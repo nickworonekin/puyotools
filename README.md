@@ -5,23 +5,23 @@ Puyo Tools is a collection of tools and libraries used to access the contents of
 
 ## Current Release
 
-The current binary release of Puyo Tools is *1.0.7*. You can download it [over here](https://code.google.com/p/puyotools/downloads/list)
+The current binary release of Puyo Tools is **1.0.7**. You can download it [over here](https://code.google.com/p/puyotools/downloads/list).
 
-*Puyo Tools requires [.NET Framework 3.5](http://www.microsoft.com/downloads/details.aspx?FamilyId=333325FD-AE52-4E35-B531-508D977D32A6&displaylang=en).*
+**Puyo Tools requires [.NET Framework 3.5](http://www.microsoft.com/downloads/details.aspx?FamilyId=333325FD-AE52-4E35-B531-508D977D32A6&displaylang=en).**
 
 Source code for Puyo Tools is available in C#.
 
 ## Supported Formats
-Compression:
+### Compression:
   * CNX
   * CXLZ
   * LZ00
   * LZ01
-  * LZ11 (known as LZSS type 0x11)
-  * LZSS
+  * LZ11
+  * LZSS/LZ10
   * PRS
 
-Archives:
+### Archives:
   * ACX
   * AFS
   * GNT
@@ -38,7 +38,7 @@ Archives:
   * Unleashed ONE
   * VDD
 
-Textures:
+### Textures:
   * PVR (Native Dreamcast Texture Format)
   * GVR (Dreamcast Texture Format for Gamecube & Wii)
   * SVR (Dreamcast Texture Format for PlayStation 2)
@@ -46,5 +46,5 @@ Textures:
   * Compile BMP (GMP)
 
 ## Help Wanted
-If you have any information on any of the following please post it at the [http://www.puyonexus.net/forum/viewtopic.php?f=7&t=393 relevant topic at Puyo Nexus]. Thank you!
+If you have any information on any of the following please post it at the [relevant topic at Puyo Nexus](http://www.puyonexus.net/forum/viewtopic.php?f=7&t=393). Thank you!
   * No help needed at the moment.
