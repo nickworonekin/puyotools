@@ -1,0 +1,238 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{7578281C-3030-4640-A7E3-5AD83C598694}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>PuyoTools</RootNamespace>
+    <AssemblyName>PuyoTools</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <StartupObject>PuyoTools.PuyoTools</StartupObject>
+    <ApplicationIcon>Resources\ProgramIcon.ico</ApplicationIcon>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>3.5</OldToolsVersion>
+    <UpgradeBackupLocation />
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Exceptions.cs" />
+    <Compile Include="FileSelectionDialog.cs" />
+    <Compile Include="FileTypeInfo.cs" />
+    <Compile Include="FormContent.cs" />
+    <Compile Include="GUI\MainWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUI\MainWindow.Designer.cs">
+      <DependentUpon>MainWindow.cs</DependentUpon>
+    </Compile>
+    <Compile Include="IconResources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>IconResources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="BitmapResources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>BitmapResources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Modules\Archive.cs" />
+    <Compile Include="Modules\Archives\acx.cs" />
+    <Compile Include="Modules\Archives\afs.cs" />
+    <Compile Include="Modules\Archives\gvm.cs" />
+    <Compile Include="Modules\Archives\mdl.cs" />
+    <Compile Include="Modules\Archives\narc.cs" />
+    <Compile Include="Modules\Archives\one.cs" />
+    <Compile Include="Modules\Archives\pvm.cs" />
+    <Compile Include="Modules\Archives\sba.cs" />
+    <Compile Include="Modules\Archives\txag.cs" />
+    <Compile Include="Modules\Compression\Dictionary\CompressionDictionary.cs" />
+    <Compile Include="Modules\Compression\Dictionary\LzBuffer.cs" />
+    <Compile Include="Modules\Compression\Dictionary\LzWindow.cs" />
+    <Compile Include="Modules\Compression\lz00.cs" />
+    <Compile Include="Modules\Compression\lzss.cs" />
+    <Compile Include="Modules\Compression\lz11.cs" />
+    <Compile Include="Modules\Compression\prs.cs" />
+    <Compile Include="Modules\Compression\pvz.cs" />
+    <Compile Include="Modules\TextureFormatSettings.cs" />
+    <Compile Include="Modules\Textures.cs" />
+    <Compile Include="Modules\Archives\spk.cs" />
+    <Compile Include="Modules\Compression.cs" />
+    <Compile Include="Modules\Compression\cnx.cs" />
+    <Compile Include="Modules\Compression\cxlz.cs" />
+    <Compile Include="Modules\Archives\gnt.cs" />
+    <Compile Include="Modules\Compression\lz01.cs" />
+    <Compile Include="Modules\Archives\mrg.cs" />
+    <Compile Include="Modules\Archives\tex.cs" />
+    <Compile Include="Modules\Archives\vdd.cs" />
+    <Compile Include="Modules\Textures\gim.cs" />
+    <Compile Include="Modules\Textures\gmp.cs" />
+    <Compile Include="Modules\Textures\gvr.cs" />
+    <Compile Include="Modules\Textures\pvr.cs" />
+    <Compile Include="Modules\Textures\svr.cs" />
+    <Compile Include="NumberExtensions.cs" />
+    <Compile Include="ObjectConverter.cs" />
+    <Compile Include="Modules\ArchivePackSettings.cs" />
+    <Compile Include="Programs\Archive\ArchiveCreator.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Programs\Archive\ArchiveExplorer.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Programs\Archive\ArchiveExtractor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Programs\Compression\Compressor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Programs\Compression\Decompressor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Modules\Archives\snt.cs" />
+    <Compile Include="Programs\Texture\TextureDecoder.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Programs\Texture\TextureEncoder.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Programs\Texture\TextureViewer.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="PuyoTools.cs" />
+    <Compile Include="StatusMessage.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="StreamExtensions.cs" />
+    <Compile Include="StringExtensions.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Libraries\VrSharp\VrSharp.csproj">
+      <Project>{A8E274F4-0D8E-4EAB-A5B2-7B40BC922534}</Project>
+      <Name>VrSharp</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Libraries\GimSharp\GimSharp.csproj">
+      <Project>{18707752-78B4-4735-AE5A-4261AD5C06EE}</Project>
+      <Name>GimSharp</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="GUI\MainWindow.resx">
+      <DependentUpon>MainWindow.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="IconResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>IconResources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BitmapResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>BitmapResources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\open.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\save.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\save_all.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\logo.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\new.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\TextureViewerBackground.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ProgramIcon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\NewLogo.png" />
+  </ItemGroup>
+</Project>
