@@ -6,7 +6,6 @@ using System.Windows.Forms;
 using System.ComponentModel;
 using System.Drawing.Imaging;
 using System.Collections.Generic;
-using Extensions;
 using VrSharp.PvrTexture;
 
 namespace PuyoTools

@@ -2,7 +2,7 @@
 using System.IO;
 using System.Text;
 
-namespace Extensions
+namespace PuyoTools
 {
     // Stream Reader Functions
     public static class StreamReaderExtensions

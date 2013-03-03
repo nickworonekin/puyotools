@@ -14,6 +14,13 @@ namespace PuyoTools.GUI
         public MainWindow()
         {
             InitializeComponent();
+
+            this.Icon = IconResources.ProgramIcon;
+
+            // Write out the version, but do it in a hackish way
+            int oldWidth = versionLabel.Width;
+            versionLabel.Text = "Version " + PuyoTools.Version;
+            versionLabel.Left -= (versionLabel.Width - oldWidth);
         }
 
         private void selectFilesToolStripMenuItem_Click(object sender, EventArgs e)

@@ -5,6 +5,8 @@ namespace PuyoTools
 {
     public static class PuyoTools
     {
+        public const string Version = "1.1.0";
+
         [STAThread]
         public static void Main()
         {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text.RegularExpressions;
 
-namespace Extensions
+namespace PuyoTools
 {
     public static class StringExtensions
     {

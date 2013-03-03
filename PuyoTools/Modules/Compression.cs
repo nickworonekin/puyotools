@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using Extensions;
 using System.Collections.Generic;
 
 // Compression Module
@@ -140,8 +139,8 @@ namespace PuyoTools
             Dictionary.Add(CompressionFormat.CXLZ, new CXLZ());
             Dictionary.Add(CompressionFormat.LZ00, new LZ00());
             Dictionary.Add(CompressionFormat.LZ01, new LZ01());
-            Dictionary.Add(CompressionFormat.LZSS, new LZSS());
-            Dictionary.Add(CompressionFormat.ONZ,  new LZ11());
+            Dictionary.Add(CompressionFormat.LZ10, new LZ10());
+            Dictionary.Add(CompressionFormat.LZ11, new LZ11());
             Dictionary.Add(CompressionFormat.PRS,  new PRS());
         }
     }
@@ -154,21 +153,9 @@ namespace PuyoTools
         CXLZ,
         LZ00,
         LZ01,
-        LZSS,
-        ONZ,
+        LZ10,
+        LZ11,
         PRS,
-    }
-
-    // Compression Header
-    public static class CompressionHeader
-    {
-        public const string
-            CNX  = "CNX\x02",
-            CXLZ = "CXLZ",
-            LZ00 = "LZ00",
-            LZ01 = "LZ01",
-            LZSS = "\x10",
-            ONZ  = "\x11";
     }
 
     public abstract class CompressionModule
@@ -189,67 +176,6 @@ namespace PuyoTools
         public virtual string CompressFilename(Stream data, string filename) // Get Filename for Compressed File
         {
             return filename;
-        }
-
-        // Search for data that can be compressed (LZ compression formats)
-        public int[] LZsearch(byte[] decompressedData, uint pos, uint decompressedSize)
-        {
-            // Set variables
-            int slidingWindowSize   = 4096; // Sliding Window Size
-            int readAheadBufferSize = 18;   // Read Ahead Buffer Size
-
-            // Create a list of our results
-            List<int> results = new List<int>();
-
-            if (pos < 3 || decompressedSize - pos < 3)
-                return new int[] { 0, 0 };
-            if (pos >= decompressedSize)
-                return new int[] { -1, 0 };
-
-            // Ok, search for data now
-            for (int i = 1; i < slidingWindowSize && i < pos; i++)
-            {
-                if (decompressedData[pos - i - 1] == decompressedData[pos])
-                    results.Add(i + 1);
-            }
-
-            // Did we get any results?
-            if (results.Count == 0)
-                return new int[] { 0, 0 };
-
-            bool finish = false;
-            int amountOfBytes = 0;
-
-            while (amountOfBytes < readAheadBufferSize && !finish)
-            {
-                amountOfBytes++;
-                for (int i = 0; i < results.Count; i++)
-                {
-                    // Make sure we aren't out of range
-                    if (pos + amountOfBytes >= decompressedSize)
-                    {
-                        finish = true;
-                        break;
-                    }
-
-                    if (decompressedData[pos + amountOfBytes] != decompressedData[pos - results[i] + (amountOfBytes % results[i])])
-                    {
-                        if (results.Count > 1)
-                        {
-                            results.RemoveAt(i);
-                            i--;
-                        }
-                        else
-                        {
-                            finish = true;
-                            break;
-                        }
-                    }
-                }
-            }
-
-            // Ok, return our results now
-            return new int[] { amountOfBytes, results[0] };
         }
     }
 }

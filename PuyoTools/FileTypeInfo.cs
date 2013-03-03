@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using Extensions;
 
 namespace PuyoTools
 {

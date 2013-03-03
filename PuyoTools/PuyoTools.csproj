@@ -93,41 +93,39 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Modules\Archive.cs" />
-    <Compile Include="Modules\Archives\acx.cs" />
-    <Compile Include="Modules\Archives\afs.cs" />
-    <Compile Include="Modules\Archives\gvm.cs" />
-    <Compile Include="Modules\Archives\mdl.cs" />
-    <Compile Include="Modules\Archives\narc.cs" />
-    <Compile Include="Modules\Archives\one.cs" />
-    <Compile Include="Modules\Archives\pvm.cs" />
-    <Compile Include="Modules\Archives\sba.cs" />
-    <Compile Include="Modules\Archives\txag.cs" />
+    <Compile Include="Modules\Archives\ACX.cs" />
+    <Compile Include="Modules\Archives\AFS.cs" />
+    <Compile Include="Modules\Archives\GVM.cs" />
+    <Compile Include="Modules\Archives\MDL.cs" />
+    <Compile Include="Modules\Archives\NARC.cs" />
+    <Compile Include="Modules\Archives\ONE.cs" />
+    <Compile Include="Modules\Archives\PVM.cs" />
+    <Compile Include="Modules\Archives\SBA.cs" />
+    <Compile Include="Modules\Archives\TXAG.cs" />
     <Compile Include="Modules\Compression\Dictionary\CompressionDictionary.cs" />
     <Compile Include="Modules\Compression\Dictionary\LzBuffer.cs" />
     <Compile Include="Modules\Compression\Dictionary\LzWindow.cs" />
-    <Compile Include="Modules\Compression\lz00.cs" />
-    <Compile Include="Modules\Compression\lzss.cs" />
-    <Compile Include="Modules\Compression\lz11.cs" />
-    <Compile Include="Modules\Compression\prs.cs" />
-    <Compile Include="Modules\Compression\pvz.cs" />
+    <Compile Include="Modules\Compression\LZ00.cs" />
+    <Compile Include="Modules\Compression\LZ10.cs" />
+    <Compile Include="Modules\Compression\LZ11.cs" />
+    <Compile Include="Modules\Compression\PRS.cs" />
     <Compile Include="Modules\TextureFormatSettings.cs" />
     <Compile Include="Modules\Textures.cs" />
-    <Compile Include="Modules\Archives\spk.cs" />
+    <Compile Include="Modules\Archives\SPK.cs" />
     <Compile Include="Modules\Compression.cs" />
-    <Compile Include="Modules\Compression\cnx.cs" />
-    <Compile Include="Modules\Compression\cxlz.cs" />
-    <Compile Include="Modules\Archives\gnt.cs" />
-    <Compile Include="Modules\Compression\lz01.cs" />
-    <Compile Include="Modules\Archives\mrg.cs" />
-    <Compile Include="Modules\Archives\tex.cs" />
-    <Compile Include="Modules\Archives\vdd.cs" />
-    <Compile Include="Modules\Textures\gim.cs" />
-    <Compile Include="Modules\Textures\gmp.cs" />
-    <Compile Include="Modules\Textures\gvr.cs" />
-    <Compile Include="Modules\Textures\pvr.cs" />
-    <Compile Include="Modules\Textures\svr.cs" />
+    <Compile Include="Modules\Compression\CNX.cs" />
+    <Compile Include="Modules\Compression\CXLZ.cs" />
+    <Compile Include="Modules\Archives\GNT.cs" />
+    <Compile Include="Modules\Compression\LZ01.cs" />
+    <Compile Include="Modules\Archives\MRG.cs" />
+    <Compile Include="Modules\Archives\TEX.cs" />
+    <Compile Include="Modules\Archives\VDD.cs" />
+    <Compile Include="Modules\Textures\GIM.cs" />
+    <Compile Include="Modules\Textures\GMP.cs" />
+    <Compile Include="Modules\Textures\GVR.cs" />
+    <Compile Include="Modules\Textures\PVR.cs" />
+    <Compile Include="Modules\Textures\SVR.cs" />
     <Compile Include="NumberExtensions.cs" />
-    <Compile Include="ObjectConverter.cs" />
     <Compile Include="Modules\ArchivePackSettings.cs" />
     <Compile Include="Programs\Archive\ArchiveCreator.cs">
       <SubType>Form</SubType>
@@ -144,7 +142,7 @@
     <Compile Include="Programs\Compression\Decompressor.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Modules\Archives\snt.cs" />
+    <Compile Include="Modules\Archives\SNT.cs" />
     <Compile Include="Programs\Texture\TextureDecoder.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -207,9 +205,6 @@
     <None Include="Resources\save_all.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\logo.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\new.png" />
   </ItemGroup>
   <ItemGroup>
@@ -236,6 +231,6 @@
     <None Include="Resources\ProgramIcon.ico" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\NewLogo.png" />
+    <None Include="Resources\Logo.png" />
   </ItemGroup>
 </Project>
