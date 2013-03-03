@@ -48,9 +48,10 @@ namespace VrSharp.SvrTexture
             NumClutEntries = BitConverter.ToUInt16(ClutData, 0x0E);
 
             // Get the correct pixel codec from the clut file.
-            // If we don't know the format in the clut file then the
-            // one specified in the texture file should be used instead.
-            PixelCodec = SvrCodecList.GetPixelCodec((SvrPixelFormat)PixelFormat);
+            // Sometimes, the pixel codec specified in the texture file
+            // is not the same one specified in the clut file. As such, we should
+            // always use the one specified in the clut file.
+            PixelCodec = SvrCodecList.GetPixelCodec((SvrPixelFormat)ClutData[0x08]);
 
             return true;
         }

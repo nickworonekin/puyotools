@@ -218,7 +218,7 @@ namespace VrSharp
             if (!NeedsExternalClut()) return; // Can't use DataCodec here
 
             if (clut.PixelCodec != null)
-                DataCodec.SetClutExternal(clut.GetClut(PixelCodec), clut.GetNumClutEntries(), clut.PixelCodec);
+                DataCodec.SetClutExternal(clut.GetClut(clut.PixelCodec), clut.GetNumClutEntries(), clut.PixelCodec);
             else
                 DataCodec.SetClutExternal(clut.GetClut(PixelCodec), clut.GetNumClutEntries(), PixelCodec);
         }

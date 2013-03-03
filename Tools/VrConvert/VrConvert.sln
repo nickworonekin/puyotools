@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VrConv", "VrConv\VrConv.csproj", "{06F2C9DB-0EEE-4F08-B143-8EB67834E44C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VrConvert", "VrConvert\VrConvert.csproj", "{06F2C9DB-0EEE-4F08-B143-8EB67834E44C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VrSharp", "..\..\Libraries\VrSharp\VrSharp.csproj", "{A8E274F4-0D8E-4EAB-A5B2-7B40BC922534}"
 EndProject

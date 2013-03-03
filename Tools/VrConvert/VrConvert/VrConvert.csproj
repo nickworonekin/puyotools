@@ -8,13 +8,13 @@
     <ProjectGuid>{06F2C9DB-0EEE-4F08-B143-8EB67834E44C}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>VrConv</RootNamespace>
-    <AssemblyName>VrConv</AssemblyName>
+    <RootNamespace>VrConvert</RootNamespace>
+    <AssemblyName>VrConvert</AssemblyName>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ApplicationIcon>
     </ApplicationIcon>
-    <StartupObject>VrConv.VrConv</StartupObject>
+    <StartupObject>VrConvert.VrConvert</StartupObject>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <UpgradeBackupLocation>
@@ -52,7 +52,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="VrConv.cs" />
+    <Compile Include="VrConvert.cs" />
     <Compile Include="VrDecoder.cs" />
     <Compile Include="VrEncoder.cs" />
   </ItemGroup>

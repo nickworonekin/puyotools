@@ -6,7 +6,7 @@ using VrSharp.GvrTexture;
 using VrSharp.PvrTexture;
 using VrSharp.SvrTexture;
 
-namespace VrConv
+namespace VrConvert
 {
     public class VrDecoder
     {

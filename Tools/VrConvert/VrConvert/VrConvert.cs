@@ -5,23 +5,23 @@ using VrSharp.GvrTexture;
 using VrSharp.PvrTexture;
 using VrSharp.SvrTexture;
 
-namespace VrConv
+namespace VrConvert
 {
-    class VrConv
+    class VrConvert
     {
         static void Main(string[] args)
         {
             if (args.Length == 0)
             {
-                Console.WriteLine("Vr Conv Usage:");
-                Console.WriteLine("Decode: vrconv -d <input> [-o <output>] [-c <clut>] [-ac]");
-                Console.WriteLine("Encode: vrconv -e <input> <vrformat> <pixelfmt> <datafmt> [options]");
-                Console.WriteLine("Help:   Decoding: vrconv -d /?");
-                Console.WriteLine("        Encoding: vrconv -e /? <vrformat (gvr/pvr/svr)>");
+                Console.WriteLine("VrConvert Usage:");
+                Console.WriteLine("Decode: vrconvert -d <input> [-o <output>] [-c <clut>] [-ac]");
+                Console.WriteLine("Encode: vrconvert -e <input> <vrformat> <pixelfmt> <datafmt> [options]");
+                Console.WriteLine("Help:   Decoding: vrconvert -d /?");
+                Console.WriteLine("        Encoding: vrconvert -e /? <vrformat (gvr/pvr/svr)>");
 
                 Console.WriteLine();
                 Console.WriteLine("------------------------");
-                Console.WriteLine("Vr Conv Build:");
+                Console.WriteLine("VrConvert Build:");
                 Console.WriteLine("Ver {0} ({1})", GetVrConvVersion(), GetVrConvBuildDate());
             }
             else
@@ -73,7 +73,7 @@ namespace VrConv
                 stream.Read(VrData, 0x00, VrData.Length);
             }
 
-            Console.WriteLine("Vr Conv");
+            Console.WriteLine("VrConvert");
             Console.WriteLine("------------------------");
             Console.WriteLine("Decoding: {0}", Path.GetFileName(InputFile));
 
@@ -179,7 +179,7 @@ namespace VrConv
                 stream.Read(BitmapData, 0x00, BitmapData.Length);
             }
 
-            Console.WriteLine("Vr Conv");
+            Console.WriteLine("VrConvert");
             Console.WriteLine("------------------------");
             Console.WriteLine("Encoding: {0}", Path.GetFileName(InputFile));
 

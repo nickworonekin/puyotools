@@ -26,11 +26,7 @@ namespace VrSharp
             byte[] data;
             try
             {
-                using (BufferedStream stream = new BufferedStream(new FileStream(file, FileMode.Open, FileAccess.Read), 0x1000))
-                {
-                    data = new byte[stream.Length];
-                    stream.Read(data, 0, data.Length);
-                }
+                data = File.ReadAllBytes(file);
             }
             catch { data = new byte[0]; }
 
@@ -46,7 +42,7 @@ namespace VrSharp
             stream.Seek(0, SeekOrigin.Begin); // Seek to the beginning
             if (stream is MemoryStream) // We can use ToArray() for memory streams
             {
-                try   { ClutData = (stream as MemoryStream).ToArray(); }
+                try { ClutData = (stream as MemoryStream).ToArray(); }
                 catch { ClutData = new byte[0]; }
             }
             else
@@ -54,11 +50,8 @@ namespace VrSharp
                 byte[] data;
                 try
                 {
-                    using (BufferedStream bufStream = new BufferedStream(stream, 0x1000))
-                    {
-                        data = new byte[bufStream.Length];
-                        bufStream.Read(data, 0, data.Length);
-                    }
+                    data = new byte[stream.Length];
+                    stream.Read(data, 0, data.Length);
                 }
                 catch { data = new byte[0]; }
 
