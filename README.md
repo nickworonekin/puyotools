@@ -5,7 +5,7 @@ Puyo Tools is a collection of tools and libraries used to access the contents of
 
 ## Current Release
 
-The current binary release of Puyo Tools is **1.0.7**. You can download it [over here](https://code.google.com/p/puyotools/downloads/list).
+The current binary release of Puyo Tools is **1.1.0**, which was released on March 3rd, 2013. You can download it [over here](https://code.google.com/p/puyotools/downloads/list).
 
 **Puyo Tools requires [.NET Framework 3.5](http://www.microsoft.com/downloads/details.aspx?FamilyId=333325FD-AE52-4E35-B531-508D977D32A6&displaylang=en).**
 
