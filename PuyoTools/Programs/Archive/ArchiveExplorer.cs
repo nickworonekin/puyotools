@@ -45,6 +45,8 @@ namespace PuyoTools
         {
             // Create the window
             FormContent.Create(this, "Puyo Tools Archive Explorer", new Size(600, 392));
+            this.MaximizeBox = true;
+            this.FormBorderStyle = FormBorderStyle.Sizable;
 
             // Tool Strip
             extractSelectedFiles = new ToolStripButton("Extract Selected Files", IconResources.Save, new EventHandler(extract));
@@ -67,6 +69,7 @@ namespace PuyoTools
                 }),
             });
 
+            toolStrip.Dock = DockStyle.Top;
             this.Controls.Add(toolStrip);
 
             // Display the file list
@@ -97,6 +100,8 @@ namespace PuyoTools
             fileList_size.Width = 200;
             fileListView.Columns.Add(fileList_size);
 
+            fileListView.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
+
             this.Controls.Add(fileListView);
 
             // Add the Archive Information
@@ -119,6 +124,8 @@ namespace PuyoTools
                 String.Empty,
                 new Point(8, 48),
                 new Size(archiveInformation.Size.Width - 16, 16));
+
+            archiveInformation.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
 
             this.ShowDialog();
         }

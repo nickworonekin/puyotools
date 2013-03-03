@@ -20,15 +20,10 @@ namespace PuyoTools
         private Button
             startWorkButton = new Button(); // Start Work Button
 
-        private ListView
-            archiveFileList = new ListView(); // Contents of Archive
+        private ListViewWithReordering
+            archiveFileList = new ListViewWithReordering(); // Contents of Archive
 
-        private List<string>
-            sourceFilenames  = new List<string>(), // List of source filenames
-            archiveFilenames = new List<string>(); // List of filenames in the archive
-
-        private List<string>
-            fileList = new List<string>(); // Files
+        private string[] fileList, archiveFnames; // Used for later
 
         private StatusMessage
             status; // Status Message
@@ -67,6 +62,9 @@ namespace PuyoTools
                 Height = this.ClientSize.Height,
             };
             this.Controls.Add(PanelContent);
+            this.MaximizeBox = true;
+            this.FormBorderStyle = FormBorderStyle.Sizable;
+            PanelContent.Dock = DockStyle.Fill;
 
             // Fill the archive & compression formats
             InitalizeArchiveFormats();
@@ -79,7 +77,7 @@ namespace PuyoTools
 
             archiveFormatList.SelectedIndex         = 0;
             archiveFormatList.MaxDropDownItems      = archiveFormatList.Items.Count;
-            archiveFormatList.SelectedIndexChanged += new EventHandler(changeArchiveFormat);
+            archiveFormatList.SelectedIndexChanged += new EventHandler(ChangeArchiveFormat);
 
             // Create the combobox that contains the compression formats
             compressionFormatList               = new ToolStripComboBox();
@@ -90,11 +88,11 @@ namespace PuyoTools
             compressionFormatList.SelectedIndex    = 0;
             compressionFormatList.MaxDropDownItems = compressionFormatList.Items.Count;
 
-            renameAllFiles = new ToolStripButton("Rename All", null, rename);
+            renameAllFiles = new ToolStripButton("Rename All", null, ShowRenameDialog);
 
             // Create the toolstrip
             ToolStrip toolStrip = new ToolStrip(new ToolStripItem[] {
-                new ToolStripButton("Add", IconResources.New, addFiles),
+                new ToolStripButton("Add", IconResources.New, AddFiles),
                 new ToolStripSeparator(),
                 new ToolStripLabel("Archive:"),
                 archiveFormatList,
@@ -104,16 +102,14 @@ namespace PuyoTools
                 new ToolStripSeparator(),
                 renameAllFiles,
             });
+            toolStrip.Dock = DockStyle.Top;
             PanelContent.Controls.Add(toolStrip);
 
             // Create the right click menu
             ContextMenuStrip contextMenu = new ContextMenuStrip();
             contextMenu.Items.AddRange(new ToolStripItem[] {
-                new ToolStripMenuItem("Rename", null, rename),
-                new ToolStripMenuItem("Delete", null, delete),
-                new ToolStripSeparator(),
-                new ToolStripMenuItem("Move Up", null, moveUp),
-                new ToolStripMenuItem("Move Down", null, moveDown),
+                new ToolStripMenuItem("Rename", null, ShowRenameDialog),
+                new ToolStripMenuItem("Delete", null, Remove),
             });
             archiveFileList.ContextMenuStrip = contextMenu;
 
@@ -125,9 +121,13 @@ namespace PuyoTools
                 new Size(420, 328));
 
             // Quick hack for setting height of list view items
-            archiveFileList.SmallImageList = new ImageList() {
-                ImageSize = new Size(1, 16),
-            };
+            ImageList imageList = new ImageList();
+            imageList.ImageSize = new Size(1, 20);
+            archiveFileList.SmallImageList = imageList;
+
+            archiveFileList.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            archiveFileList.AllowDrop = true;
+            archiveFileList.DragDrop += archiveFileList_DragDrop;
 
             // Settings Box
             settingsBox = new TabControl() {
@@ -200,6 +200,7 @@ namespace PuyoTools
             }
 
             PanelContent.Controls.Add(settingsBox);
+            settingsBox.Anchor = AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom;
             settingsBox.TabPages.Add(settingsPages[0]);
 
             // Create Archive
@@ -207,32 +208,52 @@ namespace PuyoTools
                 "Create Archive",
                 new Point((PanelContent.Width / 2) - 60, 368),
                 new Size(120, 24),
-                startWork);
+                StartWork);
+
+            startWorkButton.Anchor = AnchorStyles.Bottom;
 
             this.ShowDialog();
         }
 
+        void archiveFileList_DragDrop(object sender, DragEventArgs e)
+        {
+            for (int i = 0; i < archiveFileList.Items.Count; i++)
+            {
+                archiveFileList.Items[i].SubItems[0].Text = (i + 1).ToString("#,0");
+            }
+        }
+
         // Start Work
-        private void startWork(object sender, EventArgs e)
+        private void StartWork(object sender, EventArgs e)
         {
             // Make sure we have files
-            if (fileList.Count == 0)
+            if (archiveFileList.Items.Count == 0)
                 return;
 
             // Get output filename
-            string output_filename = FileSelectionDialog.SaveFile("Create Archive", String.Empty, String.Format("{0} ({1})|{1}", ArchiveFilters[archiveFormatList.SelectedIndex][0], ArchiveFilters[archiveFormatList.SelectedIndex][1]));
-            if (output_filename == null || output_filename == String.Empty)
+            string outFname = FileSelectionDialog.SaveFile("Create Archive", String.Empty, String.Format("{0} ({1})|{1}", ArchiveFilters[archiveFormatList.SelectedIndex][0], ArchiveFilters[archiveFormatList.SelectedIndex][1]));
+            if (outFname == null || outFname == String.Empty)
                 return;
 
             // Set up our background worker
             BackgroundWorker bw = new BackgroundWorker();
             bw.DoWork += delegate(object sender2, DoWorkEventArgs e2) {
-                run(output_filename);
+                Run(outFname);
             };
             //bw.DoWork += run;
 
+            // Create a file listing and list of archive file names for the header
+            fileList = new string[archiveFileList.Items.Count];
+            archiveFnames = new string[archiveFileList.Items.Count];
+
+            for (int i = 0; i < archiveFileList.Items.Count; i++)
+            {
+                fileList[i] = ((ArchiveEntry)archiveFileList.Items[i].Tag).fname;
+                archiveFnames[i] = ((ArchiveEntry)archiveFileList.Items[i].Tag).archiveFname;
+            }
+
             // Now, show our status
-            status = new StatusMessage("Archive - Create", fileList.ToArray());
+            status = new StatusMessage("Archive - Create", fileList);
             status.Show();
             //status.Visible = false;
 
@@ -241,7 +262,7 @@ namespace PuyoTools
 
         // Create the archive
         //private void run(object sender, DoWorkEventArgs e)
-        private void run(string output_filename)
+        private void Run(string outFname)
         {
             try
             {
@@ -249,19 +270,13 @@ namespace PuyoTools
                 int ArchiveFormatIndex = archiveFormatList.SelectedIndex;
                 int CompressionFormatIndex = compressionFormatList.SelectedIndex;
 
-                // Get output filename
-                //string output_filename = FileSelectionDialog.SaveFile("Create Archive", String.Empty, String.Format("{0} ({1})|{1}", ArchiveFilters[archiveFormatList.SelectedIndex][0], ArchiveFilters[archiveFormatList.SelectedIndex][1]));
-                //if (output_filename == null || output_filename == String.Empty)
-                //    return;
-
                 // Disable the window and show the status box
                 PanelContent.Enabled = false;
-                //status.Visible = true;
 
                 // Start creating the archive
-                Archive archive = new Archive(ArchiveFormats[archiveFormatList.SelectedIndex], Path.GetFileName(output_filename));
+                Archive archive = new Archive(ArchiveFormats[archiveFormatList.SelectedIndex], Path.GetFileName(outFname));
 
-                using (FileStream outputStream = new FileStream(output_filename, FileMode.Create, FileAccess.ReadWrite))
+                using (FileStream outputStream = new FileStream(outFname, FileMode.Create, FileAccess.ReadWrite))
                 {
                     // Get the block size
                     int blockSize;
@@ -273,11 +288,11 @@ namespace PuyoTools
                     // Create and write the header
                     bool[] settings = GetSettings(ArchiveFormatIndex);
                     uint[] offsetList;
-                    MemoryStream header = archive.CreateHeader(fileList.ToArray(), archiveFilenames.ToArray(), blockSize, settings, out offsetList);
+                    MemoryStream header = archive.CreateHeader(fileList, archiveFnames, blockSize, settings, out offsetList);
                     outputStream.Write(header);
 
                     // Add the files
-                    for (int i = 0; i < fileList.Count; i++)
+                    for (int i = 0; i < archiveFileList.Items.Count; i++)
                     {
                         // Set the current file
                         status.CurrentFile = i;
@@ -304,7 +319,7 @@ namespace PuyoTools
                         outputStream.WriteByte(archive.PaddingByte);
 
                     // Write the footer
-                    MemoryStream footer = archive.CreateFooter(fileList.ToArray(), archiveFilenames.ToArray(), blockSize, settings, header);
+                    MemoryStream footer = archive.CreateFooter(fileList, archiveFnames, blockSize, settings, header);
                     if (footer != null)
                     {
                         outputStream.Write(footer);
@@ -317,7 +332,7 @@ namespace PuyoTools
                     // Compress the data if we want to
                     if (compressionFormatList.SelectedIndex != 0)
                     {
-                        Compression compression = new Compression(outputStream, output_filename, CompressionFormats[CompressionFormatIndex - 1]);
+                        Compression compression = new Compression(outputStream, outFname, CompressionFormats[CompressionFormatIndex - 1]);
                         MemoryStream compressedData = compression.Compress();
                         if (compressedData != null)
                         {
@@ -342,14 +357,14 @@ namespace PuyoTools
         }
 
         // Change Archive Format
-        private void changeArchiveFormat(object sender, EventArgs e)
+        private void ChangeArchiveFormat(object sender, EventArgs e)
         {
             settingsBox.TabPages.Clear();
             settingsBox.TabPages.Add(settingsPages[archiveFormatList.SelectedIndex]);
         }
 
         // Add files
-        private void addFiles(object sender, EventArgs e)
+        private void AddFiles(object sender, EventArgs e)
         {
             string[] files = FileSelectionDialog.OpenFiles("Select Files", "All Files (*.*)|*.*");
 
@@ -359,20 +374,23 @@ namespace PuyoTools
             // Add the files now
             foreach (string file in files)
             {
-                fileList.Add(file);
-                sourceFilenames.Add(Path.GetFileName(file));
-                archiveFilenames.Add(Path.GetFileName(file));
+                ArchiveEntry entry = new ArchiveEntry();
+                entry.fname = file;
+                entry.sourceFname = Path.GetFileName(file);
+                entry.archiveFname = entry.sourceFname;
 
-                archiveFileList.Items.Add(new ListViewItem(new string[] {
-                    fileList.Count.ToString("#,0"),
-                    sourceFilenames[sourceFilenames.Count - 1],
-                    archiveFilenames[archiveFilenames.Count - 1],
-                }));
+                ListViewItem item = new ListViewItem(new string[] {
+                    archiveFileList.Items.Count.ToString("#,0"),
+                    entry.sourceFname,
+                    entry.archiveFname,
+                });
+                item.Tag = entry;
+                archiveFileList.Items.Add(item);
             }
         }
 
         // Remove files
-        private void delete(object sender, EventArgs e)
+        private void Remove(object sender, EventArgs e)
         {
             // Make sure we selected something
             if (archiveFileList.SelectedIndices.Count == 0)
@@ -381,17 +399,19 @@ namespace PuyoTools
             // Remove items
             foreach (int item in archiveFileList.SelectedIndices)
             {
-                fileList.RemoveAt(item);
-                sourceFilenames.RemoveAt(item);
-                archiveFilenames.RemoveAt(item);
+                //archiveEntries.RemoveAt(item);
+                archiveFileList.Items.RemoveAt(item);
             }
 
-            // Populate the list again
-            populateList();
+            // New item numbers
+            for (int i = 0; i < archiveFileList.Items.Count; i++)
+            {
+                archiveFileList.Items[i].SubItems[0].Text = (i + 1).ToString();
+            }
         }
 
-        // Rename files
-        private void rename(object sender, EventArgs e)
+        // Show rename dialog
+        private void ShowRenameDialog(object sender, EventArgs e)
         {
             // Make sure we have items first
             if (archiveFileList.Items.Count == 0)
@@ -408,7 +428,7 @@ namespace PuyoTools
             string selectedFilename = String.Empty;
 
             if (!renameAll)
-                selectedFilename = archiveFilenames[archiveFileList.SelectedIndices[0]];
+                selectedFilename = ((ArchiveEntry)archiveFileList.Items[archiveFileList.SelectedIndices[0]].Tag).archiveFname;
 
             FormContent.Create(renameDialog,
                 "Rename Files",
@@ -431,107 +451,48 @@ namespace PuyoTools
                 "Rename",
                 new Point(94, 68),
                 new Size(64, 24),
-                doRename);
+                Rename);
 
             // Display Cancel Button
             FormContent.Add(renameDialog, new Button(),
                 "Cancel",
                 new Point(162, 68),
                 new Size(64, 24),
-                cancelRename);
+                CloseRenameDialog);
 
             renameDialog.ShowDialog();
         }
 
-        // Do rename
-        private void doRename(object sender, EventArgs e)
+        // Rename files
+        private void Rename(object sender, EventArgs e)
         {
             // Rename selected files, or all files
             if (renameAll)
             {
                 for (int i = 0; i < archiveFileList.Items.Count; i++)
-                    archiveFilenames[i] = renameTextBox.Text;
+                {
+                    ((ArchiveEntry)archiveFileList.Items[i].Tag).archiveFname = renameTextBox.Text;
+                    archiveFileList.Items[i].SubItems[2].Text = renameTextBox.Text;
+                }
 
                 renameAll = false;
             }
             else
             {
                 foreach (int item in archiveFileList.SelectedIndices)
-                    archiveFilenames[item] = renameTextBox.Text;
+                {
+                    ((ArchiveEntry)archiveFileList.Items[item].Tag).archiveFname = renameTextBox.Text;
+                    archiveFileList.Items[item].SubItems[2].Text = renameTextBox.Text;
+                }
             }
 
             renameDialog.Close();
-
-            // Populate the list
-            populateList();
         }
 
-        // Cancel rename
-        private void cancelRename(object sender, EventArgs e)
+        // Close rename dialog
+        private void CloseRenameDialog(object sender, EventArgs e)
         {
             renameDialog.Close();
-        }
-
-        // Move item up in the list
-        private void moveUp(object sender, EventArgs e)
-        {
-            // Make sure we selected stuff
-            if (archiveFileList.SelectedIndices.Count == 0)
-                return;
-
-            // Make sure we didn't select the first one
-            if (archiveFileList.SelectedIndices.Contains(0))
-                return;
-
-            // Move files up in the list now
-            for (int i = 0; i < archiveFileList.SelectedIndices.Count; i++)
-            {
-                int item = archiveFileList.SelectedIndices[i];
-
-                string file        = fileList[item];
-                string sourceFile  = sourceFilenames[item];
-                string archiveFile = archiveFilenames[item];
-                fileList.RemoveAt(item);
-                sourceFilenames.RemoveAt(item);
-                archiveFilenames.RemoveAt(item);
-                fileList.Insert(item - 1, file);
-                sourceFilenames.Insert(item - 1, sourceFile);
-                archiveFilenames.Insert(item - 1, archiveFile);
-            }
-
-            // Populate the list
-            populateList();
-        }
-
-        // Move items down in the list
-        private void moveDown(object sender, EventArgs e)
-        {
-            // Make sure we selected stuff
-            if (archiveFileList.SelectedIndices.Count == 0)
-                return;
-
-            // Make sure we didn't select the last one
-            if (archiveFileList.SelectedIndices.Contains(archiveFileList.Items.Count - 1))
-                return;
-
-            // Move files down in the list now
-            for (int i = 0; i < archiveFileList.SelectedIndices.Count; i++)
-            {
-                int item = archiveFileList.SelectedIndices[i];
-
-                string file        = fileList[item];
-                string sourceFile  = sourceFilenames[item];
-                string archiveFile = archiveFilenames[item];
-                fileList.RemoveAt(item);
-                sourceFilenames.RemoveAt(item);
-                archiveFilenames.RemoveAt(item);
-                fileList.Insert(item + 1, file);
-                sourceFilenames.Insert(item + 1, sourceFile);
-                archiveFilenames.Insert(item + 1, archiveFile);
-            }
-
-            // Populate the list
-            populateList();
         }
 
         // Check block size value
@@ -539,23 +500,6 @@ namespace PuyoTools
         {
             if (!Char.IsDigit(e.KeyChar) && !Char.IsControl(e.KeyChar))
                 e.Handled = true;
-        }
-
-        // Populate the list
-        private void populateList()
-        {
-            // Clear the file list first
-            archiveFileList.Items.Clear();
-
-            // Populate it now!
-            for (int i = 0; i < fileList.Count; i++)
-            {
-                archiveFileList.Items.Add(new ListViewItem(new string[] {
-                    (i + 1).ToString("#,0"),
-                    sourceFilenames[i],
-                    archiveFilenames[i],
-                }));
-            }
         }
 
         // Initalize Archive Formats
@@ -605,6 +549,13 @@ namespace PuyoTools
             }
 
             return settings;
+        }
+
+        private class ArchiveEntry
+        {
+            public string fname;
+            public string sourceFname;
+            public string archiveFname;
         }
     }
 }

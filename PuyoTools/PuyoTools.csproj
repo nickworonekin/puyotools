@@ -89,6 +89,9 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>BitmapResources.resx</DependentUpon>
     </Compile>
+    <Compile Include="ListViewWithReordering.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Modules\Archive.cs" />
     <Compile Include="Modules\Archives\acx.cs" />
     <Compile Include="Modules\Archives\afs.cs" />
