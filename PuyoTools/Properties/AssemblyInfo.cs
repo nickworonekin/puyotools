@@ -6,10 +6,10 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Puyo Tools")]
-[assembly: AssemblyDescription("Tools that allow you to read and write files from various Puyo Puyo games")]
+[assembly: AssemblyDescription("A collection of tools and libraries used to access the contents of various game files.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Puyo Nexus")]
-[assembly: AssemblyProduct("puyo_tools.Properties")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("PuyoTools.Properties")]
 [assembly: AssemblyCopyright("Copyright © Nick Woronekin")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -29,5 +29,5 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("1.1.0.0")]
+[assembly: AssemblyFileVersion("1.1.0.0")]

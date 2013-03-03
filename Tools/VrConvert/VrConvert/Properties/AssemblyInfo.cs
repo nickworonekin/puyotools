@@ -6,12 +6,12 @@ using System.Resources;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Vr Conv")]
-[assembly: AssemblyDescription("Converts Gvr/Pvr/Svr textures to a png")]
+[assembly: AssemblyTitle("VrConvert")]
+[assembly: AssemblyDescription("Read and write GVR, PVR, and SVR textures.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Puyo Tools Team")]
-[assembly: AssemblyProduct("VrConv.Properties")]
-[assembly: AssemblyCopyright("Copyright © Puyo Tools Team 2009")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("VrConvert.Properties")]
+[assembly: AssemblyCopyright("Copyright © Nick Woronekin")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -30,6 +30,6 @@ using System.Resources;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("2.0.*")]
-[assembly: AssemblyFileVersion("2.0.0.0")]
+[assembly: AssemblyVersion("1.1.0.0")]
+[assembly: AssemblyFileVersion("1.1.0.0")]
 [assembly: NeutralResourcesLanguageAttribute("en-US")]

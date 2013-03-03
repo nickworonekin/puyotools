@@ -7,22 +7,23 @@ using VrSharp.SvrTexture;
 
 namespace VrConvert
 {
-    class VrConvert
+    public static class VrConvert
     {
-        static void Main(string[] args)
+        private const string Version = "1.1.0";
+
+        public static void Main(string[] args)
         {
             if (args.Length == 0)
             {
-                Console.WriteLine("VrConvert Usage:");
+                Console.WriteLine("VrConvert");
+                Console.WriteLine("Version {0}", Version);
+                Console.WriteLine("------------------------");
+                Console.WriteLine("Usage:");
+                Console.WriteLine();
                 Console.WriteLine("Decode: vrconvert -d <input> [-o <output>] [-c <clut>] [-ac]");
                 Console.WriteLine("Encode: vrconvert -e <input> <vrformat> <pixelfmt> <datafmt> [options]");
                 Console.WriteLine("Help:   Decoding: vrconvert -d /?");
                 Console.WriteLine("        Encoding: vrconvert -e /? <vrformat (gvr/pvr/svr)>");
-
-                Console.WriteLine();
-                Console.WriteLine("------------------------");
-                Console.WriteLine("VrConvert Build:");
-                Console.WriteLine("Ver {0} ({1})", GetVrConvVersion(), GetVrConvBuildDate());
             }
             else
             {
@@ -45,7 +46,7 @@ namespace VrConvert
             }
         }
 
-        static void DecodeVrTexture(string[] args)
+        private static void DecodeVrTexture(string[] args)
         {
             // Get the command line arguments
             int OutFileArgIndex  = Array.IndexOf(args, "-o");
@@ -130,7 +131,7 @@ namespace VrConvert
             Console.WriteLine();
         }
 
-        static void EncodeVrTexture(string[] args)
+        private static void EncodeVrTexture(string[] args)
         {
             // Fixed!
             // Get the command line arguments
@@ -258,7 +259,7 @@ namespace VrConvert
             }
         }
 
-        static void DecodingHelp()
+        private static void DecodingHelp()
         {
             Console.WriteLine();
             Console.WriteLine(
@@ -267,7 +268,7 @@ namespace VrConvert
                 "\t-ac         : Auto find clut file using <input> filename.");
         }
 
-        static void EncodingHelp(string format)
+        private static void EncodingHelp(string format)
         {
             if (format.ToLower() == "gvr")
             {
@@ -358,17 +359,6 @@ namespace VrConvert
                     //"\t-nogbix      : Don't include Gbix Header\n" +
                     "\t-gi <gindex> : Sets the Global Index (default is 0)\n");
             }
-        }
-
-        static Version GetVrConvVersion()
-        {
-            return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
-        }
-
-        static DateTime GetVrConvBuildDate()
-        {
-            Version VrConvVersion = GetVrConvVersion();
-            return new DateTime(2000, 1, 1).AddDays(VrConvVersion.Build).AddSeconds(VrConvVersion.Revision * 2);
         }
     }
 }
