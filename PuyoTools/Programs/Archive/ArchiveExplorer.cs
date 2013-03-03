@@ -47,6 +47,7 @@ namespace PuyoTools
             FormContent.Create(this, "Puyo Tools Archive Explorer", new Size(600, 392));
             this.MaximizeBox = true;
             this.FormBorderStyle = FormBorderStyle.Sizable;
+            this.SizeGripStyle = SizeGripStyle.Hide;
 
             // Tool Strip
             extractSelectedFiles = new ToolStripButton("Extract Selected Files", IconResources.Save, new EventHandler(extract));
