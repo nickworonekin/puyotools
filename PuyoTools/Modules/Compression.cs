@@ -53,6 +53,16 @@ namespace PuyoTools
             if (Decompressor == null)
                 throw new Exception("Could not decompress because no decompressor was initalized.");
 
+            // TESTING.
+            // If this is LZ10 compression then we should test the new decompressor API
+            if (Format == CompressionFormat.LZ10)
+            {
+                MemoryStream outStream = new MemoryStream();
+                Data.Position = 0;
+                PuyoTools2.Compression.Compression.Decompress(Data, (int)Data.Length, outStream, PuyoTools2.Compression.CompressionFormat.LZ10);
+                return outStream;
+            }
+
             return Decompressor.Decompress(Data);
         }
 

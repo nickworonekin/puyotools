@@ -69,6 +69,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Compression\Compression.cs" />
+    <Compile Include="Compression\CompressionBase.cs" />
+    <Compile Include="Compression\Formats\LZ10.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="FileSelectionDialog.cs" />
     <Compile Include="FileTypeInfo.cs" />
@@ -158,6 +161,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="PTMethods.cs" />
     <Compile Include="PuyoTools.cs" />
     <Compile Include="StatusMessage.cs">
       <SubType>Form</SubType>
@@ -233,4 +237,5 @@
   <ItemGroup>
     <None Include="Resources\Logo.png" />
   </ItemGroup>
+  <ItemGroup />
 </Project>

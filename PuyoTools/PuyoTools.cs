@@ -21,6 +21,8 @@ namespace PuyoTools
             Compression.InitalizeDictionary();
             Archive.InitalizeDictionary();
             Textures.InitalizeDictionary();
+
+            PuyoTools2.Compression.Compression.Initalize();
         }
     }
 }
