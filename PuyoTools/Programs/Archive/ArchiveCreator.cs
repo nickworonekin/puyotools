@@ -272,11 +272,28 @@ namespace PuyoTools
                 // Disable the window and show the status box
                 PanelContent.Enabled = false;
 
+                // FORCE AFS FOR NOW
+                using (FileStream outputStream = new FileStream(outFname, FileMode.Create, FileAccess.ReadWrite))
+                {
+                    PuyoTools2.Archive.ArchiveWriter archive = PuyoTools2.Archive.Archive.Create(outputStream, PuyoTools2.Archive.ArchiveFormat.AFS, new PuyoTools2.Archive.ArchiveWriterSettings());
+
+                    for (int i = 0; i < archiveFileList.Items.Count; i++)
+                    {
+                        status.CurrentFile = i;
+                        archive.AddFile(File.OpenRead(fileList[i]), archiveFnames[i], File.GetCreationTime(fileList[i]));
+                    }
+
+                    archive.Flush();
+                }
+
+
                 // Start creating the archive
+                /*
                 Archive archive = new Archive(ArchiveFormats[archiveFormatList.SelectedIndex], Path.GetFileName(outFname));
 
                 using (FileStream outputStream = new FileStream(outFname, FileMode.Create, FileAccess.ReadWrite))
                 {
+
                     // Get the block size
                     int blockSize;
                     if (blockSizes[ArchiveFormatIndex].Enabled && blockSizes[ArchiveFormatIndex].Text.Length > 0)
@@ -341,7 +358,7 @@ namespace PuyoTools
                             outputStream.Write(compressedData);
                         }
                     }
-                }
+                }*/
 
                 this.Close();
             }

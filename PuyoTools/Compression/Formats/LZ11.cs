@@ -3,7 +3,7 @@ using System.IO;
 
 namespace PuyoTools2.Compression
 {
-    public class LZ10 : CompressionBase
+    public class LZ11 : CompressionBase
     {
         public override bool Compress(byte[] source, long offset, int length, string fname, Stream destination)
         {
@@ -16,6 +16,14 @@ namespace PuyoTools2.Compression
             int sourcePointer = 0x4;
             int destPointer = 0x0;
             int destLength = (int)(BitConverter.ToUInt32(source, (int)offset) >> 8);
+
+            // If the destination length is 0, then the length is stored in the next 4 bytes
+            if (destLength == 0)
+            {
+                destLength = (int)(BitConverter.ToUInt32(source, (int)offset + 4));
+                sourcePointer += 4;
+            }
+
             byte[] destBuffer = new byte[destLength];
 
             // Start Decompression
@@ -34,9 +42,29 @@ namespace PuyoTools2.Compression
                     }
                     else // Data is compressed
                     {
-                        int distance = (((source[offset + sourcePointer] & 0xF) << 8) | source[offset + sourcePointer + 1]) + 1;
-                        int amount = (source[offset + sourcePointer] >> 4) + 3;
-                        sourcePointer += 2;
+                        int distance, amount;
+
+                        // Let's determine how many bytes the distance & length pair take up
+                        switch (source[offset + sourcePointer] >> 4)
+                        {
+                            case 0: // 3 bytes
+                                distance = (((source[offset + sourcePointer + 1] & 0xF) << 8) | source[offset + sourcePointer + 2]) + 1;
+                                amount = (((source[offset + sourcePointer] & 0xF) << 4) | (source[offset + sourcePointer + 1] >> 4)) + 17;
+                                sourcePointer += 3;
+                                break;
+
+                            case 1: // 4 bytes
+                                distance = (((source[offset + sourcePointer + 2] & 0xF) << 8) | source[offset + sourcePointer + 3]) + 1;
+                                amount = (((source[offset + sourcePointer] & 0xF) << 12) | (source[offset + sourcePointer + 1] << 4) | (source[offset + sourcePointer + 2] >> 4)) + 273;
+                                sourcePointer += 4;
+                                break;
+
+                            default: // 2 bytes
+                                distance = (((source[offset + sourcePointer] & 0xF) << 8) | source[offset + sourcePointer + 1]) + 1;
+                                amount = (source[offset + sourcePointer] >> 4) + 1;
+                                sourcePointer += 2;
+                                break;
+                        }
 
                         // Copy the data
                         for (int j = 0; j < amount; j++)
@@ -61,7 +89,7 @@ namespace PuyoTools2.Compression
 
         public override bool Is(Stream source, int length, string fname)
         {
-            return (length > 4 && PTStream.Contains(source, 0, new byte[] { 0x10 }));
+            return (length > 4 && PTStream.Contains(source, 0, new byte[] { 0x11 }));
         }
 
         public override bool CanCompress()

@@ -36,6 +36,7 @@ namespace PuyoTools
         // Archive Details
         private int level = 0;
         private List<ArchiveFileList> FileList = new List<ArchiveFileList>();
+        private List<PuyoTools2.Archive.ArchiveEntry[]> FileList2 = new List<PuyoTools2.Archive.ArchiveEntry[]>();
         private List<Stream> ArchiveData  = new List<Stream>();
         private List<string> ArchiveName  = new List<string>();
         private List<string> ArchiveType  = new List<string>();
@@ -57,7 +58,7 @@ namespace PuyoTools
             extractImageAsPng      = new ToolStripMenuItem("Extract textures as PNG", null, new EventHandler(selectOption));
 
             ToolStrip toolStrip = new ToolStrip(new ToolStripItem[] {
-                new ToolStripButton("Open Archive", IconResources.Open, new EventHandler(loadArchive)),
+                new ToolStripButton("Open Archive", IconResources.Open, new EventHandler(loadArchive2)),
                 new ToolStripSeparator(),
                 extractSelectedFiles,
                 extractAllFiles,
@@ -165,6 +166,36 @@ namespace PuyoTools
             }
         }
 
+        private PuyoTools2.Archive.ArchiveReader GetFileList2(ref Stream data, string filename, out string type)
+        {
+            type = "AFS";
+
+            // Check to see if the archive is compressed
+            PuyoTools2.Compression.CompressionFormat compressionFormat = PuyoTools2.Compression.Compression.GetFormat(data, (int)data.Length, filename);
+            if (compressionFormat != PuyoTools2.Compression.CompressionFormat.Unknown)
+            {
+                MemoryStream decompressedData = new MemoryStream();
+                try
+                {
+                    PuyoTools2.Compression.Compression.Decompress(data, (int)data.Length, decompressedData, compressionFormat);
+                    data = decompressedData;
+                }
+                catch
+                {
+                    // Do nothing
+                }
+            }
+
+            // Check to see if this is an archive
+            PuyoTools2.Archive.ArchiveFormat archiveFormat = PuyoTools2.Archive.Archive.GetFormat(data, (int)data.Length, filename);
+            if (archiveFormat != PuyoTools2.Archive.ArchiveFormat.Unknown)
+            {
+                return PuyoTools2.Archive.Archive.Open(data, (int)data.Length, archiveFormat);
+            }
+
+            return null;
+        }
+
         private void populateList(ArchiveFileList fileList)
         {
             // Erase the current list
@@ -195,6 +226,42 @@ namespace PuyoTools
                     (i + 1).ToString("#,0"),
                     (fileList.Entries[i].Filename == String.Empty ? " -- No Filename -- " : fileList.Entries[i].Filename),
                     String.Format("{0} ({1} bytes)", FormatFileSize(fileList.Entries[i].Length), fileList.Entries[i].Length.ToString("#,0")),
+                });
+
+                fileListView.Items.Add(item);
+            }
+        }
+
+        private void populateList2(PuyoTools2.Archive.ArchiveEntry[] entries)
+        {
+            // Erase the current list
+            fileListView.Items.Clear();
+
+            // Make sure the file list contains entries
+            if (entries == null || entries.Length == 0)
+                return;
+
+            // If we are not at the base level, we need to add some extra crap
+            if (level > 0)
+            {
+                // Add the Parent Archive link
+                ListViewItem item = new ListViewItem(new string[] {
+                    "..",
+                    "Parent Archive",
+                    null,
+                });
+                item.Font = new Font(SystemFonts.DialogFont.FontFamily.Name, SystemFonts.DialogFont.Size, FontStyle.Bold);
+
+                fileListView.Items.Add(item);
+            }
+
+            for (int i = 0; i < entries.Length; i++)
+            {
+                // Add the file information
+                ListViewItem item = new ListViewItem(new string[] {
+                    (i + 1).ToString("#,0"),
+                    (entries[i].Filename == String.Empty ? " -- No Filename -- " : entries[i].Filename),
+                    String.Format("{0} ({1} bytes)", FormatFileSize(entries[i].Length), entries[i].Length.ToString("#,0")),
                 });
 
                 fileListView.Items.Add(item);
@@ -260,6 +327,61 @@ namespace PuyoTools
                 // Populate the list and update the archive information
                 populateList(fileList);
                 updateArchiveInformation();
+            }
+        }
+
+        private void loadArchive2(object sender, EventArgs e)
+        {
+            // Select the file to open
+            string file = FileSelectionDialog.OpenFile("Select Archive",
+                "Supported Archives (*.acx;*.afs;*.carc;*.gnt;*.gvm;*.mdl;*.mrg;*.mrz;*.narc;*.one;*.onz;*.prs;*.pvm;*.snt;*.spk;*.tex;*.tez;*.txd;*.vdd)|*.acx;*.afs;*.carc;*.gnt;*.gvm;*.mdl;*.mrg;*.mrz;*.narc;*.one;*.onz;*.prs;*.pvm;*.snt;*.spk;*.tex;*.tez;*.txd;*.vdd|" +
+                "ACX Archive (*.acx)|*.acx|" +
+                "AFS Archive (*.afs)|*.afs|" +
+                "GNT Archive (*.gnt)|*.gnt|" +
+                "GVM Archive (*.gvm)|*.gvm|" +
+                "MDL Archive (*.mdl)|*.mdl|" +
+                "MRG Archive (*.mrg;*.mrz)|*.mrg;*.mrz|" +
+                "NARC Archive (*.narc;*.carc)|*.narc;*.carc|" +
+                "ONE Archive (*.one;*.onz)|*.one;*.onz|" +
+                "PVM Archive (*.pvm)|*.pvm|" +
+                "PRS Compressed Archive (*.prs)|*.prs|" +
+                "SNT Archive (*.snt)|*.snt|" +
+                "SPK Archive (*.spk)|*.spk|" +
+                "TEX Archive (*.tex;*.tez)|*.tex;*.tez|" +
+                "TXAG Archive (*.txd)|*.txd|" +
+                "VDD Archive (*.vdd)|*.vdd|" +
+                "All Files (*.*)|*.*");
+
+            if (file == null || file == String.Empty)
+                return;
+
+            // Ok, load the file and get the file list
+            string archiveType = String.Empty;
+            Stream archiveStream = new FileStream(file, FileMode.Open, FileAccess.Read);
+            PuyoTools2.Archive.ArchiveReader archive = GetFileList2(ref archiveStream, file, out archiveType);
+
+            // If we were able to open it up and get the contents, populate the list
+            if (archive.Files != null && archive.Files.Length > 0)
+            {
+                // Clear the archive data list if it contains entries
+                if (ArchiveData.Count > 0)
+                {
+                    level = 0;
+                    FileList.Clear();
+                    ArchiveData.Clear();
+                    ArchiveName.Clear();
+                    ArchiveType.Clear();
+                }
+
+                // Add the entries
+                FileList2.Add(archive.Files);
+                ArchiveData.Add(archiveStream);
+                ArchiveName.Add(Path.GetFileName(file));
+                ArchiveType.Add(archiveType);
+
+                // Populate the list and update the archive information
+                populateList2(archive.Files);
+                //updateArchiveInformation();
             }
         }
 

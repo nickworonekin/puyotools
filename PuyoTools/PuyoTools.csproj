@@ -69,9 +69,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Archive\Archive.cs" />
+    <Compile Include="Archive\ArchiveBase.cs" />
+    <Compile Include="Archive\Formats\AFS.cs" />
     <Compile Include="Compression\Compression.cs" />
     <Compile Include="Compression\CompressionBase.cs" />
+    <Compile Include="Compression\Formats\CXLZ.cs" />
     <Compile Include="Compression\Formats\LZ10.cs" />
+    <Compile Include="Compression\Formats\LZ11.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="FileSelectionDialog.cs" />
     <Compile Include="FileTypeInfo.cs" />

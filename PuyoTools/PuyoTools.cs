@@ -23,6 +23,7 @@ namespace PuyoTools
             Textures.InitalizeDictionary();
 
             PuyoTools2.Compression.Compression.Initalize();
+            PuyoTools2.Archive.Archive.Initalize();
         }
     }
 }

@@ -13,7 +13,9 @@ namespace PuyoTools2.Compression
             Formats = new Dictionary<CompressionFormat, FormatEntry>();
 
             //Formats.Add(CompressionFormat.CNX, new FormatEntry(null, "CNX", "*.cnx"));
+            Formats.Add(CompressionFormat.CXLZ, new FormatEntry(new CXLZ(), "CXLZ", String.Empty));
             Formats.Add(CompressionFormat.LZ10, new FormatEntry(new LZ10(), "LZ10", String.Empty));
+            Formats.Add(CompressionFormat.LZ11, new FormatEntry(new LZ11(), "LZ11", String.Empty));
         }
 
         public static bool Compress(Stream inStream, string fname, Stream outStream, CompressionFormat format)
@@ -53,11 +55,11 @@ namespace PuyoTools2.Compression
             public string Name;
             public string Filter;
 
-            public FormatEntry(CompressionBase Class, string Name, string Filter)
+            public FormatEntry(CompressionBase instance, string name, string filter)
             {
-                this.Class = Class;
-                this.Name = Name;
-                this.Filter = Filter;
+                Class = instance;
+                Name = name;
+                Filter = filter;
             }
         }
     }
