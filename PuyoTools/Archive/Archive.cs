@@ -13,6 +13,7 @@ namespace PuyoTools2.Archive
             Formats = new Dictionary<ArchiveFormat, FormatEntry>();
 
             Formats.Add(ArchiveFormat.AFS, new FormatEntry(new AFS(), "AFS", "*.afs"));
+            Formats.Add(ArchiveFormat.GVM, new FormatEntry(new GVM(), "GVM", "*.gvm"));
         }
 
         public static ArchiveWriter Create(Stream outStream, ArchiveFormat format, ArchiveWriterSettings settings)
@@ -65,5 +66,6 @@ namespace PuyoTools2.Archive
     {
         Unknown,
         AFS,
+        GVM,
     }
 }

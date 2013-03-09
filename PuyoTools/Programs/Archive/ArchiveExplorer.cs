@@ -40,6 +40,7 @@ namespace PuyoTools
         private List<Stream> ArchiveData  = new List<Stream>();
         private List<string> ArchiveName  = new List<string>();
         private List<string> ArchiveType  = new List<string>();
+        private PuyoTools2.Archive.ArchiveReader archiveReader;
 
         public ArchiveExplorer()
         {
@@ -363,6 +364,8 @@ namespace PuyoTools
             // If we were able to open it up and get the contents, populate the list
             if (archive.Files != null && archive.Files.Length > 0)
             {
+                archiveReader = archive;
+
                 // Clear the archive data list if it contains entries
                 if (ArchiveData.Count > 0)
                 {
@@ -387,6 +390,7 @@ namespace PuyoTools
 
         private void loadEmbeddedArchive(object sender, EventArgs e)
         {
+            /*
             if (fileListView.SelectedIndices.Count == 1)
             {
                 // Let's make a copy of the selected file data and see if it is an archive
@@ -436,6 +440,8 @@ namespace PuyoTools
                     }
                 }
             }
+            */
+            loadEmbeddedImage2();
         }
 
         private void loadEmbeddedImage()
@@ -479,6 +485,56 @@ namespace PuyoTools
             catch
             {
             }
+        }
+
+        private void loadEmbeddedImage2()
+        {
+           // try
+            //{
+                // Get the selected item and the data and filename
+                int item = fileListView.SelectedIndices[0] - (level == 0 ? 0 : 1);
+                //MemoryStream imageData = ArchiveData[level].Copy(FileList[level].Entries[item].Offset, FileList[level].Entries[item].Length);
+                PuyoTools2.Archive.ArchiveEntry entry = archiveReader.GetFile(item);
+
+                entry.Stream.Position = entry.Offset;
+                MemoryStream imageData = new MemoryStream();
+                PuyoTools2.PTStream.CopyPartTo(entry.Stream, imageData, entry.Length);
+
+                //string filename = FileList[level].Entries[item].Filename;
+                string filename = "";
+
+                // Check to see if the image is compressed
+                Compression compression = new Compression(imageData, filename);
+                if (compression.Format != CompressionFormat.NULL)
+                {
+                    // Decompress
+                    MemoryStream decompressedData = compression.Decompress();
+                    if (decompressedData != null)
+                        imageData = decompressedData;
+                }
+
+                // Check to see if this is an image
+                Textures image = new Textures(imageData, filename);
+                if (image.Format == TextureFormat.NULL)
+                    throw new TextureFormatNotSupported();
+
+                // Try to open this image if we can
+                try
+                {
+                    new TextureViewer(imageData, filename);
+                }
+                catch (TextureFormatNeedsPalette)
+                {
+                    int index = indexOfFile(image.PaletteFilename);
+                    if (index == -1)
+                        throw new Exception();
+                    else
+                        new TextureViewer(imageData, filename, ArchiveData[level].Copy(FileList[level].Entries[index].Offset, FileList[level].Entries[index].Length));
+                }
+           // }
+            //catch
+            //{
+            //}
         }
 
         // Find file

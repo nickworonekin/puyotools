@@ -26,7 +26,7 @@ namespace PuyoTools2.Archive
             public Read(Stream source, int length)
             {
                 // The start of the archive
-                long offset = source.Position;
+                offset = source.Position;
 
                 // Get the number of files in the archive
                 source.Position += 4;
@@ -60,6 +60,9 @@ namespace PuyoTools2.Archive
                     // Add this entry to the file list
                     Files[i] = new ArchiveEntry(source, entryOffset, entryLength, entryFname);
                 }
+
+                // Set the position of the stream to the end of the file
+                source.Position = offset + length;
             }
         }
 

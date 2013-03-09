@@ -19,6 +19,7 @@ namespace PuyoTools2.Archive
     public abstract class ArchiveReader
     {
         public ArchiveEntry[] Files;
+        protected long offset;
 
         /// <summary>
         /// Returns information about a file at the specified index in the archive.
@@ -116,6 +117,7 @@ namespace PuyoTools2.Archive
 
         // GVM/PVM/SVM
         public bool PVMFilename = true;
+        public bool PVMGlobalIndex = true;
         public bool PVMFormats = true;
         public bool PVMDimensions = true;
 

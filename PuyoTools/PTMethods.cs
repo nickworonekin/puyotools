@@ -111,19 +111,27 @@ namespace PuyoTools2
             int num;
             byte[] buffer = new byte[bufferSize];
 
-            int copyLength = bufferSize;
-            if (copyLength > length)
+            if (source.Position + length > source.Length)
             {
-                copyLength = length;
+                length = (int)(source.Length - source.Position);
+            }
+
+            int amountToRead = length;
+
+            int copyLength = bufferSize;
+            if (copyLength > amountToRead)
+            {
+                copyLength = amountToRead;
             }
 
             while ((num = source.Read(buffer, 0, copyLength)) != 0)
             {
                 destination.Write(buffer, 0, num);
 
-                if (source.Position + copyLength > source.Length)
+                amountToRead -= num;
+                if (copyLength > amountToRead)
                 {
-                    copyLength = (int)(source.Length - source.Position);
+                    copyLength = amountToRead;
                 }
             }
         }
@@ -266,6 +274,14 @@ namespace PuyoTools2
             destination.WriteByte((byte)((value >> 8) & 0xFF));
             destination.WriteByte((byte)((value >> 16) & 0xFF));
             destination.WriteByte((byte)((value >> 24) & 0xFF));
+        }
+
+        public static void WriteInt32BE(Stream destination, int value)
+        {
+            destination.WriteByte((byte)((value >> 24) & 0xFF));
+            destination.WriteByte((byte)((value >> 16) & 0xFF));
+            destination.WriteByte((byte)((value >> 8) & 0xFF));
+            destination.WriteByte((byte)(value & 0xFF));
         }
 
         /// <summary>
