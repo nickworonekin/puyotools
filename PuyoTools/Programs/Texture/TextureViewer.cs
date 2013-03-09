@@ -170,6 +170,20 @@ namespace PuyoTools
 
         private Bitmap LoadImage(string filename)
         {
+            using (Stream data = File.OpenRead(filename))
+            {
+                // Get the texture format
+                PuyoTools2.Texture.TextureFormat format = PuyoTools2.Texture.Texture.GetFormat(data, (int)data.Length, filename);
+
+                if (format == PuyoTools2.Texture.TextureFormat.Unknown)
+                    return null;
+
+                // Read the texture
+                Bitmap texture;
+                PuyoTools2.Texture.Texture.Read(data, out texture, (int)data.Length, format);
+                return texture;
+            }
+            /*
             try
             {
                 // Open the file
@@ -214,10 +228,25 @@ namespace PuyoTools
             {
                 return null;
             }
+             * */
         }
 
         private Bitmap LoadImage(Stream data, string filename)
         {
+            data.Position = 0;
+
+            // Get the texture format
+            PuyoTools2.Texture.TextureFormat format = PuyoTools2.Texture.Texture.GetFormat(data, (int)data.Length, filename);
+
+            if (format == PuyoTools2.Texture.TextureFormat.Unknown)
+                return null;
+
+            // Read the texture
+            Bitmap texture;
+            PuyoTools2.Texture.Texture.Read(data, out texture, (int)data.Length, format);
+            return texture;
+
+            /*
             try
             {
                 // Get and return the image
@@ -239,6 +268,7 @@ namespace PuyoTools
             {
                 return null;
             }
+             * */
         }
 
         private Bitmap LoadImage(Stream data, string filename, Stream palette)

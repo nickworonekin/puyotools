@@ -32,11 +32,34 @@ namespace VrSharp.GvrTexture
         }
 
         /// <summary>
+        /// Open a Gvr texture from a stream.
+        /// </summary>
+        /// <param name="stream">Stream that contains the texture data.</param>
+        /// <param name="length">Number of bytes to read.</param>
+        public GvrTexture(Stream stream, int length)
+            : base(stream, length)
+        {
+            InitSuccess = ReadHeader();
+        }
+
+        /// <summary>
         /// Open a Gvr texture from a byte array.
         /// </summary>
         /// <param name="array">Byte array that contains the texture data.</param>
         public GvrTexture(byte[] array)
             : base(array)
+        {
+            InitSuccess = ReadHeader();
+        }
+
+        /// <summary>
+        /// Open a Gvr texture from a byte array.
+        /// </summary>
+        /// <param name="array">Byte array that contains the texture data.</param>
+        /// <param name="offset">Offset of the texture in the array.</param>
+        /// <param name="length">Number of bytes to read.</param>
+        public GvrTexture(byte[] array, long offset, int length)
+            : base(array, offset, length)
         {
             InitSuccess = ReadHeader();
         }
@@ -144,27 +167,50 @@ namespace VrSharp.GvrTexture
         }
 
         // Checks if the input file is a gvr
-        public static bool IsGvrTexture(byte[] data)
+        public static bool IsGvrTexture(byte[] data, long offset, int length)
         {
             // Gbix and Gvrt
-            if (data.Length >= 0x20 &&
-                Compare(data, "GBIX", 0x00) &&
-                Compare(data, "GVRT", 0x10) &&
-                BitConverter.ToUInt32(data, 0x14) == data.Length - 24)
+            if (length >= 0x20 &&
+                Compare(data, "GBIX", (int)offset + 0x00) &&
+                Compare(data, "GVRT", (int)offset + 0x10) &&
+                BitConverter.ToUInt32(data, (int)offset + 0x14) == length - 24)
                 return true;
             // Gcix and Gvrt
-            else if (data.Length >= 0x20 &&
-                Compare(data, "GCIX", 0x00) &&
-                Compare(data, "GVRT", 0x10) &&
-                BitConverter.ToUInt32(data, 0x14) == data.Length - 24)
+            else if (length >= 0x20 &&
+                Compare(data, "GCIX", (int)offset + 0x00) &&
+                Compare(data, "GVRT", (int)offset + 0x10) &&
+                BitConverter.ToUInt32(data, (int)offset + 0x14) == length - 24)
                 return true;
             // Gvrt
-            else if (data.Length >= 0x10 &&
-                Compare(data, "GVRT", 0x00) &&
-                BitConverter.ToUInt32(data, 0x04) == data.Length - 8)
+            else if (length >= 0x10 &&
+                Compare(data, "GVRT", (int)offset + 0x00) &&
+                BitConverter.ToUInt32(data, (int)offset + 0x04) == length - 8)
                 return true;
 
             return false;
+        }
+
+        public static bool IsGvrTexture(byte[] data)
+        {
+            return IsGvrTexture(data, 0, data.Length);
+        }
+        public static bool IsGvrTexture(Stream data, int length)
+        {
+            // If it's less than 16 bytes, then it is not a texture
+            if (length < 0x10)
+                return false;
+
+            long oldPosition = data.Position;
+            byte[] buffer = new byte[0x20];
+
+            if (length > 0x20)
+                data.Read(buffer, 0, 0x20);
+            else
+                data.Read(buffer, 0, 0x10);
+
+            data.Position = oldPosition;
+
+            return IsGvrTexture(buffer, 0, length);
         }
         #endregion
     }

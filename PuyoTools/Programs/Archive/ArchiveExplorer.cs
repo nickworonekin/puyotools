@@ -178,7 +178,7 @@ namespace PuyoTools
                 MemoryStream decompressedData = new MemoryStream();
                 try
                 {
-                    PuyoTools2.Compression.Compression.Decompress(data, (int)data.Length, decompressedData, compressionFormat);
+                    PuyoTools2.Compression.Compression.Decompress(data, decompressedData, (int)data.Length, compressionFormat);
                     data = decompressedData;
                 }
                 catch

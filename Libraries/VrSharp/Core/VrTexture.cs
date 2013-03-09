@@ -49,38 +49,54 @@ namespace VrSharp
         /// Open a Vr texture from a stream.
         /// </summary>
         /// <param name="stream">Stream that contains the texture data.</param>
-        public VrTexture(Stream stream)
-        {
-            stream.Seek(0, SeekOrigin.Begin); // Seek to the beginning
-            if (stream is MemoryStream) // We can use ToArray() for memory streams
-            {
-                try   { TextureData = (stream as MemoryStream).ToArray(); }
-                catch { TextureData = new byte[0]; }
-            }
-            else
-            {
-                byte[] data;
-                try
-                {
-                    data = new byte[stream.Length];
-                    stream.Read(data, 0, data.Length);
-                }
-                catch { data = new byte[0]; }
+        public VrTexture(Stream stream) : this(stream, (int)(stream.Length - stream.Position)) { }
 
-                TextureData = data;
+        /// <summary>
+        /// Open a Vr texture from a stream.
+        /// </summary>
+        /// <param name="stream">Stream that contains the texture data.</param>
+        /// <param name="length">Number of bytes to read.</param>
+        public VrTexture(Stream stream, int length)
+        {
+            byte[] data;
+            try
+            {
+                data = new byte[length];
+                stream.Read(data, 0, length);
             }
+            catch { data = new byte[0]; }
+
+            TextureData = data;
         }
 
         /// <summary>
         /// Open a Vr texture from a byte array.
         /// </summary>
         /// <param name="array">Byte array that contains the texture data.</param>
-        public VrTexture(byte[] array)
+        public VrTexture(byte[] array) : this(array, 0, array.Length) { }
+
+        /// <summary>
+        /// Open a Vr texture from a byte array.
+        /// </summary>
+        /// <param name="array">Byte array that contains the texture data.</param>
+        /// <param name="offset">Offset of the texture in the array.</param>
+        /// <param name="length">Number of bytes to read.</param>
+        public VrTexture(byte[] array, long offset, int length)
         {
+            byte[] data;
             if (array == null)
-                TextureData = new byte[0];
+                data = new byte[0];
             else
-                TextureData = array;
+            {
+                data = new byte[length];
+                try
+                {
+                    Array.Copy(array, offset, data, 0, length);
+                }
+                catch { data = new byte[0]; }
+            }
+
+            TextureData = data;
         }
         #endregion
 

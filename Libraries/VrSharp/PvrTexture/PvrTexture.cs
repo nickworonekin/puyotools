@@ -33,11 +33,34 @@ namespace VrSharp.PvrTexture
         }
 
         /// <summary>
+        /// Open a Pvr texture from a stream.
+        /// </summary>
+        /// <param name="stream">Stream that contains the texture data.</param>
+        /// <param name="length">Number of bytes to read.</param>
+        public PvrTexture(Stream stream, int length)
+            : base(stream, length)
+        {
+            InitSuccess = ReadHeader();
+        }
+
+        /// <summary>
         /// Open a Pvr texture from a byte array.
         /// </summary>
         /// <param name="array">Byte array that contains the texture data.</param>
         public PvrTexture(byte[] array)
             : base(array)
+        {
+            InitSuccess = ReadHeader();
+        }
+
+        /// <summary>
+        /// Open a Pvr texture from a byte array.
+        /// </summary>
+        /// <param name="array">Byte array that contains the texture data.</param>
+        /// <param name="offset">Offset of the texture in the array.</param>
+        /// <param name="length">Number of bytes to read.</param>
+        public PvrTexture(byte[] array, long offset, int length)
+            : base(array, offset, length)
         {
             InitSuccess = ReadHeader();
         }
@@ -160,36 +183,61 @@ namespace VrSharp.PvrTexture
         }
 
         // Checks if the input file is a pvr
-        public static bool IsPvrTexture(byte[] data)
+        public static bool IsPvrTexture(byte[] data, long offset, int length)
         {
             // Gbix and Pvrt
-            if (data.Length >= 0x20 &&
-                Compare(data, "GBIX", 0x00) &&
-                Compare(data, "PVRT", 0x10) &&
-                data[0x19] < 0x60 &&
-                BitConverter.ToUInt32(data, 0x14) == data.Length - 24)
+            if (length >= 0x20 &&
+                Compare(data, "GBIX", (int)offset + 0x00) &&
+                Compare(data, "PVRT", (int)offset + 0x10) &&
+                data[offset + 0x19] < 0x60 &&
+                BitConverter.ToUInt32(data, (int)offset + 0x14) == length - 24)
                 return true;
             // Pvrt
-            else if (data.Length >= 0x10 &&
-                Compare(data, "PVRT", 0x00) &&
-                data[0x09] < 0x60 &&
-                BitConverter.ToUInt32(data, 0x04) == data.Length - 8)
+            else if (length >= 0x10 &&
+                Compare(data, "PVRT", (int)offset + 0x00) &&
+                data[offset + 0x09] < 0x60 &&
+                BitConverter.ToUInt32(data, (int)offset + 0x04) == length - 8)
                 return true;
             // Gbix and Pvrt (w/ Rle Compression)
-            else if (data.Length >= 0x24 &&
-                Compare(data, "GBIX", 0x04) &&
-                Compare(data, "PVRT", 0x14) &&
-                data[0x1D] < 0x60 &&
-                BitConverter.ToUInt32(data, 0x18) == BitConverter.ToUInt32(data, 0x00) - 24)
+            else if (length >= 0x24 &&
+                Compare(data, "GBIX", (int)offset + 0x04) &&
+                Compare(data, "PVRT", (int)offset + 0x14) &&
+                data[offset + 0x1D] < 0x60 &&
+                BitConverter.ToUInt32(data, (int)offset + 0x18) == BitConverter.ToUInt32(data, (int)offset + 0x00) - 24)
                 return true;
             // Pvrt (w/ Rle Compression)
-            else if (data.Length >= 0x14 &&
-                Compare(data, "PVRT", 0x04) &&
-                data[0x0D] < 0x60 &&
-                BitConverter.ToUInt32(data, 0x08) == BitConverter.ToUInt32(data, 0x00) - 8)
+            else if (length >= 0x14 &&
+                Compare(data, "PVRT", (int)offset + 0x04) &&
+                data[offset + 0x0D] < 0x60 &&
+                BitConverter.ToUInt32(data, (int)offset + 0x08) == BitConverter.ToUInt32(data, (int)offset + 0x00) - 8)
                 return true;
 
             return false;
+        }
+
+        public static bool IsPvrTexture(byte[] data)
+        {
+            return IsPvrTexture(data, 0, data.Length);
+        }
+        public static bool IsPvrTexture(Stream data, int length)
+        {
+            // If it's less than 16 bytes, then it is not a texture
+            if (length < 0x10)
+                return false;
+
+            long oldPosition = data.Position;
+            byte[] buffer = new byte[0x24];
+
+            if (length > 0x24)
+                data.Read(buffer, 0, 0x24);
+            else if (length > 0x20)
+                data.Read(buffer, 0, 0x20);
+            else
+                data.Read(buffer, 0, 0x10);
+
+            data.Position = oldPosition;
+
+            return IsPvrTexture(buffer, 0, length);
         }
 
         // Gets the compression format used on the pvr

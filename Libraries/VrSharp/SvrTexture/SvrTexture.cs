@@ -28,11 +28,34 @@ namespace VrSharp.SvrTexture
         }
 
         /// <summary>
+        /// Open a Svr texture from a stream.
+        /// </summary>
+        /// <param name="stream">Stream that contains the texture data.</param>
+        /// <param name="length">Number of bytes to read.</param>
+        public SvrTexture(Stream stream, int length)
+            : base(stream, length)
+        {
+            InitSuccess = ReadHeader();
+        }
+
+        /// <summary>
         /// Open a Svr texture from a byte array.
         /// </summary>
         /// <param name="array">Byte array that contains the texture data.</param>
         public SvrTexture(byte[] array)
             : base(array)
+        {
+            InitSuccess = ReadHeader();
+        }
+
+        /// <summary>
+        /// Open a Svr texture from a byte array.
+        /// </summary>
+        /// <param name="array">Byte array that contains the texture data.</param>
+        /// <param name="offset">Offset of the texture in the array.</param>
+        /// <param name="length">Number of bytes to read.</param>
+        public SvrTexture(byte[] array, long offset, int length)
+            : base(array, offset, length)
         {
             InitSuccess = ReadHeader();
         }
@@ -126,23 +149,46 @@ namespace VrSharp.SvrTexture
         }
 
         // Checks if the input file is a svr
-        public static bool IsSvrTexture(byte[] data)
+        public static bool IsSvrTexture(byte[] data, long offset, int length)
         {
             // Gbix and Pvrt
-            if (data.Length >= 0x20 &&
-                Compare(data, "GBIX", 0x00) &&
-                Compare(data, "PVRT", 0x10) &&
-                data[0x19] >= 0x60 && data[0x19] < 0x70 &&
-                BitConverter.ToUInt32(data, 0x14) == data.Length - 24)
+            if (length >= 0x20 &&
+                Compare(data, "GBIX", (int)offset + 0x00) &&
+                Compare(data, "PVRT", (int)offset + 0x10) &&
+                data[offset + 0x19] >= 0x60 && data[offset + 0x19] < 0x70 &&
+                BitConverter.ToUInt32(data, (int)offset + 0x14) == length - 24)
                 return true;
             // Pvrt
-            else if (data.Length >= 0x10 &&
-                Compare(data, "PVRT", 0x00) &&
-                data[0x19] >= 0x60 && data[0x19] < 0x70 &&
-                BitConverter.ToUInt32(data, 0x04) == data.Length - 8)
+            else if (length >= 0x10 &&
+                Compare(data, "PVRT", (int)offset + 0x00) &&
+                data[offset + 0x19] >= 0x60 && data[offset + 0x19] < 0x70 &&
+                BitConverter.ToUInt32(data, (int)offset + 0x04) == length - 8)
                 return true;
 
             return false;
+        }
+
+        public static bool IsSvrTexture(byte[] data)
+        {
+            return IsSvrTexture(data, 0, data.Length);
+        }
+        public static bool IsSvrTexture(Stream data, int length)
+        {
+            // If it's less than 16 bytes, then it is not a texture
+            if (length < 0x10)
+                return false;
+
+            long oldPosition = data.Position;
+            byte[] buffer = new byte[0x20];
+
+            if (length > 0x20)
+                data.Read(buffer, 0, 0x20);
+            else
+                data.Read(buffer, 0, 0x10);
+
+            data.Position = oldPosition;
+
+            return IsSvrTexture(buffer, 0, length);
         }
         #endregion
     }

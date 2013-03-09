@@ -5,9 +5,8 @@ namespace PuyoTools2.Compression
 {
     public abstract class CompressionBase
     {
-        public abstract bool Compress(byte[] source, long offset, int length, string fname, Stream destination);
-        public abstract bool Decompress(byte[] source, long offset, int length, Stream destination);
-
+        public abstract void Decompress(byte[] source, long offset, Stream destination, int length);
+        public abstract void Compress(byte[] source, long offset, Stream destination, int length, string fname);
         public abstract bool Is(Stream source, int length, string fname);
 
         // It's assumed that this format can be read (in this case, decompressed).
@@ -15,26 +14,26 @@ namespace PuyoTools2.Compression
         public abstract bool CanCompress();
 
         #region Helper methods for Decompress
-        public bool Decompress(Stream source, Stream destination)
+        public void Decompress(Stream source, Stream destination)
         {
             // Since no length is specified, the length will be size between the current offset
             // and the length of the stream.
-            return Decompress(source, (int)(source.Length - source.Position), destination);
+            Decompress(source, destination, (int)(source.Length - source.Position));
         }
 
-        public bool Decompress(Stream source, int length, Stream destination)
+        public void Decompress(Stream source, Stream destination, int length)
         {
             // Read in the rest of the input stream
             byte[] buffer = new byte[length];
             source.Read(buffer, 0, length);
 
             // Now we can decompress the data
-            return Decompress(buffer, 0, length, destination);
+            Decompress(buffer, 0, destination, length);
         }
 
-        public bool Decompress(byte[] source, Stream destination)
+        public void Decompress(byte[] source, Stream destination)
         {
-            return Decompress(source, 0, source.Length, destination);
+            Decompress(source, 0, destination, source.Length);
         }
         #endregion
 

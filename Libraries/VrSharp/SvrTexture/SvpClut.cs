@@ -27,11 +27,34 @@ namespace VrSharp.SvrTexture
         }
 
         /// <summary>
+        /// Open a Svp clut from a stream.
+        /// </summary>
+        /// <param name="stream">Stream that contains the clut data.</param>
+        /// <param name="length">Number of bytes to read.</param>
+        public SvpClut(Stream stream, int length)
+            : base(stream, length)
+        {
+            InitSuccess = ReadHeader();
+        }
+
+        /// <summary>
         /// Open a Svp clut from a byte array.
         /// </summary>
         /// <param name="array">Byte array that contains the clut data.</param>
         public SvpClut(byte[] array)
             : base(array)
+        {
+            InitSuccess = ReadHeader();
+        }
+
+        /// <summary>
+        /// Open a Svp clut from a byte array.
+        /// </summary>
+        /// <param name="array">Byte array that contains the clut data.</param>
+        /// <param name="offset">Offset of the clut data in the array.</param>
+        /// <param name="length">Number of bytes to read.</param>
+        public SvpClut(byte[] array, long offset, int length)
+            : base(array, offset, length)
         {
             InitSuccess = ReadHeader();
         }

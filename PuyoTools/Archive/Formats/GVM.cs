@@ -23,7 +23,6 @@ namespace PuyoTools2.Archive
 
         public class Read : ArchiveReader
         {
-            byte properties;
             bool containsFilename, containsPixelFormat, containsDimensions, containsGlobalIndex;
             int tableEntryLength, globalIndexOffset;
 
@@ -39,7 +38,7 @@ namespace PuyoTools2.Archive
 
                 // Read what properties this archive stores for each texture
                 source.Position++;
-                properties = PTStream.ReadByte(source);
+                byte properties = PTStream.ReadByte(source);
                 containsFilename    = (properties & (1 << 3)) > 0;
                 containsPixelFormat = (properties & (1 << 2)) > 0;
                 containsDimensions  = (properties & (1 << 1)) > 0;

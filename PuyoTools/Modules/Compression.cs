@@ -59,7 +59,7 @@ namespace PuyoTools
             {
                 MemoryStream outStream = new MemoryStream();
                 Data.Position = 0;
-                PuyoTools2.Compression.Compression.Decompress(Data, (int)Data.Length, outStream, PuyoTools2.Compression.CompressionFormat.LZ10);
+                PuyoTools2.Compression.Compression.Decompress(Data, outStream, (int)Data.Length, PuyoTools2.Compression.CompressionFormat.LZ10);
                 return outStream;
             }
 

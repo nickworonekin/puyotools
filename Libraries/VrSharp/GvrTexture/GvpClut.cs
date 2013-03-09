@@ -27,11 +27,34 @@ namespace VrSharp.GvrTexture
         }
 
         /// <summary>
+        /// Open a Gvp clut from a stream.
+        /// </summary>
+        /// <param name="stream">Stream that contains the clut data.</param>
+        /// <param name="length">Number of bytes to read.</param>
+        public GvpClut(Stream stream, int length)
+            : base(stream, length)
+        {
+            InitSuccess = ReadHeader();
+        }
+
+        /// <summary>
         /// Open a Gvp clut from a byte array.
         /// </summary>
         /// <param name="array">Byte array that contains the clut data.</param>
         public GvpClut(byte[] array)
             : base(array)
+        {
+            InitSuccess = ReadHeader();
+        }
+
+        /// <summary>
+        /// Open a Gvp clut from a byte array.
+        /// </summary>
+        /// <param name="array">Byte array that contains the clut data.</param>
+        /// <param name="offset">Offset of the clut data in the array.</param>
+        /// <param name="length">Number of bytes to read.</param>
+        public GvpClut(byte[] array, long offset, int length)
+            : base(array, offset, length)
         {
             InitSuccess = ReadHeader();
         }

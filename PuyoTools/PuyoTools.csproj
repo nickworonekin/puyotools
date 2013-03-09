@@ -174,6 +174,11 @@
     </Compile>
     <Compile Include="StreamExtensions.cs" />
     <Compile Include="StringExtensions.cs" />
+    <Compile Include="Texture\Formats\GVR.cs" />
+    <Compile Include="Texture\Formats\PVR.cs" />
+    <Compile Include="Texture\Formats\SVR.cs" />
+    <Compile Include="Texture\Texture.cs" />
+    <Compile Include="Texture\TextureBase.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Libraries\VrSharp\VrSharp.csproj">

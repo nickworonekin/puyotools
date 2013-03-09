@@ -37,38 +37,54 @@ namespace VrSharp
         /// Open a Vp clut from a stream.
         /// </summary>
         /// <param name="stream">Stream that contains the clut data.</param>
-        public VpClut(Stream stream)
-        {
-            stream.Seek(0, SeekOrigin.Begin); // Seek to the beginning
-            if (stream is MemoryStream) // We can use ToArray() for memory streams
-            {
-                try { ClutData = (stream as MemoryStream).ToArray(); }
-                catch { ClutData = new byte[0]; }
-            }
-            else
-            {
-                byte[] data;
-                try
-                {
-                    data = new byte[stream.Length];
-                    stream.Read(data, 0, data.Length);
-                }
-                catch { data = new byte[0]; }
+        public VpClut(Stream stream) : this(stream, (int)(stream.Length - stream.Position)) { }
 
-                ClutData = data;
+        /// <summary>
+        /// Open a Vp clut from a stream.
+        /// </summary>
+        /// <param name="stream">Stream that contains the clut data.</param>
+        /// <param name="length">Number of bytes to read.</param>
+        public VpClut(Stream stream, int length)
+        {
+            byte[] data;
+            try
+            {
+                data = new byte[length];
+                stream.Read(data, 0, length);
             }
+            catch { data = new byte[0]; }
+
+            ClutData = data;
         }
 
         /// <summary>
         /// Open a Vp clut from a byte array.
         /// </summary>
         /// <param name="array">Byte array that contains the clut data.</param>
-        public VpClut(byte[] array)
+        public VpClut(byte[] array) : this(array, 0, array.Length) { }
+
+        /// <summary>
+        /// Open a Vp clut from a byte array.
+        /// </summary>
+        /// <param name="array">Byte array that contains the clut data.</param>
+        /// <param name="offset">Offset of the clut data in the array.</param>
+        /// <param name="length">Number of bytes to read.</param>
+        public VpClut(byte[] array, long offset, int length)
         {
+            byte[] data;
             if (array == null)
-                ClutData = new byte[0];
+                data = new byte[0];
             else
-                ClutData = array;
+            {
+                data = new byte[length];
+                try
+                {
+                    Array.Copy(array, offset, data, 0, length);
+                }
+                catch { data = new byte[0]; }
+            }
+
+            ClutData = data;
         }
         #endregion
 

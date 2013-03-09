@@ -5,12 +5,12 @@ namespace PuyoTools2.Compression
 {
     public class LZ11 : CompressionBase
     {
-        public override bool Compress(byte[] source, long offset, int length, string fname, Stream destination)
+        public override void Compress(byte[] source, long offset, Stream destination, int length, string fname)
         {
             throw new NotImplementedException();
         }
 
-        public override bool Decompress(byte[] source, long offset, int length, Stream destination)
+        public override void Decompress(byte[] source, long offset, Stream destination, int length)
         {
             // Set up information for decompression
             int sourcePointer = 0x4;
@@ -83,8 +83,6 @@ namespace PuyoTools2.Compression
             }
 
             destination.Write(destBuffer, 0, destLength);
-
-            return true;
         }
 
         public override bool Is(Stream source, int length, string fname)

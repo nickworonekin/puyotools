@@ -18,31 +18,33 @@ namespace PuyoTools2.Compression
             Formats.Add(CompressionFormat.LZ11, new FormatEntry(new LZ11(), "LZ11", String.Empty));
         }
 
-        public static bool Compress(Stream inStream, string fname, Stream outStream, CompressionFormat format)
+        public static void Compress(Stream source, Stream destination, string fname, CompressionFormat format)
         {
-            return false;
+            return;
         }
 
-        public static bool Decompress(Stream inStream, int length, string fname, Stream outStream)
+        public static CompressionFormat Decompress(Stream source, Stream destination, int length, string fname)
         {
-            CompressionFormat format = GetFormat(inStream, length, fname);
+            CompressionFormat format = GetFormat(source, length, fname);
 
             if (format == CompressionFormat.Unknown)
-                return false;
+                return format;
 
-            return Formats[format].Class.Decompress(inStream, length, outStream);
+            Formats[format].Class.Decompress(source, destination, length);
+
+            return format;
         }
 
-        public static bool Decompress(Stream inStream, int length, Stream outStream, CompressionFormat format)
+        public static void Decompress(Stream source, Stream destination, int length, CompressionFormat format)
         {
-            return Formats[format].Class.Decompress(inStream, length, outStream);
+            Formats[format].Class.Decompress(source, destination, length);
         }
 
-        public static CompressionFormat GetFormat(Stream inStream, int length, string fname)
+        public static CompressionFormat GetFormat(Stream source, int length, string fname)
         {
             foreach (KeyValuePair<CompressionFormat, FormatEntry> format in Formats)
             {
-                if (format.Value.Class.Is(inStream, length, fname))
+                if (format.Value.Class.Is(source, length, fname))
                     return format.Key;
             }
 
