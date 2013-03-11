@@ -72,21 +72,36 @@
     <Compile Include="Archive\Archive.cs" />
     <Compile Include="Archive\ArchiveBase.cs" />
     <Compile Include="Archive\Formats\AFS.cs" />
+    <Compile Include="Archive\Formats\GNT.cs" />
     <Compile Include="Archive\Formats\GVM.cs" />
+    <Compile Include="Archive\Formats\U8.cs" />
     <Compile Include="Compression\Compression.cs" />
     <Compile Include="Compression\CompressionBase.cs" />
     <Compile Include="Compression\Formats\CXLZ.cs" />
     <Compile Include="Compression\Formats\LZ10.cs" />
     <Compile Include="Compression\Formats\LZ11.cs" />
+    <Compile Include="Compression\Formats\PRS.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="FileSelectionDialog.cs" />
     <Compile Include="FileTypeInfo.cs" />
     <Compile Include="FormContent.cs" />
+    <Compile Include="GUI\ArchiveExplorer.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUI\ArchiveExplorer.Designer.cs">
+      <DependentUpon>ArchiveExplorer.cs</DependentUpon>
+    </Compile>
     <Compile Include="GUI\MainWindow.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="GUI\MainWindow.Designer.cs">
       <DependentUpon>MainWindow.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\TextureViewer.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUI\TextureViewer.Designer.cs">
+      <DependentUpon>TextureViewer.cs</DependentUpon>
     </Compile>
     <Compile Include="IconResources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -191,8 +206,14 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="GUI\ArchiveExplorer.resx">
+      <DependentUpon>ArchiveExplorer.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="GUI\MainWindow.resx">
       <DependentUpon>MainWindow.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUI\TextureViewer.resx">
+      <DependentUpon>TextureViewer.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="IconResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

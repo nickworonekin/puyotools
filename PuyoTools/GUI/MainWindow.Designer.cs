@@ -143,7 +143,7 @@
             this.selectFilesToolStripMenuItem1,
             this.selectDirectoryToolStripMenuItem1});
             this.extractToolStripMenuItem.Name = "extractToolStripMenuItem";
-            this.extractToolStripMenuItem.Size = new System.Drawing.Size(116, 22);
+            this.extractToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.extractToolStripMenuItem.Text = "Extract";
             // 
             // selectFilesToolStripMenuItem1
@@ -163,19 +163,19 @@
             // createToolStripMenuItem
             // 
             this.createToolStripMenuItem.Name = "createToolStripMenuItem";
-            this.createToolStripMenuItem.Size = new System.Drawing.Size(116, 22);
+            this.createToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.createToolStripMenuItem.Text = "Create";
             this.createToolStripMenuItem.Click += new System.EventHandler(this.createToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(113, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(149, 6);
             // 
             // explorerToolStripMenuItem
             // 
             this.explorerToolStripMenuItem.Name = "explorerToolStripMenuItem";
-            this.explorerToolStripMenuItem.Size = new System.Drawing.Size(116, 22);
+            this.explorerToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.explorerToolStripMenuItem.Text = "Explorer";
             this.explorerToolStripMenuItem.Click += new System.EventHandler(this.explorerToolStripMenuItem_Click);
             // 

@@ -57,6 +57,7 @@
     <Compile Include="GimDataDecoder.cs" />
     <Compile Include="GimExceptions.cs" />
     <Compile Include="GimFile.cs" />
+    <Compile Include="GimFormats.cs" />
     <Compile Include="GimPaletteDecoder.cs" />
     <Compile Include="GimSwizzle.cs" />
     <Compile Include="ImageConverter.cs" />

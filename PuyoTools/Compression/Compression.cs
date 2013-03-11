@@ -16,6 +16,7 @@ namespace PuyoTools2.Compression
             Formats.Add(CompressionFormat.CXLZ, new FormatEntry(new CXLZ(), "CXLZ", String.Empty));
             Formats.Add(CompressionFormat.LZ10, new FormatEntry(new LZ10(), "LZ10", String.Empty));
             Formats.Add(CompressionFormat.LZ11, new FormatEntry(new LZ11(), "LZ11", String.Empty));
+            Formats.Add(CompressionFormat.PRS, new FormatEntry(new PRS(), "PRS", String.Empty));
         }
 
         public static void Compress(Stream source, Stream destination, string fname, CompressionFormat format)

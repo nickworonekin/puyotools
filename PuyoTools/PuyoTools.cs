@@ -10,8 +10,11 @@ namespace PuyoTools
         [STAThread]
         public static void Main()
         {
-            Initalize();
             Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+
+            Initalize();
+
             Application.Run(new GUI.MainWindow());
         }
 

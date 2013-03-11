@@ -78,7 +78,7 @@ namespace PuyoTools2.Archive
                     }
 
                     // Add this entry to the file list
-                    Files[i] = new ArchiveEntry(source, entryOffset, entryLength, entryFname);
+                    Files[i] = new ArchiveEntry(source, offset + entryOffset, entryLength, entryFname);
 
                     entryOffset += entryLength;
                 }

@@ -10,22 +10,22 @@ namespace PuyoTools2.Texture
         public override void Read(byte[] source, long offset, out Bitmap destination, int length)
         {
             // Some GVR textures require an external clut, so we'll just pass this off to ReadWithCLUT
-            ReadWithCLUT(source, offset, null, 0, out destination, length, 0);
+            ReadWithPalette(source, offset, null, 0, out destination, length, 0);
         }
 
-        public override void ReadWithCLUT(byte[] source, long offset, byte[] clut, long clutOffset, out Bitmap destination, int length, int clutLength)
+        public override void ReadWithPalette(byte[] source, long offset, byte[] palette, long paletteOffset, out Bitmap destination, int length, int paletteLength)
         {
             // Reading GVR textures is done through VrSharp, so just pass it to that
             GvrTexture texture = new GvrTexture(source, offset, length);
             
-            // Check to see if this texture requires an external CLUT.
+            // Check to see if this texture requires an external palette.
             // If it does and none was set, throw an exception.
             if (texture.NeedsExternalClut())
             {
-                if (clut != null && clutLength > 0)
-                    texture.SetClut(new GvpClut(clut, clutOffset, clutLength));
+                if (palette != null && paletteLength > 0)
+                    texture.SetClut(new GvpClut(palette, paletteOffset, paletteLength));
                 else
-                    throw new PuyoTools.TextureFormatNeedsPalette();
+                    throw new TextureNeedsPalette();
             }
 
             destination = texture.GetTextureAsBitmap();

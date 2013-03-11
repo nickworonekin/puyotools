@@ -13,9 +13,9 @@ namespace PuyoTools2.Texture
         {
             Formats = new Dictionary<TextureFormat, FormatEntry>();
 
-            Formats.Add(TextureFormat.GVR, new FormatEntry(new GVR(), "GVR", "*.gvr"));
-            Formats.Add(TextureFormat.PVR, new FormatEntry(new PVR(), "PVR", "*pvr;*.pvz"));
-            Formats.Add(TextureFormat.SVR, new FormatEntry(new SVR(), "SVR", "*.svr"));
+            Formats.Add(TextureFormat.GVR, new FormatEntry(new GVR(), "GVR", ".gvr", ".gvp"));
+            Formats.Add(TextureFormat.PVR, new FormatEntry(new PVR(), "PVR", ".pvr", ".pvp"));
+            Formats.Add(TextureFormat.SVR, new FormatEntry(new SVR(), "SVR", ".svr", ".svp"));
         }
 
         public static TextureFormat Read(Stream source, Stream destination, int length, string fname)
@@ -75,13 +75,15 @@ namespace PuyoTools2.Texture
         {
             public TextureBase Class;
             public string Name;
-            public string Filter;
+            public string Extension;
+            public string PaletteExtension;
 
-            public FormatEntry(TextureBase instance, string name, string filter)
+            public FormatEntry(TextureBase instance, string name, string extension, string paletteExt)
             {
                 Class = instance;
                 Name = name;
-                Filter = filter;
+                Extension = extension;
+                PaletteExtension = paletteExt;
             }
         }
     }

@@ -15,7 +15,7 @@ namespace PuyoTools2.Texture
         // So, we're only going to bother seeing if this format can be written to (compressed).
         public abstract bool CanWrite();
 
-        public virtual void ReadWithCLUT(byte[] source, long offset, byte[] clut, long clutOffset, out Bitmap destination, int length, int clutLength)
+        public virtual void ReadWithPalette(byte[] source, long offset, byte[] palette, long paletteOffset, out Bitmap destination, int length, int paletteLength)
         {
             Read(source, offset, out destination, length);
         }
@@ -90,4 +90,6 @@ namespace PuyoTools2.Texture
     public class TextureWriterSettings
     {
     }
+
+    public class TextureNeedsPalette : Exception { }
 }

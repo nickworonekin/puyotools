@@ -58,7 +58,7 @@ namespace PuyoTools2.Archive
                     string entryFname = PTStream.ReadCString(source, 32);
 
                     // Add this entry to the file list
-                    Files[i] = new ArchiveEntry(source, entryOffset, entryLength, entryFname);
+                    Files[i] = new ArchiveEntry(source, offset + entryOffset, entryLength, entryFname);
                 }
 
                 // Set the position of the stream to the end of the file

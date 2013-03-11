@@ -16,6 +16,7 @@ namespace PuyoTools.GUI
             InitializeComponent();
 
             this.Icon = IconResources.ProgramIcon;
+            this.MinimumSize = this.Size;
 
             // Write out the version, but do it in a hackish way
             int oldWidth = versionLabel.Width;
@@ -60,7 +61,7 @@ namespace PuyoTools.GUI
 
         private void explorerToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            new ArchiveExplorer();
+            (new ArchiveExplorer()).Show();
         }
 
         private void selectFilesToolStripMenuItem2_Click(object sender, EventArgs e)
@@ -85,7 +86,7 @@ namespace PuyoTools.GUI
 
         private void viewerToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            new TextureViewer();
+            (new TextureViewer()).Show();
         }
 
         private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)

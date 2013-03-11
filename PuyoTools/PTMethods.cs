@@ -286,6 +286,25 @@ namespace PuyoTools2
 
         /// <summary>
         /// Reads an ASCII encoded null terminated C string from a stream.
+        /// The stream is read until a null byte is reached.
+        /// </summary>
+        /// <param name="source">The stream to read from.</param>
+        /// <returns>The string read from the stream.</returns>
+        public static string ReadCString(Stream source)
+        {
+            List<byte> buffer = new List<byte>();
+            byte value;
+
+            while ((value = ReadByte(source)) != 0)
+            {
+                buffer.Add(value);
+            }
+
+            return Encoding.ASCII.GetString(buffer.ToArray());
+        }
+
+        /// <summary>
+        /// Reads an ASCII encoded null terminated C string from a stream.
         /// </summary>
         /// <param name="source">The stream to read from.</param>
         /// <param name="length">Number of bytes to read.</param>
