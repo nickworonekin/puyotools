@@ -139,11 +139,12 @@ namespace PuyoTools.GUI
                 catch (TextureNeedsPalette)
                 {
                     // Seems like we need a palette for this texture. Let's try to find one.
-                    string paletteName = Path.Combine(Path.GetDirectoryName(ofd.SafeFileName), Path.GetFileNameWithoutExtension(ofd.SafeFileName)) + PTTexture.Formats[textureFormat].PaletteExtension;
+                    string paletteName = Path.Combine(Path.GetDirectoryName(ofd.FileName), Path.GetFileNameWithoutExtension(ofd.FileName)) + PTTexture.Formats[textureFormat].PaletteExtension;
 
                     if (File.Exists(paletteName))
                     {
                         // Looks like the palette file exists. Let's load that with the texture
+                        data.Position = 0;
                         using (FileStream paletteData = File.OpenRead(paletteName))
                         {
                             OpenTexture(data, paletteData, (int)data.Length, (int)paletteData.Length, ofd.SafeFileName, textureFormat);
