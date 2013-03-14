@@ -2,13 +2,17 @@
 using System.IO;
 using System.Collections.Generic;
 
-namespace PuyoTools2.Archive
+namespace PuyoTools.Archive
 {
     public abstract class ArchiveBase
     {
         public abstract ArchiveReader Open(Stream source, int length);
         public abstract ArchiveWriter Create(Stream destination, ArchiveWriterSettings settings);
         public abstract bool Is(Stream source, int length, string fname);
+
+        // It's assumed that this format can be read (in this case, opened).
+        // So, we're only going to bother seeing if this format can be written to (created).
+        public abstract bool CanCreate();
 
         public ArchiveWriter Create(Stream destination)
         {

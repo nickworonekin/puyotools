@@ -4,7 +4,7 @@ using System.Drawing;
 using System.Collections.Generic;
 
 // Texture Module
-namespace PuyoTools
+namespace PuyoTools.Old
 {
     public class Textures
     {

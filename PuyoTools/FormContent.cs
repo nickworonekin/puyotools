@@ -2,7 +2,7 @@
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace PuyoTools
+namespace PuyoTools.Old
 {
     public class FormContent
     {

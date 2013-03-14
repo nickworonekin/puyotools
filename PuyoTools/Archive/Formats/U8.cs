@@ -2,7 +2,7 @@
 using System.IO;
 using System.Collections.Generic;
 
-namespace PuyoTools2.Archive
+namespace PuyoTools.Archive
 {
     public class U8 : ArchiveBase
     {
@@ -19,6 +19,11 @@ namespace PuyoTools2.Archive
         public override bool Is(Stream source, int length, string fname)
         {
             return (length > 32 && PTStream.Contains(source, 0, new byte[] { (byte)'U', 0xAA, (byte)'8', (byte)'-' }));
+        }
+
+        public override bool CanCreate()
+        {
+            return false;
         }
 
         public class Read : ArchiveReader
@@ -56,17 +61,27 @@ namespace PuyoTools2.Archive
                     node.DataOffset = PTStream.ReadUInt32BE(source);
                     node.Length = PTStream.ReadUInt32BE(source);
 
-                    // If this is a directory node, just continue on with reading the file.
-                    // Support will be added for it later. I promose ... maybe.
-                    if (node.Type == 1)
-                        continue;
-
-                    // Now, let's create the archive entry
+                    // Create the archive entry, then check what type of node it is
                     ArchiveEntry entry = new ArchiveEntry();
                     entry.Stream = source;
-                    entry.Offset = offset + node.DataOffset;
-                    entry.Length = (int)node.Length;
 
+                    // A file node
+                    if (node.Type == 0)
+                    {
+                        entry.Offset = offset + node.DataOffset;
+                        entry.Length = (int)node.Length;
+                    }
+
+                    // A directory node
+                    // In its present state, Puyo Tools can't handle directories in archives.
+                    // In the meantime, we'll just add the directory as a file entry with a length of 0.
+                    else if (node.Type == 1)
+                    {
+                        entry.Offset = 0;
+                        entry.Length = 0;
+                    }
+
+                    // Get the filename for the entry
                     long oldPosition = source.Position;
                     source.Position = offset + stringTableOffset + node.NameOffset;
                     entry.Filename = PTStream.ReadCString(source);

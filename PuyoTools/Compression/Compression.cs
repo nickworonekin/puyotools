@@ -2,9 +2,9 @@
 using System.IO;
 using System.Collections.Generic;
 
-namespace PuyoTools2.Compression
+namespace PuyoTools.Compression
 {
-    public static class Compression
+    public static class PTCompression
     {
         public static Dictionary<CompressionFormat, FormatEntry> Formats;
 
@@ -12,16 +12,10 @@ namespace PuyoTools2.Compression
         {
             Formats = new Dictionary<CompressionFormat, FormatEntry>();
 
-            //Formats.Add(CompressionFormat.CNX, new FormatEntry(null, "CNX", "*.cnx"));
             Formats.Add(CompressionFormat.CXLZ, new FormatEntry(new CXLZ(), "CXLZ", String.Empty));
             Formats.Add(CompressionFormat.LZ10, new FormatEntry(new LZ10(), "LZ10", String.Empty));
             Formats.Add(CompressionFormat.LZ11, new FormatEntry(new LZ11(), "LZ11", String.Empty));
-            Formats.Add(CompressionFormat.PRS, new FormatEntry(new PRS(), "PRS", String.Empty));
-        }
-
-        public static void Compress(Stream source, Stream destination, string fname, CompressionFormat format)
-        {
-            return;
+            Formats.Add(CompressionFormat.PRS,  new FormatEntry(new PRS(),  "PRS",  String.Empty));
         }
 
         public static CompressionFormat Decompress(Stream source, Stream destination, int length, string fname)
@@ -39,6 +33,11 @@ namespace PuyoTools2.Compression
         public static void Decompress(Stream source, Stream destination, int length, CompressionFormat format)
         {
             Formats[format].Class.Decompress(source, destination, length);
+        }
+
+        public static void Compress(Stream source, Stream destination, string fname, CompressionFormat format)
+        {
+            //return Formats[format].Class.Compress(
         }
 
         public static CompressionFormat GetFormat(Stream source, int length, string fname)

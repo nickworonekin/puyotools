@@ -8,6 +8,8 @@ using System.Text;
 using System.Windows.Forms;
 using System.IO;
 using System.Drawing.Imaging;
+using PuyoTools.Compression;
+using PuyoTools.Texture;
 
 namespace PuyoTools.GUI
 {
@@ -32,10 +34,10 @@ namespace PuyoTools.GUI
             copyToolStripMenuItem.Enabled = false;
         }
 
-        public void OpenTexture(Stream data, int length, string fname, PuyoTools2.Texture.TextureFormat format)
+        public void OpenTexture(Stream data, int length, string fname, TextureFormat format)
         {
             Bitmap textureBitmap;
-            PuyoTools2.Texture.Texture.Read(data, out textureBitmap, length, format);
+            PTTexture.Read(data, out textureBitmap, length, format);
 
             textureDisplay.Image = textureBitmap;
 
@@ -53,7 +55,7 @@ namespace PuyoTools.GUI
             // Display information about the texture
             textureNameLabel.Text = (fname == String.Empty ? "Unnamed" : fname);
             textureDimensionsLabel.Text = textureBitmap.Width + " x " + textureBitmap.Height;
-            textureFormatLabel.Text = PuyoTools2.Texture.Texture.Formats[format].Name;
+            textureFormatLabel.Text = PTTexture.Formats[format].Name;
 
             textureInfoPanel.Visible = true;
             textureDisplay.Visible = true;
@@ -90,10 +92,10 @@ namespace PuyoTools.GUI
                 FileStream data = File.OpenRead(ofd.FileName);
 
                 // Let's determine first if it is a texture
-                PuyoTools2.Texture.TextureFormat textureFormat;
+                TextureFormat textureFormat;
 
-                textureFormat = PuyoTools2.Texture.Texture.GetFormat(data, (int)data.Length, ofd.SafeFileName);
-                if (textureFormat != PuyoTools2.Texture.TextureFormat.Unknown)
+                textureFormat = PTTexture.GetFormat(data, (int)data.Length, ofd.SafeFileName);
+                if (textureFormat != TextureFormat.Unknown)
                 {
                     // This is a texture. Let's open it.
                     OpenTexture(data, (int)data.Length, ofd.SafeFileName, textureFormat);
@@ -102,17 +104,17 @@ namespace PuyoTools.GUI
                 }
 
                 // It's not a texture. Maybe it's compressed?
-                PuyoTools2.Compression.CompressionFormat compressionFormat = PuyoTools2.Compression.Compression.GetFormat(data, (int)data.Length, ofd.SafeFileName);
-                if (compressionFormat != PuyoTools2.Compression.CompressionFormat.Unknown)
+                CompressionFormat compressionFormat = PTCompression.GetFormat(data, (int)data.Length, ofd.SafeFileName);
+                if (compressionFormat != CompressionFormat.Unknown)
                 {
                     // The file is compressed! Let's decompress it and then try to determine if it is a texture
                     MemoryStream decompressedData = new MemoryStream();
-                    PuyoTools2.Compression.Compression.Decompress(data, decompressedData, (int)data.Length, compressionFormat);
+                    PTCompression.Decompress(data, decompressedData, (int)data.Length, compressionFormat);
                     decompressedData.Position = 0;
 
                     // Now with this decompressed data, let's determine if it is a texture
-                    textureFormat = PuyoTools2.Texture.Texture.GetFormat(decompressedData, (int)decompressedData.Length, ofd.SafeFileName);
-                    if (textureFormat != PuyoTools2.Texture.TextureFormat.Unknown)
+                    textureFormat = PTTexture.GetFormat(decompressedData, (int)decompressedData.Length, ofd.SafeFileName);
+                    if (textureFormat != TextureFormat.Unknown)
                     {
                         // This is a texture. Let's open it.
                         OpenTexture(decompressedData, (int)decompressedData.Length, ofd.SafeFileName, textureFormat);

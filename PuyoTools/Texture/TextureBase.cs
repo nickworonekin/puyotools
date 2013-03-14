@@ -3,7 +3,7 @@ using System.IO;
 using System.Drawing;
 using System.Drawing.Imaging;
 
-namespace PuyoTools2.Texture
+namespace PuyoTools.Texture
 {
     public abstract class TextureBase
     {
@@ -11,8 +11,8 @@ namespace PuyoTools2.Texture
         public abstract void Write(byte[] source, long offset, Stream destination, int length, string fname);
         public abstract bool Is(Stream source, int length, string fname);
 
-        // It's assumed that this format can be read (in this case, decompressed).
-        // So, we're only going to bother seeing if this format can be written to (compressed).
+        // It's assumed that this format can be read.
+        // So, we're only going to bother seeing if this format can be written to.
         public abstract bool CanWrite();
 
         public virtual void ReadWithPalette(byte[] source, long offset, byte[] palette, long paletteOffset, out Bitmap destination, int length, int paletteLength)

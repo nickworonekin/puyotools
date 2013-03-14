@@ -4,7 +4,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using VrSharp.GvrTexture;
 
-namespace PuyoTools
+namespace PuyoTools.Old
 {
     // Gvr Texture
     class GVR : TextureModule

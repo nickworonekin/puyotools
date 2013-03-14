@@ -2,7 +2,7 @@
 using System.Windows.Forms;
 using System.Collections.Generic;
 
-namespace PuyoTools
+namespace PuyoTools.Old
 {
     public class ArchivePackSettings
     {

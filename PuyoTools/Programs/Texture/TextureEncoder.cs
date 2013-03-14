@@ -8,7 +8,7 @@ using System.Drawing.Imaging;
 using System.Collections.Generic;
 using VrSharp.PvrTexture;
 
-namespace PuyoTools
+namespace PuyoTools.Old
 {
     public class TextureEncoder : Form
     {

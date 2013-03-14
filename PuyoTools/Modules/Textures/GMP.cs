@@ -3,7 +3,7 @@ using System.IO;
 using System.Drawing;
 using System.Drawing.Imaging;
 
-namespace PuyoTools
+namespace PuyoTools.Old
 {
     public class GMP : TextureModule
     {

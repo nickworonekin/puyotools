@@ -6,10 +6,11 @@ using System.Windows.Forms;
 using System.ComponentModel;
 using System.Collections.Generic;
 
-namespace PuyoTools
+namespace PuyoTools.Old
 {
     public class ArchiveCreator : Form
     {
+        /*
         // Set up form variables
         private Panel PanelContent;
 
@@ -275,7 +276,7 @@ namespace PuyoTools
                 // FORCE AFS FOR NOW
                 using (FileStream outputStream = new FileStream(outFname, FileMode.Create, FileAccess.ReadWrite))
                 {
-                    PuyoTools2.Archive.ArchiveWriter archive = PuyoTools2.Archive.Archive.Create(outputStream, PuyoTools2.Archive.ArchiveFormat.AFS, new PuyoTools2.Archive.ArchiveWriterSettings());
+                    PuyoTools.Archive.ArchiveWriter archive = PuyoTools.Archive.Archive.Create(outputStream, PuyoTools.Archive.ArchiveFormat.AFS, new PuyoTools.Archive.ArchiveWriterSettings());
 
                     for (int i = 0; i < archiveFileList.Items.Count; i++)
                     {
@@ -358,7 +359,7 @@ namespace PuyoTools
                             outputStream.Write(compressedData);
                         }
                     }
-                }*/
+                }*/ /*
 
                 this.Close();
             }
@@ -573,5 +574,6 @@ namespace PuyoTools
             public string sourceFname;
             public string archiveFname;
         }
+                     * */
     }
 }

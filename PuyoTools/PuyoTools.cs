@@ -21,13 +21,13 @@ namespace PuyoTools
         // Initalize directories
         private static void Initalize()
         {
-            Compression.InitalizeDictionary();
-            Archive.InitalizeDictionary();
-            Textures.InitalizeDictionary();
+            Old.Compression.InitalizeDictionary();
+            Old.Archive.InitalizeDictionary();
+            Old.Textures.InitalizeDictionary();
 
-            PuyoTools2.Compression.Compression.Initalize();
-            PuyoTools2.Archive.Archive.Initalize();
-            PuyoTools2.Texture.Texture.Initalize();
+            Compression.PTCompression.Initalize();
+            Archive.PTArchive.Initalize();
+            Texture.PTTexture.Initalize();
         }
     }
 }

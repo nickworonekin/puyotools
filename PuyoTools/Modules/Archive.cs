@@ -4,7 +4,7 @@ using System.Windows.Forms;
 using System.Collections.Generic;
 
 // Archive Module
-namespace PuyoTools
+namespace PuyoTools.Old
 {
     public class Archive
     {

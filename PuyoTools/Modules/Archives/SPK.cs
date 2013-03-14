@@ -2,7 +2,7 @@
 using System.IO;
 using System.Text;
 
-namespace PuyoTools
+namespace PuyoTools.Old
 {
     public class SPK : ArchiveModule
     {

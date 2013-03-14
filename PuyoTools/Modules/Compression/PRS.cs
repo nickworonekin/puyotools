@@ -19,7 +19,7 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 
-namespace PuyoTools
+namespace PuyoTools.Old
 {
     public class PRS : CompressionModule
     {

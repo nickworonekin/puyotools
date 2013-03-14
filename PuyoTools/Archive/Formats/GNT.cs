@@ -2,7 +2,7 @@
 using System.IO;
 using System.Collections.Generic;
 
-namespace PuyoTools2.Archive
+namespace PuyoTools.Archive
 {
     public class GNT : ArchiveBase
     {
@@ -21,6 +21,11 @@ namespace PuyoTools2.Archive
             return (length > 36
                 && PTStream.Contains(source, 0, new byte[] { (byte)'N', (byte)'G', (byte)'I', (byte)'F' })
                 && PTStream.Contains(source, 32, new byte[] { (byte)'N', (byte)'G', (byte)'T', (byte)'L' }));
+        }
+
+        public override bool CanCreate()
+        {
+            return false;
         }
 
         public class Read : ArchiveReader

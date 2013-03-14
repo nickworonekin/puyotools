@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace PuyoTools
+namespace PuyoTools.Old
 {
     class LzBufferDictionary : CompressionDictionary
     {

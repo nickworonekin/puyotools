@@ -3,7 +3,7 @@ using System.IO;
 using System.Text;
 using System.Collections.Generic;
 
-namespace PuyoTools
+namespace PuyoTools.Old
 {
     public class MRG : ArchiveModule
     {

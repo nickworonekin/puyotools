@@ -4,7 +4,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using VrSharp.PvrTexture;
 
-namespace PuyoTools
+namespace PuyoTools.Old
 {
     // Pvr Texture
     class PVR : TextureModule

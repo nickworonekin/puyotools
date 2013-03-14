@@ -3,7 +3,7 @@ using System.IO;
 using System.Drawing;
 using VrSharp.SvrTexture;
 
-namespace PuyoTools2.Texture
+namespace PuyoTools.Texture
 {
     public class SVR : TextureBase
     {
@@ -43,7 +43,7 @@ namespace PuyoTools2.Texture
 
         public override bool CanWrite()
         {
-            throw new NotImplementedException();
+            return false;
         }
     }
 }

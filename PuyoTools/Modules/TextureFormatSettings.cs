@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using GimSharp;
 using VrSharp.PvrTexture;
 
-namespace PuyoTools
+namespace PuyoTools.Old
 {
     public abstract class TextureFormatSettings
     {

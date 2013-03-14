@@ -5,7 +5,7 @@ using System.Drawing.Imaging;
 using GimSharp;
 using ImgSharp;
 
-namespace PuyoTools
+namespace PuyoTools.Old
 {
     public class GIM : TextureModule
     {

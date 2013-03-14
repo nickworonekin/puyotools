@@ -6,10 +6,11 @@ using System.ComponentModel;
 using System.Drawing.Imaging;
 using System.Collections.Generic;
 
-namespace PuyoTools
+namespace PuyoTools.Old
 {
     public class ArchiveExplorer : Form
     {
+        /*
         // Tool Strip
         private ToolStripMenuItem
             addFileNumberExtracted,
@@ -36,11 +37,11 @@ namespace PuyoTools
         // Archive Details
         private int level = 0;
         private List<ArchiveFileList> FileList = new List<ArchiveFileList>();
-        private List<PuyoTools2.Archive.ArchiveEntry[]> FileList2 = new List<PuyoTools2.Archive.ArchiveEntry[]>();
+        private List<ArchiveEntry[]> FileList2 = new List<ArchiveEntry[]>();
         private List<Stream> ArchiveData  = new List<Stream>();
         private List<string> ArchiveName  = new List<string>();
         private List<string> ArchiveType  = new List<string>();
-        private PuyoTools2.Archive.ArchiveReader archiveReader;
+        private ArchiveReader archiveReader;
 
         public ArchiveExplorer()
         {
@@ -167,18 +168,18 @@ namespace PuyoTools
             }
         }
 
-        private PuyoTools2.Archive.ArchiveReader GetFileList2(ref Stream data, string filename, out string type)
+        private PuyoTools.Archive.ArchiveReader GetFileList2(ref Stream data, string filename, out string type)
         {
             type = "AFS";
 
             // Check to see if the archive is compressed
-            PuyoTools2.Compression.CompressionFormat compressionFormat = PuyoTools2.Compression.Compression.GetFormat(data, (int)data.Length, filename);
-            if (compressionFormat != PuyoTools2.Compression.CompressionFormat.Unknown)
+            PuyoTools.Compression.CompressionFormat compressionFormat = PuyoTools.Compression.Compression.GetFormat(data, (int)data.Length, filename);
+            if (compressionFormat != PuyoTools.Compression.CompressionFormat.Unknown)
             {
                 MemoryStream decompressedData = new MemoryStream();
                 try
                 {
-                    PuyoTools2.Compression.Compression.Decompress(data, decompressedData, (int)data.Length, compressionFormat);
+                    PuyoTools.Compression.Compression.Decompress(data, decompressedData, (int)data.Length, compressionFormat);
                     data = decompressedData;
                 }
                 catch
@@ -188,10 +189,10 @@ namespace PuyoTools
             }
 
             // Check to see if this is an archive
-            PuyoTools2.Archive.ArchiveFormat archiveFormat = PuyoTools2.Archive.Archive.GetFormat(data, (int)data.Length, filename);
-            if (archiveFormat != PuyoTools2.Archive.ArchiveFormat.Unknown)
+            PuyoTools.Archive.ArchiveFormat archiveFormat = PuyoTools.Archive.Archive.GetFormat(data, (int)data.Length, filename);
+            if (archiveFormat != PuyoTools.Archive.ArchiveFormat.Unknown)
             {
-                return PuyoTools2.Archive.Archive.Open(data, (int)data.Length, archiveFormat);
+                return PuyoTools.Archive.Archive.Open(data, (int)data.Length, archiveFormat);
             }
 
             return null;
@@ -233,7 +234,7 @@ namespace PuyoTools
             }
         }
 
-        private void populateList2(PuyoTools2.Archive.ArchiveEntry[] entries)
+        private void populateList2(PuyoTools.Archive.ArchiveEntry[] entries)
         {
             // Erase the current list
             fileListView.Items.Clear();
@@ -359,7 +360,7 @@ namespace PuyoTools
             // Ok, load the file and get the file list
             string archiveType = String.Empty;
             Stream archiveStream = new FileStream(file, FileMode.Open, FileAccess.Read);
-            PuyoTools2.Archive.ArchiveReader archive = GetFileList2(ref archiveStream, file, out archiveType);
+            PuyoTools.Archive.ArchiveReader archive = GetFileList2(ref archiveStream, file, out archiveType);
 
             // If we were able to open it up and get the contents, populate the list
             if (archive.Files != null && archive.Files.Length > 0)
@@ -441,6 +442,7 @@ namespace PuyoTools
                 }
             }
             */
+        /*
             loadEmbeddedImage2();
         }
 
@@ -494,11 +496,11 @@ namespace PuyoTools
                 // Get the selected item and the data and filename
                 int item = fileListView.SelectedIndices[0] - (level == 0 ? 0 : 1);
                 //MemoryStream imageData = ArchiveData[level].Copy(FileList[level].Entries[item].Offset, FileList[level].Entries[item].Length);
-                PuyoTools2.Archive.ArchiveEntry entry = archiveReader.GetFile(item);
+                PuyoTools.Archive.ArchiveEntry entry = archiveReader.GetFile(item);
 
                 entry.Stream.Position = entry.Offset;
                 MemoryStream imageData = new MemoryStream();
-                PuyoTools2.PTStream.CopyPartTo(entry.Stream, imageData, entry.Length);
+                PuyoTools.PTStream.CopyPartTo(entry.Stream, imageData, entry.Length);
 
                 //string filename = FileList[level].Entries[item].Filename;
                 string filename = "";
@@ -704,5 +706,6 @@ namespace PuyoTools
 
             return bytes.ToString("#,0") + " bytes";
         }
+         * */
     }
 }

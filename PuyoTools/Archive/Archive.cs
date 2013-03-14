@@ -2,9 +2,9 @@
 using System.IO;
 using System.Collections.Generic;
 
-namespace PuyoTools2.Archive
+namespace PuyoTools.Archive
 {
-    public static class Archive
+    public static class PTArchive
     {
         public static Dictionary<ArchiveFormat, FormatEntry> Formats;
 

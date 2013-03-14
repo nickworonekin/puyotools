@@ -4,7 +4,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using VrSharp.SvrTexture;
 
-namespace PuyoTools
+namespace PuyoTools.Old
 {
     // Svr Texture
     class SVR : TextureModule

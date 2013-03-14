@@ -7,7 +7,7 @@ using System.ComponentModel;
 using System.Drawing.Imaging;
 using System.Collections.Generic;
 
-namespace PuyoTools
+namespace PuyoTools.Old
 {
     public class Compressor : Form
     {

@@ -1,15 +1,10 @@
 ﻿using System;
 using System.IO;
 
-namespace PuyoTools2.Compression
+namespace PuyoTools.Compression
 {
     public class LZ10 : CompressionBase
     {
-        public override void Compress(byte[] source, long offset, Stream destination, int length, string fname)
-        {
-            throw new NotImplementedException();
-        }
-
         public override void Decompress(byte[] source, long offset, Stream destination, int length)
         {
             // Set up information for decompression
@@ -57,6 +52,11 @@ namespace PuyoTools2.Compression
             destination.Write(destBuffer, 0, destLength);
         }
 
+        public override void Compress(byte[] source, long offset, Stream destination, int length, string fname)
+        {
+            throw new NotImplementedException();
+        }
+
         public override bool Is(Stream source, int length, string fname)
         {
             return (length > 4 && PTStream.Contains(source, 0, new byte[] { 0x10 }));
@@ -64,7 +64,7 @@ namespace PuyoTools2.Compression
 
         public override bool CanCompress()
         {
-            throw new NotImplementedException();
+            return false;
         }
     }
 }

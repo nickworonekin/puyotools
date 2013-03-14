@@ -3,7 +3,7 @@ using System.IO;
 using System.Text;
 using System.Collections.Generic;
 
-namespace PuyoTools2
+namespace PuyoTools
 {
     public static class PTMethods
     {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace PuyoTools
+namespace PuyoTools.Old
 {
     // Number Extensions
     public static class Endian

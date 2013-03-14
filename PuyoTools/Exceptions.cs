@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace PuyoTools
+namespace PuyoTools.Old
 {
     class CompressionFormatNotSupported : Exception
     {

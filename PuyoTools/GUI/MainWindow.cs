@@ -26,37 +26,39 @@ namespace PuyoTools.GUI
 
         private void selectFilesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            new Decompressor();
+            //new Old.Decompressor();
+            (new Decompressor()).Show();
         }
 
         private void selectDirectoryToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            new Decompressor(true);
+            new Old.Decompressor(true);
         }
 
         private void selectFilesToolStripMenuItem3_Click(object sender, EventArgs e)
         {
-            new Compressor();
+            new Old.Compressor();
         }
 
         private void selectDirectoryToolStripMenuItem3_Click(object sender, EventArgs e)
         {
-            new Compressor(true);
+            new Old.Compressor(true);
         }
 
         private void selectFilesToolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            new ArchiveExtractor();
+            //new Old.ArchiveExtractor();
+            (new ArchiveExtractor()).Show();
         }
 
         private void selectDirectoryToolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            new ArchiveExtractor(true);
+            new Old.ArchiveExtractor(true);
         }
 
         private void createToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            new ArchiveCreator();
+            new Old.ArchiveCreator();
         }
 
         private void explorerToolStripMenuItem_Click(object sender, EventArgs e)
@@ -66,22 +68,22 @@ namespace PuyoTools.GUI
 
         private void selectFilesToolStripMenuItem2_Click(object sender, EventArgs e)
         {
-            new TextureDecoder();
+            new Old.TextureDecoder();
         }
 
         private void selectDirectoryToolStripMenuItem2_Click(object sender, EventArgs e)
         {
-            new TextureDecoder(true);
+            new Old.TextureDecoder(true);
         }
 
         private void selectFilesToolStripMenuItem4_Click(object sender, EventArgs e)
         {
-            new TextureEncoder();
+            new Old.TextureEncoder();
         }
 
         private void selectDirectoryToolStripMenuItem4_Click(object sender, EventArgs e)
         {
-            new TextureEncoder(true);
+            new Old.TextureEncoder(true);
         }
 
         private void viewerToolStripMenuItem_Click(object sender, EventArgs e)

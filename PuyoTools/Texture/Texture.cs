@@ -3,9 +3,9 @@ using System.IO;
 using System.Drawing;
 using System.Collections.Generic;
 
-namespace PuyoTools2.Texture
+namespace PuyoTools.Texture
 {
-    public static class Texture
+    public static class PTTexture
     {
         public static Dictionary<TextureFormat, FormatEntry> Formats;
 

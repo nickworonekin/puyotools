@@ -5,10 +5,11 @@ using System.Windows.Forms;
 using System.ComponentModel;
 using System.Drawing.Imaging;
 
-namespace PuyoTools
+namespace PuyoTools.Old
 {
     public class TextureViewer : Form
     {
+        /*
         Panel imagePanel;
         PictureBox image = new PictureBox() {
             Location  = new Point(0, 0),
@@ -92,7 +93,7 @@ namespace PuyoTools
             backColorSelect.Items.AddRange(new string[] { "White", "Black", "Red", "Green", "Blue" });
             backColorSelect.SelectedIndex = 0;
             backColorSelect.MaxDropDownItems = backColorSelect.Items.Count;
-            backColorSelect.SelectedIndexChanged += new EventHandler(ChangeBackColor);*/
+            backColorSelect.SelectedIndexChanged += new EventHandler(ChangeBackColor);*/ /*
 
             // Set up the toolstrip
             ToolStrip toolStrip;
@@ -173,14 +174,14 @@ namespace PuyoTools
             using (Stream data = File.OpenRead(filename))
             {
                 // Get the texture format
-                PuyoTools2.Texture.TextureFormat format = PuyoTools2.Texture.Texture.GetFormat(data, (int)data.Length, filename);
+                PuyoTools.Texture.TextureFormat format = PuyoTools.Texture.Texture.GetFormat(data, (int)data.Length, filename);
 
-                if (format == PuyoTools2.Texture.TextureFormat.Unknown)
+                if (format == PuyoTools.Texture.TextureFormat.Unknown)
                     return null;
 
                 // Read the texture
                 Bitmap texture;
-                PuyoTools2.Texture.Texture.Read(data, out texture, (int)data.Length, format);
+                PuyoTools.Texture.Texture.Read(data, out texture, (int)data.Length, format);
                 return texture;
             }
             /*
@@ -228,7 +229,7 @@ namespace PuyoTools
             {
                 return null;
             }
-             * */
+             * */ /*
         }
 
         private Bitmap LoadImage(Stream data, string filename)
@@ -236,14 +237,14 @@ namespace PuyoTools
             data.Position = 0;
 
             // Get the texture format
-            PuyoTools2.Texture.TextureFormat format = PuyoTools2.Texture.Texture.GetFormat(data, (int)data.Length, filename);
+            PuyoTools.Texture.TextureFormat format = PuyoTools.Texture.Texture.GetFormat(data, (int)data.Length, filename);
 
-            if (format == PuyoTools2.Texture.TextureFormat.Unknown)
+            if (format == PuyoTools.Texture.TextureFormat.Unknown)
                 return null;
 
             // Read the texture
             Bitmap texture;
-            PuyoTools2.Texture.Texture.Read(data, out texture, (int)data.Length, format);
+            PuyoTools.Texture.Texture.Read(data, out texture, (int)data.Length, format);
             return texture;
 
             /*
@@ -268,7 +269,7 @@ namespace PuyoTools
             {
                 return null;
             }
-             * */
+             * */ /*
         }
 
         private Bitmap LoadImage(Stream data, string filename, Stream palette)
@@ -353,7 +354,7 @@ namespace PuyoTools
                 case 3: image.BackColor = Color.Green; break;
                 case 4: image.BackColor = Color.Blue;  break;
             }
-        }*/
+        }*/ /*
 
         // Save Image
         private void SaveImage(object sender, EventArgs e)
@@ -408,5 +409,6 @@ namespace PuyoTools
                 Clipboard.SetDataObject(dataObject, true);
             }
         }
+             */
     }
 }

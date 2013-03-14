@@ -3,7 +3,7 @@ using System.IO;
 using System.Collections.Generic;
 
 // Compression Module
-namespace PuyoTools
+namespace PuyoTools.Old
 {
     public class Compression
     {
@@ -55,13 +55,13 @@ namespace PuyoTools
 
             // TESTING.
             // If this is LZ10 compression then we should test the new decompressor API
-            if (Format == CompressionFormat.LZ10)
+            /*if (Format == CompressionFormat.LZ10)
             {
                 MemoryStream outStream = new MemoryStream();
                 Data.Position = 0;
-                PuyoTools2.Compression.Compression.Decompress(Data, outStream, (int)Data.Length, PuyoTools2.Compression.CompressionFormat.LZ10);
+                PuyoTools.Compression.Compression.Decompress(Data, outStream, (int)Data.Length, PuyoTools.Compression.CompressionFormat.LZ10);
                 return outStream;
-            }
+            }*/
 
             return Decompressor.Decompress(Data);
         }

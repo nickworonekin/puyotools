@@ -91,6 +91,18 @@
     <Compile Include="GUI\ArchiveExplorer.Designer.cs">
       <DependentUpon>ArchiveExplorer.cs</DependentUpon>
     </Compile>
+    <Compile Include="GUI\ArchiveExtractor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUI\ArchiveExtractor.Designer.cs">
+      <DependentUpon>ArchiveExtractor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\Decompressor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUI\Decompressor.Designer.cs">
+      <DependentUpon>Decompressor.cs</DependentUpon>
+    </Compile>
     <Compile Include="GUI\MainWindow.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -102,6 +114,12 @@
     </Compile>
     <Compile Include="GUI\TextureViewer.Designer.cs">
       <DependentUpon>TextureViewer.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\ToolForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUI\ToolForm.Designer.cs">
+      <DependentUpon>ToolForm.cs</DependentUpon>
     </Compile>
     <Compile Include="IconResources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -209,11 +227,20 @@
     <EmbeddedResource Include="GUI\ArchiveExplorer.resx">
       <DependentUpon>ArchiveExplorer.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="GUI\ArchiveExtractor.resx">
+      <DependentUpon>ArchiveExtractor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUI\Decompressor.resx">
+      <DependentUpon>Decompressor.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="GUI\MainWindow.resx">
       <DependentUpon>MainWindow.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GUI\TextureViewer.resx">
       <DependentUpon>TextureViewer.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUI\ToolForm.resx">
+      <DependentUpon>ToolForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="IconResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
