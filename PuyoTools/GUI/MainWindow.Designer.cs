@@ -31,22 +31,16 @@
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.compressionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.decompressToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.selectFilesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.selectDirectoryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.compressToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.selectFilesToolStripMenuItem3 = new System.Windows.Forms.ToolStripMenuItem();
             this.selectDirectoryToolStripMenuItem3 = new System.Windows.Forms.ToolStripMenuItem();
             this.archiveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.extractToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.selectFilesToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.selectDirectoryToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.createToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.explorerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.textureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.decodeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.selectFilesToolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
-            this.selectDirectoryToolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.encodeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.selectFilesToolStripMenuItem4 = new System.Windows.Forms.ToolStripMenuItem();
             this.selectDirectoryToolStripMenuItem4 = new System.Windows.Forms.ToolStripMenuItem();
@@ -82,26 +76,10 @@
             // 
             // decompressToolStripMenuItem
             // 
-            this.decompressToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.selectFilesToolStripMenuItem,
-            this.selectDirectoryToolStripMenuItem});
             this.decompressToolStripMenuItem.Name = "decompressToolStripMenuItem";
-            this.decompressToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
+            this.decompressToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.decompressToolStripMenuItem.Text = "Decompress";
-            // 
-            // selectFilesToolStripMenuItem
-            // 
-            this.selectFilesToolStripMenuItem.Name = "selectFilesToolStripMenuItem";
-            this.selectFilesToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
-            this.selectFilesToolStripMenuItem.Text = "Select Files";
-            this.selectFilesToolStripMenuItem.Click += new System.EventHandler(this.selectFilesToolStripMenuItem_Click);
-            // 
-            // selectDirectoryToolStripMenuItem
-            // 
-            this.selectDirectoryToolStripMenuItem.Name = "selectDirectoryToolStripMenuItem";
-            this.selectDirectoryToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
-            this.selectDirectoryToolStripMenuItem.Text = "Select Directory";
-            this.selectDirectoryToolStripMenuItem.Click += new System.EventHandler(this.selectDirectoryToolStripMenuItem_Click);
+            this.decompressToolStripMenuItem.Click += new System.EventHandler(this.decompressToolStripMenuItem_Click);
             // 
             // compressToolStripMenuItem
             // 
@@ -109,7 +87,7 @@
             this.selectFilesToolStripMenuItem3,
             this.selectDirectoryToolStripMenuItem3});
             this.compressToolStripMenuItem.Name = "compressToolStripMenuItem";
-            this.compressToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
+            this.compressToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.compressToolStripMenuItem.Text = "Compress";
             // 
             // selectFilesToolStripMenuItem3
@@ -139,26 +117,10 @@
             // 
             // extractToolStripMenuItem
             // 
-            this.extractToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.selectFilesToolStripMenuItem1,
-            this.selectDirectoryToolStripMenuItem1});
             this.extractToolStripMenuItem.Name = "extractToolStripMenuItem";
             this.extractToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.extractToolStripMenuItem.Text = "Extract";
-            // 
-            // selectFilesToolStripMenuItem1
-            // 
-            this.selectFilesToolStripMenuItem1.Name = "selectFilesToolStripMenuItem1";
-            this.selectFilesToolStripMenuItem1.Size = new System.Drawing.Size(156, 22);
-            this.selectFilesToolStripMenuItem1.Text = "Select Files";
-            this.selectFilesToolStripMenuItem1.Click += new System.EventHandler(this.selectFilesToolStripMenuItem1_Click);
-            // 
-            // selectDirectoryToolStripMenuItem1
-            // 
-            this.selectDirectoryToolStripMenuItem1.Name = "selectDirectoryToolStripMenuItem1";
-            this.selectDirectoryToolStripMenuItem1.Size = new System.Drawing.Size(156, 22);
-            this.selectDirectoryToolStripMenuItem1.Text = "Select Directory";
-            this.selectDirectoryToolStripMenuItem1.Click += new System.EventHandler(this.selectDirectoryToolStripMenuItem1_Click);
+            this.extractToolStripMenuItem.Click += new System.EventHandler(this.extractToolStripMenuItem_Click);
             // 
             // createToolStripMenuItem
             // 
@@ -192,26 +154,10 @@
             // 
             // decodeToolStripMenuItem
             // 
-            this.decodeToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.selectFilesToolStripMenuItem2,
-            this.selectDirectoryToolStripMenuItem2});
             this.decodeToolStripMenuItem.Name = "decodeToolStripMenuItem";
-            this.decodeToolStripMenuItem.Size = new System.Drawing.Size(114, 22);
+            this.decodeToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.decodeToolStripMenuItem.Text = "Decode";
-            // 
-            // selectFilesToolStripMenuItem2
-            // 
-            this.selectFilesToolStripMenuItem2.Name = "selectFilesToolStripMenuItem2";
-            this.selectFilesToolStripMenuItem2.Size = new System.Drawing.Size(156, 22);
-            this.selectFilesToolStripMenuItem2.Text = "Select Files";
-            this.selectFilesToolStripMenuItem2.Click += new System.EventHandler(this.selectFilesToolStripMenuItem2_Click);
-            // 
-            // selectDirectoryToolStripMenuItem2
-            // 
-            this.selectDirectoryToolStripMenuItem2.Name = "selectDirectoryToolStripMenuItem2";
-            this.selectDirectoryToolStripMenuItem2.Size = new System.Drawing.Size(156, 22);
-            this.selectDirectoryToolStripMenuItem2.Text = "Select Directory";
-            this.selectDirectoryToolStripMenuItem2.Click += new System.EventHandler(this.selectDirectoryToolStripMenuItem2_Click);
+            this.decodeToolStripMenuItem.Click += new System.EventHandler(this.decodeToolStripMenuItem_Click);
             // 
             // encodeToolStripMenuItem
             // 
@@ -219,7 +165,7 @@
             this.selectFilesToolStripMenuItem4,
             this.selectDirectoryToolStripMenuItem4});
             this.encodeToolStripMenuItem.Name = "encodeToolStripMenuItem";
-            this.encodeToolStripMenuItem.Size = new System.Drawing.Size(114, 22);
+            this.encodeToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.encodeToolStripMenuItem.Text = "Encode";
             // 
             // selectFilesToolStripMenuItem4
@@ -239,12 +185,12 @@
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(111, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(149, 6);
             // 
             // viewerToolStripMenuItem
             // 
             this.viewerToolStripMenuItem.Name = "viewerToolStripMenuItem";
-            this.viewerToolStripMenuItem.Size = new System.Drawing.Size(114, 22);
+            this.viewerToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.viewerToolStripMenuItem.Text = "Viewer";
             this.viewerToolStripMenuItem.Click += new System.EventHandler(this.viewerToolStripMenuItem_Click);
             // 
@@ -324,12 +270,6 @@
         private System.Windows.Forms.ToolStripMenuItem viewerToolStripMenuItem;
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.Label versionLabel;
-        private System.Windows.Forms.ToolStripMenuItem selectFilesToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem selectDirectoryToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem selectFilesToolStripMenuItem1;
-        private System.Windows.Forms.ToolStripMenuItem selectDirectoryToolStripMenuItem1;
-        private System.Windows.Forms.ToolStripMenuItem selectFilesToolStripMenuItem2;
-        private System.Windows.Forms.ToolStripMenuItem selectDirectoryToolStripMenuItem2;
         private System.Windows.Forms.ToolStripMenuItem selectFilesToolStripMenuItem3;
         private System.Windows.Forms.ToolStripMenuItem selectDirectoryToolStripMenuItem3;
         private System.Windows.Forms.ToolStripMenuItem selectFilesToolStripMenuItem4;

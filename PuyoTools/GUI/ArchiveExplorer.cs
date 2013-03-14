@@ -59,8 +59,51 @@ namespace PuyoTools.GUI
         private void OpenTexture(Stream data, int length, string fname, TextureFormat format)
         {
             TextureViewer viewer = new TextureViewer();
-            viewer.OpenTexture(data, length, fname, format);
-            viewer.Show();
+
+            long oldPosition = data.Position;
+
+            try
+            {
+                viewer.OpenTexture(data, length, fname, format);
+                viewer.Show();
+            }
+            catch (TextureNeedsPalette)
+            {
+                ArchiveInfo info = OpenedArchives.Peek();
+
+                // Seems like we need a palette for this texture. Let's try to find one.
+                string textureName = Path.GetFileNameWithoutExtension(fname) + PTTexture.Formats[format].PaletteExtension;
+                int paletteFileIndex = -1;
+
+                for (int i = 0; i < info.Archive.Files.Length; i++)
+                {
+                    if (info.Archive.Files[i].Filename.ToLower() == textureName.ToLower())
+                    {
+                        paletteFileIndex = i;
+                        break;
+                    }
+                }
+
+                // Let's see if we found the palette file. And if so, open it up.
+                // Due to the nature of how this works, we need to copy the palette data to another stream first
+                if (paletteFileIndex != -1)
+                {
+                    ArchiveEntry paletteEntry = info.Archive.GetFile(paletteFileIndex);
+
+                    // Copy over the data
+                    paletteEntry.Stream.Position = paletteEntry.Offset;
+
+                    MemoryStream paletteData = new MemoryStream();
+                    PTStream.CopyPartTo(paletteEntry.Stream, paletteData, paletteEntry.Length);
+                    
+                    paletteData.Position = 0;
+
+                    // Now open the texture
+                    data.Position = oldPosition;
+                    viewer.OpenTexture(data, paletteData, length, paletteEntry.Length, fname, format);
+                    viewer.Show();
+                }
+            }
         }
 
         private void Populate(ArchiveInfo info)

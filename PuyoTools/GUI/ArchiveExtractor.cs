@@ -32,6 +32,7 @@ namespace PuyoTools.GUI
                 {
                     ArchiveFormat format;
                     string outPath, outName;
+                    Queue<TextureEntry> textureFileQueue = null;
 
                     using (FileStream inStream = File.OpenRead(file))
                     {
@@ -145,17 +146,37 @@ namespace PuyoTools.GUI
                                 TextureFormat textureFormat = PTTexture.GetFormat(entry.Stream, entry.Length, entry.Filename);
                                 if (textureFormat != TextureFormat.Unknown)
                                 {
-                                    // Ok, it appears to be a texture. Let's convert it, and then edit the entry
-                                    Bitmap textureBitmap;
-                                    MemoryStream textureData = new MemoryStream();
-                                    PTTexture.Read(entry.Stream, out textureBitmap, entry.Length, entry.Filename);
-                                    textureBitmap.Save(textureData, ImageFormat.Png);
+                                    // Ok, it appears to be a texture. We're going to attempt to convert it here.
+                                    // If we get a TextureNeedsPalette exception, we'll wait until after we extract
+                                    // all the files in this archive before we process it.
+                                    try
+                                    {
+                                        MemoryStream textureData = new MemoryStream();
+                                        PTTexture.Read(entry.Stream, textureData, entry.Length, entry.Filename);
 
-                                    entry.Stream = textureData;
-                                    entry.Offset = 0;
-                                    entry.Length = (int)textureData.Length;
+                                        // If no exception was thrown, then we are all good doing what we need to do
+                                        entry.Stream = textureData;
+                                        entry.Offset = 0;
+                                        entry.Length = (int)textureData.Length;
 
-                                    outName = Path.GetFileNameWithoutExtension(outName) + ".png";
+                                        outName = Path.GetFileNameWithoutExtension(outName) + ".png";
+                                    }
+                                    catch (TextureNeedsPalette)
+                                    {
+                                        // Uh oh, looks like we need a palette.
+                                        // What we are going to do is add it to textureFileQueue, then convert it
+                                        // after we extract all of the files.
+                                        if (textureFileQueue == null)
+                                        {
+                                            textureFileQueue = new Queue<TextureEntry>();
+                                        }
+
+                                        TextureEntry textureEntry = new TextureEntry();
+                                        textureEntry.Format = textureFormat;
+                                        textureEntry.Filename = Path.Combine(outPath, outName);
+
+                                        textureFileQueue.Enqueue(textureEntry);
+                                    }
                                 }
                             }
 
@@ -184,6 +205,56 @@ namespace PuyoTools.GUI
                                     {
                                         fileList.Add(Path.Combine(outPath, outName));
                                     }
+                                }
+                            }
+                        }
+                    }
+
+                    // Let's see if we have any textures we still need to convert.
+                    if (settings.ConvertExtractedTextures && textureFileQueue != null)
+                    {
+                        // Ok, it appears we do. So, let's loop through the queue until it is empty.
+                        while (textureFileQueue.Count > 0)
+                        {
+                            TextureEntry textureEntry = textureFileQueue.Dequeue();
+
+                            // Get the palette file name, and the out file name
+                            string paletteName = Path.Combine(Path.GetDirectoryName(textureEntry.Filename), Path.GetFileNameWithoutExtension(textureEntry.Filename)) + PTTexture.Formats[textureEntry.Format].PaletteExtension;
+                            string textureOutName = Path.Combine(Path.GetDirectoryName(textureEntry.Filename), Path.GetFileNameWithoutExtension(textureEntry.Filename)) + ".png";
+
+                            // Make sure the two files exist before we attempt to open them.
+                            // Wrap the whole thing in a try catch in case for some reason the texture file was modifed.
+                            // That way, it'll fail peacefully and not screw over last minute things that need to be done to the archive.
+
+                            // Open up the archive and test to make sure it's still a valid texture.
+                            // You know, in case somehow it was edited or not extracted properly.
+                            if (File.Exists(textureEntry.Filename) && File.Exists(paletteName))
+                            {
+                                try
+                                {
+                                    using (FileStream inTextureStream = File.OpenRead(textureEntry.Filename))
+                                    {
+                                        if (!PTTexture.Formats[textureEntry.Format].Class.Is(inTextureStream, (int)inTextureStream.Length, textureEntry.Filename))
+                                        {
+                                            // Oh dear, somehow this isn't a texture anymore. Just skip over it
+                                            continue;
+                                        }
+
+                                        // Ok, now we can load the palette data and try to convert it.
+                                        using (FileStream inPaletteStream = File.OpenRead(paletteName),
+                                        outTextureStream = File.Create(textureOutName))
+                                        {
+                                            PTTexture.ReadWithPalette(inTextureStream, inPaletteStream, outTextureStream, (int)inTextureStream.Length, (int)inPaletteStream.Length, textureEntry.Format);
+                                        }
+                                    }
+
+                                    // Now we can delete those two files
+                                    File.Delete(textureEntry.Filename);
+                                    File.Delete(paletteName);
+                                }
+                                catch
+                                {
+                                    // Something happened! But we'll just ignore it.
                                 }
                             }
                         }
@@ -223,6 +294,12 @@ namespace PuyoTools.GUI
             public bool AppendFileNumber;
             public bool ExtractExtractedArchives;
             public bool ConvertExtractedTextures;
+        }
+
+        private struct TextureEntry
+        {
+            public TextureFormat Format;
+            public string Filename;
         }
 
         private void runButton_Click(object sender, EventArgs e)

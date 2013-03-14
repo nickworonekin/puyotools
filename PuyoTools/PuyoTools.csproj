@@ -109,6 +109,12 @@
     <Compile Include="GUI\MainWindow.Designer.cs">
       <DependentUpon>MainWindow.cs</DependentUpon>
     </Compile>
+    <Compile Include="GUI\TextureDecoder.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUI\TextureDecoder.Designer.cs">
+      <DependentUpon>TextureDecoder.cs</DependentUpon>
+    </Compile>
     <Compile Include="GUI\TextureViewer.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -235,6 +241,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="GUI\MainWindow.resx">
       <DependentUpon>MainWindow.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUI\TextureDecoder.resx">
+      <DependentUpon>TextureDecoder.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GUI\TextureViewer.resx">
       <DependentUpon>TextureViewer.cs</DependentUpon>

@@ -95,5 +95,20 @@ namespace PuyoTools.GUI
         {
             System.Diagnostics.Process.Start("https://github.com/nickworonekin/puyotools");
         }
+
+        private void decompressToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            (new Decompressor()).Show();
+        }
+
+        private void extractToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            (new ArchiveExtractor()).Show();
+        }
+
+        private void decodeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            (new TextureDecoder()).Show();
+        }
     }
 }

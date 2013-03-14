@@ -72,6 +72,66 @@ namespace PuyoTools.Texture
 
         #endregion
 
+        #region Helper methods for ReadWithPalette
+        public void ReadWithPalette(Stream source, Stream palette, Stream destination)
+        {
+            // Since no length is specified, the length will be size between the current offset
+            // and the length of the stream.
+            ReadWithPalette(source, palette, destination, (int)(source.Length - source.Position), (int)(palette.Length - palette.Position));
+        }
+
+        public void ReadWithPalette(Stream source, Stream palette, out Bitmap destination)
+        {
+            ReadWithPalette(source, palette, out destination, (int)(source.Length - source.Position), (int)(palette.Length - palette.Position));
+        }
+
+        public void ReadWithPalette(Stream source, Stream palette, Stream destination, int length, int paletteLength)
+        {
+            // Read in the rest of the input stream
+            byte[] buffer = new byte[length];
+            source.Read(buffer, 0, length);
+
+            // Read in the palette stream
+            byte[] paletteBuffer = new byte[paletteLength];
+            palette.Read(paletteBuffer, 0, paletteLength);
+
+            // Now we can decompress the data
+            ReadWithPalette(buffer, 0, paletteBuffer, 0, destination, length, paletteLength);
+        }
+
+        public void ReadWithPalette(Stream source, Stream palette, out Bitmap destination, int length, int paletteLength)
+        {
+            // Read in the rest of the input stream
+            byte[] buffer = new byte[length];
+            source.Read(buffer, 0, length);
+
+            // Read in the palette stream
+            byte[] paletteBuffer = new byte[paletteLength];
+            palette.Read(paletteBuffer, 0, paletteLength);
+
+            // Now we can decompress the data
+            ReadWithPalette(buffer, 0, paletteBuffer, 0, out destination, length, paletteLength);
+        }
+
+        public void ReadWithPalette(byte[] source, byte[] palette, Stream destination)
+        {
+            ReadWithPalette(source, 0, palette, 0, destination, source.Length, palette.Length);
+        }
+
+        public void ReadWithPalette(byte[] source, byte[] palette, out Bitmap destination)
+        {
+            ReadWithPalette(source, 0, palette, 0, out destination, source.Length, palette.Length);
+        }
+
+        public void ReadWithPalette(byte[] source, long offset, byte[] palette, long paletteOffset, Stream destination, int length, int paletteLength)
+        {
+            Bitmap texture;
+            ReadWithPalette(source, offset, palette, paletteOffset, out texture, length, paletteLength);
+            texture.Save(destination, ImageFormat.Png);
+        }
+
+        #endregion
+
         #region Helper methods for Is
         public bool Is(Stream source, string fname)
         {

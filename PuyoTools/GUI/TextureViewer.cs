@@ -39,6 +39,19 @@ namespace PuyoTools.GUI
             Bitmap textureBitmap;
             PTTexture.Read(data, out textureBitmap, length, format);
 
+            DisplayTexture(textureBitmap, fname, format);
+        }
+
+        public void OpenTexture(Stream data, Stream paletteData, int length, int paletteLength, string fname, TextureFormat format)
+        {
+            Bitmap textureBitmap;
+            PTTexture.ReadWithPalette(data, paletteData, out textureBitmap, length, paletteLength, format);
+
+            DisplayTexture(textureBitmap, fname, format);
+        }
+
+        private void DisplayTexture(Bitmap textureBitmap, string fname, TextureFormat format)
+        {
             textureDisplay.Image = textureBitmap;
 
             // Adjust the textureDisplay and center it
@@ -95,31 +108,46 @@ namespace PuyoTools.GUI
                 TextureFormat textureFormat;
 
                 textureFormat = PTTexture.GetFormat(data, (int)data.Length, ofd.SafeFileName);
-                if (textureFormat != TextureFormat.Unknown)
-                {
-                    // This is a texture. Let's open it.
-                    OpenTexture(data, (int)data.Length, ofd.SafeFileName, textureFormat);
 
-                    return;
+                if (textureFormat == TextureFormat.Unknown)
+                {
+                    // It's not a texture. Maybe it's compressed?
+                    CompressionFormat compressionFormat = PTCompression.GetFormat(data, (int)data.Length, ofd.SafeFileName);
+                    if (compressionFormat != CompressionFormat.Unknown)
+                    {
+                        // The file is compressed! Let's decompress it and then try to determine if it is a texture
+                        MemoryStream decompressedData = new MemoryStream();
+                        PTCompression.Decompress(data, decompressedData, (int)data.Length, compressionFormat);
+                        decompressedData.Position = 0;
+
+                        // Now with this decompressed data, let's determine if it is a texture
+                        textureFormat = PTTexture.GetFormat(decompressedData, (int)decompressedData.Length, ofd.SafeFileName);
+                    }
+
+                    if (textureFormat == TextureFormat.Unknown)
+                    {
+                        // Hmm... still doesn't appear to be a texture. Just ignore this file then.
+                        return;
+                    }
                 }
 
-                // It's not a texture. Maybe it's compressed?
-                CompressionFormat compressionFormat = PTCompression.GetFormat(data, (int)data.Length, ofd.SafeFileName);
-                if (compressionFormat != CompressionFormat.Unknown)
+                // This is a texture. Let's open it.
+                try
                 {
-                    // The file is compressed! Let's decompress it and then try to determine if it is a texture
-                    MemoryStream decompressedData = new MemoryStream();
-                    PTCompression.Decompress(data, decompressedData, (int)data.Length, compressionFormat);
-                    decompressedData.Position = 0;
+                    OpenTexture(data, (int)data.Length, ofd.SafeFileName, textureFormat);
+                }
+                catch (TextureNeedsPalette)
+                {
+                    // Seems like we need a palette for this texture. Let's try to find one.
+                    string paletteName = Path.Combine(Path.GetDirectoryName(ofd.SafeFileName), Path.GetFileNameWithoutExtension(ofd.SafeFileName)) + PTTexture.Formats[textureFormat].PaletteExtension;
 
-                    // Now with this decompressed data, let's determine if it is a texture
-                    textureFormat = PTTexture.GetFormat(decompressedData, (int)decompressedData.Length, ofd.SafeFileName);
-                    if (textureFormat != TextureFormat.Unknown)
+                    if (File.Exists(paletteName))
                     {
-                        // This is a texture. Let's open it.
-                        OpenTexture(decompressedData, (int)decompressedData.Length, ofd.SafeFileName, textureFormat);
-
-                        return;
+                        // Looks like the palette file exists. Let's load that with the texture
+                        using (FileStream paletteData = File.OpenRead(paletteName))
+                        {
+                            OpenTexture(data, paletteData, (int)data.Length, (int)paletteData.Length, ofd.SafeFileName, textureFormat);
+                        }
                     }
                 }
             }
