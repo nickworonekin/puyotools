@@ -7,8 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.IO;
+
 using PuyoTools.Archive;
-using PuyoTools.Compression;
 using PuyoTools.Texture;
 
 namespace PuyoTools.GUI
@@ -67,7 +67,7 @@ namespace PuyoTools.GUI
                 viewer.OpenTexture(data, length, fname, format);
                 viewer.Show();
             }
-            catch (TextureNeedsPalette)
+            catch (TextureNeedsPaletteException)
             {
                 ArchiveInfo info = OpenedArchives.Peek();
 

@@ -151,5 +151,5 @@ namespace PuyoTools.Texture
     {
     }
 
-    public class TextureNeedsPalette : Exception { }
+    public class TextureNeedsPaletteException : Exception { }
 }

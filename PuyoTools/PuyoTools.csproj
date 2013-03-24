@@ -62,6 +62,7 @@
   </Target>
   -->
   <ItemGroup>
+    <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
@@ -69,22 +70,29 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Archive\Archive.cs" />
+    <Compile Include="PTArchive.cs" />
     <Compile Include="Archive\ArchiveBase.cs" />
-    <Compile Include="Archive\Formats\AFS.cs" />
-    <Compile Include="Archive\Formats\GNT.cs" />
-    <Compile Include="Archive\Formats\GVM.cs" />
-    <Compile Include="Archive\Formats\U8.cs" />
-    <Compile Include="Compression\Compression.cs" />
+    <Compile Include="Archive\Formats\AcxArchive.cs" />
+    <Compile Include="Archive\Formats\AfsArchive.cs" />
+    <Compile Include="Archive\Formats\GntArchive.cs" />
+    <Compile Include="Archive\Formats\GvmArchive.cs" />
+    <Compile Include="Archive\Formats\U8Archive.cs" />
+    <Compile Include="PTCompression.cs" />
     <Compile Include="Compression\CompressionBase.cs" />
-    <Compile Include="Compression\Formats\CXLZ.cs" />
-    <Compile Include="Compression\Formats\LZ10.cs" />
-    <Compile Include="Compression\Formats\LZ11.cs" />
-    <Compile Include="Compression\Formats\PRS.cs" />
+    <Compile Include="Compression\Formats\CxlzCompression.cs" />
+    <Compile Include="Compression\Formats\Lz10Compression.cs" />
+    <Compile Include="Compression\Formats\Lz11Compression.cs" />
+    <Compile Include="Compression\Formats\PrsCompression.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="FileSelectionDialog.cs" />
     <Compile Include="FileTypeInfo.cs" />
     <Compile Include="FormContent.cs" />
+    <Compile Include="GUI\ArchiveCreator.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUI\ArchiveCreator.Designer.cs">
+      <DependentUpon>ArchiveCreator.cs</DependentUpon>
+    </Compile>
     <Compile Include="GUI\ArchiveExplorer.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -213,10 +221,10 @@
     </Compile>
     <Compile Include="StreamExtensions.cs" />
     <Compile Include="StringExtensions.cs" />
-    <Compile Include="Texture\Formats\GVR.cs" />
-    <Compile Include="Texture\Formats\PVR.cs" />
-    <Compile Include="Texture\Formats\SVR.cs" />
-    <Compile Include="Texture\Texture.cs" />
+    <Compile Include="Texture\Formats\GvrTexture.cs" />
+    <Compile Include="Texture\Formats\PvrTexture.cs" />
+    <Compile Include="Texture\Formats\SvrTexture.cs" />
+    <Compile Include="PTTexture.cs" />
     <Compile Include="Texture\TextureBase.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -230,6 +238,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="GUI\ArchiveCreator.resx">
+      <DependentUpon>ArchiveCreator.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="GUI\ArchiveExplorer.resx">
       <DependentUpon>ArchiveExplorer.cs</DependentUpon>
     </EmbeddedResource>

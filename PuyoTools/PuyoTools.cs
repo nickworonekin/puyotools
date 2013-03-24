@@ -25,9 +25,9 @@ namespace PuyoTools
             Old.Archive.InitalizeDictionary();
             Old.Textures.InitalizeDictionary();
 
-            Compression.PTCompression.Initalize();
-            Archive.PTArchive.Initalize();
-            Texture.PTTexture.Initalize();
+            PTCompression.Initalize();
+            PTArchive.Initalize();
+            PTTexture.Initalize();
         }
     }
 }

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace PuyoTools.Archive
 {
-    public class GNT : ArchiveBase
+    public class GntArchive : ArchiveBase
     {
         public override ArchiveReader Open(Stream source, int length)
         {
@@ -33,7 +33,7 @@ namespace PuyoTools.Archive
             public Read(Stream source, int length)
             {
                 // The start of the archive
-                offset = source.Position;
+                archiveOffset = source.Position;
 
                 // Get the number of files in the archive
                 source.Position += 48;
@@ -50,11 +50,11 @@ namespace PuyoTools.Archive
                     int entryOffset = PTStream.ReadInt32BE(source) + 32;
 
                     // Add this entry to the file list
-                    Files[i] = new ArchiveEntry(source, offset + entryOffset, entryLength, String.Empty);
+                    Files[i] = new ArchiveEntry(source, archiveOffset + entryOffset, entryLength, String.Empty);
                 }
 
                 // Set the position of the stream to the end of the file
-                source.Position = offset + length;
+                source.Position = archiveOffset + length;
             }
         }
 

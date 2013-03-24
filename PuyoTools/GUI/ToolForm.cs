@@ -24,7 +24,7 @@ namespace PuyoTools.GUI
             fileList = new List<string>();
         }
 
-        private void addFilesButton_Click(object sender, EventArgs e)
+        protected void addFilesButton_Click(object sender, EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.Filter = "All Files (*.*)|*.*";
@@ -40,7 +40,7 @@ namespace PuyoTools.GUI
             }
         }
 
-        private void addDirectoryButton_Click(object sender, EventArgs e)
+        protected void addDirectoryButton_Click(object sender, EventArgs e)
         {
             FolderBrowserDialog fbd = new FolderBrowserDialog();
             fbd.Description = "Select a directory.";

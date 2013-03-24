@@ -3,7 +3,7 @@ using System.IO;
 
 namespace PuyoTools.Compression
 {
-    public class LZ11 : CompressionBase
+    public class Lz11Compression : CompressionBase
     {
         public override void Decompress(byte[] source, long offset, Stream destination, int length)
         {

@@ -7,8 +7,8 @@ using System.Text;
 using System.Windows.Forms;
 using System.Drawing.Imaging;
 using System.IO;
+
 using PuyoTools.Archive;
-using PuyoTools.Compression;
 using PuyoTools.Texture;
 
 namespace PuyoTools.GUI
@@ -161,7 +161,7 @@ namespace PuyoTools.GUI
 
                                         outName = Path.GetFileNameWithoutExtension(outName) + ".png";
                                     }
-                                    catch (TextureNeedsPalette)
+                                    catch (TextureNeedsPaletteException)
                                     {
                                         // Uh oh, looks like we need a palette.
                                         // What we are going to do is add it to textureFileQueue, then convert it
@@ -234,7 +234,7 @@ namespace PuyoTools.GUI
                                 {
                                     using (FileStream inTextureStream = File.OpenRead(textureEntry.Filename))
                                     {
-                                        if (!PTTexture.Formats[textureEntry.Format].Class.Is(inTextureStream, (int)inTextureStream.Length, textureEntry.Filename))
+                                        if (!PTTexture.Formats[textureEntry.Format].Instance.Is(inTextureStream, (int)inTextureStream.Length, textureEntry.Filename))
                                         {
                                             // Oh dear, somehow this isn't a texture anymore. Just skip over it
                                             continue;

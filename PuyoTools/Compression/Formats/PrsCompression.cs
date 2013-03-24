@@ -3,7 +3,7 @@ using System.IO;
 
 namespace PuyoTools.Compression
 {
-    public class PRS : CompressionBase
+    public class PrsCompression : CompressionBase
     {
         public override void Decompress(byte[] source, long offset, Stream destination, int length)
         {

@@ -7,8 +7,8 @@ using System.Text;
 using System.Windows.Forms;
 using System.Drawing.Imaging;
 using System.IO;
+
 using PuyoTools.Texture;
-using PuyoTools.Compression;
 
 namespace PuyoTools.GUI
 {
@@ -70,7 +70,7 @@ namespace PuyoTools.GUI
                         {
                             PTTexture.Read(source, textureData, (int)source.Length, format);
                         }
-                        catch (TextureNeedsPalette)
+                        catch (TextureNeedsPaletteException)
                         {
                             // It appears that we need to load an external palette.
                             // Let's get the filename for this palette file, see if it exists, and load it in
@@ -87,6 +87,12 @@ namespace PuyoTools.GUI
                             using (FileStream paletteData = File.OpenRead(paletteName))
                             {
                                 PTTexture.ReadWithPalette(source, paletteData, textureData, (int)source.Length, (int)paletteData.Length, format);
+                            }
+
+                            // Delete the palette file if the user chose to delete the source texture
+                            if (settings.DeleteSource)
+                            {
+                                File.Delete(paletteName);
                             }
                         }
                     }

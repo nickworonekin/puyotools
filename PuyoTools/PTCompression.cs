@@ -1,8 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
+using PuyoTools.Compression;
 
-namespace PuyoTools.Compression
+namespace PuyoTools
 {
     public static class PTCompression
     {
@@ -12,10 +13,10 @@ namespace PuyoTools.Compression
         {
             Formats = new Dictionary<CompressionFormat, FormatEntry>();
 
-            Formats.Add(CompressionFormat.CXLZ, new FormatEntry(new CXLZ(), "CXLZ", String.Empty));
-            Formats.Add(CompressionFormat.LZ10, new FormatEntry(new LZ10(), "LZ10", String.Empty));
-            Formats.Add(CompressionFormat.LZ11, new FormatEntry(new LZ11(), "LZ11", String.Empty));
-            Formats.Add(CompressionFormat.PRS,  new FormatEntry(new PRS(),  "PRS",  String.Empty));
+            Formats.Add(CompressionFormat.CXLZ, new FormatEntry(new CxlzCompression(), "CXLZ", String.Empty));
+            Formats.Add(CompressionFormat.LZ10, new FormatEntry(new Lz10Compression(), "LZ10", String.Empty));
+            Formats.Add(CompressionFormat.LZ11, new FormatEntry(new Lz11Compression(), "LZ11", String.Empty));
+            Formats.Add(CompressionFormat.PRS,  new FormatEntry(new PrsCompression(),  "PRS",  String.Empty));
         }
 
         public static CompressionFormat Decompress(Stream source, Stream destination, int length, string fname)
@@ -25,14 +26,14 @@ namespace PuyoTools.Compression
             if (format == CompressionFormat.Unknown)
                 return format;
 
-            Formats[format].Class.Decompress(source, destination, length);
+            Formats[format].Instance.Decompress(source, destination, length);
 
             return format;
         }
 
         public static void Decompress(Stream source, Stream destination, int length, CompressionFormat format)
         {
-            Formats[format].Class.Decompress(source, destination, length);
+            Formats[format].Instance.Decompress(source, destination, length);
         }
 
         public static void Compress(Stream source, Stream destination, string fname, CompressionFormat format)
@@ -44,7 +45,7 @@ namespace PuyoTools.Compression
         {
             foreach (KeyValuePair<CompressionFormat, FormatEntry> format in Formats)
             {
-                if (format.Value.Class.Is(source, length, fname))
+                if (format.Value.Instance.Is(source, length, fname))
                     return format.Key;
             }
 
@@ -53,15 +54,15 @@ namespace PuyoTools.Compression
 
         public struct FormatEntry
         {
-            public CompressionBase Class;
-            public string Name;
-            public string Filter;
+            public readonly CompressionBase Instance;
+            public readonly string Name;
+            public readonly string Extension;
 
-            public FormatEntry(CompressionBase instance, string name, string filter)
+            public FormatEntry(CompressionBase instance, string name, string extension)
             {
-                Class = instance;
+                Instance = instance;
                 Name = name;
-                Filter = filter;
+                Extension = extension;
             }
         }
     }

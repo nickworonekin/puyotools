@@ -23,7 +23,7 @@ namespace PuyoTools.Archive
     public abstract class ArchiveReader
     {
         public ArchiveEntry[] Files;
-        protected long offset;
+        protected long archiveOffset;
 
         /// <summary>
         /// Returns information about a file at the specified index in the archive.
@@ -69,14 +69,14 @@ namespace PuyoTools.Archive
             AddFile(source, (int)(source.Length - source.Position), fname, date);
         }
 
-        public void AddFile(Stream source, int length, string fname)
+        public virtual void AddFile(Stream source, int length, string fname)
         {
             // All we're going to do is add the file to the entry list
             // The magic happens once Flush is called.
             files.Add(new ArchiveEntry(source, source.Position, length, fname));
         }
 
-        public void AddFile(Stream source, int length, string fname, DateTime date)
+        public virtual void AddFile(Stream source, int length, string fname, DateTime date)
         {
             // All we're going to do is add the file to the entry list
             // The magic happens once Flush is called.
@@ -128,4 +128,6 @@ namespace PuyoTools.Archive
         // SNT
         public int SNTType = 0; // 0 = PS2, 1 = PSP
     }
+
+    public class CannotAddFileToArchiveException : Exception { }
 }

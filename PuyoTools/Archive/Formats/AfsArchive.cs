@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace PuyoTools.Archive
 {
-    public class AFS : ArchiveBase
+    public class AfsArchive : ArchiveBase
     {
         public override ArchiveReader Open(Stream source, int length)
         {
@@ -23,7 +23,7 @@ namespace PuyoTools.Archive
 
         public override bool CanCreate()
         {
-            return false;
+            return true;
         }
 
         public class Read : ArchiveReader
@@ -31,7 +31,7 @@ namespace PuyoTools.Archive
             public Read(Stream source, int length)
             {
                 // The start of the archive
-                offset = source.Position;
+                archiveOffset = source.Position;
 
                 // Get the number of files in the archive
                 source.Position += 4;
@@ -45,7 +45,7 @@ namespace PuyoTools.Archive
                 // If the offset isn't stored there, then it is stored right before the offset of the first file
                 if (metadataOffset == 0)
                 {
-                    source.Position = offset + 8;
+                    source.Position = archiveOffset + 8;
                     source.Position = PTStream.ReadInt32(source) - 8;
                     metadataOffset = PTStream.ReadInt32(source);
                 }
@@ -54,7 +54,7 @@ namespace PuyoTools.Archive
                 for (int i = 0; i < numFiles; i++)
                 {
                     // Readin the entry offset and length
-                    source.Position = offset + 8 + (i * 8);
+                    source.Position = archiveOffset + 8 + (i * 8);
                     int entryOffset = PTStream.ReadInt32(source);
                     int entryLength = PTStream.ReadInt32(source);
 
@@ -63,11 +63,11 @@ namespace PuyoTools.Archive
                     string entryFname = PTStream.ReadCString(source, 32);
 
                     // Add this entry to the file list
-                    Files[i] = new ArchiveEntry(source, offset + entryOffset, entryLength, entryFname);
+                    Files[i] = new ArchiveEntry(source, archiveOffset + entryOffset, entryLength, entryFname);
                 }
 
                 // Set the position of the stream to the end of the file
-                source.Position = offset + length;
+                source.Position = archiveOffset + length;
             }
         }
 

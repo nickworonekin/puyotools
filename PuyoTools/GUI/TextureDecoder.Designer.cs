@@ -61,9 +61,9 @@
             this.outputToSourceDirButton.AutoSize = true;
             this.outputToSourceDirButton.Location = new System.Drawing.Point(14, 37);
             this.outputToSourceDirButton.Name = "outputToSourceDirButton";
-            this.outputToSourceDirButton.Size = new System.Drawing.Size(301, 17);
+            this.outputToSourceDirButton.Size = new System.Drawing.Size(261, 17);
             this.outputToSourceDirButton.TabIndex = 1;
-            this.outputToSourceDirButton.Text = "Output textures to the same directory as the source texture";
+            this.outputToSourceDirButton.Text = "Output to the same directory as the source texture";
             this.outputToSourceDirButton.UseVisualStyleBackColor = true;
             // 
             // deleteSourceButton

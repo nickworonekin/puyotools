@@ -1,10 +1,11 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
+using PuyoTools.Texture;
 
 namespace PuyoTools.Archive
 {
-    public class GVM : ArchiveBase
+    public class GvmArchive : ArchiveBase
     {
         public override ArchiveReader Open(Stream source, int length)
         {
@@ -34,7 +35,7 @@ namespace PuyoTools.Archive
             public Read(Stream source, int length)
             {
                 // The start of the archive
-                offset = source.Position;
+                archiveOffset = source.Position;
 
                 // The offset of the first entry
                 source.Position += 4;
@@ -71,25 +72,25 @@ namespace PuyoTools.Archive
                     // We need to need to determine the offset based on the length,
                     // which is stored in the texture data.
                     // We already have the entry offset
-                    source.Position = offset + entryOffset + 4;
+                    source.Position = archiveOffset + entryOffset + 4;
                     int entryLength = PTStream.ReadInt32(source) + 8;
 
                     string entryFname = String.Empty;
                     if (containsFilename)
                     {
-                        source.Position = offset + headerOffset + 2;
+                        source.Position = archiveOffset + headerOffset + 2;
                         entryFname = PTStream.ReadCString(source, 28) + ".gvr";
                         headerOffset += tableEntryLength;
                     }
 
                     // Add this entry to the file list
-                    Files[i] = new ArchiveEntry(source, offset + entryOffset, entryLength, entryFname);
+                    Files[i] = new ArchiveEntry(source, archiveOffset + entryOffset, entryLength, entryFname);
 
                     entryOffset += entryLength;
                 }
 
                 // Set the position of the stream to the end of the file
-                source.Position = offset + length;
+                source.Position = archiveOffset + length;
             }
 
             public override ArchiveEntry GetFile(int index)
@@ -142,6 +143,18 @@ namespace PuyoTools.Archive
             public Write(Stream destination, ArchiveWriterSettings settings)
             {
                 Initalize(destination, settings);
+            }
+
+            public override void AddFile(Stream source, int length, string fname)
+            {
+                // Only GVR textures can be added to a GVM archive.
+                // If this is not a GVR texture, throw an exception
+                if (!(new GvrTexture()).Is(source, length, fname))
+                {
+                    throw new CannotAddFileToArchiveException();
+                }
+
+                base.AddFile(source, length, fname);
             }
 
             public override void Flush()

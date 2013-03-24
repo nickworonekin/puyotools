@@ -8,7 +8,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.IO;
 using System.Drawing.Imaging;
-using PuyoTools.Compression;
+
 using PuyoTools.Texture;
 
 namespace PuyoTools.GUI
@@ -136,7 +136,7 @@ namespace PuyoTools.GUI
                 {
                     OpenTexture(data, (int)data.Length, ofd.SafeFileName, textureFormat);
                 }
-                catch (TextureNeedsPalette)
+                catch (TextureNeedsPaletteException)
                 {
                     // Seems like we need a palette for this texture. Let's try to find one.
                     string paletteName = Path.Combine(Path.GetDirectoryName(ofd.FileName), Path.GetFileNameWithoutExtension(ofd.FileName)) + PTTexture.Formats[textureFormat].PaletteExtension;

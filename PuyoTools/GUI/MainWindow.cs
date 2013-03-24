@@ -58,7 +58,8 @@ namespace PuyoTools.GUI
 
         private void createToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            new Old.ArchiveCreator();
+            //new Old.ArchiveCreator();
+            (new ArchiveCreator()).Show();
         }
 
         private void explorerToolStripMenuItem_Click(object sender, EventArgs e)

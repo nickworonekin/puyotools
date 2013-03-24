@@ -3,14 +3,14 @@ using System.IO;
 
 namespace PuyoTools.Compression
 {
-    public class CXLZ : CompressionBase
+    public class CxlzCompression : CompressionBase
     {
         public override void Decompress(byte[] source, long offset, Stream destination, int length)
         {
             // The CXLZ format is identical to LZ10 with the exception of "CXLZ" at the beginning of the file
             // As such, we'll just pass it to the LZ10 decompressor
 
-            (new LZ10()).Decompress(source, offset + 4, destination, length - 4);
+            (new Lz10Compression()).Decompress(source, offset + 4, destination, length - 4);
         }
 
         public override void Compress(byte[] source, long offset, Stream destination, int length, string fname)
@@ -20,7 +20,7 @@ namespace PuyoTools.Compression
 
             destination.Write(new byte[] { (byte)'C', (byte)'X', (byte)'L', (byte)'Z' }, 0, 4);
 
-            (new LZ10()).Compress(source, offset, destination, length, fname);
+            (new Lz10Compression()).Compress(source, offset, destination, length, fname);
         }
 
         public override bool Is(Stream source, int length, string fname)

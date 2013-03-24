@@ -1,31 +1,31 @@
 ﻿using System;
 using System.IO;
 using System.Drawing;
-using VrSharp.GvrTexture;
+using VrSharp.PvrTexture;
 
 namespace PuyoTools.Texture
 {
-    public class GVR : TextureBase
+    public class PvrTexture : TextureBase
     {
         public override void Read(byte[] source, long offset, out Bitmap destination, int length)
         {
-            // Some GVR textures require an external clut, so we'll just pass this off to ReadWithCLUT
+            // Some PVR textures require an external clut, so we'll just pass this off to ReadWithCLUT
             ReadWithPalette(source, offset, null, 0, out destination, length, 0);
         }
 
         public override void ReadWithPalette(byte[] source, long offset, byte[] palette, long paletteOffset, out Bitmap destination, int length, int paletteLength)
         {
-            // Reading GVR textures is done through VrSharp, so just pass it to that
-            GvrTexture texture = new GvrTexture(source, offset, length);
-            
+            // Reading PVR textures is done through VrSharp, so just pass it to that
+            VrSharp.PvrTexture.PvrTexture texture = new VrSharp.PvrTexture.PvrTexture(source, offset, length);
+
             // Check to see if this texture requires an external palette.
             // If it does and none was set, throw an exception.
             if (texture.NeedsExternalClut())
             {
                 if (palette != null && paletteLength > 0)
-                    texture.SetClut(new GvpClut(palette, paletteOffset, paletteLength));
+                    texture.SetClut(new PvpClut(palette, paletteOffset, paletteLength));
                 else
-                    throw new TextureNeedsPalette();
+                    throw new TextureNeedsPaletteException();
             }
 
             destination = texture.GetTextureAsBitmap();
@@ -38,7 +38,7 @@ namespace PuyoTools.Texture
 
         public override bool Is(Stream source, int length, string fname)
         {
-            return (length > 16 && GvrTexture.IsGvrTexture(source, length));
+            return (length > 16 && VrSharp.PvrTexture.PvrTexture.IsPvrTexture(source, length));
         }
 
         public override bool CanWrite()

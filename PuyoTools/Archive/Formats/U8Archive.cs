@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace PuyoTools.Archive
 {
-    public class U8 : ArchiveBase
+    public class U8Archive : ArchiveBase
     {
         public override ArchiveReader Open(Stream source, int length)
         {
@@ -31,7 +31,7 @@ namespace PuyoTools.Archive
             public Read(Stream source, int length)
             {
                 // The start of the archive
-                offset = source.Position;
+                archiveOffset = source.Position;
 
                 // Read the archive header
                 source.Position += 4;
@@ -40,7 +40,7 @@ namespace PuyoTools.Archive
                 uint dataOffset = PTStream.ReadUInt32BE(source);
 
                 // Go the root node
-                source.Position = offset + rootNodeOffset;
+                source.Position = archiveOffset + rootNodeOffset;
                 Node rootNode = new Node();
                 rootNode.Type = PTStream.ReadUInt16BE(source);
                 rootNode.NameOffset = PTStream.ReadUInt16BE(source);
@@ -68,7 +68,7 @@ namespace PuyoTools.Archive
                     // A file node
                     if (node.Type == 0)
                     {
-                        entry.Offset = offset + node.DataOffset;
+                        entry.Offset = archiveOffset + node.DataOffset;
                         entry.Length = (int)node.Length;
                     }
 
@@ -83,7 +83,7 @@ namespace PuyoTools.Archive
 
                     // Get the filename for the entry
                     long oldPosition = source.Position;
-                    source.Position = offset + stringTableOffset + node.NameOffset;
+                    source.Position = archiveOffset + stringTableOffset + node.NameOffset;
                     entry.Filename = PTStream.ReadCString(source);
                     source.Position = oldPosition;
 
@@ -92,7 +92,7 @@ namespace PuyoTools.Archive
                 }
 
                 // Set the position of the stream to the end of the file
-                source.Position = offset + length;
+                source.Position = archiveOffset + length;
             }
 
             private struct Node

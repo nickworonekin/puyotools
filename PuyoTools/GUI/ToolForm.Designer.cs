@@ -132,10 +132,10 @@
 
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Panel panel2;
-        private System.Windows.Forms.Button addFilesButton;
-        private System.Windows.Forms.Button fileListButton;
-        private System.Windows.Forms.Button addDirectoryButton;
         protected System.Windows.Forms.Panel settingsPanel;
         protected System.Windows.Forms.Button runButton;
+        protected System.Windows.Forms.Button fileListButton;
+        protected System.Windows.Forms.Button addFilesButton;
+        protected System.Windows.Forms.Button addDirectoryButton;
     }
 }
