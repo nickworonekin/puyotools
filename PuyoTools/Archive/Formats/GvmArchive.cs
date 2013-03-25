@@ -14,7 +14,7 @@ namespace PuyoTools.Archive
 
         public override ArchiveWriter Create(Stream destination, ArchiveWriterSettings settings)
         {
-            return new Write(destination, settings);
+            return new Write(destination, (GvmWriterSettings)settings);
         }
 
         public override bool Is(Stream source, int length, string fname)
@@ -135,14 +135,14 @@ namespace PuyoTools.Archive
 
         public class Write : ArchiveWriter
         {
-            public Write(Stream destination)
-            {
-                Initalize(destination, new ArchiveWriterSettings());
-            }
+            GvmWriterSettings settings;
 
-            public Write(Stream destination, ArchiveWriterSettings settings)
+            public Write(Stream destination) : this(destination, new GvmWriterSettings()) { }
+
+            public Write(Stream destination, GvmWriterSettings settings)
             {
-                Initalize(destination, settings);
+                Initalize(destination);
+                this.settings = settings;
             }
 
             public override void AddFile(Stream source, int length, string fname)
@@ -162,5 +162,13 @@ namespace PuyoTools.Archive
                 throw new NotImplementedException();
             }
         }
+    }
+
+    public partial class GvmWriterSettings : ArchiveWriterSettings
+    {
+        public bool Filename = true;
+        public bool GlobalIndex = true;
+        public bool Formats = true;
+        public bool Dimensions = true;
     }
 }

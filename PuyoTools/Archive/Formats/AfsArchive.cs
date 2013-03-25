@@ -13,7 +13,7 @@ namespace PuyoTools.Archive
 
         public override ArchiveWriter Create(Stream destination, ArchiveWriterSettings settings)
         {
-            return new Write(destination, settings);
+            return new Write(destination, (AfsWriterSettings)settings);
         }
 
         public override bool Is(Stream source, int length, string fname)
@@ -73,14 +73,14 @@ namespace PuyoTools.Archive
 
         public class Write : ArchiveWriter
         {
-            public Write(Stream destination)
-            {
-                Initalize(destination, new ArchiveWriterSettings());
-            }
+            AfsWriterSettings settings;
 
-            public Write(Stream destination, ArchiveWriterSettings settings)
+            public Write(Stream destination) : this(destination, new AfsWriterSettings()) { }
+
+            public Write(Stream destination, AfsWriterSettings settings)
             {
-                Initalize(destination, settings);
+                Initalize(destination);
+                this.settings = settings;
             }
 
             public override void Flush()
@@ -88,7 +88,7 @@ namespace PuyoTools.Archive
                 // The start of the archive
                 long offset = destination.Position;
                 int blockSize = settings.BlockSize;
-                int version = settings.AFSVersion;
+                AfsWriterSettings.AfsVersion version = settings.Version;
 
                 // Magic code "AFS\0"
                 destination.WriteByte((byte)'A');
@@ -112,7 +112,7 @@ namespace PuyoTools.Archive
 
                 // If this is AFS v1, then the metadata offset is stored at 8 bytes before
                 // the first entry offset.
-                if (version == 1)
+                if (version == AfsWriterSettings.AfsVersion.Version1)
                 {
                     destination.Position = offset + firstEntryOffset - 8;
                 }
@@ -134,18 +134,35 @@ namespace PuyoTools.Archive
                 {
                     PTStream.WriteCString(destination, files[i].Filename, 32);
 
-                    PTStream.WriteInt16(destination, (short)files[i].Date.Year);
-                    PTStream.WriteInt16(destination, (short)files[i].Date.Month);
-                    PTStream.WriteInt16(destination, (short)files[i].Date.Day);
-                    PTStream.WriteInt16(destination, (short)files[i].Date.Hour);
-                    PTStream.WriteInt16(destination, (short)files[i].Date.Minute);
-                    PTStream.WriteInt16(destination, (short)files[i].Date.Second);
+                    // File creation time
+                    if (!String.IsNullOrEmpty(files[i].SourceFile) && File.Exists(files[i].SourceFile))
+                    {
+                        // File exists, let's read in the file creation time
+                        FileInfo fileInfo = new FileInfo(files[i].SourceFile);
+
+                        PTStream.WriteInt16(destination, (short)fileInfo.CreationTime.Year);
+                        PTStream.WriteInt16(destination, (short)fileInfo.CreationTime.Month);
+                        PTStream.WriteInt16(destination, (short)fileInfo.CreationTime.Day);
+                        PTStream.WriteInt16(destination, (short)fileInfo.CreationTime.Hour);
+                        PTStream.WriteInt16(destination, (short)fileInfo.CreationTime.Minute);
+                        PTStream.WriteInt16(destination, (short)fileInfo.CreationTime.Second);
+                    }
+                    else
+                    {
+                        // File does not exist, just store all 0s
+                        PTStream.WriteInt16(destination, 0);
+                        PTStream.WriteInt16(destination, 0);
+                        PTStream.WriteInt16(destination, 0);
+                        PTStream.WriteInt16(destination, 0);
+                        PTStream.WriteInt16(destination, 0);
+                        PTStream.WriteInt16(destination, 0);
+                    }
 
                     // Write out this data that I have no idea what its purpose is
                     long oldPosition = destination.Position;
                     byte[] buffer = new byte[4];
 
-                    if (version == 1)
+                    if (version == AfsWriterSettings.AfsVersion.Version1)
                         destination.Position = offset + 8 + (i * 8);
                     else
                         destination.Position = offset + 4 + (i * 4);
@@ -159,6 +176,18 @@ namespace PuyoTools.Archive
                 while ((destination.Position - offset) % blockSize != 0)
                     destination.WriteByte(0);
             }
+        }
+    }
+
+    public partial class AfsWriterSettings : ArchiveWriterSettings
+    {
+        public int BlockSize = 2048;
+        public AfsVersion Version = AfsVersion.Version1;
+
+        public enum AfsVersion
+        {
+            Version1, // Dreamcast
+            Version2, // Post Dreamcast (PS2, GC, Xbox and after)
         }
     }
 }

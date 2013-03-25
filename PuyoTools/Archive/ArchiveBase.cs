@@ -16,7 +16,7 @@ namespace PuyoTools.Archive
 
         public ArchiveWriter Create(Stream destination)
         {
-            return Create(destination, new ArchiveWriterSettings());
+            return Create(destination, null);
         }
     }
 
@@ -48,15 +48,13 @@ namespace PuyoTools.Archive
     {
         protected Stream destination;
         protected List<ArchiveEntry> files;
-        protected ArchiveWriterSettings settings;
 
         public abstract void Flush();
 
-        protected void Initalize(Stream destination, ArchiveWriterSettings settings)
+        protected void Initalize(Stream destination)
         {
             files = new List<ArchiveEntry>();
             this.destination = destination;
-            this.settings = settings;
         }
 
         public void AddFile(Stream source, string fname)
@@ -64,9 +62,9 @@ namespace PuyoTools.Archive
             AddFile(source, (int)(source.Length - source.Position), fname);
         }
 
-        public void AddFile(Stream source, string fname, DateTime date)
+        public void AddFile(Stream source, string fname, string sourceFile)
         {
-            AddFile(source, (int)(source.Length - source.Position), fname, date);
+            AddFile(source, (int)(source.Length - source.Position), fname, sourceFile);
         }
 
         public virtual void AddFile(Stream source, int length, string fname)
@@ -76,11 +74,11 @@ namespace PuyoTools.Archive
             files.Add(new ArchiveEntry(source, source.Position, length, fname));
         }
 
-        public virtual void AddFile(Stream source, int length, string fname, DateTime date)
+        public void AddFile(Stream source, int length, string fname, string sourceFile)
         {
             // All we're going to do is add the file to the entry list
             // The magic happens once Flush is called.
-            files.Add(new ArchiveEntry(source, source.Position, length, fname, date));
+            files.Add(new ArchiveEntry(source, source.Position, length, fname, sourceFile));
         }
     }
 
@@ -90,7 +88,7 @@ namespace PuyoTools.Archive
         public long Offset;
         public int Length;
         public string Filename;
-        public DateTime Date;
+        public string SourceFile;
 
         public ArchiveEntry(Stream stream, long offset, int length, string fname)
         {
@@ -98,36 +96,24 @@ namespace PuyoTools.Archive
             Offset = offset;
             Length = length;
             Filename = fname;
-            Date = DateTime.MinValue;
+            SourceFile = String.Empty;
         }
 
-        public ArchiveEntry(Stream stream, long offset, int length, string fname, DateTime date)
+        public ArchiveEntry(Stream stream, long offset, int length, string fname, string sourceFile)
         {
             Stream = stream;
             Offset = offset;
             Length = length;
             Filename = fname;
-            Date = date;
+            SourceFile = sourceFile;
         }
     }
 
-    public class ArchiveWriterSettings
-    {
-        // Global
-        public int BlockSize = 16;
-
-        // AFS
-        public int AFSVersion = 2;
-
-        // GVM/PVM/SVM
-        public bool PVMFilename = true;
-        public bool PVMGlobalIndex = true;
-        public bool PVMFormats = true;
-        public bool PVMDimensions = true;
-
-        // SNT
-        public int SNTType = 0; // 0 = PS2, 1 = PSP
-    }
+    // We're going to declare an empty ArchiveWriterSettings here. Why is it empty?
+    // That way we can split up the settings and the panel content for the archive
+    // creator. If someone is using the archive code for their projects, they don't
+    // need the things for the panel content.
+    public abstract partial class ArchiveWriterSettings { }
 
     public class CannotAddFileToArchiveException : Exception { }
 }

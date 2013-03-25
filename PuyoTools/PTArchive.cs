@@ -13,10 +13,10 @@ namespace PuyoTools
         {
             Formats = new Dictionary<ArchiveFormat, FormatEntry>();
 
-            Formats.Add(ArchiveFormat.Afs, new FormatEntry(new AfsArchive(), "AFS", ".afs"));
-            Formats.Add(ArchiveFormat.Gnt, new FormatEntry(new GntArchive(), "GNT", ".gnt"));
-            Formats.Add(ArchiveFormat.Gvm, new FormatEntry(new GvmArchive(), "GVM", ".gvm"));
-            Formats.Add(ArchiveFormat.U8,  new FormatEntry(new U8Archive(),  "U8",  ".arc"));
+            Formats.Add(ArchiveFormat.Afs, new FormatEntry(new AfsArchive(), new AfsWriterSettings(), "AFS", ".afs"));
+            Formats.Add(ArchiveFormat.Gnt, new FormatEntry(new GntArchive(), null,                    "GNT", ".gnt"));
+            Formats.Add(ArchiveFormat.Gvm, new FormatEntry(new GvmArchive(), new GvmWriterSettings(), "GVM", ".gvm"));
+            Formats.Add(ArchiveFormat.U8,  new FormatEntry(new U8Archive(),  null,                    "U8",  ".arc"));
         }
 
         public static ArchiveWriter Create(Stream outStream, ArchiveFormat format, ArchiveWriterSettings settings)
@@ -53,12 +53,14 @@ namespace PuyoTools
         public struct FormatEntry
         {
             public readonly ArchiveBase Instance;
+            public readonly ArchiveWriterSettings SettingsInstance;
             public readonly string Name;
             public readonly string Extension;
 
-            public FormatEntry(ArchiveBase instance, string name, string extension)
+            public FormatEntry(ArchiveBase instance, ArchiveWriterSettings settingsInstance, string name, string extension)
             {
                 Instance = instance;
+                SettingsInstance = settingsInstance;
                 Name = name;
                 Extension = extension;
             }

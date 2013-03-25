@@ -70,6 +70,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Archive\ArchiveWriterSettings.cs" />
     <Compile Include="PTArchive.cs" />
     <Compile Include="Archive\ArchiveBase.cs" />
     <Compile Include="Archive\Formats\AcxArchive.cs" />

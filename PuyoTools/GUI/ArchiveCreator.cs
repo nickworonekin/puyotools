@@ -7,6 +7,8 @@ using System.Text;
 using System.Windows.Forms;
 using System.IO;
 
+using PuyoTools.Archive;
+
 // This is only needed until I make a nice rename form
 using Microsoft.VisualBasic;
 // Remove the above once I do that
@@ -15,7 +17,9 @@ namespace PuyoTools.GUI
 {
     public partial class ArchiveCreator : ToolForm
     {
-        List<Panel> formatSettingsPanel;
+        List<SettingsPanel> formatSettingsPanel;
+        List<ArchiveFormat> archiveFormats;
+        List<CompressionFormat> compressionFormats;
 
         public ArchiveCreator()
         {
@@ -34,36 +38,40 @@ namespace PuyoTools.GUI
             listView_ClientSizeChanged(null, null);
 
             // Set up the format settings panels
-            formatSettingsPanel = new List<Panel>();
+            formatSettingsPanel = new List<SettingsPanel>();
 
             // Fill the archive format box
             archiveFormatBox.SelectedIndex = 0;
+            archiveFormats = new List<ArchiveFormat>();
             foreach (KeyValuePair<ArchiveFormat, PTArchive.FormatEntry> format in PTArchive.Formats)
             {
                 if (format.Value.Instance.CanCreate())
                 {
                     archiveFormatBox.Items.Add(format.Value.Name);
+                    archiveFormats.Add(format.Key);
 
-                    InitalizeSettingsPanel(format.Key);
+                    SettingsPanel panel = new SettingsPanel(archiveSettingsPanel);
+
+                    if (format.Value.SettingsInstance != null)
+                    {
+                        format.Value.SettingsInstance.SetPanelContent(panel);
+                    }
+
+                    formatSettingsPanel.Add(panel);
                 }
             }
 
             // Fill the compression format box
             compressionFormatBox.SelectedIndex = 0;
+            compressionFormats = new List<CompressionFormat>();
             foreach (KeyValuePair<CompressionFormat, PTCompression.FormatEntry> format in PTCompression.Formats)
             {
                 if (format.Value.Instance.CanCompress())
                 {
                     compressionFormatBox.Items.Add(format.Value.Name);
+                    compressionFormats.Add(format.Key);
                 }
             }
-
-            SettingsPanel p = new SettingsPanel(archiveSettingsPanel);
-            p.AddComboBox("Block Size", new string[] { "16", "2048" }, ComboBoxStyle.DropDown);
-            p.AddRadioButtons("AFS Version", new string[] { "v1 (Dreamcast)", "v2" });
-            p.AddCheckBox("Choice #1");
-            p.AddCheckBox("Choice #2");
-            p.AddCheckBox("Choice #3");
         }
 
         private void AddFiles(IEnumerable<string> files)
@@ -71,6 +79,7 @@ namespace PuyoTools.GUI
             foreach (string file in files)
             {
                 FileEntry fileEntry = new FileEntry();
+                fileEntry.SourceFile = file;
                 fileEntry.Filename = Path.GetFileName(file);
                 fileEntry.FilenameInArchive = fileEntry.Filename;
 
@@ -91,12 +100,76 @@ namespace PuyoTools.GUI
             runButton.Enabled = (listView.Items.Count > 0 && archiveFormatBox.SelectedIndex > 0);
         }
 
-        private void InitalizeSettingsPanel(ArchiveFormat format)
+        private void Run(Settings settings)
         {
+            // For some archives, the file needs to be a specific format. As such,
+            // they may be rejected when trying to add them. We'll store such files in
+            // this list to let the user know they could not be added.
+            List<FileEntry> FilesNotAdded = new List<FileEntry>();
+
+            // Create the stream we are going to write the archive to
+            Stream destination;
+            if (settings.CompressionFormat == CompressionFormat.Unknown)
+            {
+                // We are not compression the archive. Write directly to the destination
+                destination = File.Create(settings.OutFilename);
+            }
+            else
+            {
+                // We are compressing the archive. Write to a memory stream first.
+                destination = new MemoryStream();
+            }
+
+            // Create the archive
+            ArchiveWriter archive = PTArchive.Create(destination, settings.ArchiveFormat, settings.ArchiveSettings);
+
+            // Add the files to the archive. We're going to do this in a try catch since
+            // sometimes an exception may be thrown (namely if the archive cannot contain
+            // the file the user is trying to add)
+            foreach (ListViewItem item in listView.Items)
+            {
+                FileEntry entry = (FileEntry)item.Tag;
+
+                try
+                {
+                    archive.AddFile(File.OpenRead(entry.SourceFile), entry.FilenameInArchive, entry.SourceFile);
+                }
+                catch (CannotAddFileToArchiveException)
+                {
+                    FilesNotAdded.Add(entry);
+                }
+            }
+
+            // If filesNotAdded is not empty, then show a message to the user
+            // and ask them if they want to continue
+            if (FilesNotAdded.Count > 0)
+            {
+                // ...
+            }
+
+            // Finish writing the archive
+            archive.Flush();
+
+            // Do we want to compress this archive?
+            if (settings.CompressionFormat != CompressionFormat.Unknown)
+            {
+                destination.Position = 0;
+
+                using (FileStream outStream = File.Create(settings.OutFilename))
+                {
+                    PTCompression.Compress(destination, outStream, (int)destination.Length, Path.GetFileName(settings.OutFilename), settings.CompressionFormat);
+                }
+            }
+
+            destination.Close();
+
+            // The tool is finished doing what it needs to do. We can close it now.
+            this.Close();
         }
 
         private struct FileEntry
         {
+            public string SourceFile;
             public string Filename;
             public string FilenameInArchive;
         }
@@ -130,7 +203,7 @@ namespace PuyoTools.GUI
 
             if (fbd.ShowDialog() == DialogResult.OK)
             {
-                if (MessageBox.Show("Include files within sub-directories?", "Subdirectories", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                if (MessageBox.Show("Include files within subdirectories?", "Subdirectories", MessageBoxButtons.YesNo) == DialogResult.Yes)
                 {
                     AddFiles(Directory.GetFiles(fbd.SelectedPath, "*.*", SearchOption.AllDirectories));
                 }
@@ -145,6 +218,13 @@ namespace PuyoTools.GUI
 
         private void archiveFormatBox_SelectedIndexChanged(object sender, EventArgs e)
         {
+            archiveSettingsPanel.Controls.Clear();
+
+            if (archiveFormatBox.SelectedIndex != 0)
+            {
+                archiveSettingsPanel.Controls.Add(formatSettingsPanel[archiveFormatBox.SelectedIndex - 1]);
+            }
+
             EnableRunButton();
         }
 
@@ -171,6 +251,8 @@ namespace PuyoTools.GUI
             {
                 listView.Items[i].SubItems[0].Text = (i + 1).ToString();
             }
+
+            EnableRunButton();
         }
 
         private void renameToolStripMenuItem_Click(object sender, EventArgs e)
@@ -192,18 +274,17 @@ namespace PuyoTools.GUI
         // A settings panel inside the settings panel. Isn't that great!
         // Actually, it's just so we don't need to use a million different panels
         // in the form designer.
-        private class SettingsPanel : Panel
+        public class SettingsPanel : Panel
         {
             int yPos = 0;
 
             public SettingsPanel(Panel parent)
             {
                 this.Dock = DockStyle.Fill;
-                parent.Controls.Add(this);
             }
 
             // Add a combo box (with a label) to the panel
-            public ComboBox AddComboBox(string labelText, string[] choices, ComboBoxStyle style)
+            public void AddComboBox(out ComboBox comboBox, string labelText, string[] choices, ComboBoxStyle style)
             {
                 Label label = new Label();
                 label.Location = new Point(this.Margin.Left + label.Margin.Left, yPos + 3);
@@ -211,34 +292,31 @@ namespace PuyoTools.GUI
                 label.Text = labelText;
                 this.Controls.Add(label);
 
-                ComboBox comboBox = new ComboBox();
+                comboBox = new ComboBox();
                 comboBox.Location = new Point(label.Left + label.Width + label.Margin.Right + comboBox.Margin.Left, yPos);
                 comboBox.Width = 150;
                 comboBox.DropDownStyle = style;
                 comboBox.Items.AddRange(choices);
+                comboBox.SelectedIndex = 0;
                 this.Controls.Add(comboBox);
 
                 yPos += 24;
-
-                return comboBox;
             }
 
             // Add a checkbox to the panel
-            public CheckBox AddCheckBox(string text)
+            public void AddCheckBox(out CheckBox checkBox, string text)
             {
-                CheckBox checkBox = new CheckBox();
+                checkBox = new CheckBox();
                 checkBox.Location = new Point(this.Margin.Left + checkBox.Margin.Left, yPos);
                 checkBox.AutoSize = true;
                 checkBox.Text = text;
                 this.Controls.Add(checkBox);
 
                 yPos += 24;
-
-                return checkBox;
             }
 
             // Add radio buttons (with a label) to the panel
-            public RadioButton[] AddRadioButtons(string labelText, string[] choices)
+            public void AddRadioButtons(out RadioButton[] radioButtons, string labelText, string[] choices)
             {
                 Label label = new Label();
                 label.Location = new Point(this.Margin.Left + label.Margin.Left, yPos + 3);
@@ -256,8 +334,9 @@ namespace PuyoTools.GUI
 
                 // Add the radio buttons to the panel
                 int panelYPos = 0;
-                RadioButton[] radioButtons = new RadioButton[choices.Length];
-                for (int i = 0; i < radioButtons.Length; i++)
+
+                radioButtons = new RadioButton[choices.Length];
+                for (int i = 0; i < choices.Length; i++)
                 {
                     radioButtons[i] = new RadioButton();
                     radioButtons[i].Location = new Point(this.Margin.Left + radioButtons[i].Margin.Left, panelYPos);
@@ -270,10 +349,57 @@ namespace PuyoTools.GUI
                     yPos += 20;
                 }
 
-                yPos += 4;
+                radioButtons[0].Checked = true;
 
-                return radioButtons;
+                yPos += 4;
             }
+        }
+
+        private void runButton_Click(object sender, EventArgs e)
+        {
+            // Get the format of the archive the user wants to create
+            ArchiveFormat archiveFormat = archiveFormats[archiveFormatBox.SelectedIndex - 1];
+            string fileExtension = (PTArchive.Formats[archiveFormat].Extension != String.Empty ? PTArchive.Formats[archiveFormat].Extension : ".*");
+
+            // Prompt the user to save the archive
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.Title = "Save Archive";
+            sfd.Filter = PTArchive.Formats[archiveFormat].Name + " Archive (*" + fileExtension + ")|*" + fileExtension + "|All Files (*.*)|*.*";
+
+            if (sfd.ShowDialog() == DialogResult.OK)
+            {
+                // Disable the form
+                this.Enabled = false;
+
+                Settings settings = new Settings();
+                settings.ArchiveFormat = archiveFormat;
+                settings.OutFilename = sfd.FileName;
+
+                if (compressionFormatBox.SelectedIndex != 0)
+                {
+                    settings.CompressionFormat = compressionFormats[compressionFormatBox.SelectedIndex - 1];
+                }
+                else
+                {
+                    settings.CompressionFormat = CompressionFormat.Unknown;
+                }
+
+                settings.ArchiveSettings = PTArchive.Formats[archiveFormat].SettingsInstance;
+                if (settings.ArchiveSettings != null)
+                {
+                    settings.ArchiveSettings.SetSettings();
+                }
+
+                Run(settings);
+            }
+        }
+
+        private struct Settings
+        {
+            public ArchiveFormat ArchiveFormat;
+            public CompressionFormat CompressionFormat;
+            public string OutFilename;
+            public ArchiveWriterSettings ArchiveSettings;
         }
     }
 }

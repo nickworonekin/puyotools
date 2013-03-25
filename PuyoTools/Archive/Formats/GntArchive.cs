@@ -13,7 +13,7 @@ namespace PuyoTools.Archive
 
         public override ArchiveWriter Create(Stream destination, ArchiveWriterSettings settings)
         {
-            return new Write(destination, settings);
+            return new Write(destination);
         }
 
         public override bool Is(Stream source, int length, string fname)
@@ -62,13 +62,10 @@ namespace PuyoTools.Archive
         {
             public Write(Stream destination)
             {
-                Initalize(destination, new ArchiveWriterSettings());
+                Initalize(destination);
             }
 
-            public Write(Stream destination, ArchiveWriterSettings settings)
-            {
-                Initalize(destination, settings);
-            }
+            public Write(Stream destination, ArchiveWriterSettings settings) : this(destination) { }
 
             public override void Flush()
             {
