@@ -54,4 +54,20 @@ namespace PuyoTools.Archive
             Dimensions = DimensionsCheckbox.Checked;
         }
     }
+
+    // SNT Writer
+    public partial class SntWriterSettings : ArchiveWriterSettings
+    {
+        private RadioButton[] TypeRadio;
+
+        public override void SetPanelContent(ArchiveCreator.SettingsPanel panel)
+        {
+            panel.AddRadioButtons(out TypeRadio, "SNT Type", new string[] { "PlayStation 2", "PlayStation Portable" });
+        }
+
+        public override void SetSettings()
+        {
+            Type = (TypeRadio[0].Checked ? SntType.Ps2 : SntType.Psp);
+        }
+    }
 }

@@ -13,9 +13,14 @@ namespace PuyoTools
         {
             Formats = new Dictionary<ArchiveFormat, FormatEntry>();
 
+            Formats.Add(ArchiveFormat.Acx, new FormatEntry(new AcxArchive(), null,                    "ACX", ".acx"));
             Formats.Add(ArchiveFormat.Afs, new FormatEntry(new AfsArchive(), new AfsWriterSettings(), "AFS", ".afs"));
             Formats.Add(ArchiveFormat.Gnt, new FormatEntry(new GntArchive(), null,                    "GNT", ".gnt"));
             Formats.Add(ArchiveFormat.Gvm, new FormatEntry(new GvmArchive(), new GvmWriterSettings(), "GVM", ".gvm"));
+            Formats.Add(ArchiveFormat.Mrg, new FormatEntry(new MrgArchive(), null,                    "MRG", ".mrg"));
+            Formats.Add(ArchiveFormat.Spk, new FormatEntry(new SpkArchive(), null,                    "SPK", ".spk"));
+            Formats.Add(ArchiveFormat.Snt, new FormatEntry(new SntArchive(), new SntWriterSettings(), "SNT", ".snt"));
+            Formats.Add(ArchiveFormat.Tex, new FormatEntry(new TexArchive(), null,                    "TEX", ".tex"));
             Formats.Add(ArchiveFormat.U8,  new FormatEntry(new U8Archive(),  null,                    "U8",  ".arc"));
         }
 
@@ -70,9 +75,14 @@ namespace PuyoTools
     public enum ArchiveFormat
     {
         Unknown,
+        Acx,
         Afs,
         Gnt,
         Gvm,
+        Mrg,
+        Spk,
+        Snt,
+        Tex,
         U8,
     }
 }

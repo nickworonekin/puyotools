@@ -71,6 +71,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Archive\ArchiveWriterSettings.cs" />
+    <Compile Include="Archive\Formats\MrgArchive.cs" />
+    <Compile Include="Archive\Formats\SntArchive.cs" />
+    <Compile Include="Archive\Formats\SpkArchive.cs" />
+    <Compile Include="Archive\Formats\TexArchive.cs" />
     <Compile Include="PTArchive.cs" />
     <Compile Include="Archive\ArchiveBase.cs" />
     <Compile Include="Archive\Formats\AcxArchive.cs" />
@@ -222,6 +226,7 @@
     </Compile>
     <Compile Include="StreamExtensions.cs" />
     <Compile Include="StringExtensions.cs" />
+    <Compile Include="Texture\Formats\GimTexture.cs" />
     <Compile Include="Texture\Formats\GvrTexture.cs" />
     <Compile Include="Texture\Formats\PvrTexture.cs" />
     <Compile Include="Texture\Formats\SvrTexture.cs" />

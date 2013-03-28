@@ -14,7 +14,7 @@ namespace PuyoTools.Archive
 
         public override ArchiveWriter Create(Stream destination, ArchiveWriterSettings settings)
         {
-            return new Write(destination, (GvmWriterSettings)settings);
+            return new Write(destination, (settings as GvmWriterSettings) ?? new GvmWriterSettings());
         }
 
         public override bool Is(Stream source, int length, string fname)

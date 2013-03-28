@@ -41,11 +41,6 @@
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.archiveSettingsPanel = new System.Windows.Forms.Panel();
             this.AFSsettingsPanel = new System.Windows.Forms.Panel();
-            this.AFSv2Radio = new System.Windows.Forms.RadioButton();
-            this.AFSv1Radio = new System.Windows.Forms.RadioButton();
-            this.label4 = new System.Windows.Forms.Label();
-            this.AFSblockSizeBox = new System.Windows.Forms.ComboBox();
-            this.label3 = new System.Windows.Forms.Label();
             this.compressionFormatBox = new System.Windows.Forms.ComboBox();
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
@@ -56,7 +51,6 @@
             this.itemContextMenu.SuspendLayout();
             this.tabPage2.SuspendLayout();
             this.archiveSettingsPanel.SuspendLayout();
-            this.AFSsettingsPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // settingsPanel
@@ -171,7 +165,7 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(556, 188);
+            this.tabPage2.Size = new System.Drawing.Size(556, 288);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Settings";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -187,67 +181,12 @@
             // 
             // AFSsettingsPanel
             // 
-            this.AFSsettingsPanel.Controls.Add(this.AFSv2Radio);
-            this.AFSsettingsPanel.Controls.Add(this.AFSv1Radio);
-            this.AFSsettingsPanel.Controls.Add(this.label4);
-            this.AFSsettingsPanel.Controls.Add(this.AFSblockSizeBox);
-            this.AFSsettingsPanel.Controls.Add(this.label3);
             this.AFSsettingsPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.AFSsettingsPanel.Location = new System.Drawing.Point(0, 0);
             this.AFSsettingsPanel.Name = "AFSsettingsPanel";
             this.AFSsettingsPanel.Size = new System.Drawing.Size(556, 258);
             this.AFSsettingsPanel.TabIndex = 0;
             this.AFSsettingsPanel.Visible = false;
-            // 
-            // AFSv2Radio
-            // 
-            this.AFSv2Radio.AutoSize = true;
-            this.AFSv2Radio.Location = new System.Drawing.Point(9, 73);
-            this.AFSv2Radio.Name = "AFSv2Radio";
-            this.AFSv2Radio.Padding = new System.Windows.Forms.Padding(20, 0, 0, 0);
-            this.AFSv2Radio.Size = new System.Drawing.Size(141, 17);
-            this.AFSv2Radio.TabIndex = 4;
-            this.AFSv2Radio.TabStop = true;
-            this.AFSv2Radio.Text = "v2 (Post-Dreamcast)";
-            this.AFSv2Radio.UseVisualStyleBackColor = true;
-            // 
-            // AFSv1Radio
-            // 
-            this.AFSv1Radio.AutoSize = true;
-            this.AFSv1Radio.Location = new System.Drawing.Point(9, 50);
-            this.AFSv1Radio.Name = "AFSv1Radio";
-            this.AFSv1Radio.Padding = new System.Windows.Forms.Padding(20, 0, 0, 0);
-            this.AFSv1Radio.Size = new System.Drawing.Size(117, 17);
-            this.AFSv1Radio.TabIndex = 3;
-            this.AFSv1Radio.TabStop = true;
-            this.AFSv1Radio.Text = "v1 (Dreamcast)";
-            this.AFSv1Radio.UseVisualStyleBackColor = true;
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(6, 34);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(65, 13);
-            this.label4.TabIndex = 2;
-            this.label4.Text = "AFS Version";
-            // 
-            // AFSblockSizeBox
-            // 
-            this.AFSblockSizeBox.FormattingEnabled = true;
-            this.AFSblockSizeBox.Location = new System.Drawing.Point(69, 4);
-            this.AFSblockSizeBox.Name = "AFSblockSizeBox";
-            this.AFSblockSizeBox.Size = new System.Drawing.Size(150, 21);
-            this.AFSblockSizeBox.TabIndex = 1;
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(6, 7);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(57, 13);
-            this.label3.TabIndex = 0;
-            this.label3.Text = "Block Size";
             // 
             // compressionFormatBox
             // 
@@ -305,8 +244,6 @@
             this.tabPage2.ResumeLayout(false);
             this.tabPage2.PerformLayout();
             this.archiveSettingsPanel.ResumeLayout(false);
-            this.AFSsettingsPanel.ResumeLayout(false);
-            this.AFSsettingsPanel.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -329,10 +266,5 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Panel archiveSettingsPanel;
         private System.Windows.Forms.Panel AFSsettingsPanel;
-        private System.Windows.Forms.ComboBox AFSblockSizeBox;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.RadioButton AFSv2Radio;
-        private System.Windows.Forms.RadioButton AFSv1Radio;
-        private System.Windows.Forms.Label label4;
     }
 }

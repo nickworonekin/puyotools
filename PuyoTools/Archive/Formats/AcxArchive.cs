@@ -83,8 +83,8 @@ namespace PuyoTools.Archive
                 int firstEntryOffset = entryOffset;
                 for (int i = 0; i < files.Count; i++)
                 {
-                    PTStream.WriteInt32(destination, entryOffset);
-                    PTStream.WriteInt32(destination, files[i].Length);
+                    PTStream.WriteInt32BE(destination, entryOffset);
+                    PTStream.WriteInt32BE(destination, files[i].Length);
 
                     entryOffset += PTMethods.RoundUp(files[i].Length, 4);
                 }

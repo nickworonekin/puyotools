@@ -13,7 +13,7 @@ namespace PuyoTools.Archive
 
         public override ArchiveWriter Create(Stream destination, ArchiveWriterSettings settings)
         {
-            return new Write(destination, (AfsWriterSettings)settings);
+            return new Write(destination, (settings as AfsWriterSettings) ?? new AfsWriterSettings());
         }
 
         public override bool Is(Stream source, int length, string fname)

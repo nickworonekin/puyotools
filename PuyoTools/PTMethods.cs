@@ -63,6 +63,20 @@ namespace PuyoTools
         }
 
         /// <summary>
+        /// Writes a byte to the current stream a specified amount of times.
+        /// </summary>
+        /// <param name="destination">The stream to write to.</param>
+        /// <param name="value">Value to write to the stream.</param>
+        /// <param name="amount">Number of times to write the value to the stream.</param>
+        public static void WriteByteRepeated(Stream destination, byte value, int amount)
+        {
+            for (int i = 0; i < amount; i++)
+            {
+                destination.WriteByte(value);
+            }
+        }
+
+        /// <summary>
         /// Reads the bytes from the current stream and writes them to another stream.
         /// </summary>
         /// <param name="source">The stream to read from.</param>

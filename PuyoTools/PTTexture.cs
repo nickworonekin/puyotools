@@ -14,6 +14,7 @@ namespace PuyoTools
         {
             Formats = new Dictionary<TextureFormat, FormatEntry>();
 
+            Formats.Add(TextureFormat.Gim, new FormatEntry(new GimTexture(), "GIM", ".gim", String.Empty));
             Formats.Add(TextureFormat.Gvr, new FormatEntry(new GvrTexture(), "GVR", ".gvr", ".gvp"));
             Formats.Add(TextureFormat.Pvr, new FormatEntry(new PvrTexture(), "PVR", ".pvr", ".pvp"));
             Formats.Add(TextureFormat.Svr, new FormatEntry(new SvrTexture(), "SVR", ".svr", ".svp"));
@@ -102,6 +103,7 @@ namespace PuyoTools
     public enum TextureFormat
     {
         Unknown,
+        Gim,
         Gvr,
         Pvr,
         Svr,
