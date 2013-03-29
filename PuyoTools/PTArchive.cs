@@ -18,6 +18,7 @@ namespace PuyoTools
             Formats.Add(ArchiveFormat.Gnt, new FormatEntry(new GntArchive(), null,                    "GNT", ".gnt"));
             Formats.Add(ArchiveFormat.Gvm, new FormatEntry(new GvmArchive(), new GvmWriterSettings(), "GVM", ".gvm"));
             Formats.Add(ArchiveFormat.Mrg, new FormatEntry(new MrgArchive(), null,                    "MRG", ".mrg"));
+            Formats.Add(ArchiveFormat.Pvm, new FormatEntry(new PvmArchive(), new PvmWriterSettings(), "PVM", ".pvm"));
             Formats.Add(ArchiveFormat.Spk, new FormatEntry(new SpkArchive(), null,                    "SPK", ".spk"));
             Formats.Add(ArchiveFormat.Snt, new FormatEntry(new SntArchive(), new SntWriterSettings(), "SNT", ".snt"));
             Formats.Add(ArchiveFormat.Tex, new FormatEntry(new TexArchive(), null,                    "TEX", ".tex"));
@@ -80,6 +81,7 @@ namespace PuyoTools
         Gnt,
         Gvm,
         Mrg,
+        Pvm,
         Spk,
         Snt,
         Tex,

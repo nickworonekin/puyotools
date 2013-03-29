@@ -55,6 +55,28 @@ namespace PuyoTools.Archive
         }
     }
 
+    // PVM Writer
+    public partial class PvmWriterSettings : ArchiveWriterSettings
+    {
+        private CheckBox FilenameCheckbox, GlobalIndexCheckbox, FormatsCheckbox, DimensionsCheckbox;
+
+        public override void SetPanelContent(ArchiveCreator.SettingsPanel panel)
+        {
+            panel.AddCheckBox(out FilenameCheckbox, "Store Filenames");
+            panel.AddCheckBox(out GlobalIndexCheckbox, "Store Global Indicies");
+            panel.AddCheckBox(out FormatsCheckbox, "Store Texture Format");
+            panel.AddCheckBox(out DimensionsCheckbox, "Store Texture Dimensions");
+        }
+
+        public override void SetSettings()
+        {
+            Filename = FilenameCheckbox.Checked;
+            GlobalIndex = GlobalIndexCheckbox.Checked;
+            Formats = FormatsCheckbox.Checked;
+            Dimensions = DimensionsCheckbox.Checked;
+        }
+    }
+
     // SNT Writer
     public partial class SntWriterSettings : ArchiveWriterSettings
     {

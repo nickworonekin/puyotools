@@ -72,6 +72,7 @@
   <ItemGroup>
     <Compile Include="Archive\ArchiveWriterSettings.cs" />
     <Compile Include="Archive\Formats\MrgArchive.cs" />
+    <Compile Include="Archive\Formats\PvmArchive.cs" />
     <Compile Include="Archive\Formats\SntArchive.cs" />
     <Compile Include="Archive\Formats\SpkArchive.cs" />
     <Compile Include="Archive\Formats\TexArchive.cs" />
