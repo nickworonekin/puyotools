@@ -9,11 +9,34 @@ using System.IO;
 
 namespace PuyoTools.GUI
 {
-    public partial class Decompressor : ToolForm
+    public partial class FileCompressor : ToolForm
     {
-        public Decompressor()
+        List<CompressionFormat> compressionFormats;
+
+        public FileCompressor()
         {
             InitializeComponent();
+
+            // Add additional event handlers from the base class
+            addFilesButton.Click += EnableRunButton;
+            addDirectoryButton.Click += EnableRunButton;
+
+            // Fill the compression format box
+            compressionFormatBox.SelectedIndex = 0;
+            compressionFormats = new List<CompressionFormat>();
+            foreach (KeyValuePair<CompressionFormat, PTCompression.FormatEntry> format in PTCompression.Formats)
+            {
+                if (format.Value.Instance.CanCompress())
+                {
+                    compressionFormatBox.Items.Add(format.Value.Name);
+                    compressionFormats.Add(format.Key);
+                }
+            }
+        }
+
+        private void EnableRunButton(object sender, EventArgs e)
+        {
+            runButton.Enabled = (fileList.Count > 0 && compressionFormatBox.SelectedIndex > 0);
         }
 
         private void Run(Settings settings)
@@ -24,20 +47,13 @@ namespace PuyoTools.GUI
                 // But, we're going to do this in a try catch in case any errors happen.
                 try
                 {
-                    CompressionFormat format;
                     MemoryStream buffer = new MemoryStream();
 
                     using (FileStream source = File.OpenRead(file))
                     {
-                        // Just run it through the decompressor.
-                        // No need to check the format beforehand.
-                        format = PTCompression.Decompress(source, buffer, (int)source.Length, Path.GetFileName(file));
+                        // Run it through the compressor.
+                        PTCompression.Compress(source, buffer, (int)source.Length, Path.GetFileName(file), settings.CompressionFormat);
                     }
-
-                    // If the compression format is unknown, then nothing happened.
-                    // Just continue on with the next file
-                    if (format == CompressionFormat.Unknown)
-                        continue;
 
                     // Now that we have a decompressed file (we hope!), let's see what we need to do with it.
                     if (settings.OverwriteSourceFile)
@@ -53,7 +69,7 @@ namespace PuyoTools.GUI
                     }
 
                     // Get the output path and create it if it does not exist.
-                    string outPath = Path.Combine(Path.GetDirectoryName(file), "Decompressed Files");
+                    string outPath = Path.Combine(Path.GetDirectoryName(file), "Compressed Files");
                     if (!Directory.Exists(outPath))
                     {
                         Directory.CreateDirectory(outPath);
@@ -83,6 +99,7 @@ namespace PuyoTools.GUI
 
         private struct Settings
         {
+            public CompressionFormat CompressionFormat;
             public bool OverwriteSourceFile;
             public bool DeleteSourceFile;
         }
@@ -94,6 +111,7 @@ namespace PuyoTools.GUI
 
             // Set up the settings we will be using for this
             Settings settings = new Settings();
+            settings.CompressionFormat = compressionFormats[compressionFormatBox.SelectedIndex - 1];
             settings.OverwriteSourceFile = overwriteSourceFileCheckbox.Checked;
             settings.DeleteSourceFile = deleteSourceFileCheckbox.Checked;
 

@@ -52,6 +52,7 @@ namespace PuyoTools.Archive
 
                 // rootNode.Length is essentially how many files are contained in the archive, so we'll
                 // do just that
+                int shift = 0;
                 for (int i = 0; i < rootNode.Length - 1; i++)
                 {
                     // Read in this node
@@ -74,11 +75,11 @@ namespace PuyoTools.Archive
 
                     // A directory node
                     // In its present state, Puyo Tools can't handle directories in archives.
-                    // In the meantime, we'll just add the directory as a file entry with a length of 0.
+                    // In the meantime, we'll just skip it
                     else if (node.Type == 1)
                     {
-                        entry.Offset = 0;
-                        entry.Length = 0;
+                        shift++;
+                        continue;
                     }
 
                     // Get the filename for the entry
@@ -88,7 +89,13 @@ namespace PuyoTools.Archive
                     source.Position = oldPosition;
 
                     // Add this entry to the file list
-                    Files[i] = entry;
+                    Files[i - shift] = entry;
+                }
+
+                // Resize the array if there were directory entries
+                if (shift != 0)
+                {
+                    Array.Resize<ArchiveEntry>(ref Files, Files.Length - shift);
                 }
 
                 // Set the position of the stream to the end of the file

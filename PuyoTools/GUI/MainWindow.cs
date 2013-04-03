@@ -27,7 +27,7 @@ namespace PuyoTools.GUI
         private void selectFilesToolStripMenuItem_Click(object sender, EventArgs e)
         {
             //new Old.Decompressor();
-            (new Decompressor()).Show();
+            (new FileDecompressor()).Show();
         }
 
         private void selectDirectoryToolStripMenuItem_Click(object sender, EventArgs e)
@@ -37,12 +37,14 @@ namespace PuyoTools.GUI
 
         private void selectFilesToolStripMenuItem3_Click(object sender, EventArgs e)
         {
-            new Old.Compressor();
+            //new Old.Compressor();
+            (new FileCompressor()).Show();
         }
 
         private void selectDirectoryToolStripMenuItem3_Click(object sender, EventArgs e)
         {
-            new Old.Compressor(true);
+            //new Old.Compressor(true);
+            (new FileCompressor()).Show();
         }
 
         private void selectFilesToolStripMenuItem1_Click(object sender, EventArgs e)
@@ -99,7 +101,7 @@ namespace PuyoTools.GUI
 
         private void decompressToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            (new Decompressor()).Show();
+            (new FileDecompressor()).Show();
         }
 
         private void extractToolStripMenuItem_Click(object sender, EventArgs e)
@@ -110,6 +112,11 @@ namespace PuyoTools.GUI
         private void decodeToolStripMenuItem_Click(object sender, EventArgs e)
         {
             (new TextureDecoder()).Show();
+        }
+
+        private void compressToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            (new FileCompressor()).Show();
         }
     }
 }

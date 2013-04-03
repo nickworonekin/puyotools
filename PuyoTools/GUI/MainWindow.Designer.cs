@@ -32,8 +32,6 @@
             this.compressionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.decompressToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.compressToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.selectFilesToolStripMenuItem3 = new System.Windows.Forms.ToolStripMenuItem();
-            this.selectDirectoryToolStripMenuItem3 = new System.Windows.Forms.ToolStripMenuItem();
             this.archiveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.extractToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.createToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -83,26 +81,10 @@
             // 
             // compressToolStripMenuItem
             // 
-            this.compressToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.selectFilesToolStripMenuItem3,
-            this.selectDirectoryToolStripMenuItem3});
             this.compressToolStripMenuItem.Name = "compressToolStripMenuItem";
             this.compressToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.compressToolStripMenuItem.Text = "Compress";
-            // 
-            // selectFilesToolStripMenuItem3
-            // 
-            this.selectFilesToolStripMenuItem3.Name = "selectFilesToolStripMenuItem3";
-            this.selectFilesToolStripMenuItem3.Size = new System.Drawing.Size(156, 22);
-            this.selectFilesToolStripMenuItem3.Text = "Select Files";
-            this.selectFilesToolStripMenuItem3.Click += new System.EventHandler(this.selectFilesToolStripMenuItem3_Click);
-            // 
-            // selectDirectoryToolStripMenuItem3
-            // 
-            this.selectDirectoryToolStripMenuItem3.Name = "selectDirectoryToolStripMenuItem3";
-            this.selectDirectoryToolStripMenuItem3.Size = new System.Drawing.Size(156, 22);
-            this.selectDirectoryToolStripMenuItem3.Text = "Select Directory";
-            this.selectDirectoryToolStripMenuItem3.Click += new System.EventHandler(this.selectDirectoryToolStripMenuItem3_Click);
+            this.compressToolStripMenuItem.Click += new System.EventHandler(this.compressToolStripMenuItem_Click);
             // 
             // archiveToolStripMenuItem
             // 
@@ -118,26 +100,26 @@
             // extractToolStripMenuItem
             // 
             this.extractToolStripMenuItem.Name = "extractToolStripMenuItem";
-            this.extractToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.extractToolStripMenuItem.Size = new System.Drawing.Size(116, 22);
             this.extractToolStripMenuItem.Text = "Extract";
             this.extractToolStripMenuItem.Click += new System.EventHandler(this.extractToolStripMenuItem_Click);
             // 
             // createToolStripMenuItem
             // 
             this.createToolStripMenuItem.Name = "createToolStripMenuItem";
-            this.createToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.createToolStripMenuItem.Size = new System.Drawing.Size(116, 22);
             this.createToolStripMenuItem.Text = "Create";
             this.createToolStripMenuItem.Click += new System.EventHandler(this.createToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(149, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(113, 6);
             // 
             // explorerToolStripMenuItem
             // 
             this.explorerToolStripMenuItem.Name = "explorerToolStripMenuItem";
-            this.explorerToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.explorerToolStripMenuItem.Size = new System.Drawing.Size(116, 22);
             this.explorerToolStripMenuItem.Text = "Explorer";
             this.explorerToolStripMenuItem.Click += new System.EventHandler(this.explorerToolStripMenuItem_Click);
             // 
@@ -155,7 +137,7 @@
             // decodeToolStripMenuItem
             // 
             this.decodeToolStripMenuItem.Name = "decodeToolStripMenuItem";
-            this.decodeToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.decodeToolStripMenuItem.Size = new System.Drawing.Size(114, 22);
             this.decodeToolStripMenuItem.Text = "Decode";
             this.decodeToolStripMenuItem.Click += new System.EventHandler(this.decodeToolStripMenuItem_Click);
             // 
@@ -165,7 +147,7 @@
             this.selectFilesToolStripMenuItem4,
             this.selectDirectoryToolStripMenuItem4});
             this.encodeToolStripMenuItem.Name = "encodeToolStripMenuItem";
-            this.encodeToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.encodeToolStripMenuItem.Size = new System.Drawing.Size(114, 22);
             this.encodeToolStripMenuItem.Text = "Encode";
             // 
             // selectFilesToolStripMenuItem4
@@ -185,12 +167,12 @@
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(149, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(111, 6);
             // 
             // viewerToolStripMenuItem
             // 
             this.viewerToolStripMenuItem.Name = "viewerToolStripMenuItem";
-            this.viewerToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.viewerToolStripMenuItem.Size = new System.Drawing.Size(114, 22);
             this.viewerToolStripMenuItem.Text = "Viewer";
             this.viewerToolStripMenuItem.Click += new System.EventHandler(this.viewerToolStripMenuItem_Click);
             // 
@@ -270,8 +252,6 @@
         private System.Windows.Forms.ToolStripMenuItem viewerToolStripMenuItem;
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.Label versionLabel;
-        private System.Windows.Forms.ToolStripMenuItem selectFilesToolStripMenuItem3;
-        private System.Windows.Forms.ToolStripMenuItem selectDirectoryToolStripMenuItem3;
         private System.Windows.Forms.ToolStripMenuItem selectFilesToolStripMenuItem4;
         private System.Windows.Forms.ToolStripMenuItem selectDirectoryToolStripMenuItem4;
         private System.Windows.Forms.LinkLabel linkLabel1;

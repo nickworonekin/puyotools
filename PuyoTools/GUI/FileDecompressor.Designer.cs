@@ -1,6 +1,6 @@
 ﻿namespace PuyoTools.GUI
 {
-    partial class Decompressor
+    partial class FileDecompressor
     {
         /// <summary>
         /// Required designer variable.
@@ -62,12 +62,12 @@
             this.deleteSourceFileCheckbox.Text = "Delete source file (upon success)";
             this.deleteSourceFileCheckbox.UseVisualStyleBackColor = true;
             // 
-            // Decompressor
+            // FileDecompressor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.ClientSize = new System.Drawing.Size(584, 362);
-            this.Name = "Decompressor";
-            this.Text = "Decompressor";
+            this.Name = "FileDecompressor";
+            this.Text = "File Decompressor";
             this.settingsPanel.ResumeLayout(false);
             this.settingsPanel.PerformLayout();
             this.ResumeLayout(false);
