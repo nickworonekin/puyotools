@@ -7,7 +7,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.IO;
 
-using PuyoTools.Archive;
+using PuyoTools.Modules.Archive;
 
 // This is only needed until I make a nice rename form
 using Microsoft.VisualBasic;
@@ -43,18 +43,18 @@ namespace PuyoTools.GUI
             // Fill the archive format box
             archiveFormatBox.SelectedIndex = 0;
             archiveFormats = new List<ArchiveFormat>();
-            foreach (KeyValuePair<ArchiveFormat, PTArchive.FormatEntry> format in PTArchive.Formats)
+            foreach (KeyValuePair<ArchiveFormat, Archive.FormatEntry> format in Archive.Formats)
             {
-                if (format.Value.Instance.CanCreate())
+                if (format.Value.Instance.CanCreate)
                 {
-                    archiveFormatBox.Items.Add(format.Value.Name);
+                    archiveFormatBox.Items.Add(format.Value.Instance.Name);
                     archiveFormats.Add(format.Key);
 
                     SettingsPanel panel = new SettingsPanel(archiveSettingsPanel);
 
-                    if (format.Value.SettingsInstance != null)
+                    if (format.Value.SettingsInstanceGUI != null)
                     {
-                        format.Value.SettingsInstance.SetPanelContent(panel);
+                        format.Value.SettingsInstanceGUI.SetPanelContent(panel);
                     }
 
                     formatSettingsPanel.Add(panel);
@@ -64,11 +64,11 @@ namespace PuyoTools.GUI
             // Fill the compression format box
             compressionFormatBox.SelectedIndex = 0;
             compressionFormats = new List<CompressionFormat>();
-            foreach (KeyValuePair<CompressionFormat, PTCompression.FormatEntry> format in PTCompression.Formats)
+            foreach (KeyValuePair<CompressionFormat, Compression.FormatEntry> format in Compression.Formats)
             {
-                if (format.Value.Instance.CanCompress())
+                if (format.Value.Instance.CanCompress)
                 {
-                    compressionFormatBox.Items.Add(format.Value.Name);
+                    compressionFormatBox.Items.Add(format.Value.Instance.Name);
                     compressionFormats.Add(format.Key);
                 }
             }
@@ -121,7 +121,7 @@ namespace PuyoTools.GUI
             }
 
             // Create the archive
-            ArchiveWriter archive = PTArchive.Create(destination, settings.ArchiveFormat, settings.ArchiveSettings);
+            ArchiveWriter archive = Archive.Create(destination, settings.ArchiveFormat, settings.ArchiveSettings);
 
             // Add the files to the archive. We're going to do this in a try catch since
             // sometimes an exception may be thrown (namely if the archive cannot contain
@@ -157,7 +157,7 @@ namespace PuyoTools.GUI
 
                 using (FileStream outStream = File.Create(settings.OutFilename))
                 {
-                    PTCompression.Compress(destination, outStream, (int)destination.Length, Path.GetFileName(settings.OutFilename), settings.CompressionFormat);
+                    Compression.Compress(destination, outStream, (int)destination.Length, Path.GetFileName(settings.OutFilename), settings.CompressionFormat);
                 }
             }
 
@@ -359,12 +359,12 @@ namespace PuyoTools.GUI
         {
             // Get the format of the archive the user wants to create
             ArchiveFormat archiveFormat = archiveFormats[archiveFormatBox.SelectedIndex - 1];
-            string fileExtension = (PTArchive.Formats[archiveFormat].Extension != String.Empty ? PTArchive.Formats[archiveFormat].Extension : ".*");
+            string fileExtension = (Archive.Formats[archiveFormat].Instance.FileExtension != String.Empty ? Archive.Formats[archiveFormat].Instance.FileExtension : ".*");
 
             // Prompt the user to save the archive
             SaveFileDialog sfd = new SaveFileDialog();
             sfd.Title = "Save Archive";
-            sfd.Filter = PTArchive.Formats[archiveFormat].Name + " Archive (*" + fileExtension + ")|*" + fileExtension + "|All Files (*.*)|*.*";
+            sfd.Filter = Archive.Formats[archiveFormat].Instance.Name + " Archive (*" + fileExtension + ")|*" + fileExtension + "|All Files (*.*)|*.*";
 
             if (sfd.ShowDialog() == DialogResult.OK)
             {
@@ -384,10 +384,10 @@ namespace PuyoTools.GUI
                     settings.CompressionFormat = CompressionFormat.Unknown;
                 }
 
-                settings.ArchiveSettings = PTArchive.Formats[archiveFormat].SettingsInstance;
-                if (settings.ArchiveSettings != null)
+                settings.ArchiveSettings = Archive.Formats[archiveFormat].Instance.GetWriterSettings();
+                if (Archive.Formats[archiveFormat].SettingsInstanceGUI != null)
                 {
-                    settings.ArchiveSettings.SetSettings();
+                    Archive.Formats[archiveFormat].SettingsInstanceGUI.SetSettings(settings.ArchiveSettings);
                 }
 
                 Run(settings);

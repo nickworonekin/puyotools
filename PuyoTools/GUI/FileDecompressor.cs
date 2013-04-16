@@ -31,7 +31,7 @@ namespace PuyoTools.GUI
                     {
                         // Just run it through the decompressor.
                         // No need to check the format beforehand.
-                        format = PTCompression.Decompress(source, buffer, (int)source.Length, Path.GetFileName(file));
+                        format = Compression.Decompress(source, buffer, (int)source.Length, Path.GetFileName(file));
                     }
 
                     // If the compression format is unknown, then nothing happened.

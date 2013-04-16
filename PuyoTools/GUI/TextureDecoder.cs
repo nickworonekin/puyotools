@@ -8,7 +8,7 @@ using System.Windows.Forms;
 using System.Drawing.Imaging;
 using System.IO;
 
-using PuyoTools.Texture;
+using PuyoTools.Modules.Texture;
 
 namespace PuyoTools.GUI
 {
@@ -38,7 +38,7 @@ namespace PuyoTools.GUI
                         Stream source = inStream;
 
                         // Get the format of the texture
-                        format = PTTexture.GetFormat(source, (int)source.Length, Path.GetFileName(file));
+                        format = Texture.GetFormat(source, (int)source.Length, Path.GetFileName(file));
                         if (format == TextureFormat.Unknown)
                         {
                             // Maybe it's compressed? Let's check.
@@ -46,15 +46,15 @@ namespace PuyoTools.GUI
                             if (settings.DecodeCompressedTextures)
                             {
                                 // Get the compression format, if it is compressed that is.
-                                CompressionFormat compressionFormat = PTCompression.GetFormat(source, (int)source.Length, Path.GetFileName(file));
+                                CompressionFormat compressionFormat = Compression.GetFormat(source, (int)source.Length, Path.GetFileName(file));
                                 if (compressionFormat != CompressionFormat.Unknown)
                                 {
                                     // Ok, it appears to be compressed. Let's decompress it, and then check the format again
                                     source = new MemoryStream();
-                                    PTCompression.Decompress(inStream, source, (int)inStream.Length, compressionFormat);
+                                    Compression.Decompress(inStream, source, (int)inStream.Length, compressionFormat);
 
                                     source.Position = 0;
-                                    format = PTTexture.GetFormat(source, (int)source.Length, Path.GetFileName(file));
+                                    format = Texture.GetFormat(source, (int)source.Length, Path.GetFileName(file));
                                 }
                             }
 
@@ -68,13 +68,13 @@ namespace PuyoTools.GUI
                         // Alright, let's decode the texture now
                         try
                         {
-                            PTTexture.Read(source, textureData, (int)source.Length, format);
+                            Texture.Read(source, textureData, (int)source.Length, format);
                         }
                         catch (TextureNeedsPaletteException)
                         {
                             // It appears that we need to load an external palette.
                             // Let's get the filename for this palette file, see if it exists, and load it in
-                            string paletteName = Path.Combine(Path.GetDirectoryName(file), Path.GetFileNameWithoutExtension(file)) + PTTexture.Formats[format].PaletteExtension;
+                            string paletteName = Path.Combine(Path.GetDirectoryName(file), Path.GetFileNameWithoutExtension(file)) + Texture.Formats[format].Instance.PaletteFileExtension;
 
                             if (!File.Exists(paletteName))
                             {
@@ -86,7 +86,7 @@ namespace PuyoTools.GUI
                             textureData = new MemoryStream(); // Just incase some data was written
                             using (FileStream paletteData = File.OpenRead(paletteName))
                             {
-                                PTTexture.ReadWithPalette(source, paletteData, textureData, (int)source.Length, (int)paletteData.Length, format);
+                                Texture.ReadWithPalette(source, paletteData, textureData, (int)source.Length, (int)paletteData.Length, format);
                             }
 
                             // Delete the palette file if the user chose to delete the source texture

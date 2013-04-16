@@ -9,7 +9,7 @@ using System.Windows.Forms;
 using System.IO;
 using System.Drawing.Imaging;
 
-using PuyoTools.Texture;
+using PuyoTools.Modules.Texture;
 
 namespace PuyoTools.GUI
 {
@@ -37,7 +37,7 @@ namespace PuyoTools.GUI
         public void OpenTexture(Stream data, int length, string fname, TextureFormat format)
         {
             Bitmap textureBitmap;
-            PTTexture.Read(data, out textureBitmap, length, format);
+            Texture.Read(data, out textureBitmap, length, format);
 
             DisplayTexture(textureBitmap, fname, format);
         }
@@ -45,7 +45,7 @@ namespace PuyoTools.GUI
         public void OpenTexture(Stream data, Stream paletteData, int length, int paletteLength, string fname, TextureFormat format)
         {
             Bitmap textureBitmap;
-            PTTexture.ReadWithPalette(data, paletteData, out textureBitmap, length, paletteLength, format);
+            Texture.ReadWithPalette(data, paletteData, out textureBitmap, length, paletteLength, format);
 
             DisplayTexture(textureBitmap, fname, format);
         }
@@ -68,7 +68,7 @@ namespace PuyoTools.GUI
             // Display information about the texture
             textureNameLabel.Text = (fname == String.Empty ? "Unnamed" : fname);
             textureDimensionsLabel.Text = textureBitmap.Width + " x " + textureBitmap.Height;
-            textureFormatLabel.Text = PTTexture.Formats[format].Name;
+            textureFormatLabel.Text = Texture.Formats[format].Instance.Name;
 
             textureInfoPanel.Visible = true;
             textureDisplay.Visible = true;
@@ -107,21 +107,21 @@ namespace PuyoTools.GUI
                 // Let's determine first if it is a texture
                 TextureFormat textureFormat;
 
-                textureFormat = PTTexture.GetFormat(data, (int)data.Length, ofd.SafeFileName);
+                textureFormat = Texture.GetFormat(data, (int)data.Length, ofd.SafeFileName);
 
                 if (textureFormat == TextureFormat.Unknown)
                 {
                     // It's not a texture. Maybe it's compressed?
-                    CompressionFormat compressionFormat = PTCompression.GetFormat(data, (int)data.Length, ofd.SafeFileName);
+                    CompressionFormat compressionFormat = Compression.GetFormat(data, (int)data.Length, ofd.SafeFileName);
                     if (compressionFormat != CompressionFormat.Unknown)
                     {
                         // The file is compressed! Let's decompress it and then try to determine if it is a texture
                         MemoryStream decompressedData = new MemoryStream();
-                        PTCompression.Decompress(data, decompressedData, (int)data.Length, compressionFormat);
+                        Compression.Decompress(data, decompressedData, (int)data.Length, compressionFormat);
                         decompressedData.Position = 0;
 
                         // Now with this decompressed data, let's determine if it is a texture
-                        textureFormat = PTTexture.GetFormat(decompressedData, (int)decompressedData.Length, ofd.SafeFileName);
+                        textureFormat = Texture.GetFormat(decompressedData, (int)decompressedData.Length, ofd.SafeFileName);
                     }
 
                     if (textureFormat == TextureFormat.Unknown)
@@ -139,7 +139,7 @@ namespace PuyoTools.GUI
                 catch (TextureNeedsPaletteException)
                 {
                     // Seems like we need a palette for this texture. Let's try to find one.
-                    string paletteName = Path.Combine(Path.GetDirectoryName(ofd.FileName), Path.GetFileNameWithoutExtension(ofd.FileName)) + PTTexture.Formats[textureFormat].PaletteExtension;
+                    string paletteName = Path.Combine(Path.GetDirectoryName(ofd.FileName), Path.GetFileNameWithoutExtension(ofd.FileName)) + Texture.Formats[textureFormat].Instance.PaletteFileExtension;
 
                     if (File.Exists(paletteName))
                     {

@@ -24,11 +24,11 @@ namespace PuyoTools.GUI
             // Fill the compression format box
             compressionFormatBox.SelectedIndex = 0;
             compressionFormats = new List<CompressionFormat>();
-            foreach (KeyValuePair<CompressionFormat, PTCompression.FormatEntry> format in PTCompression.Formats)
+            foreach (KeyValuePair<CompressionFormat, Compression.FormatEntry> format in Compression.Formats)
             {
-                if (format.Value.Instance.CanCompress())
+                if (format.Value.Instance.CanCompress)
                 {
-                    compressionFormatBox.Items.Add(format.Value.Name);
+                    compressionFormatBox.Items.Add(format.Value.Instance.Name);
                     compressionFormats.Add(format.Key);
                 }
             }
@@ -52,7 +52,7 @@ namespace PuyoTools.GUI
                     using (FileStream source = File.OpenRead(file))
                     {
                         // Run it through the compressor.
-                        PTCompression.Compress(source, buffer, (int)source.Length, Path.GetFileName(file), settings.CompressionFormat);
+                        Compression.Compress(source, buffer, (int)source.Length, Path.GetFileName(file), settings.CompressionFormat);
                     }
 
                     // Now that we have a decompressed file (we hope!), let's see what we need to do with it.

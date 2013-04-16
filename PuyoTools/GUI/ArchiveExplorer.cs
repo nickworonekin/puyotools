@@ -8,8 +8,9 @@ using System.Text;
 using System.Windows.Forms;
 using System.IO;
 
-using PuyoTools.Archive;
-using PuyoTools.Texture;
+using PuyoTools.Modules;
+using PuyoTools.Modules.Archive;
+using PuyoTools.Modules.Texture;
 
 namespace PuyoTools.GUI
 {
@@ -44,7 +45,7 @@ namespace PuyoTools.GUI
         private void OpenArchive(Stream data, int length, string fname, ArchiveFormat format)
         {
             // Let's open the archive and add it to the stack
-            ArchiveReader archive = PTArchive.Open(data, length, format);
+            ArchiveReader archive = Archive.Open(data, length, format);
 
             ArchiveInfo info = new ArchiveInfo();
             info.Format = format;
@@ -72,7 +73,7 @@ namespace PuyoTools.GUI
                 ArchiveInfo info = OpenedArchives.Peek();
 
                 // Seems like we need a palette for this texture. Let's try to find one.
-                string textureName = Path.GetFileNameWithoutExtension(fname) + PTTexture.Formats[format].PaletteExtension;
+                string textureName = Path.GetFileNameWithoutExtension(fname) + Texture.Formats[format].Instance.PaletteFileExtension;
                 int paletteFileIndex = -1;
 
                 for (int i = 0; i < info.Archive.Files.Length; i++)
@@ -133,7 +134,7 @@ namespace PuyoTools.GUI
 
             // Display information about the archive
             numFilesLabel.Text = info.Archive.Files.Length.ToString();
-            archiveFormatLabel.Text = PTArchive.Formats[info.Format].Name;
+            archiveFormatLabel.Text = Archive.Formats[info.Format].Instance.Name;
 
             archiveNameLabel.Text = OpenedArchiveNames[0];
             for (int i = 1; i < OpenedArchiveNames.Count; i++)
@@ -177,7 +178,7 @@ namespace PuyoTools.GUI
                 // Let's determine first if it is an archive
                 ArchiveFormat archiveFormat;
 
-                archiveFormat = PTArchive.GetFormat(data, (int)data.Length, ofd.SafeFileName);
+                archiveFormat = Archive.GetFormat(data, (int)data.Length, ofd.SafeFileName);
                 if (archiveFormat != ArchiveFormat.Unknown)
                 {
                     // This is an archive. Let's open it.
@@ -191,16 +192,16 @@ namespace PuyoTools.GUI
                 }
 
                 // It's not an archive. Maybe it's compressed?
-                CompressionFormat compressionFormat = PTCompression.GetFormat(data, (int)data.Length, ofd.SafeFileName);
+                CompressionFormat compressionFormat = Compression.GetFormat(data, (int)data.Length, ofd.SafeFileName);
                 if (compressionFormat != CompressionFormat.Unknown)
                 {
                     // The file is compressed! Let's decompress it and then try to determine if it is an archive
                     MemoryStream decompressedData = new MemoryStream();
-                    PTCompression.Decompress(data, decompressedData, (int)data.Length, compressionFormat);
+                    Compression.Decompress(data, decompressedData, (int)data.Length, compressionFormat);
                     decompressedData.Position = 0;
 
                     // Now with this decompressed data, let's determine if it is an archive
-                    archiveFormat = PTArchive.GetFormat(decompressedData, (int)decompressedData.Length, ofd.SafeFileName);
+                    archiveFormat = Archive.GetFormat(decompressedData, (int)decompressedData.Length, ofd.SafeFileName);
                     if (archiveFormat != ArchiveFormat.Unknown)
                     {
                         // This is an archive. Let's open it.
@@ -246,7 +247,7 @@ namespace PuyoTools.GUI
             ArchiveFormat archiveFormat;
             TextureFormat textureFormat;
 
-            archiveFormat = PTArchive.GetFormat(entry.Stream, entry.Length, entry.Filename);
+            archiveFormat = Archive.GetFormat(entry.Stream, entry.Length, entry.Filename);
             if (archiveFormat != ArchiveFormat.Unknown)
             {
                 // This is an archive. Let's open it.
@@ -255,7 +256,7 @@ namespace PuyoTools.GUI
                 return;
             }
 
-            textureFormat = PTTexture.GetFormat(entry.Stream, entry.Length, entry.Filename);
+            textureFormat = Texture.GetFormat(entry.Stream, entry.Length, entry.Filename);
             if (textureFormat != TextureFormat.Unknown)
             {
                 // This is a texture. Let's attempt to open it up in the texture viewer
@@ -265,15 +266,16 @@ namespace PuyoTools.GUI
             }
 
             // It's not an archive or a texture. Maybe it's compressed?
-            CompressionFormat compressionFormat = PTCompression.GetFormat(entry.Stream, entry.Length, entry.Filename);
+            CompressionFormat compressionFormat = Compression.GetFormat(entry.Stream, entry.Length, entry.Filename);
             if (compressionFormat != CompressionFormat.Unknown)
             {
                 // The file is compressed! Let's decompress it and then try to determine if it is an archive or a texture
                 MemoryStream decompressedData = new MemoryStream();
-                PTCompression.Decompress(entry.Stream, decompressedData, entry.Length, compressionFormat);
+                Compression.Decompress(entry.Stream, decompressedData, entry.Length, compressionFormat);
+                decompressedData.Position = 0;
 
                 // Now with this decompressed data, let's determine if it is an archive or a texture
-                archiveFormat = PTArchive.GetFormat(decompressedData, (int)decompressedData.Length, entry.Filename);
+                archiveFormat = Archive.GetFormat(decompressedData, (int)decompressedData.Length, entry.Filename);
                 if (archiveFormat != ArchiveFormat.Unknown)
                 {
                     // This is an archive. Let's open it.
@@ -282,7 +284,7 @@ namespace PuyoTools.GUI
                     return;
                 }
 
-                textureFormat = PTTexture.GetFormat(decompressedData, (int)decompressedData.Length, entry.Filename);
+                textureFormat = Texture.GetFormat(decompressedData, (int)decompressedData.Length, entry.Filename);
                 if (textureFormat != TextureFormat.Unknown)
                 {
                     // This is a texture. Let's attempt to open it up in the texture viewer

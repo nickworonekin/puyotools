@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>PuyoTools</RootNamespace>
     <AssemblyName>PuyoTools</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <StartupObject>PuyoTools.PuyoTools</StartupObject>
     <ApplicationIcon>Resources\ProgramIcon.ico</ApplicationIcon>
@@ -33,6 +33,7 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -64,41 +65,22 @@
   <ItemGroup>
     <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Archive\ArchiveWriterSettings.cs" />
-    <Compile Include="Archive\Formats\MrgArchive.cs" />
-    <Compile Include="Archive\Formats\PvmArchive.cs" />
-    <Compile Include="Archive\Formats\SntArchive.cs" />
-    <Compile Include="Archive\Formats\SpkArchive.cs" />
-    <Compile Include="Archive\Formats\TexArchive.cs" />
+    <Compile Include="ArchiveWriterSettings.cs" />
     <Compile Include="GUI\FileCompressor.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="GUI\FileCompressor.Designer.cs">
       <DependentUpon>FileCompressor.cs</DependentUpon>
     </Compile>
-    <Compile Include="PTArchive.cs" />
-    <Compile Include="Archive\ArchiveBase.cs" />
-    <Compile Include="Archive\Formats\AcxArchive.cs" />
-    <Compile Include="Archive\Formats\AfsArchive.cs" />
-    <Compile Include="Archive\Formats\GntArchive.cs" />
-    <Compile Include="Archive\Formats\GvmArchive.cs" />
-    <Compile Include="Archive\Formats\U8Archive.cs" />
-    <Compile Include="PTCompression.cs" />
-    <Compile Include="Compression\CompressionBase.cs" />
-    <Compile Include="Compression\Formats\CxlzCompression.cs" />
-    <Compile Include="Compression\Formats\Lz10Compression.cs" />
-    <Compile Include="Compression\Formats\Lz11Compression.cs" />
-    <Compile Include="Compression\Formats\PrsCompression.cs" />
-    <Compile Include="Exceptions.cs" />
-    <Compile Include="FileSelectionDialog.cs" />
-    <Compile Include="FileTypeInfo.cs" />
-    <Compile Include="FormContent.cs" />
+    <Compile Include="Archive.cs" />
+    <Compile Include="Compression.cs" />
     <Compile Include="GUI\ArchiveCreator.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -157,68 +139,9 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>BitmapResources.resx</DependentUpon>
     </Compile>
+    <Compile Include="IPuyoToolsPlugin.cs" />
     <Compile Include="ListViewWithReordering.cs">
       <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Modules\Archive.cs" />
-    <Compile Include="Modules\Archives\ACX.cs" />
-    <Compile Include="Modules\Archives\AFS.cs" />
-    <Compile Include="Modules\Archives\GVM.cs" />
-    <Compile Include="Modules\Archives\MDL.cs" />
-    <Compile Include="Modules\Archives\NARC.cs" />
-    <Compile Include="Modules\Archives\ONE.cs" />
-    <Compile Include="Modules\Archives\PVM.cs" />
-    <Compile Include="Modules\Archives\SBA.cs" />
-    <Compile Include="Modules\Archives\TXAG.cs" />
-    <Compile Include="Modules\Compression\Dictionary\CompressionDictionary.cs" />
-    <Compile Include="Modules\Compression\Dictionary\LzBuffer.cs" />
-    <Compile Include="Modules\Compression\Dictionary\LzWindow.cs" />
-    <Compile Include="Modules\Compression\LZ00.cs" />
-    <Compile Include="Modules\Compression\LZ10.cs" />
-    <Compile Include="Modules\Compression\LZ11.cs" />
-    <Compile Include="Modules\Compression\PRS.cs" />
-    <Compile Include="Modules\TextureFormatSettings.cs" />
-    <Compile Include="Modules\Textures.cs" />
-    <Compile Include="Modules\Archives\SPK.cs" />
-    <Compile Include="Modules\Compression.cs" />
-    <Compile Include="Modules\Compression\CNX.cs" />
-    <Compile Include="Modules\Compression\CXLZ.cs" />
-    <Compile Include="Modules\Archives\GNT.cs" />
-    <Compile Include="Modules\Compression\LZ01.cs" />
-    <Compile Include="Modules\Archives\MRG.cs" />
-    <Compile Include="Modules\Archives\TEX.cs" />
-    <Compile Include="Modules\Archives\VDD.cs" />
-    <Compile Include="Modules\Textures\GIM.cs" />
-    <Compile Include="Modules\Textures\GMP.cs" />
-    <Compile Include="Modules\Textures\GVR.cs" />
-    <Compile Include="Modules\Textures\PVR.cs" />
-    <Compile Include="Modules\Textures\SVR.cs" />
-    <Compile Include="NumberExtensions.cs" />
-    <Compile Include="Modules\ArchivePackSettings.cs" />
-    <Compile Include="Programs\Archive\ArchiveCreator.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Programs\Archive\ArchiveExplorer.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Programs\Archive\ArchiveExtractor.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Programs\Compression\Compressor.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Programs\Compression\Decompressor.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Modules\Archives\SNT.cs" />
-    <Compile Include="Programs\Texture\TextureDecoder.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Programs\Texture\TextureEncoder.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Programs\Texture\TextureViewer.cs">
-      <SubType>Form</SubType>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
@@ -226,28 +149,13 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="PTMethods.cs" />
     <Compile Include="PuyoTools.cs" />
-    <Compile Include="StatusMessage.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="StreamExtensions.cs" />
-    <Compile Include="StringExtensions.cs" />
-    <Compile Include="Texture\Formats\GimTexture.cs" />
-    <Compile Include="Texture\Formats\GvrTexture.cs" />
-    <Compile Include="Texture\Formats\PvrTexture.cs" />
-    <Compile Include="Texture\Formats\SvrTexture.cs" />
-    <Compile Include="PTTexture.cs" />
-    <Compile Include="Texture\TextureBase.cs" />
+    <Compile Include="Texture.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Libraries\VrSharp\VrSharp.csproj">
-      <Project>{A8E274F4-0D8E-4EAB-A5B2-7B40BC922534}</Project>
-      <Name>VrSharp</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Libraries\GimSharp\GimSharp.csproj">
-      <Project>{18707752-78B4-4735-AE5A-4261AD5C06EE}</Project>
-      <Name>GimSharp</Name>
+    <ProjectReference Include="..\PuyoTools.Modules\PuyoTools.Modules.csproj">
+      <Project>{e5d36ffb-a89f-4f4d-928c-87fc863b4c6c}</Project>
+      <Name>PuyoTools.Modules</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -295,6 +203,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="Resources\open.png" />
   </ItemGroup>
   <ItemGroup>

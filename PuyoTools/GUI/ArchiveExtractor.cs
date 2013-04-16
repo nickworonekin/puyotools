@@ -8,8 +8,9 @@ using System.Windows.Forms;
 using System.Drawing.Imaging;
 using System.IO;
 
-using PuyoTools.Archive;
-using PuyoTools.Texture;
+using PuyoTools.Modules;
+using PuyoTools.Modules.Archive;
+using PuyoTools.Modules.Texture;
 
 namespace PuyoTools.GUI
 {
@@ -42,7 +43,7 @@ namespace PuyoTools.GUI
                         Stream source = inStream;
 
                         // Get the format of the archive
-                        format = PTArchive.GetFormat(source, (int)source.Length, Path.GetFileName(file));
+                        format = Archive.GetFormat(source, (int)source.Length, Path.GetFileName(file));
                         if (format == ArchiveFormat.Unknown)
                         {
                             // Maybe it's compressed? Let's check.
@@ -50,15 +51,15 @@ namespace PuyoTools.GUI
                             if (settings.DecompressSourceArchive)
                             {
                                 // Get the compression format, if it is compressed that is.
-                                CompressionFormat compressionFormat = PTCompression.GetFormat(source, (int)source.Length, Path.GetFileName(file));
+                                CompressionFormat compressionFormat = Compression.GetFormat(source, (int)source.Length, Path.GetFileName(file));
                                 if (compressionFormat != CompressionFormat.Unknown)
                                 {
                                     // Ok, it appears to be compressed. Let's decompress it, and then check the format again
                                     source = new MemoryStream();
-                                    PTCompression.Decompress(inStream, source, (int)inStream.Length, compressionFormat);
+                                    Compression.Decompress(inStream, source, (int)inStream.Length, compressionFormat);
 
                                     source.Position = 0;
-                                    format = PTArchive.GetFormat(source, (int)source.Length, Path.GetFileName(file));
+                                    format = Archive.GetFormat(source, (int)source.Length, Path.GetFileName(file));
                                 }
                             }
 
@@ -70,7 +71,7 @@ namespace PuyoTools.GUI
                         }
 
                         // Now that we know its format, let's open it and start working with it.
-                        ArchiveReader archive = PTArchive.Open(source, (int)source.Length, format);
+                        ArchiveReader archive = Archive.Open(source, (int)source.Length, format);
 
                         // Get the appropiate output directory
                         if (settings.ExtractToSourceDirectory)
@@ -124,12 +125,12 @@ namespace PuyoTools.GUI
                                 entry.Stream.Position = entry.Offset;
 
                                 // Get the compression format, if it is compressed that is.
-                                CompressionFormat compressionFormat = PTCompression.GetFormat(entry.Stream, entry.Length, entry.Filename);
+                                CompressionFormat compressionFormat = Compression.GetFormat(entry.Stream, entry.Length, entry.Filename);
                                 if (compressionFormat != CompressionFormat.Unknown)
                                 {
                                     // Ok, it appears to be compressed. Let's decompress it, and then edit the entry
                                     MemoryStream decompressedData = new MemoryStream();
-                                    PTCompression.Decompress(entry.Stream, decompressedData, entry.Length, compressionFormat);
+                                    Compression.Decompress(entry.Stream, decompressedData, entry.Length, compressionFormat);
 
                                     entry.Stream = decompressedData;
                                     entry.Offset = 0;
@@ -143,7 +144,7 @@ namespace PuyoTools.GUI
                                 entry.Stream.Position = entry.Offset;
 
                                 // Get the texture format, if it is a texture that is.
-                                TextureFormat textureFormat = PTTexture.GetFormat(entry.Stream, entry.Length, entry.Filename);
+                                TextureFormat textureFormat = Texture.GetFormat(entry.Stream, entry.Length, entry.Filename);
                                 if (textureFormat != TextureFormat.Unknown)
                                 {
                                     // Ok, it appears to be a texture. We're going to attempt to convert it here.
@@ -152,7 +153,7 @@ namespace PuyoTools.GUI
                                     try
                                     {
                                         MemoryStream textureData = new MemoryStream();
-                                        PTTexture.Read(entry.Stream, textureData, entry.Length, entry.Filename);
+                                        Texture.Read(entry.Stream, textureData, entry.Length, entry.Filename);
 
                                         // If no exception was thrown, then we are all good doing what we need to do
                                         entry.Stream = textureData;
@@ -191,7 +192,7 @@ namespace PuyoTools.GUI
                             entry.Stream.Position = entry.Offset;
                             if (settings.ExtractExtractedArchives)
                             {
-                                ArchiveFormat archiveFormat = PTArchive.GetFormat(entry.Stream, entry.Length, entry.Filename);
+                                ArchiveFormat archiveFormat = Archive.GetFormat(entry.Stream, entry.Length, entry.Filename);
                                 if (archiveFormat != ArchiveFormat.Unknown)
                                 {
                                     // It appears to be an archive. Let's add it to the file list
@@ -219,7 +220,7 @@ namespace PuyoTools.GUI
                             TextureEntry textureEntry = textureFileQueue.Dequeue();
 
                             // Get the palette file name, and the out file name
-                            string paletteName = Path.Combine(Path.GetDirectoryName(textureEntry.Filename), Path.GetFileNameWithoutExtension(textureEntry.Filename)) + PTTexture.Formats[textureEntry.Format].PaletteExtension;
+                            string paletteName = Path.Combine(Path.GetDirectoryName(textureEntry.Filename), Path.GetFileNameWithoutExtension(textureEntry.Filename)) + Texture.Formats[textureEntry.Format].Instance.PaletteFileExtension;
                             string textureOutName = Path.Combine(Path.GetDirectoryName(textureEntry.Filename), Path.GetFileNameWithoutExtension(textureEntry.Filename)) + ".png";
 
                             // Make sure the two files exist before we attempt to open them.
@@ -234,7 +235,7 @@ namespace PuyoTools.GUI
                                 {
                                     using (FileStream inTextureStream = File.OpenRead(textureEntry.Filename))
                                     {
-                                        if (!PTTexture.Formats[textureEntry.Format].Instance.Is(inTextureStream, (int)inTextureStream.Length, textureEntry.Filename))
+                                        if (!Texture.Formats[textureEntry.Format].Instance.Is(inTextureStream, (int)inTextureStream.Length, textureEntry.Filename))
                                         {
                                             // Oh dear, somehow this isn't a texture anymore. Just skip over it
                                             continue;
@@ -244,7 +245,7 @@ namespace PuyoTools.GUI
                                         using (FileStream inPaletteStream = File.OpenRead(paletteName),
                                         outTextureStream = File.Create(textureOutName))
                                         {
-                                            PTTexture.ReadWithPalette(inTextureStream, inPaletteStream, outTextureStream, (int)inTextureStream.Length, (int)inPaletteStream.Length, textureEntry.Format);
+                                            Texture.ReadWithPalette(inTextureStream, inPaletteStream, outTextureStream, (int)inTextureStream.Length, (int)inPaletteStream.Length, textureEntry.Format);
                                         }
                                     }
 

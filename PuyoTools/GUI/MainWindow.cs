@@ -32,7 +32,7 @@ namespace PuyoTools.GUI
 
         private void selectDirectoryToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            new Old.Decompressor(true);
+            //new Old.Decompressor(true);
         }
 
         private void selectFilesToolStripMenuItem3_Click(object sender, EventArgs e)
@@ -55,7 +55,7 @@ namespace PuyoTools.GUI
 
         private void selectDirectoryToolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            new Old.ArchiveExtractor(true);
+            //new Old.ArchiveExtractor(true);
         }
 
         private void createToolStripMenuItem_Click(object sender, EventArgs e)
@@ -71,22 +71,22 @@ namespace PuyoTools.GUI
 
         private void selectFilesToolStripMenuItem2_Click(object sender, EventArgs e)
         {
-            new Old.TextureDecoder();
+            //new Old.TextureDecoder();
         }
 
         private void selectDirectoryToolStripMenuItem2_Click(object sender, EventArgs e)
         {
-            new Old.TextureDecoder(true);
+            //new Old.TextureDecoder(true);
         }
 
         private void selectFilesToolStripMenuItem4_Click(object sender, EventArgs e)
         {
-            new Old.TextureEncoder();
+            //new Old.TextureEncoder();
         }
 
         private void selectDirectoryToolStripMenuItem4_Click(object sender, EventArgs e)
         {
-            new Old.TextureEncoder(true);
+            //new Old.TextureEncoder(true);
         }
 
         private void viewerToolStripMenuItem_Click(object sender, EventArgs e)

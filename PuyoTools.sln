@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GimSharp", "Libraries\GimSh
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VrSharp", "Libraries\VrSharp\VrSharp.csproj", "{A8E274F4-0D8E-4EAB-A5B2-7B40BC922534}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PuyoTools.Modules", "PuyoTools.Modules\PuyoTools.Modules.csproj", "{E5D36FFB-A89F-4F4D-928C-87FC863B4C6C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -25,6 +27,10 @@ Global
 		{A8E274F4-0D8E-4EAB-A5B2-7B40BC922534}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A8E274F4-0D8E-4EAB-A5B2-7B40BC922534}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A8E274F4-0D8E-4EAB-A5B2-7B40BC922534}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E5D36FFB-A89F-4F4D-928C-87FC863B4C6C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E5D36FFB-A89F-4F4D-928C-87FC863B4C6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E5D36FFB-A89F-4F4D-928C-87FC863B4C6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E5D36FFB-A89F-4F4D-928C-87FC863B4C6C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
