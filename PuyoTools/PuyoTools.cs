@@ -50,7 +50,7 @@ namespace PuyoTools
                     {
                         // Archive module
                         Modules.Archive.ArchiveBase module = (Modules.Archive.ArchiveBase)plugin;
-                        Archive.Formats.Add(ArchiveFormat.Plugin + archivePlugins, new Archive.FormatEntry(module, null));
+                        Archive.Formats.Add(ArchiveFormat.Plugin + archivePlugins, module);
                         archivePlugins++;
                     }
 
@@ -58,7 +58,7 @@ namespace PuyoTools
                     {
                         // Compression module
                         Modules.Compression.CompressionBase module = (Modules.Compression.CompressionBase)plugin;
-                        Compression.Formats.Add(CompressionFormat.Plugin + compressionPlugins, new Compression.FormatEntry(module));
+                        Compression.Formats.Add(CompressionFormat.Plugin + compressionPlugins, module);
                         compressionPlugins++;
                     }
 
@@ -66,7 +66,7 @@ namespace PuyoTools
                     {
                         // Texture module
                         Modules.Texture.TextureBase module = (Modules.Texture.TextureBase)plugin;
-                        Texture.Formats.Add(TextureFormat.Plugin + texturePlugins, new Texture.FormatEntry(module));
+                        Texture.Formats.Add(TextureFormat.Plugin + texturePlugins, module);
                         texturePlugins++;
                     }
                 }

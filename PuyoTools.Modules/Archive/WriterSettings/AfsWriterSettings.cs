@@ -1,0 +1,21 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Drawing;
+using System.Data;
+using System.Linq;
+using System.Text;
+using System.Windows.Forms;
+
+namespace PuyoTools.Modules.Archive
+{
+    public partial class AfsWriterSettings : UserControl
+    {
+        public AfsWriterSettings()
+        {
+            InitializeComponent();
+
+            BlockSizeBox.SelectedIndex = 0;
+        }
+    }
+}

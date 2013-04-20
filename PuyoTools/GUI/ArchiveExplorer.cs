@@ -73,7 +73,7 @@ namespace PuyoTools.GUI
                 ArchiveInfo info = OpenedArchives.Peek();
 
                 // Seems like we need a palette for this texture. Let's try to find one.
-                string textureName = Path.GetFileNameWithoutExtension(fname) + Texture.Formats[format].Instance.PaletteFileExtension;
+                string textureName = Path.GetFileNameWithoutExtension(fname) + Texture.Formats[format].PaletteFileExtension;
                 int paletteFileIndex = -1;
 
                 for (int i = 0; i < info.Archive.Files.Length; i++)
@@ -91,13 +91,22 @@ namespace PuyoTools.GUI
                 {
                     ArchiveEntry paletteEntry = info.Archive.GetFile(paletteFileIndex);
 
-                    // Copy over the data
-                    paletteEntry.Stream.Position = paletteEntry.Offset;
+                    // Get the palette data (we may need to copy over the data to another stream)
+                    Stream paletteData;
+                    if (data == paletteEntry.Stream)
+                    {
+                        paletteEntry.Stream.Position = paletteEntry.Offset;
 
-                    MemoryStream paletteData = new MemoryStream();
-                    PTStream.CopyPartTo(paletteEntry.Stream, paletteData, paletteEntry.Length);
-                    
-                    paletteData.Position = 0;
+                        paletteData = new MemoryStream();
+                        PTStream.CopyPartTo(paletteEntry.Stream, paletteData, paletteEntry.Length);
+
+                        paletteData.Position = 0;
+                    }
+                    else
+                    {
+                        paletteData = paletteEntry.Stream;
+                        paletteData.Position = paletteEntry.Offset;
+                    }
 
                     // Now open the texture
                     data.Position = oldPosition;
@@ -134,7 +143,7 @@ namespace PuyoTools.GUI
 
             // Display information about the archive
             numFilesLabel.Text = info.Archive.Files.Length.ToString();
-            archiveFormatLabel.Text = Archive.Formats[info.Format].Instance.Name;
+            archiveFormatLabel.Text = Archive.Formats[info.Format].Name;
 
             archiveNameLabel.Text = OpenedArchiveNames[0];
             for (int i = 1; i < OpenedArchiveNames.Count; i++)

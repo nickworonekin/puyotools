@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Windows.Forms;
+
 using PuyoTools.Modules.Texture;
 
 namespace PuyoTools.Modules.Archive
@@ -17,7 +19,7 @@ namespace PuyoTools.Modules.Archive
             get { return ".pvm"; }
         }
 
-        public override bool CanCreate
+        public override bool CanWrite
         {
             get { return false; }
         }
@@ -27,12 +29,12 @@ namespace PuyoTools.Modules.Archive
             return new Reader(source, length);
         }
 
-        public override ArchiveWriter Create(Stream destination, ArchiveWriterSettings settings)
+        public override ArchiveWriter Create(Stream destination, ModuleWriterSettings settings)
         {
             return new Writer(destination, (settings as WriterSettings) ?? new WriterSettings());
         }
 
-        public override ArchiveWriterSettings GetWriterSettings()
+        public override ModuleWriterSettings WriterSettingsObject()
         {
             return new WriterSettings();
         }
@@ -178,12 +180,28 @@ namespace PuyoTools.Modules.Archive
             }
         }
 
-        public class WriterSettings : ArchiveWriterSettings
+        public class WriterSettings : ModuleWriterSettings
         {
+            private PvmWriterSettings writerSettingsPanel;
+
             public bool Filename = true;
             public bool GlobalIndex = true;
             public bool Formats = true;
             public bool Dimensions = true;
+
+            public override void SetPanelContent(Panel panel)
+            {
+                writerSettingsPanel = new PvmWriterSettings();
+                panel.Controls.Add(writerSettingsPanel);
+            }
+
+            public override void SetSettings()
+            {
+                Filename = writerSettingsPanel.FilenameCheckbox.Checked;
+                GlobalIndex = writerSettingsPanel.GlobalIndexCheckbox.Checked;
+                Formats = writerSettingsPanel.FormatCheckbox.Checked;
+                Dimensions = writerSettingsPanel.DimensionsCheckbox.Checked;
+            }
         }
     }
 }

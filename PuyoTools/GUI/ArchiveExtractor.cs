@@ -220,7 +220,7 @@ namespace PuyoTools.GUI
                             TextureEntry textureEntry = textureFileQueue.Dequeue();
 
                             // Get the palette file name, and the out file name
-                            string paletteName = Path.Combine(Path.GetDirectoryName(textureEntry.Filename), Path.GetFileNameWithoutExtension(textureEntry.Filename)) + Texture.Formats[textureEntry.Format].Instance.PaletteFileExtension;
+                            string paletteName = Path.Combine(Path.GetDirectoryName(textureEntry.Filename), Path.GetFileNameWithoutExtension(textureEntry.Filename)) + Texture.Formats[textureEntry.Format].PaletteFileExtension;
                             string textureOutName = Path.Combine(Path.GetDirectoryName(textureEntry.Filename), Path.GetFileNameWithoutExtension(textureEntry.Filename)) + ".png";
 
                             // Make sure the two files exist before we attempt to open them.
@@ -235,7 +235,7 @@ namespace PuyoTools.GUI
                                 {
                                     using (FileStream inTextureStream = File.OpenRead(textureEntry.Filename))
                                     {
-                                        if (!Texture.Formats[textureEntry.Format].Instance.Is(inTextureStream, (int)inTextureStream.Length, textureEntry.Filename))
+                                        if (!Texture.Formats[textureEntry.Format].Is(inTextureStream, (int)inTextureStream.Length, textureEntry.Filename))
                                         {
                                             // Oh dear, somehow this isn't a texture anymore. Just skip over it
                                             continue;

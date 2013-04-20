@@ -10,7 +10,7 @@ namespace PuyoTools.Modules.Compression
             get { return "PRS"; }
         }
 
-        public override bool CanCompress
+        public override bool CanWrite
         {
             get { return true; }
         }

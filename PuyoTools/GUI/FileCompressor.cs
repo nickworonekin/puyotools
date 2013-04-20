@@ -7,6 +7,8 @@ using System.Text;
 using System.Windows.Forms;
 using System.IO;
 
+using PuyoTools.Modules.Compression;
+
 namespace PuyoTools.GUI
 {
     public partial class FileCompressor : ToolForm
@@ -24,11 +26,11 @@ namespace PuyoTools.GUI
             // Fill the compression format box
             compressionFormatBox.SelectedIndex = 0;
             compressionFormats = new List<CompressionFormat>();
-            foreach (KeyValuePair<CompressionFormat, Compression.FormatEntry> format in Compression.Formats)
+            foreach (KeyValuePair<CompressionFormat, CompressionBase> format in Compression.Formats)
             {
-                if (format.Value.Instance.CanCompress)
+                if (format.Value.CanWrite)
                 {
-                    compressionFormatBox.Items.Add(format.Value.Instance.Name);
+                    compressionFormatBox.Items.Add(format.Value.Name);
                     compressionFormats.Add(format.Key);
                 }
             }

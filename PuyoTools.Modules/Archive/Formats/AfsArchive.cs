@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Windows.Forms;
 
 namespace PuyoTools.Modules.Archive
 {
@@ -16,7 +17,7 @@ namespace PuyoTools.Modules.Archive
             get { return ".afs"; }
         }
 
-        public override bool CanCreate
+        public override bool CanWrite
         {
             get { return true; }
         }
@@ -26,12 +27,12 @@ namespace PuyoTools.Modules.Archive
             return new Reader(source, length);
         }
 
-        public override ArchiveWriter Create(Stream destination, ArchiveWriterSettings settings)
+        public override ArchiveWriter Create(Stream destination, ModuleWriterSettings settings)
         {
             return new Writer(destination, (settings as WriterSettings) ?? new WriterSettings());
         }
 
-        public override ArchiveWriterSettings GetWriterSettings()
+        public override ModuleWriterSettings WriterSettingsObject()
         {
             return new WriterSettings();
         }
@@ -193,8 +194,10 @@ namespace PuyoTools.Modules.Archive
             }
         }
 
-        public class WriterSettings : ArchiveWriterSettings
+        public class WriterSettings : ModuleWriterSettings
         {
+            private AfsWriterSettings writerSettingsPanel;
+
             public int BlockSize = 2048;
             public AfsVersion Version = AfsVersion.Version1;
 
@@ -202,6 +205,18 @@ namespace PuyoTools.Modules.Archive
             {
                 Version1, // Dreamcast
                 Version2, // Post Dreamcast (PS2, GC, Xbox and after)
+            }
+
+            public override void SetPanelContent(Panel panel)
+            {
+                writerSettingsPanel = new AfsWriterSettings();
+                panel.Controls.Add(writerSettingsPanel);
+            }
+
+            public override void SetSettings()
+            {
+                BlockSize = int.Parse(writerSettingsPanel.BlockSizeBox.GetItemText(writerSettingsPanel.BlockSizeBox.SelectedItem));
+                Version = (writerSettingsPanel.AfsVersion1Radio.Checked ? AfsVersion.Version1 : AfsVersion.Version2);
             }
         }
     }

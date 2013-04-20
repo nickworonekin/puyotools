@@ -16,7 +16,7 @@ namespace PuyoTools.Modules.Archive
             get { return ".arc"; }
         }
 
-        public override bool CanCreate
+        public override bool CanWrite
         {
             get { return false; }
         }
@@ -26,14 +26,9 @@ namespace PuyoTools.Modules.Archive
             return new Reader(source, length);
         }
 
-        public override ArchiveWriter Create(Stream destination, ArchiveWriterSettings settings)
+        public override ArchiveWriter Create(Stream destination, ModuleWriterSettings settings)
         {
             return new Writer(destination);
-        }
-
-        public override ArchiveWriterSettings GetWriterSettings()
-        {
-            return null;
         }
 
         public override bool Is(Stream source, int length, string fname)

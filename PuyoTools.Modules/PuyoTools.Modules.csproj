@@ -36,7 +36,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Libraries\GimSharp\GimSharp.csproj">
@@ -60,11 +63,30 @@
     <Compile Include="Archive\Formats\SpkArchive.cs" />
     <Compile Include="Archive\Formats\TexArchive.cs" />
     <Compile Include="Archive\Formats\U8Archive.cs" />
+    <Compile Include="Archive\WriterSettings\AfsWriterSettings.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Archive\WriterSettings\AfsWriterSettings.Designer.cs">
+      <DependentUpon>AfsWriterSettings.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Archive\WriterSettings\PvmWriterSettings.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Archive\WriterSettings\PvmWriterSettings.Designer.cs">
+      <DependentUpon>PvmWriterSettings.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Archive\WriterSettings\SntWriterSettings.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Archive\WriterSettings\SntWriterSettings.Designer.cs">
+      <DependentUpon>SntWriterSettings.cs</DependentUpon>
+    </Compile>
     <Compile Include="Compression\CompressionBase.cs" />
     <Compile Include="Compression\Formats\CxlzCompression.cs" />
     <Compile Include="Compression\Formats\Lz10Compression.cs" />
     <Compile Include="Compression\Formats\Lz11Compression.cs" />
     <Compile Include="Compression\Formats\PrsCompression.cs" />
+    <Compile Include="Core\ModuleBase.cs" />
     <Compile Include="Core\PTMethods.cs" />
     <Compile Include="Core\PTStream.cs" />
     <Compile Include="Texture\Formats\GimTexture.cs" />
@@ -72,6 +94,18 @@
     <Compile Include="Texture\Formats\PvrTexture.cs" />
     <Compile Include="Texture\Formats\SvrTexture.cs" />
     <Compile Include="Texture\TextureBase.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="Archive\WriterSettings\AfsWriterSettings.resx">
+      <DependentUpon>AfsWriterSettings.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Archive\WriterSettings\PvmWriterSettings.resx">
+      <DependentUpon>PvmWriterSettings.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Archive\WriterSettings\SntWriterSettings.resx">
+      <DependentUpon>SntWriterSettings.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

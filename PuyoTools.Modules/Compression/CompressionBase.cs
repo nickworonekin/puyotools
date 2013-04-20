@@ -3,17 +3,10 @@ using System.IO;
 
 namespace PuyoTools.Modules.Compression
 {
-    public abstract class CompressionBase
+    public abstract class CompressionBase : ModuleBase
     {
-        public abstract string Name { get; }
-
-        // It's assumed that this format can be read (in this case, decompressed).
-        // So, we're only going to bother seeing if this format can be written to (compressed).
-        public abstract bool CanCompress { get; }
-
         public abstract void Decompress(byte[] source, long offset, Stream destination, int length);
         public abstract void Compress(byte[] source, long offset, Stream destination, int length, string fname);
-        public abstract bool Is(Stream source, int length, string fname);
 
         #region Helper methods for Decompress
         public void Decompress(Stream source, Stream destination)

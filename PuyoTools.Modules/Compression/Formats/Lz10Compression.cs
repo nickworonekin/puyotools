@@ -10,7 +10,7 @@ namespace PuyoTools.Modules.Compression
             get { return "LZ10"; }
         }
 
-        public override bool CanCompress
+        public override bool CanWrite
         {
             get { return false; }
         }

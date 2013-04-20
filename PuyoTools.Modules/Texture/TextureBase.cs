@@ -5,19 +5,13 @@ using System.Drawing.Imaging;
 
 namespace PuyoTools.Modules.Texture
 {
-    public abstract class TextureBase
+    public abstract class TextureBase : ModuleBase
     {
-        public abstract string Name { get; }
         public abstract string FileExtension { get; }
         public abstract string PaletteFileExtension { get; }
 
-        // It's assumed that this format can be read.
-        // So, we're only going to bother seeing if this format can be written to.
-        public abstract bool CanWrite { get; }
-
         public abstract void Read(byte[] source, long offset, out Bitmap destination, int length);
         public abstract void Write(byte[] source, long offset, Stream destination, int length, string fname);
-        public abstract bool Is(Stream source, int length, string fname);
 
         public virtual void ReadWithPalette(byte[] source, long offset, byte[] palette, long paletteOffset, out Bitmap destination, int length, int paletteLength)
         {

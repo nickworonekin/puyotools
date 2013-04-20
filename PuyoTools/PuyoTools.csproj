@@ -72,7 +72,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ArchiveWriterSettings.cs" />
     <Compile Include="GUI\FileCompressor.cs">
       <SubType>Form</SubType>
     </Compile>

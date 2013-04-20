@@ -74,7 +74,7 @@ namespace PuyoTools.GUI
                         {
                             // It appears that we need to load an external palette.
                             // Let's get the filename for this palette file, see if it exists, and load it in
-                            string paletteName = Path.Combine(Path.GetDirectoryName(file), Path.GetFileNameWithoutExtension(file)) + Texture.Formats[format].Instance.PaletteFileExtension;
+                            string paletteName = Path.Combine(Path.GetDirectoryName(file), Path.GetFileNameWithoutExtension(file)) + Texture.Formats[format].PaletteFileExtension;
 
                             if (!File.Exists(paletteName))
                             {

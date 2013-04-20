@@ -68,7 +68,7 @@ namespace PuyoTools.GUI
             // Display information about the texture
             textureNameLabel.Text = (fname == String.Empty ? "Unnamed" : fname);
             textureDimensionsLabel.Text = textureBitmap.Width + " x " + textureBitmap.Height;
-            textureFormatLabel.Text = Texture.Formats[format].Instance.Name;
+            textureFormatLabel.Text = Texture.Formats[format].Name;
 
             textureInfoPanel.Visible = true;
             textureDisplay.Visible = true;
@@ -139,7 +139,7 @@ namespace PuyoTools.GUI
                 catch (TextureNeedsPaletteException)
                 {
                     // Seems like we need a palette for this texture. Let's try to find one.
-                    string paletteName = Path.Combine(Path.GetDirectoryName(ofd.FileName), Path.GetFileNameWithoutExtension(ofd.FileName)) + Texture.Formats[textureFormat].Instance.PaletteFileExtension;
+                    string paletteName = Path.Combine(Path.GetDirectoryName(ofd.FileName), Path.GetFileNameWithoutExtension(ofd.FileName)) + Texture.Formats[textureFormat].PaletteFileExtension;
 
                     if (File.Exists(paletteName))
                     {

@@ -7,7 +7,9 @@ using System.Text;
 using System.Windows.Forms;
 using System.IO;
 
+using PuyoTools.Modules;
 using PuyoTools.Modules.Archive;
+using PuyoTools.Modules.Compression;
 
 // This is only needed until I make a nice rename form
 using Microsoft.VisualBasic;
@@ -17,7 +19,8 @@ namespace PuyoTools.GUI
 {
     public partial class ArchiveCreator : ToolForm
     {
-        List<SettingsPanel> formatSettingsPanel;
+        List<ModuleWriterSettings> formatWriterSettings;
+        List<Panel> writerSettingsPanel;
         List<ArchiveFormat> archiveFormats;
         List<CompressionFormat> compressionFormats;
 
@@ -37,38 +40,44 @@ namespace PuyoTools.GUI
             // Resize the column widths
             listView_ClientSizeChanged(null, null);
 
-            // Set up the format settings panels
-            formatSettingsPanel = new List<SettingsPanel>();
+            // Set up the writer settings panel and format writer settings
+            formatWriterSettings = new List<ModuleWriterSettings>();
+            writerSettingsPanel = new List<Panel>();
 
             // Fill the archive format box
             archiveFormatBox.SelectedIndex = 0;
             archiveFormats = new List<ArchiveFormat>();
-            foreach (KeyValuePair<ArchiveFormat, Archive.FormatEntry> format in Archive.Formats)
+            foreach (KeyValuePair<ArchiveFormat, ArchiveBase> format in Archive.Formats)
             {
-                if (format.Value.Instance.CanCreate)
+                if (format.Value.CanWrite)
                 {
-                    archiveFormatBox.Items.Add(format.Value.Instance.Name);
+                    archiveFormatBox.Items.Add(format.Value.Name);
                     archiveFormats.Add(format.Key);
 
-                    SettingsPanel panel = new SettingsPanel(archiveSettingsPanel);
-
-                    if (format.Value.SettingsInstanceGUI != null)
+                    ModuleWriterSettings writerSettings = format.Value.WriterSettingsObject();
+                    if (writerSettings != null)
                     {
-                        format.Value.SettingsInstanceGUI.SetPanelContent(panel);
+                        Panel panel = new Panel();
+                        writerSettings.SetPanelContent(panel);
+                        writerSettingsPanel.Add(panel);
+                    }
+                    else
+                    {
+                        writerSettingsPanel.Add(null);
                     }
 
-                    formatSettingsPanel.Add(panel);
+                    formatWriterSettings.Add(writerSettings);
                 }
             }
 
             // Fill the compression format box
             compressionFormatBox.SelectedIndex = 0;
             compressionFormats = new List<CompressionFormat>();
-            foreach (KeyValuePair<CompressionFormat, Compression.FormatEntry> format in Compression.Formats)
+            foreach (KeyValuePair<CompressionFormat, CompressionBase> format in Compression.Formats)
             {
-                if (format.Value.Instance.CanCompress)
+                if (format.Value.CanWrite)
                 {
-                    compressionFormatBox.Items.Add(format.Value.Instance.Name);
+                    compressionFormatBox.Items.Add(format.Value.Name);
                     compressionFormats.Add(format.Key);
                 }
             }
@@ -222,7 +231,10 @@ namespace PuyoTools.GUI
 
             if (archiveFormatBox.SelectedIndex != 0)
             {
-                archiveSettingsPanel.Controls.Add(formatSettingsPanel[archiveFormatBox.SelectedIndex - 1]);
+                if (writerSettingsPanel[archiveFormatBox.SelectedIndex - 1] != null)
+                {
+                    archiveSettingsPanel.Controls.Add(writerSettingsPanel[archiveFormatBox.SelectedIndex - 1]);
+                }
             }
 
             EnableRunButton();
@@ -271,100 +283,16 @@ namespace PuyoTools.GUI
             }
         }
 
-        // A settings panel inside the settings panel. Isn't that great!
-        // Actually, it's just so we don't need to use a million different panels
-        // in the form designer.
-        public class SettingsPanel : Panel
-        {
-            int yPos = 0;
-
-            public SettingsPanel(Panel parent)
-            {
-                this.Dock = DockStyle.Fill;
-            }
-
-            // Add a combo box (with a label) to the panel
-            public void AddComboBox(out ComboBox comboBox, string labelText, string[] choices, ComboBoxStyle style)
-            {
-                Label label = new Label();
-                label.Location = new Point(this.Margin.Left + label.Margin.Left, yPos + 3);
-                label.AutoSize = true;
-                label.Text = labelText;
-                this.Controls.Add(label);
-
-                comboBox = new ComboBox();
-                comboBox.Location = new Point(label.Left + label.Width + label.Margin.Right + comboBox.Margin.Left, yPos);
-                comboBox.Width = 150;
-                comboBox.DropDownStyle = style;
-                comboBox.Items.AddRange(choices);
-                comboBox.SelectedIndex = 0;
-                this.Controls.Add(comboBox);
-
-                yPos += 24;
-            }
-
-            // Add a checkbox to the panel
-            public void AddCheckBox(out CheckBox checkBox, string text)
-            {
-                checkBox = new CheckBox();
-                checkBox.Location = new Point(this.Margin.Left + checkBox.Margin.Left, yPos);
-                checkBox.AutoSize = true;
-                checkBox.Text = text;
-                this.Controls.Add(checkBox);
-
-                yPos += 24;
-            }
-
-            // Add radio buttons (with a label) to the panel
-            public void AddRadioButtons(out RadioButton[] radioButtons, string labelText, string[] choices)
-            {
-                Label label = new Label();
-                label.Location = new Point(this.Margin.Left + label.Margin.Left, yPos + 3);
-                label.AutoSize = true;
-                label.Text = labelText;
-                this.Controls.Add(label);
-
-                yPos += 24;
-
-                Panel panel = new Panel();
-                panel.Location = new Point(0, yPos);
-                panel.Size = new Size(this.Width, 0);
-                panel.AutoSize = true;
-                this.Controls.Add(panel);
-
-                // Add the radio buttons to the panel
-                int panelYPos = 0;
-
-                radioButtons = new RadioButton[choices.Length];
-                for (int i = 0; i < choices.Length; i++)
-                {
-                    radioButtons[i] = new RadioButton();
-                    radioButtons[i].Location = new Point(this.Margin.Left + radioButtons[i].Margin.Left, panelYPos);
-                    radioButtons[i].Padding = new Padding(20, 0, 0, 0);
-                    radioButtons[i].Text = choices[i];
-                    radioButtons[i].AutoSize = true;
-                    panel.Controls.Add(radioButtons[i]);
-
-                    panelYPos += 20;
-                    yPos += 20;
-                }
-
-                radioButtons[0].Checked = true;
-
-                yPos += 4;
-            }
-        }
-
         private void runButton_Click(object sender, EventArgs e)
         {
             // Get the format of the archive the user wants to create
             ArchiveFormat archiveFormat = archiveFormats[archiveFormatBox.SelectedIndex - 1];
-            string fileExtension = (Archive.Formats[archiveFormat].Instance.FileExtension != String.Empty ? Archive.Formats[archiveFormat].Instance.FileExtension : ".*");
+            string fileExtension = (Archive.Formats[archiveFormat].FileExtension != String.Empty ? Archive.Formats[archiveFormat].FileExtension : ".*");
 
             // Prompt the user to save the archive
             SaveFileDialog sfd = new SaveFileDialog();
             sfd.Title = "Save Archive";
-            sfd.Filter = Archive.Formats[archiveFormat].Instance.Name + " Archive (*" + fileExtension + ")|*" + fileExtension + "|All Files (*.*)|*.*";
+            sfd.Filter = Archive.Formats[archiveFormat].Name + " Archive (*" + fileExtension + ")|*" + fileExtension + "|All Files (*.*)|*.*";
 
             if (sfd.ShowDialog() == DialogResult.OK)
             {
@@ -384,10 +312,10 @@ namespace PuyoTools.GUI
                     settings.CompressionFormat = CompressionFormat.Unknown;
                 }
 
-                settings.ArchiveSettings = Archive.Formats[archiveFormat].Instance.GetWriterSettings();
-                if (Archive.Formats[archiveFormat].SettingsInstanceGUI != null)
+                settings.ArchiveSettings = formatWriterSettings[archiveFormatBox.SelectedIndex - 1];
+                if (settings.ArchiveSettings != null)
                 {
-                    Archive.Formats[archiveFormat].SettingsInstanceGUI.SetSettings(settings.ArchiveSettings);
+                    settings.ArchiveSettings.SetSettings();
                 }
 
                 Run(settings);
@@ -399,7 +327,7 @@ namespace PuyoTools.GUI
             public ArchiveFormat ArchiveFormat;
             public CompressionFormat CompressionFormat;
             public string OutFilename;
-            public ArchiveWriterSettings ArchiveSettings;
+            public ModuleWriterSettings ArchiveSettings;
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Windows.Forms;
 
 using PuyoTools.Modules.Texture;
 
@@ -18,7 +19,7 @@ namespace PuyoTools.Modules.Archive
             get { return ".snt"; }
         }
 
-        public override bool CanCreate
+        public override bool CanWrite
         {
             get { return true; }
         }
@@ -28,12 +29,12 @@ namespace PuyoTools.Modules.Archive
             return new Reader(source, length);
         }
 
-        public override ArchiveWriter Create(Stream destination, ArchiveWriterSettings settings)
+        public override ArchiveWriter Create(Stream destination, ModuleWriterSettings settings)
         {
             return new Writer(destination, (settings as WriterSettings) ?? new WriterSettings());
         }
 
-        public override ArchiveWriterSettings GetWriterSettings()
+        public override ModuleWriterSettings WriterSettingsObject()
         {
             return new WriterSettings();
         }
@@ -243,14 +244,27 @@ namespace PuyoTools.Modules.Archive
             }
         }
 
-        public class WriterSettings : ArchiveWriterSettings
+        public class WriterSettings : ModuleWriterSettings
         {
+            private SntWriterSettings writerSettingsPanel;
+
             public SntType Type = SntType.Ps2;
 
             public enum SntType
             {
                 Ps2, // PlayStation 2
                 Psp, // PlayStation Portable
+            }
+
+            public override void SetPanelContent(Panel panel)
+            {
+                writerSettingsPanel = new SntWriterSettings();
+                panel.Controls.Add(writerSettingsPanel);
+            }
+
+            public override void SetSettings()
+            {
+                Type = (writerSettingsPanel.TypePs2Radio.Checked ? SntType.Ps2 : SntType.Psp);
             }
         }
     }

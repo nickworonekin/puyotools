@@ -4,19 +4,12 @@ using System.Collections.Generic;
 
 namespace PuyoTools.Modules.Archive
 {
-    public abstract class ArchiveBase
+    public abstract class ArchiveBase : ModuleBase
     {
-        public abstract string Name { get; }
         public abstract string FileExtension { get; }
 
-        // It's assumed that this format can be read (in this case, opened).
-        // So, we're only going to bother seeing if this format can be written to (created).
-        public abstract bool CanCreate { get; }
-
         public abstract ArchiveReader Open(Stream source, int length);
-        public abstract ArchiveWriter Create(Stream destination, ArchiveWriterSettings settings);
-        public abstract ArchiveWriterSettings GetWriterSettings();
-        public abstract bool Is(Stream source, int length, string fname);
+        public abstract ArchiveWriter Create(Stream destination, ModuleWriterSettings settings);
 
         public ArchiveWriter Create(Stream destination)
         {
