@@ -11,9 +11,7 @@ using PuyoTools.Modules;
 using PuyoTools.Modules.Archive;
 using PuyoTools.Modules.Compression;
 
-// This is only needed until I make a nice rename form
-using Microsoft.VisualBasic;
-// Remove the above once I do that
+using Ookii.Dialogs;
 
 namespace PuyoTools.GUI
 {
@@ -207,8 +205,9 @@ namespace PuyoTools.GUI
 
         private new void addDirectoryButton_Click(object sender, EventArgs e)
         {
-            FolderBrowserDialog fbd = new FolderBrowserDialog();
+            VistaFolderBrowserDialog fbd = new VistaFolderBrowserDialog();
             fbd.Description = "Select a directory.";
+            fbd.UseDescriptionForTitle = true;
 
             if (fbd.ShowDialog() == DialogResult.OK)
             {
@@ -269,16 +268,23 @@ namespace PuyoTools.GUI
 
         private void renameToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            // TEMP! Use Visual Basic's InputBox
-            string fname = Interaction.InputBox("Rename selected files to", "Rename Files");
+            InputDialog dialog = new InputDialog();
+            dialog.WindowTitle = "Rename Files";
+            dialog.MainInstruction = dialog.WindowTitle;
+            dialog.Content = "Selected files will use this filename when added to the archive.";
 
-            if (fname != String.Empty)
+            if (listView.SelectedItems.Count == 1)
+            {
+                dialog.Input = listView.SelectedItems[0].SubItems[2].Text;
+            }
+
+            if (dialog.ShowDialog() == DialogResult.OK)
             {
                 foreach (ListViewItem item in listView.SelectedItems)
                 {
-                    item.SubItems[2].Text = fname;
+                    item.SubItems[2].Text = dialog.Input;
                     FileEntry fileEntry = (FileEntry)item.Tag;
-                    fileEntry.FilenameInArchive = fname;
+                    fileEntry.FilenameInArchive = dialog.Input;
                 }
             }
         }

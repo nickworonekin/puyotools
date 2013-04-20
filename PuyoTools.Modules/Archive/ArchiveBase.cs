@@ -106,11 +106,7 @@ namespace PuyoTools.Modules.Archive
         }
     }
 
-    // We're going to declare an empty ArchiveWriterSettings here. Why is it empty?
-    // That way we can split up the settings and the panel content for the archive
-    // creator. If someone is using the archive code for their projects, they don't
-    // need the things for the panel content.
-    public abstract partial class ArchiveWriterSettings { }
+    public abstract class ArchiveWriterSettings : ModuleWriterSettings { }
 
     public class CannotAddFileToArchiveException : Exception { }
 }

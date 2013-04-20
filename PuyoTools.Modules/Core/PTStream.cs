@@ -131,28 +131,28 @@ namespace PuyoTools.Modules
         /// <summary>
         /// Checks to see if the stream contains the specified sequence of bytes.
         /// </summary>
-        /// <param name="inStream">Stream to check</param>
+        /// <param name="source">Stream to check</param>
         /// <param name="offset">Offset to check (relative to the current stream position)</param>
         /// <param name="length">Number of bytes to check.</param>
         /// <param name="a">Byte array to compare to</param>
         /// <returns></returns>
-        public static bool Contains(Stream inStream, long offset, byte[] a)
+        public static bool Contains(Stream source, long offset, byte[] a)
         {
             // First, let's do the logical thing and make sure a.Length > 0 and a != null
-            if (a.Length > 0 && a == null)
+            if (a == null || a.Length == 0)
                 return false;
 
             // Go to the offset we want to check.
             // In this case, offset is relative to the position of the stream
-            long oldPosition = inStream.Position;
-            inStream.Position += offset;
+            long oldPosition = source.Position;
+            source.Position += offset;
 
             // Read in the buffer now
             byte[] buffer = new byte[a.Length];
-            inStream.Read(buffer, 0, a.Length);
+            source.Read(buffer, 0, a.Length);
 
             // Reset the position of the stream back to oldPosition
-            inStream.Position = oldPosition;
+            source.Position = oldPosition;
 
             // Now let's check to see if the stream contains a
             return PTMethods.ArraysEqual<byte>(buffer, a);

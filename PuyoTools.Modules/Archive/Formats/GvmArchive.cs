@@ -21,7 +21,7 @@ namespace PuyoTools.Modules.Archive
 
         public override bool CanWrite
         {
-            get { return true; }
+            get { return false; }
         }
 
         public override ArchiveReader Open(Stream source, int length)

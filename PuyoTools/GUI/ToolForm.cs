@@ -8,6 +8,8 @@ using System.Text;
 using System.Windows.Forms;
 using System.IO;
 
+using Ookii.Dialogs;
+
 namespace PuyoTools.GUI
 {
     public partial class ToolForm : Form
@@ -42,8 +44,9 @@ namespace PuyoTools.GUI
 
         protected void addDirectoryButton_Click(object sender, EventArgs e)
         {
-            FolderBrowserDialog fbd = new FolderBrowserDialog();
+            VistaFolderBrowserDialog fbd = new VistaFolderBrowserDialog();
             fbd.Description = "Select a directory.";
+            fbd.UseDescriptionForTitle = true;
 
             if (fbd.ShowDialog() == DialogResult.OK)
             {
@@ -59,6 +62,11 @@ namespace PuyoTools.GUI
                 if (fileList.Count > 0)
                     runButton.Enabled = true;
             }
+        }
+
+        private void fileListButton_Click(object sender, EventArgs e)
+        {
+            (new FileListForm(fileList)).ShowDialog();
         }
     }
 }

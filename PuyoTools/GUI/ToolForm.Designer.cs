@@ -60,6 +60,7 @@
             this.fileListButton.TabIndex = 2;
             this.fileListButton.Text = "File List";
             this.fileListButton.UseVisualStyleBackColor = true;
+            this.fileListButton.Click += new System.EventHandler(this.fileListButton_Click);
             // 
             // addDirectoryButton
             // 
