@@ -39,5 +39,15 @@ namespace PuyoTools.Modules
 
             return value + (roundUpTo - (value % roundUpTo));
         }
+
+        public static ushort ToUInt16BE(byte[] value, int startIndex)
+        {
+            return (ushort)(value[startIndex] << 8 | value[startIndex + 1]);
+        }
+
+        public static uint ToUInt32BE(byte[] value, int startIndex)
+        {
+            return (uint)(value[startIndex] << 24 | value[startIndex + 1] << 16 | value[startIndex + 2] << 8 | value[startIndex + 3]);
+        }
     }
 }

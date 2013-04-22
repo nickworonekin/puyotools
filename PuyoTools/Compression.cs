@@ -13,7 +13,10 @@ namespace PuyoTools
         {
             Formats = new Dictionary<CompressionFormat, CompressionBase>();
 
+            Formats.Add(CompressionFormat.Cnx,  new CnxCompression());
             Formats.Add(CompressionFormat.Cxlz, new CxlzCompression());
+            Formats.Add(CompressionFormat.Lz00, new Lz00Compression());
+            Formats.Add(CompressionFormat.Lz01, new Lz01Compression());
             Formats.Add(CompressionFormat.Lz10, new Lz10Compression());
             Formats.Add(CompressionFormat.Lz11, new Lz11Compression());
             Formats.Add(CompressionFormat.Prs,  new PrsCompression());

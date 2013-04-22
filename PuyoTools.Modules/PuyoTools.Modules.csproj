@@ -82,10 +82,13 @@
       <DependentUpon>SntWriterSettings.cs</DependentUpon>
     </Compile>
     <Compile Include="Compression\CompressionBase.cs" />
+    <Compile Include="Compression\Formats\CnxCompression.cs" />
     <Compile Include="Compression\Formats\CxlzCompression.cs" />
+    <Compile Include="Compression\Formats\Lz01Compression.cs" />
     <Compile Include="Compression\Formats\Lz10Compression.cs" />
     <Compile Include="Compression\Formats\Lz11Compression.cs" />
     <Compile Include="Compression\Formats\PrsCompression.cs" />
+    <Compile Include="Compression\Formats\Lz00Compression.cs" />
     <Compile Include="Core\ModuleBase.cs" />
     <Compile Include="Core\PTMethods.cs" />
     <Compile Include="Core\PTStream.cs" />

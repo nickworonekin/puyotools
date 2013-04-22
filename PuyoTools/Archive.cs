@@ -22,8 +22,8 @@ namespace PuyoTools
             Formats.Add(ArchiveFormat.Gvm, new GvmArchive());
             Formats.Add(ArchiveFormat.Mrg, new MrgArchive());
             Formats.Add(ArchiveFormat.Pvm, new PvmArchive());
-            Formats.Add(ArchiveFormat.Spk, new SpkArchive());
             Formats.Add(ArchiveFormat.Snt, new SntArchive());
+            Formats.Add(ArchiveFormat.Spk, new SpkArchive());
             Formats.Add(ArchiveFormat.Tex, new TexArchive());
             Formats.Add(ArchiveFormat.U8,  new U8Archive());
         }
@@ -69,8 +69,8 @@ namespace PuyoTools
         Gvm,
         Mrg,
         Pvm,
-        Spk,
         Snt,
+        Spk,
         Tex,
         U8,
         Plugin,

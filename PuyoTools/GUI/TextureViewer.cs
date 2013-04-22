@@ -102,7 +102,7 @@ namespace PuyoTools.GUI
             DialogResult result = ofd.ShowDialog();
             if (result == DialogResult.OK)
             {
-                FileStream data = File.OpenRead(ofd.FileName);
+                Stream data = File.OpenRead(ofd.FileName);
 
                 // Let's determine first if it is a texture
                 TextureFormat textureFormat;
@@ -122,12 +122,17 @@ namespace PuyoTools.GUI
 
                         // Now with this decompressed data, let's determine if it is a texture
                         textureFormat = Texture.GetFormat(decompressedData, (int)decompressedData.Length, ofd.SafeFileName);
-                    }
 
-                    if (textureFormat == TextureFormat.Unknown)
-                    {
-                        // Hmm... still doesn't appear to be a texture. Just ignore this file then.
-                        return;
+                        if (textureFormat != TextureFormat.Unknown)
+                        {
+                            // It appears to be a texture. Set data to the decompressed data
+                            data = decompressedData;
+                        }
+                        else
+                        {
+                            // Hmm... still doesn't appear to be a texture. Just ignore this file then.
+                            return;
+                        }
                     }
                 }
 

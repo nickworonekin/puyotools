@@ -12,6 +12,8 @@ using PuyoTools.Modules;
 using PuyoTools.Modules.Archive;
 using PuyoTools.Modules.Texture;
 
+using Ookii.Dialogs;
+
 namespace PuyoTools.GUI
 {
     public partial class ArchiveExplorer : Form
@@ -342,13 +344,14 @@ namespace PuyoTools.GUI
             // Multiple files selected
             else
             {
-                FolderBrowserDialog fbd = new FolderBrowserDialog();
+                VistaFolderBrowserDialog fbd = new VistaFolderBrowserDialog();
                 fbd.Description = "Select a folder to extract the files to.";
+                fbd.UseDescriptionForTitle = true;
 
                 if (fbd.ShowDialog() == DialogResult.OK)
                 {
                     ArchiveReader archive = OpenedArchives.Peek().Archive;
-                    for (int i = 0; i < archive.Files.Length; i++)
+                    for (int i = 0; i < listView.SelectedIndices.Count; i++)
                     {
                         int index = listView.SelectedIndices[i];
 
@@ -371,6 +374,61 @@ namespace PuyoTools.GUI
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             this.Close();
+        }
+
+        private void extractAllToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ArchiveReader archive = OpenedArchives.Peek().Archive;
+
+            // No files in the archive
+            if (archive.Files.Length == 0)
+                return;
+
+            // One file in the archive
+            else if (archive.Files.Length == 1)
+            {
+                SaveFileDialog sfd = new SaveFileDialog();
+                sfd.FileName = archive.Files[0].Filename;
+                sfd.Filter = "All Files (*.*)|*.*";
+                sfd.Title = "Extract File";
+
+                if (sfd.ShowDialog() == DialogResult.OK)
+                {
+                    ArchiveEntry entry = archive.GetFile(0);
+                    entry.Stream.Position = entry.Offset;
+
+                    using (FileStream outStream = File.Create(sfd.FileName))
+                    {
+                        PTStream.CopyPartTo(entry.Stream, outStream, entry.Length);
+                    }
+                }
+            }
+
+            // Multiple files in the archive
+            else
+            {
+                VistaFolderBrowserDialog fbd = new VistaFolderBrowserDialog();
+                fbd.Description = "Select a folder to extract the files to.";
+                fbd.UseDescriptionForTitle = true;
+
+                if (fbd.ShowDialog() == DialogResult.OK)
+                {
+                    for (int i = 0; i < archive.Files.Length; i++)
+                    {
+                        ArchiveEntry entry = archive.GetFile(i);
+                        entry.Stream.Position = entry.Offset;
+
+                        string fname = entry.Filename;
+                        if (fname == String.Empty)
+                            fname = i.ToString("D" + archive.Files.Length.ToString().Length);
+
+                        using (FileStream outStream = File.Create(Path.Combine(fbd.SelectedPath, fname)))
+                        {
+                            PTStream.CopyPartTo(entry.Stream, outStream, entry.Length);
+                        }
+                    }
+                }
+            }
         }
     }
 }
