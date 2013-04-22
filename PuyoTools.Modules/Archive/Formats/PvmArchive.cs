@@ -21,7 +21,7 @@ namespace PuyoTools.Modules.Archive
 
         public override bool CanWrite
         {
-            get { return false; }
+            get { return true; }
         }
 
         public override ArchiveReader Open(Stream source, int length)
@@ -130,7 +130,7 @@ namespace PuyoTools.Modules.Archive
                 if (containsGlobalIndex)
                 {
                     Files[index].Stream.Position = 0xC + (index * tableEntryLength) + globalIndexOffset;
-                    PTStream.WriteInt32(data, PTStream.ReadInt32BE(Files[index].Stream));
+                    PTStream.WriteUInt32(data, PTStream.ReadUInt32(Files[index].Stream));
                 }
                 else
                 {
@@ -164,8 +164,8 @@ namespace PuyoTools.Modules.Archive
 
             public override void AddFile(Stream source, int length, string fname)
             {
-                // Only GVR textures can be added to a GVM archive.
-                // If this is not a GVR texture, throw an exception
+                // Only PVR textures can be added to a PVM archive.
+                // If this is not a PVR texture, throw an exception
                 if (!(new PvrTexture()).Is(source, length, fname))
                 {
                     throw new CannotAddFileToArchiveException();
@@ -176,7 +176,97 @@ namespace PuyoTools.Modules.Archive
 
             public override void Flush()
             {
-                throw new NotImplementedException();
+                // Determine the length of each entry in the header
+                // and the flags that indicate what is stored in the header
+                int entryLength = 2;
+                ushort flags = 0;
+
+                if (settings.Filename)
+                {
+                    entryLength += 28;
+                    flags |= 0x8;
+                }
+                if (settings.Formats)
+                {
+                    entryLength += 2;
+                    flags |= 0x4;
+                }
+                if (settings.Dimensions)
+                {
+                    entryLength += 2;
+                    flags |= 0x2;
+                }
+                if (settings.GlobalIndex)
+                {
+                    entryLength += 4;
+                    flags |= 0x1;
+                }
+
+                // Write the start of the header
+                destination.WriteByte((byte)'P');
+                destination.WriteByte((byte)'V');
+                destination.WriteByte((byte)'M');
+                destination.WriteByte((byte)'H');
+
+                // Offset of the first texture in the archive
+                long entryOffset = PTMethods.RoundUp(12 + (files.Count * entryLength), 16);
+                PTStream.WriteInt32(destination, (int)entryOffset - 8);
+
+                // Write out the flags
+                PTStream.WriteUInt16(destination, flags);
+
+                // Write out the number of files
+                PTStream.WriteUInt16(destination, (ushort)files.Count);
+
+                // We're going to be using this a few times. Might as well do this here
+                long oldPosition;
+
+                // Now, let's add the files
+                for (int i = 0; i < files.Count; i++)
+                {
+                    // We need to get some information about the texture.
+                    // We already checked to make sure this texture is a PVR.
+                    // No need to check it again.
+                    oldPosition = files[i].Stream.Position;
+                    VrSharp.PvrTexture.PvrTexture texture = new VrSharp.PvrTexture.PvrTexture(files[i].Stream, files[i].Length);
+                    VrSharp.PvrTexture.PvrTextureInfo textureInfo = (VrSharp.PvrTexture.PvrTextureInfo)texture.GetTextureInfo();
+                    files[i].Stream.Position = oldPosition;
+
+                    // Write out the file number
+                    PTStream.WriteUInt16(destination, (ushort)i);
+
+                    // Write the information for this entry in the header
+                    if (settings.Filename)
+                    {
+                        PTStream.WriteCString(destination, Path.GetFileNameWithoutExtension(files[i].Filename), 28);
+                    }
+                    if (settings.Formats)
+                    {
+                        destination.WriteByte(0);
+                        destination.WriteByte(textureInfo.DataFormat);
+                    }
+                    if (settings.Dimensions)
+                    {
+                        ushort dimensions = 0;
+                        dimensions |= (ushort)(((byte)Math.Log(textureInfo.TextureWidth, 2) - 2) & 0xF);
+                        dimensions |= (ushort)((((byte)Math.Log(textureInfo.TextureHeight, 2) - 2) & 0xF) << 4);
+                        PTStream.WriteUInt16(destination, dimensions);
+                    }
+                    if (settings.GlobalIndex)
+                    {
+                        PTStream.WriteUInt32(destination, textureInfo.GlobalIndex);
+                    }
+
+                    // Now write out the file information
+                    oldPosition = destination.Position;
+                    destination.Position = entryOffset;
+                    files[i].Stream.Position += textureInfo.PvrtOffset;
+
+                    PTStream.CopyPartToPadded(files[i].Stream, destination, files[i].Length - textureInfo.PvrtOffset, 16, 0);
+
+                    entryOffset = destination.Position;
+                    destination.Position = oldPosition;
+                }
             }
         }
 

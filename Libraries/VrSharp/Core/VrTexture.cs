@@ -14,6 +14,8 @@ namespace VrSharp
         protected byte[] TextureData;  // Vr Texture Data
         protected byte[] RawImageData; // Raw Image Data
 
+        protected uint GlobalIndex; // Vr Texture Global Index
+
         protected ushort TextureWidth;  // Vr Texture Width
         protected ushort TextureHeight; // Vr Texture Height
 

@@ -103,6 +103,7 @@
             // 
             // listView
             // 
+            this.listView.AllowDrop = true;
             this.listView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.numCol,
             this.fileCol,

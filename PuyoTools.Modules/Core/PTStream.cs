@@ -260,6 +260,34 @@ namespace PuyoTools.Modules
             destination.WriteByte((byte)(value & 0xFF));
         }
 
+        public static void WriteUInt16(Stream destination, ushort value)
+        {
+            destination.WriteByte((byte)(value & 0xFF));
+            destination.WriteByte((byte)((value >> 8) & 0xFF));
+        }
+
+        public static void WriteUInt16BE(Stream destination, ushort value)
+        {
+            destination.WriteByte((byte)((value >> 8) & 0xFF));
+            destination.WriteByte((byte)(value & 0xFF));
+        }
+
+        public static void WriteUInt32(Stream destination, uint value)
+        {
+            destination.WriteByte((byte)(value & 0xFF));
+            destination.WriteByte((byte)((value >> 8) & 0xFF));
+            destination.WriteByte((byte)((value >> 16) & 0xFF));
+            destination.WriteByte((byte)((value >> 24) & 0xFF));
+        }
+
+        public static void WriteUInt32BE(Stream destination, uint value)
+        {
+            destination.WriteByte((byte)((value >> 24) & 0xFF));
+            destination.WriteByte((byte)((value >> 16) & 0xFF));
+            destination.WriteByte((byte)((value >> 8) & 0xFF));
+            destination.WriteByte((byte)(value & 0xFF));
+        }
+
         /// <summary>
         /// Reads an ASCII encoded null terminated C string from a stream.
         /// The stream is read until a null byte is reached.

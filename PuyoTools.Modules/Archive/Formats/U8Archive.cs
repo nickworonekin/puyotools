@@ -18,7 +18,7 @@ namespace PuyoTools.Modules.Archive
 
         public override bool CanWrite
         {
-            get { return false; }
+            get { return true; }
         }
 
         public override ArchiveReader Open(Stream source, int length)
@@ -52,8 +52,8 @@ namespace PuyoTools.Modules.Archive
                 // Go the root node
                 source.Position = archiveOffset + rootNodeOffset;
                 Node rootNode = new Node();
-                rootNode.Type = PTStream.ReadUInt16BE(source);
-                rootNode.NameOffset = PTStream.ReadUInt16BE(source);
+                rootNode.Type = PTStream.ReadByte(source);
+                rootNode.NameOffset = (uint)(PTStream.ReadByte(source) << 24 | PTStream.ReadUInt16BE(source));
                 rootNode.DataOffset = PTStream.ReadUInt32BE(source);
                 rootNode.Length = PTStream.ReadUInt32BE(source);
 
@@ -67,8 +67,8 @@ namespace PuyoTools.Modules.Archive
                 {
                     // Read in this node
                     Node node = new Node();
-                    node.Type = PTStream.ReadUInt16BE(source);
-                    node.NameOffset = PTStream.ReadUInt16BE(source);
+                    node.Type = PTStream.ReadByte(source);
+                    node.NameOffset = (uint)(PTStream.ReadByte(source) << 24 | PTStream.ReadUInt16BE(source));
                     node.DataOffset = PTStream.ReadUInt32BE(source);
                     node.Length = PTStream.ReadUInt32BE(source);
 
@@ -114,8 +114,8 @@ namespace PuyoTools.Modules.Archive
 
             private struct Node
             {
-                public ushort Type;
-                public ushort NameOffset;
+                public byte Type;
+                public uint NameOffset;
                 public uint DataOffset;
                 public uint Length;
             }
@@ -132,7 +132,75 @@ namespace PuyoTools.Modules.Archive
 
             public override void Flush()
             {
-                throw new NotImplementedException();
+                // The start of the archive
+                long offset = destination.Position;
+
+                // Puyo Tools is only capable of building U8 archives that do not contain directories.
+                // It's just very difficult to do with the way Puyo Tools is structured.
+
+                // First things first, let's get the header size
+                int headerSize = ((files.Count + 1) * 12) + 1;
+                for (int i = 0; i < files.Count; i++)
+                {
+                    headerSize += files[i].Filename.Length + 1;
+                }
+
+                // Get the name and data offset
+                int nameOffset = 0;
+                int dataOffset = PTMethods.RoundUp(0x20 + headerSize, 32);
+
+                // Start writing out the header
+                destination.WriteByte((byte)'U');
+                destination.WriteByte(0xAA);
+                destination.WriteByte((byte)'8');
+                destination.WriteByte((byte)'-');
+
+                PTStream.WriteUInt32BE(destination, 0x20); // Root node offset (always 0x20)
+                PTStream.WriteInt32BE(destination, headerSize); // Header size
+                PTStream.WriteInt32BE(destination, dataOffset); // Data offset
+
+                // Pad
+                while ((destination.Position - offset) % 32 != 0)
+                    destination.WriteByte(0);
+
+                // Write the root node
+                destination.WriteByte(1);
+                destination.WriteByte((byte)(nameOffset >> 16));
+                PTStream.WriteUInt16BE(destination, (ushort)(nameOffset & 0xFFFF));
+                PTStream.WriteInt32BE(destination, 0);
+                PTStream.WriteInt32BE(destination, files.Count + 1);
+
+                nameOffset++;
+
+                // Write out the file nodes
+                for (int i = 0; i < files.Count; i++)
+                {
+                    destination.WriteByte(0);
+                    destination.WriteByte((byte)(nameOffset >> 16));
+                    PTStream.WriteUInt16BE(destination, (ushort)(nameOffset & 0xFFFF));
+                    PTStream.WriteInt32BE(destination, dataOffset);
+                    PTStream.WriteInt32BE(destination, files[i].Length);
+
+                    nameOffset += files[i].Filename.Length + 1;
+                    dataOffset += PTMethods.RoundUp(files[i].Length, 32);
+                }
+
+                // Write out the filename table
+                PTStream.WriteCString(destination, String.Empty, 1);
+                for (int i = 0; i < files.Count; i++)
+                {
+                    PTStream.WriteCString(destination, files[i].Filename, files[i].Filename.Length + 1);
+                }
+
+                // Pad
+                while ((destination.Position - offset) % 32 != 0)
+                    destination.WriteByte(0);
+
+                // Write the file data
+                for (int i = 0; i < files.Count; i++)
+                {
+                    PTStream.CopyPartToPadded(files[i].Stream, destination, files[i].Length, 32, 0);
+                }
             }
         }
     }

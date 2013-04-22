@@ -21,5 +21,15 @@ namespace VrSharp
         /// Data Format
         /// </summary>
         public byte DataFormat;
+
+        /// <summary>
+        /// Global Index
+        /// </summary>
+        public uint GlobalIndex;
+
+        /// <summary>
+        /// Offset of the PVRT (or GVRT) chunk.
+        /// </summary>
+        public int PvrtOffset;
     }
 }

@@ -67,6 +67,9 @@ namespace PuyoTools.GUI
         private void fileListButton_Click(object sender, EventArgs e)
         {
             (new FileListForm(fileList)).ShowDialog();
+
+            if (fileList.Count == 0)
+                runButton.Enabled = false;
         }
     }
 }

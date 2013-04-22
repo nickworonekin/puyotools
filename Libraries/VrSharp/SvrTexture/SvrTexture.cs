@@ -89,10 +89,12 @@ namespace VrSharp.SvrTexture
             if (!InitSuccess) return new SvrTextureInfo();
 
             SvrTextureInfo TextureInfo = new SvrTextureInfo();
+            TextureInfo.GlobalIndex    = GlobalIndex;
             TextureInfo.TextureWidth   = TextureWidth;
             TextureInfo.TextureHeight  = TextureHeight;
             TextureInfo.PixelFormat    = PixelFormat;
             TextureInfo.DataFormat     = DataFormat;
+            TextureInfo.PvrtOffset     = PvrtOffset;
 
             return TextureInfo;
         }
@@ -120,6 +122,15 @@ namespace VrSharp.SvrTexture
             }
 
             // Read the file information
+            if (GbixOffset != -1)
+            {
+                GlobalIndex = (uint)(TextureData[GbixOffset + 0x08] | TextureData[GbixOffset + 0x09] << 8 | TextureData[GbixOffset + 0x0A] << 16 | TextureData[GbixOffset + 0x0B] << 24);
+            }
+            else
+            {
+                GlobalIndex = 0;
+            }
+
             TextureWidth  = BitConverter.ToUInt16(TextureData, PvrtOffset + 0x0C);
             TextureHeight = BitConverter.ToUInt16(TextureData, PvrtOffset + 0x0E);
 

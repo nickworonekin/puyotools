@@ -12,6 +12,8 @@ using PuyoTools.Modules;
 using PuyoTools.Modules.Archive;
 using PuyoTools.Modules.Texture;
 
+using Ookii.Dialogs;
+
 namespace PuyoTools.GUI
 {
     public partial class ArchiveExtractor : ToolForm
@@ -21,11 +23,20 @@ namespace PuyoTools.GUI
             InitializeComponent();
         }
 
-        private void Run(Settings settings)
+        private void Run(Settings settings, ProgressDialog dialog)
         {
             for (int i = 0; i < fileList.Count; i++)
             {
                 string file = fileList[i];
+
+                if (fileList.Count == 1)
+                {
+                    dialog.ReportProgress(i * 100 / fileList.Count, dialog.Text, "Processing " + Path.GetFileName(file));
+                }
+                else
+                {
+                    dialog.ReportProgress(i * 100 / fileList.Count, dialog.Text, "Processing " + Path.GetFileName(file) + " (" + (i + 1) + " of " + fileList.Count + ")");
+                }
 
                 // Let's open the file.
                 // But, we're going to do this in a try catch in case any errors happen.
@@ -206,7 +217,22 @@ namespace PuyoTools.GUI
                                     {
                                         fileList.Add(Path.Combine(outPath, outName));
                                     }
+
+                                    if (fileList.Count == 2)
+                                    {
+                                        // If there was one archive in the file list, and now there is more,
+                                        // adjust the progress bar and the description
+                                        dialog.ReportProgress(i * 100 / fileList.Count, dialog.Text, "Processing " + Path.GetFileName(file) + " (" + (i + 1) + " of " + fileList.Count + ")");
+                                    }
                                 }
+                            }
+
+                            if (fileList.Count == 1)
+                            {
+                                // If there is just one file in the file list, then the progress will be
+                                // based on how many files are being extracted from the archive, not
+                                // how many archives we are extracting.
+                                dialog.ReportProgress((j + 1) * 100 / archive.Files.Length);
                             }
                         }
                     }
@@ -277,6 +303,15 @@ namespace PuyoTools.GUI
                 {
                     // Meh, just ignore the error.
                 }
+
+                if (i == fileList.Count - 1)
+                {
+                    dialog.ReportProgress((i + 1) * 100 / fileList.Count, dialog.Text, "Complete");
+                }
+                else
+                {
+                    dialog.ReportProgress((i + 1) * 100 / fileList.Count);
+                }
             }
 
             // The tool is finished doing what it needs to do. We can close it now.
@@ -322,7 +357,15 @@ namespace PuyoTools.GUI
             settings.ConvertExtractedTextures = convertExtractedTexturesCheckbox.Checked;
 
             // Run the tool
-            Run(settings);
+            ProgressDialog dialog = new ProgressDialog();
+            dialog.WindowTitle = "Processing";
+            dialog.Text = "Extracting Files";
+            dialog.ShowCancelButton = false;
+            dialog.DoWork += delegate(object sender2, DoWorkEventArgs e2)
+            {
+                Run(settings, dialog);
+            };
+            dialog.Show();
         }
     }
 }
