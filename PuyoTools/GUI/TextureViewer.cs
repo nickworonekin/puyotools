@@ -134,6 +134,11 @@ namespace PuyoTools.GUI
                             return;
                         }
                     }
+                    else
+                    {
+                        // Hmm... doesn't appear to be a texture. Just ignore this file then.
+                        return;
+                    }
                 }
 
                 // This is a texture. Let's open it.

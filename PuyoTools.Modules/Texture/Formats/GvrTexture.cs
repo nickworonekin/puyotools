@@ -58,7 +58,7 @@ namespace PuyoTools.Modules.Texture
 
         public override bool Is(Stream source, int length, string fname)
         {
-            return (length > 16 && VrSharp.GvrTexture.GvrTexture.IsGvrTexture(source, length));
+            return (length > 16 && VrSharp.GvrTexture.GvrTexture.Is(source, length));
         }
     }
 }

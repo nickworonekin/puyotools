@@ -31,6 +31,7 @@ namespace VrSharp
         #endregion
 
         #region Constructors
+        /*
         /// <summary>
         /// Open a Vr texture from a file.
         /// </summary>
@@ -100,6 +101,7 @@ namespace VrSharp
 
             TextureData = data;
         }
+         * */
         #endregion
 
         #region Get Texture
@@ -379,60 +381,88 @@ namespace VrSharp
         #endregion
 
         #region Constructors & Initalizers
-        protected virtual bool Initalize()
+        public VrTexture(string file)
         {
-            return false;
+            try
+            {
+                TextureData = File.ReadAllBytes(file);
+            }
+            catch
+            {
+                TextureData = null;
+            }
+
+            if (TextureData != null)
+            {
+                InitSuccess = Initalize();
+            }
+            else
+            {
+                InitSuccess = false;
+            }
         }
 
-        /*
-        /// <summary>
-        /// Determines if this is a VR texture.
-        /// </summary>
-        /// <param name="source">Byte array containing the data.</param>
-        /// <param name="offset">The offset in the byte array to start at.</param>
-        /// <param name="length">Length of the data (in bytes).</param>
-        /// <returns>True if this is a VR texture, false otherwise.</returns>
-        public virtual bool Is(byte[] source, int offset, int length)
+        public VrTexture(byte[] source)
         {
-            return false;
+            TextureData = source;
+
+            if (TextureData != null)
+            {
+                InitSuccess = Initalize();
+            }
+            else
+            {
+                InitSuccess = false;
+            }
         }
 
-        /// <summary>
-        /// Determines if this is a VR texture.
-        /// </summary>
-        /// <param name="source">Byte array containing the data.</param>
-        /// <returns>True if this is a VR texture, false otherwise.</returns>
-        public virtual bool Is(byte[] source)
+        public VrTexture(byte[] source, int offset, int length)
         {
-            return Is(source, 0, source.Length);
+            if (source == null || (offset == 0 && source.Length == length))
+            {
+                TextureData = source;
+            }
+            else if (source != null)
+            {
+                TextureData = new byte[length];
+                Array.Copy(source, offset, TextureData, 0, length);
+            }
+
+            if (TextureData != null)
+            {
+                InitSuccess = Initalize();
+            }
+            else
+            {
+                InitSuccess = false;
+            }
         }
 
+        public VrTexture(Stream source) : this(source, (int)(source.Length - source.Position)) { }
 
-        /// <summary>
-        /// Determines if this is a VR texture.
-        /// </summary>
-        /// <param name="source">The stream to read from. The stream position is not changed.</param>
-        /// <param name="length">Number of bytes to read.</param>
-        /// <returns>True if this is a VR texture, false otherwise.</returns>
-        public virtual bool Is(Stream source, int length)
+        public VrTexture(Stream source, int length)
         {
-            byte[] buffer = new byte[length];
-            source.Read(buffer, 0, length);
-            source.Position -= length;
+            try
+            {
+                TextureData = new byte[length];
+                source.Read(TextureData, 0, length);
+            }
+            catch
+            {
+                TextureData = null;
+            }
 
-            return Is(buffer, 0, length);
+            if (TextureData != null)
+            {
+                InitSuccess = Initalize();
+            }
+            else
+            {
+                InitSuccess = false;
+            }
         }
 
-        /// <summary>
-        /// Determines if this is a VR texture.
-        /// </summary>
-        /// <param name="source">The stream to read from. The stream position is not changed.</param>
-        /// <returns>True if this is a VR texture, false otherwise.</returns>
-        public virtual bool Is(Stream source)
-        {
-            return Is(source, (int)(source.Length - source.Position));
-        }
-        */
+        protected abstract bool Initalize();
         #endregion
     }
 }

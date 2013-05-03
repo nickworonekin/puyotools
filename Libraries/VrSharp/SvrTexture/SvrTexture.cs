@@ -6,63 +6,108 @@ namespace VrSharp.SvrTexture
 {
     public class SvrTexture : VrTexture
     {
-        #region Fields
+        #region Texture Properties
+        /// <summary>
+        /// The texture's pixel format.
+        /// </summary>
         public SvrPixelFormat PixelFormat { get; private set; }
+
+        /// <summary>
+        /// The texture's data format.
+        /// </summary>
         public SvrDataFormat DataFormat { get; private set; }
         #endregion
 
-        #region Constructors
+        #region Constructors & Initalizers
         /// <summary>
-        /// Open a Svr texture from a file.
+        /// Open a SVR texture from a file.
         /// </summary>
         /// <param name="file">Filename of the file that contains the texture data.</param>
-        public SvrTexture(string file)
-            : base(file)
-        {
-            InitSuccess = ReadHeader();
-        }
+        public SvrTexture(string file) : base(file) { }
 
         /// <summary>
-        /// Open a Svr texture from a stream.
+        /// Open a SVR texture from a byte array.
         /// </summary>
-        /// <param name="stream">Stream that contains the texture data.</param>
-        public SvrTexture(Stream stream)
-            : base(stream)
-        {
-            InitSuccess = ReadHeader();
-        }
+        /// <param name="source">Byte array that contains the texture data.</param>
+        public SvrTexture(byte[] source) : base(source) { }
 
         /// <summary>
-        /// Open a Svr texture from a stream.
+        /// Open a SVR texture from a byte array.
         /// </summary>
-        /// <param name="stream">Stream that contains the texture data.</param>
-        /// <param name="length">Number of bytes to read.</param>
-        public SvrTexture(Stream stream, int length)
-            : base(stream, length)
-        {
-            InitSuccess = ReadHeader();
-        }
-
-        /// <summary>
-        /// Open a Svr texture from a byte array.
-        /// </summary>
-        /// <param name="array">Byte array that contains the texture data.</param>
-        public SvrTexture(byte[] array)
-            : base(array)
-        {
-            InitSuccess = ReadHeader();
-        }
-
-        /// <summary>
-        /// Open a Svr texture from a byte array.
-        /// </summary>
-        /// <param name="array">Byte array that contains the texture data.</param>
+        /// <param name="source">Byte array that contains the texture data.</param>
         /// <param name="offset">Offset of the texture in the array.</param>
         /// <param name="length">Number of bytes to read.</param>
-        public SvrTexture(byte[] array, long offset, int length)
-            : base(array, offset, length)
+        public SvrTexture(byte[] source, long offset, int length) : base(source, (int)offset, length) { }
+
+        /// <summary>
+        /// Open a SVR texture from a stream.
+        /// </summary>
+        /// <param name="source">Stream that contains the texture data.</param>
+        public SvrTexture(Stream source) : base(source) { }
+
+        /// <summary>
+        /// Open a SVR texture from a stream.
+        /// </summary>
+        /// <param name="source">Stream that contains the texture data.</param>
+        /// <param name="length">Number of bytes to read.</param>
+        public SvrTexture(Stream source, int length) : base(source, length) { }
+
+        protected override bool Initalize()
         {
-            InitSuccess = ReadHeader();
+            // Check to see if what we are dealing with is a SVR texture
+            if (!Is(TextureData))
+                return false;
+
+            // Determine the offsets of the GBIX (if present) and PVRT header chunks.
+            if (Compare(TextureData, "GBIX", 0x00))
+            {
+                GbixOffset = 0x00;
+                PvrtOffset = 0x10;
+            }
+            else
+            {
+                GbixOffset = -1;
+                PvrtOffset = 0x00;
+            }
+
+            // Read the global index (if it is present). If it is not present, just set it to 0.
+            if (GbixOffset != -1)
+            {
+                GlobalIndex = BitConverter.ToUInt32(TextureData, GbixOffset + 0x08);
+            }
+            else
+            {
+                GlobalIndex = 0;
+            }
+
+            // Read information about the texture
+            TextureWidth  = BitConverter.ToUInt16(TextureData, PvrtOffset + 0x0C);
+            TextureHeight = BitConverter.ToUInt16(TextureData, PvrtOffset + 0x0E);
+
+            PixelFormat = (SvrPixelFormat)TextureData[PvrtOffset + 0x08];
+            DataFormat  = (SvrDataFormat)TextureData[PvrtOffset + 0x09];
+
+            // Get the codecs and make sure we can decode using them
+            PixelCodec = SvrCodecList.GetPixelCodec(PixelFormat);
+            if (PixelCodec == null || !PixelCodec.CanDecode()) return false;
+
+            DataCodec = SvrCodecList.GetDataCodec(DataFormat);
+            if (DataCodec == null || !DataCodec.CanDecode()) return false;
+
+            // Set the clut and data offsets
+            if (DataCodec.GetNumClutEntries() == 0 || DataCodec.NeedsExternalClut())
+            {
+                ClutOffset = -1;
+                DataOffset = PvrtOffset + 0x10;
+            }
+            else
+            {
+                ClutOffset = PvrtOffset + 0x10;
+                DataOffset = ClutOffset + (DataCodec.GetNumClutEntries() * (PixelCodec.GetBpp() / 8));
+            }
+
+            RawImageData = new byte[TextureWidth * TextureHeight * 4];
+            return true;
         }
         #endregion
 
@@ -84,129 +129,88 @@ namespace VrSharp.SvrTexture
         }
         #endregion
 
-        /*
-        #region Misc
+        #region Texture Check
         /// <summary>
-        /// Returns information about the texture.  (Use an explicit cast to get SvrTextureInfo.)
+        /// Determines if this is a SVR texture.
         /// </summary>
-        /// <returns></returns>
-        public override VrTextureInfo GetTextureInfo()
+        /// <param name="source">Byte array containing the data.</param>
+        /// <param name="offset">The offset in the byte array to start at.</param>
+        /// <param name="length">Length of the data (in bytes).</param>
+        /// <returns>True if this is a SVR texture, false otherwise.</returns>
+        public static bool Is(byte[] source, int offset, int length)
         {
-            if (!InitSuccess) return new SvrTextureInfo();
-
-            SvrTextureInfo TextureInfo = new SvrTextureInfo();
-            TextureInfo.GlobalIndex    = GlobalIndex;
-            TextureInfo.TextureWidth   = TextureWidth;
-            TextureInfo.TextureHeight  = TextureHeight;
-            TextureInfo.PixelFormat    = PixelFormat;
-            TextureInfo.DataFormat     = DataFormat;
-            TextureInfo.PvrtOffset     = PvrtOffset;
-
-            return TextureInfo;
-        }
-        #endregion
-         * */
-
-        #region Header
-        // Read the header and sets up the appropiate values.
-        // Returns true if successful, otherwise false
-        private bool ReadHeader()
-        {
-            // Make sure this is a Svr Texture
-            if (!IsSvrTexture(TextureData))
-                return false;
-
-            // Get the header offsets
-            if (Compare(TextureData, "GBIX", 0x00))
-            {
-                GbixOffset = 0x00;
-                PvrtOffset = 0x10;
-            }
-            else
-            {
-                GbixOffset = -1;
-                PvrtOffset = 0x00;
-            }
-
-            // Read the file information
-            if (GbixOffset != -1)
-            {
-                GlobalIndex = (uint)(TextureData[GbixOffset + 0x08] | TextureData[GbixOffset + 0x09] << 8 | TextureData[GbixOffset + 0x0A] << 16 | TextureData[GbixOffset + 0x0B] << 24);
-            }
-            else
-            {
-                GlobalIndex = 0;
-            }
-
-            TextureWidth  = BitConverter.ToUInt16(TextureData, PvrtOffset + 0x0C);
-            TextureHeight = BitConverter.ToUInt16(TextureData, PvrtOffset + 0x0E);
-
-            PixelFormat = (SvrPixelFormat)TextureData[PvrtOffset + 0x08];
-            DataFormat  = (SvrDataFormat)TextureData[PvrtOffset + 0x09];
-
-            // Get the codecs and make sure we can decode using them
-            PixelCodec = SvrCodecList.GetPixelCodec((SvrPixelFormat)PixelFormat);
-            DataCodec  = SvrCodecList.GetDataCodec((SvrDataFormat)DataFormat);
-            if (PixelCodec == null || !PixelCodec.CanDecode()) return false;
-            if (DataCodec == null  || !DataCodec.CanDecode()) return false;
-
-            // Set the clut and data offsets
-            if (DataCodec.GetNumClutEntries() == 0 || DataCodec.NeedsExternalClut())
-            {
-                ClutOffset = -1;
-                DataOffset = PvrtOffset + 0x10;
-            }
-            else
-            {
-                ClutOffset = PvrtOffset + 0x10;
-                DataOffset = ClutOffset + (DataCodec.GetNumClutEntries() * (PixelCodec.GetBpp() / 8));
-            }
-
-            RawImageData = new byte[TextureWidth * TextureHeight * 4];
-            return true;
-        }
-
-        // Checks if the input file is a svr
-        public static bool IsSvrTexture(byte[] data, long offset, int length)
-        {
-            // Gbix and Pvrt
+            // GBIX and PVRT
             if (length >= 0x20 &&
-                Compare(data, "GBIX", (int)offset + 0x00) &&
-                Compare(data, "PVRT", (int)offset + 0x10) &&
-                data[offset + 0x19] >= 0x60 && data[offset + 0x19] < 0x70 &&
-                BitConverter.ToUInt32(data, (int)offset + 0x14) == length - 24)
+                Compare(source, "GBIX", offset + 0x00) &&
+                Compare(source, "PVRT", offset + 0x10) &&
+                source[offset + 0x19] >= 0x60 && source[offset + 0x19] < 0x70 &&
+                BitConverter.ToUInt32(source, offset + 0x14) == length - 24)
                 return true;
-            // Pvrt
+
+            // PVRT (and no GBIX chunk)
             else if (length >= 0x10 &&
-                Compare(data, "PVRT", (int)offset + 0x00) &&
-                data[offset + 0x19] >= 0x60 && data[offset + 0x19] < 0x70 &&
-                BitConverter.ToUInt32(data, (int)offset + 0x04) == length - 8)
+                Compare(source, "PVRT", offset + 0x00) &&
+                source[offset + 0x19] >= 0x60 && source[offset + 0x19] < 0x70 &&
+                BitConverter.ToUInt32(source, offset + 0x04) == length - 8)
                 return true;
 
             return false;
         }
 
-        public static bool IsSvrTexture(byte[] data)
+        /// <summary>
+        /// Determines if this is a SVR texture.
+        /// </summary>
+        /// <param name="source">Byte array containing the data.</param>
+        /// <returns>True if this is a SVR texture, false otherwise.</returns>
+        public static bool Is(byte[] source)
         {
-            return IsSvrTexture(data, 0, data.Length);
+            return Is(source, 0, source.Length);
         }
-        public static bool IsSvrTexture(Stream data, int length)
+
+        /// <summary>
+        /// Determines if this is a SVR texture.
+        /// </summary>
+        /// <param name="source">The stream to read from. The stream position is not changed.</param>
+        /// <param name="length">Number of bytes to read.</param>
+        /// <returns>True if this is a SVR texture, false otherwise.</returns>
+        public static bool Is(Stream source, int length)
         {
-            // If it's less than 16 bytes, then it is not a texture
-            if (length < 0x10)
+            // If the length is < 16, then there is no way this is a valid texture.
+            if (length < 16)
+            {
                 return false;
+            }
 
-            long oldPosition = data.Position;
-            byte[] buffer = new byte[0x20];
-
-            if (length > 0x20)
-                data.Read(buffer, 0, 0x20);
+            // Let's see if we should check 16 bytes or 32 bytes
+            int amountToRead = 0;
+            if (length < 32)
+            {
+                amountToRead = 16;
+            }
+            else if (length < 36)
+            {
+                amountToRead = 32;
+            }
             else
-                data.Read(buffer, 0, 0x10);
+            {
+                amountToRead = 36;
+            }
 
-            data.Position = oldPosition;
+            byte[] buffer = new byte[amountToRead];
+            source.Read(buffer, 0, amountToRead);
+            source.Position -= amountToRead;
 
-            return IsSvrTexture(buffer, 0, length);
+            return Is(buffer, 0, length);
+        }
+
+        /// <summary>
+        /// Determines if this is a SVR texture.
+        /// </summary>
+        /// <param name="source">The stream to read from. The stream position is not changed.</param>
+        /// <returns>True if this is a SVR texture, false otherwise.</returns>
+        public static bool Is(Stream source)
+        {
+            return Is(source, (int)(source.Length - source.Position));
         }
         #endregion
     }
