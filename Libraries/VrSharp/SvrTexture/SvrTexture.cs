@@ -37,7 +37,7 @@ namespace VrSharp.SvrTexture
         /// <param name="source">Byte array that contains the texture data.</param>
         /// <param name="offset">Offset of the texture in the array.</param>
         /// <param name="length">Number of bytes to read.</param>
-        public SvrTexture(byte[] source, long offset, int length) : base(source, (int)offset, length) { }
+        public SvrTexture(byte[] source, int offset, int length) : base(source, offset, length) { }
 
         /// <summary>
         /// Open a SVR texture from a stream.
@@ -93,6 +93,7 @@ namespace VrSharp.SvrTexture
 
             DataCodec = SvrCodecList.GetDataCodec(DataFormat);
             if (DataCodec == null || !DataCodec.CanDecode()) return false;
+            DataCodec.PixelCodec = PixelCodec;
 
             // Set the clut and data offsets
             if (DataCodec.GetNumClutEntries() == 0 || DataCodec.NeedsExternalClut())

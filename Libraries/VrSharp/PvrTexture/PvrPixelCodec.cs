@@ -18,6 +18,7 @@ namespace VrSharp.PvrTexture
                 get { return 16; }
             }
 
+            /*
             public override byte[,] GetClut(byte[] input, int offset, int entries)
             {
                 byte[,] clut = new byte[entries, 4];
@@ -90,6 +91,7 @@ namespace VrSharp.PvrTexture
 
                 return BitConverter.GetBytes(pixel);
             }
+            */
 
             public override void DecodePixel(byte[] source, int sourceIndex, byte[] destination, int destinationIndex)
             {
@@ -128,6 +130,7 @@ namespace VrSharp.PvrTexture
                 get { return 16; }
             }
 
+            /*
             public override byte[,] GetClut(byte[] input, int offset, int entries)
             {
                 byte[,] clut = new byte[entries, 4];
@@ -188,6 +191,7 @@ namespace VrSharp.PvrTexture
 
                 return BitConverter.GetBytes(pixel);
             }
+            */
 
             public override void DecodePixel(byte[] source, int sourceIndex, byte[] destination, int destinationIndex)
             {
@@ -225,6 +229,7 @@ namespace VrSharp.PvrTexture
                 get { return 16; }
             }
 
+            /*
             public override byte[,] GetClut(byte[] input, int offset, int entries)
             {
                 byte[,] clut = new byte[entries, 4];
@@ -287,12 +292,13 @@ namespace VrSharp.PvrTexture
 
                 return BitConverter.GetBytes(pixel);
             }
+            */
 
             public override void DecodePixel(byte[] source, int sourceIndex, byte[] destination, int destinationIndex)
             {
                 ushort pixel = BitConverter.ToUInt16(source, sourceIndex);
 
-                destination[destinationIndex + 3] = (byte)(((pixel >> 12) & 0x0F) * 0xFF);
+                destination[destinationIndex + 3] = (byte)(((pixel >> 12) & 0x0F) * 0xFF / 0x0F);
                 destination[destinationIndex + 2] = (byte)(((pixel >> 8)  & 0x0F) * 0xFF / 0x0F);
                 destination[destinationIndex + 1] = (byte)(((pixel >> 4)  & 0x0F) * 0xFF / 0x0F);
                 destination[destinationIndex + 0] = (byte)(((pixel >> 0)  & 0x0F) * 0xFF / 0x0F);

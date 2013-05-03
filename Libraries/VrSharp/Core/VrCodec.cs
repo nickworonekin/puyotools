@@ -24,67 +24,48 @@ namespace VrSharp
         public abstract int GetBpp(); // Returns the bits per pixel for this pixel codec
 
         // Gets the clut for this pixel format and returns it as Argb8888
-        public abstract byte[,] GetClut(byte[] input, int offset, int entries);
+        //public abstract byte[,] GetClut(byte[] input, int offset, int entries);
         // Create the clut for this pixel format
-        public virtual byte[] CreateClut(byte[,] input) { return null; }
+        //public virtual byte[] CreateClut(byte[,] input) { return null; }
         // Converts the entry for the pixel format to Argb8888
-        public virtual byte[] GetPixelPalette(byte[] input, int offset)
-        {
-            return null;
-        }
+        //public virtual byte[] GetPixelPalette(byte[] input, int offset)
+        //{
+        //    return null;
+        //}
 
         // Converts the entry from Argb8888 to the pixel format entry
-        public virtual byte[] CreatePixelPalette(byte[] input, int offset)
-        {
-            return null;
-        }
+        //public virtual byte[] CreatePixelPalette(byte[] input, int offset)
+        //{
+        //    return null;
+        //}
 
         public abstract int Bpp { get; }
 
-        public virtual void DecodePixel(byte[] source, int sourceIndex, byte[] destination, int destinationIndex)
-        {
-            throw new NotImplementedException();
-        }
+        public abstract void DecodePixel(byte[] source, int sourceIndex, byte[] destination, int destinationIndex);
+        public abstract void EncodePixel(byte[] source, int sourceIndex, byte[] destination, int destinationIndex);
 
-        public virtual void EncodePixel(byte[] source, int sourceIndex, byte[] destination, int destinationIndex)
+        public byte[] EncodeClut(byte[][] palette, int numEntries)
         {
-            throw new NotImplementedException();
-        }
-
-        public byte[] EncodeClut(byte[,] palette, int numEntries)
-        {
-            byte[] destination = new byte[numEntries * (GetBpp() / 8)];
+            byte[] destination = new byte[numEntries * (Bpp >> 3)];
             int destinationIndex = 0;
-
-            byte[] pixel = new byte[4];
 
             for (int i = 0; i < numEntries; i++)
             {
-                pixel[3] = palette[i, 3];
-                pixel[2] = palette[i, 2];
-                pixel[1] = palette[i, 1];
-                pixel[0] = palette[i, 0];
-
-                EncodePixel(pixel, 0, destination, destinationIndex);
-                destinationIndex += (GetBpp() / 8);
+                EncodePixel(palette[i], 0, destination, destinationIndex);
+                destinationIndex += (Bpp >> 3);
             }
 
             return destination;
         }
 
-        public byte[,] DecodeClut(byte[] source, int sourceIndex, int numEntries)
+        public byte[][] DecodeClut(byte[] source, int sourceIndex, int numEntries)
         {
-            byte[,] palette = new byte[numEntries, 4];
-            byte[] pixel = new byte[4];
+            byte[][] palette = new byte[numEntries][];
 
             for (int i = 0; i < numEntries; i++)
             {
-                DecodePixel(source, sourceIndex + (i * GetBpp() / 8), pixel, 0);
-
-                palette[i, 3] = pixel[3];
-                palette[i, 2] = pixel[2];
-                palette[i, 1] = pixel[1];
-                palette[i, 0] = pixel[0];
+                palette[i] = new byte[4];
+                DecodePixel(source, sourceIndex + (i * (Bpp >> 3)), palette[i], 0);
             }
 
             return palette;
@@ -96,14 +77,7 @@ namespace VrSharp
     // Base codec for the data codecs
     public abstract class VrDataCodec : VrCodec
     {
-        protected VrPixelCodec pixelCodec;
-
-        public VrDataCodec() { }
-
-        public VrDataCodec(VrPixelCodec pixelCodec)
-        {
-            this.pixelCodec = pixelCodec;
-        }
+        public VrPixelCodec PixelCodec;
 
         public abstract bool CanDecode(); // Returns if this format can be decoded
         public abstract bool CanEncode(); // Returns if this format can be encoded
@@ -137,16 +111,20 @@ namespace VrSharp
         // Encode texture data
         public abstract byte[] Encode(byte[] input, int width, int height, VrPixelCodec PixelCodec);
 
-        protected byte[,] ClutData; // Clut for the current texture
+        protected byte[][] ClutData;
+
+        //protected byte[,] ClutData; // Clut for the current texture
         // Set the clut from an external file
         public void SetClutExternal(byte[] clut, int entries, VrPixelCodec PixelCodec)
         {
-            ClutData = PixelCodec.GetClut(clut, 0x00, entries);
+            //ClutData = PixelCodec.GetClut(clut, 0x00, entries);
+            ClutData = PixelCodec.DecodeClut(clut, 0, entries);
         }
         // Set the clut
         public void SetClut(byte[] clut, int offset, VrPixelCodec PixelCodec)
         {
-            ClutData = PixelCodec.GetClut(clut, offset, GetNumClutEntries());
+            //ClutData = PixelCodec.GetClut(clut, offset, GetNumClutEntries());
+            ClutData = PixelCodec.DecodeClut(clut, offset, GetNumClutEntries());
         }
     }
     #endregion

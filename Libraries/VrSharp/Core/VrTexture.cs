@@ -14,94 +14,123 @@ namespace VrSharp
         protected byte[] TextureData;  // Vr Texture Data
         protected byte[] RawImageData; // Raw Image Data
 
-        //public uint GlobalIndex { get; protected set; } // Vr Texture Global Index
-
-        //public ushort TextureWidth { get; protected set; }  // Vr Texture Width
-        //public ushort TextureHeight { get; protected set; } // Vr Texture Height
-
-        //protected byte PixelFormat;        // Pixel Format
-        //protected byte DataFormat;         // Data Format
         protected VrPixelCodec PixelCodec; // Pixel Codec
         protected VrDataCodec DataCodec;   // Data Codec
 
-        //protected int GbixOffset; // Gbix Offset
-        //public int PvrtOffset { get; protected set; } // Pvrt (Gvrt) Offset
         protected int ClutOffset; // Clut Offset
         protected int DataOffset; // Data Offset
         #endregion
 
-        #region Constructors
-        /*
+        #region Texture Properties
         /// <summary>
-        /// Open a Vr texture from a file.
+        /// The texture's global index, or 0 if this texture does not have a global index defined.
         /// </summary>
-        /// <param name="file">Filename of the file that contains the texture data.</param>
+        public uint GlobalIndex { get; protected set; }
+
+        /// <summary>
+        /// Width of the texture (in pixels).
+        /// </summary>
+        public ushort TextureWidth { get; protected set; }
+
+        /// <summary>
+        /// Height of the texture (in pixels).
+        /// </summary>
+        public ushort TextureHeight { get; protected set; }
+
+        /// <summary>
+        /// Offset of the GBIX (or GCIX) chunk in the texture file, or -1 if this chunk is not present.
+        /// </summary>
+        public int GbixOffset { get; protected set; }
+
+        /// <summary>
+        /// Offset of the PVRT (or GVRT) chunk in the texture file.
+        /// </summary>
+        public int PvrtOffset { get; protected set; }
+        #endregion
+
+        #region Constructors & Initalizers
         public VrTexture(string file)
         {
-            byte[] data;
             try
             {
-                data = File.ReadAllBytes(file);
+                TextureData = File.ReadAllBytes(file);
             }
-            catch { data = new byte[0]; }
-
-            TextureData = data;
-        }
-
-        /// <summary>
-        /// Open a Vr texture from a stream.
-        /// </summary>
-        /// <param name="stream">Stream that contains the texture data.</param>
-        public VrTexture(Stream stream) : this(stream, (int)(stream.Length - stream.Position)) { }
-
-        /// <summary>
-        /// Open a Vr texture from a stream.
-        /// </summary>
-        /// <param name="stream">Stream that contains the texture data.</param>
-        /// <param name="length">Number of bytes to read.</param>
-        public VrTexture(Stream stream, int length)
-        {
-            byte[] data;
-            try
+            catch
             {
-                data = new byte[length];
-                stream.Read(data, 0, length);
+                TextureData = null;
             }
-            catch { data = new byte[0]; }
 
-            TextureData = data;
-        }
-
-        /// <summary>
-        /// Open a Vr texture from a byte array.
-        /// </summary>
-        /// <param name="array">Byte array that contains the texture data.</param>
-        public VrTexture(byte[] array) : this(array, 0, array.Length) { }
-
-        /// <summary>
-        /// Open a Vr texture from a byte array.
-        /// </summary>
-        /// <param name="array">Byte array that contains the texture data.</param>
-        /// <param name="offset">Offset of the texture in the array.</param>
-        /// <param name="length">Number of bytes to read.</param>
-        public VrTexture(byte[] array, long offset, int length)
-        {
-            byte[] data;
-            if (array == null)
-                data = new byte[0];
+            if (TextureData != null)
+            {
+                InitSuccess = Initalize();
+            }
             else
             {
-                data = new byte[length];
-                try
-                {
-                    Array.Copy(array, offset, data, 0, length);
-                }
-                catch { data = new byte[0]; }
+                InitSuccess = false;
+            }
+        }
+
+        public VrTexture(byte[] source)
+        {
+            TextureData = source;
+
+            if (TextureData != null)
+            {
+                InitSuccess = Initalize();
+            }
+            else
+            {
+                InitSuccess = false;
+            }
+        }
+
+        public VrTexture(byte[] source, int offset, int length)
+        {
+            if (source == null || (offset == 0 && source.Length == length))
+            {
+                TextureData = source;
+            }
+            else if (source != null)
+            {
+                TextureData = new byte[length];
+                Array.Copy(source, offset, TextureData, 0, length);
             }
 
-            TextureData = data;
+            if (TextureData != null)
+            {
+                InitSuccess = Initalize();
+            }
+            else
+            {
+                InitSuccess = false;
+            }
         }
-         * */
+
+        public VrTexture(Stream source) : this(source, (int)(source.Length - source.Position)) { }
+
+        public VrTexture(Stream source, int length)
+        {
+            try
+            {
+                TextureData = new byte[length];
+                source.Read(TextureData, 0, length);
+            }
+            catch
+            {
+                TextureData = null;
+            }
+
+            if (TextureData != null)
+            {
+                InitSuccess = Initalize();
+            }
+            else
+            {
+                InitSuccess = false;
+            }
+        }
+
+        protected abstract bool Initalize();
         #endregion
 
         #region Get Texture
@@ -264,14 +293,6 @@ namespace VrSharp
         {
             return InitSuccess;
         }
-
-        /*
-        /// <summary>
-        /// Returns information about the texture.
-        /// </summary>
-        /// <returns></returns>
-        public abstract VrTextureInfo GetTextureInfo();
-         * */
         #endregion
 
         #region Private Properties
@@ -351,118 +372,6 @@ namespace VrSharp
 
             return true;
         }
-        #endregion
-
-        #region Texture Properties
-        /// <summary>
-        /// The texture's global index, or 0 if this texture does not have a global index defined.
-        /// </summary>
-        public uint GlobalIndex { get; protected set; }
-
-        /// <summary>
-        /// Width of the texture (in pixels).
-        /// </summary>
-        public ushort TextureWidth { get; protected set; }
-
-        /// <summary>
-        /// Height of the texture (in pixels).
-        /// </summary>
-        public ushort TextureHeight { get; protected set; }
-
-        /// <summary>
-        /// Offset of the GBIX (or GCIX) chunk in the texture file, or -1 if this chunk is not present.
-        /// </summary>
-        public int GbixOffset { get; protected set; }
-
-        /// <summary>
-        /// Offset of the PVRT (or GVRT) chunk in the texture file.
-        /// </summary>
-        public int PvrtOffset { get; protected set; }
-        #endregion
-
-        #region Constructors & Initalizers
-        public VrTexture(string file)
-        {
-            try
-            {
-                TextureData = File.ReadAllBytes(file);
-            }
-            catch
-            {
-                TextureData = null;
-            }
-
-            if (TextureData != null)
-            {
-                InitSuccess = Initalize();
-            }
-            else
-            {
-                InitSuccess = false;
-            }
-        }
-
-        public VrTexture(byte[] source)
-        {
-            TextureData = source;
-
-            if (TextureData != null)
-            {
-                InitSuccess = Initalize();
-            }
-            else
-            {
-                InitSuccess = false;
-            }
-        }
-
-        public VrTexture(byte[] source, int offset, int length)
-        {
-            if (source == null || (offset == 0 && source.Length == length))
-            {
-                TextureData = source;
-            }
-            else if (source != null)
-            {
-                TextureData = new byte[length];
-                Array.Copy(source, offset, TextureData, 0, length);
-            }
-
-            if (TextureData != null)
-            {
-                InitSuccess = Initalize();
-            }
-            else
-            {
-                InitSuccess = false;
-            }
-        }
-
-        public VrTexture(Stream source) : this(source, (int)(source.Length - source.Position)) { }
-
-        public VrTexture(Stream source, int length)
-        {
-            try
-            {
-                TextureData = new byte[length];
-                source.Read(TextureData, 0, length);
-            }
-            catch
-            {
-                TextureData = null;
-            }
-
-            if (TextureData != null)
-            {
-                InitSuccess = Initalize();
-            }
-            else
-            {
-                InitSuccess = false;
-            }
-        }
-
-        protected abstract bool Initalize();
         #endregion
     }
 }

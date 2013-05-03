@@ -45,7 +45,7 @@ namespace VrSharp.GvrTexture
         /// <param name="source">Byte array that contains the texture data.</param>
         /// <param name="offset">Offset of the texture in the array.</param>
         /// <param name="length">Number of bytes to read.</param>
-        public GvrTexture(byte[] source, long offset, int length) : base(source, (int)offset, length) { }
+        public GvrTexture(byte[] source, int offset, int length) : base(source, offset, length) { }
 
         /// <summary>
         /// Open a GVR texture from a stream.
@@ -101,8 +101,9 @@ namespace VrSharp.GvrTexture
             PixelCodec = GvrCodecList.GetPixelCodec(PixelFormat);
             if ((DataFlags & GvrDataFlags.Clut) != 0 && (PixelCodec == null || !PixelCodec.CanDecode())) return false;
 
-            DataCodec  = GvrCodecList.GetDataCodec(DataFormat);
+            DataCodec = GvrCodecList.GetDataCodec(DataFormat);
             if (DataCodec == null || !DataCodec.CanDecode()) return false;
+            DataCodec.PixelCodec = PixelCodec;
 
             // Set the clut and data offsets
             if ((DataFlags & GvrDataFlags.InternalClut) == 0 || DataCodec.GetNumClutEntries() == 0 || NeedsExternalClut())

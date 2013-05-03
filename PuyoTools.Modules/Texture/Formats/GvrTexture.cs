@@ -36,7 +36,7 @@ namespace PuyoTools.Modules.Texture
         public override void ReadWithPalette(byte[] source, long offset, byte[] palette, long paletteOffset, out Bitmap destination, int length, int paletteLength)
         {
             // Reading GVR textures is done through VrSharp, so just pass it to that
-            VrSharp.GvrTexture.GvrTexture texture = new VrSharp.GvrTexture.GvrTexture(source, offset, length);
+            VrSharp.GvrTexture.GvrTexture texture = new VrSharp.GvrTexture.GvrTexture(source, (int)offset, length);
             
             // Check to see if this texture requires an external palette.
             // If it does and none was set, throw an exception.

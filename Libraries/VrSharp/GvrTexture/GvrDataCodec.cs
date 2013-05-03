@@ -4,9 +4,6 @@ namespace VrSharp.GvrTexture
 {
     public abstract class GvrDataCodec : VrDataCodec
     {
-        public GvrDataCodec() { }
-        public GvrDataCodec(VrPixelCodec pixelCodec) : base(pixelCodec) { }
-
         #region Intensity 4-bit
         // Intensity 4-bit
         public class Intensity4 : GvrDataCodec
@@ -559,13 +556,10 @@ namespace VrSharp.GvrTexture
                 get { return 16; }
             }
 
-            public Index4() { }
-            public Index4(VrPixelCodec pixelCodec) : base(pixelCodec) { }
-
             public override byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)
             {
                 byte[] output = new byte[width * height * 4];
-                byte[,] clut  = ClutData;
+                byte[][] clut  = ClutData;
 
                 for (int y = 0; y < height; y += 8)
                 {
@@ -577,10 +571,10 @@ namespace VrSharp.GvrTexture
                             {
                                 byte entry = (byte)((input[offset] >> ((~x2 & 0x01) * 4)) & 0x0F);
 
-                                output[((((y + y2) * width) + (x + x2)) * 4) + 3] = clut[entry, 3];
-                                output[((((y + y2) * width) + (x + x2)) * 4) + 2] = clut[entry, 2];
-                                output[((((y + y2) * width) + (x + x2)) * 4) + 1] = clut[entry, 1];
-                                output[((((y + y2) * width) + (x + x2)) * 4) + 0] = clut[entry, 0];
+                                output[((((y + y2) * width) + (x + x2)) * 4) + 3] = clut[entry][3];
+                                output[((((y + y2) * width) + (x + x2)) * 4) + 2] = clut[entry][2];
+                                output[((((y + y2) * width) + (x + x2)) * 4) + 1] = clut[entry][1];
+                                output[((((y + y2) * width) + (x + x2)) * 4) + 0] = clut[entry][0];
 
                                 if ((x2 & 0x01) != 0)
                                     offset++;
@@ -641,13 +635,10 @@ namespace VrSharp.GvrTexture
                 get { return 256; }
             }
 
-            public Index8() { }
-            public Index8(VrPixelCodec pixelCodec) : base(pixelCodec) { }
-
             public override byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)
             {
                 byte[] output = new byte[width * height * 4];
-                byte[,] clut  = ClutData;
+                byte[][] clut  = ClutData;
 
                 for (int y = 0; y < height; y += 4)
                 {
@@ -657,10 +648,10 @@ namespace VrSharp.GvrTexture
                         {
                             for (int x2 = 0; x2 < 8; x2++)
                             {
-                                output[((((y + y2) * width) + (x + x2)) * 4) + 3] = clut[input[offset], 3];
-                                output[((((y + y2) * width) + (x + x2)) * 4) + 2] = clut[input[offset], 2];
-                                output[((((y + y2) * width) + (x + x2)) * 4) + 1] = clut[input[offset], 1];
-                                output[((((y + y2) * width) + (x + x2)) * 4) + 0] = clut[input[offset], 0];
+                                output[((((y + y2) * width) + (x + x2)) * 4) + 3] = clut[input[offset]][3];
+                                output[((((y + y2) * width) + (x + x2)) * 4) + 2] = clut[input[offset]][2];
+                                output[((((y + y2) * width) + (x + x2)) * 4) + 1] = clut[input[offset]][1];
+                                output[((((y + y2) * width) + (x + x2)) * 4) + 0] = clut[input[offset]][0];
 
                                 offset++;
                             }

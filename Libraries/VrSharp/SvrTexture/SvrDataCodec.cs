@@ -14,7 +14,7 @@ namespace VrSharp.SvrTexture
 
             public override int Bpp
             {
-                get { return pixelCodec.Bpp; }
+                get { return PixelCodec.Bpp; }
             }
 
             public override byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)
@@ -26,6 +26,7 @@ namespace VrSharp.SvrTexture
                 {
                     for (int x = 0; x < width; x++)
                     {
+                        /*
                         byte[] palette = PixelCodec.GetPixelPalette(input, StartOffset + GetSwizzledOffset(x, y, width, height, GetBpp(PixelCodec)));
 
                         output[(((y * width) + x) * 4) + 3] = palette[3];
@@ -34,6 +35,9 @@ namespace VrSharp.SvrTexture
                         output[(((y * width) + x) * 4) + 0] = palette[0];
 
                         offset += (GetBpp(PixelCodec) / 8);
+                        */
+
+                        PixelCodec.DecodePixel(input, StartOffset + GetSwizzledOffset(x, y, width, height, Bpp), output, (((y * width) + x) * 4));
                     }
                 }
 
@@ -48,8 +52,10 @@ namespace VrSharp.SvrTexture
                 {
                     for (int x = 0; x < width; x++)
                     {
-                        byte[] palette = PixelCodec.CreatePixelPalette(input, (((y * width) + x) * 4));
-                        palette.CopyTo(output, GetSwizzledOffset(x, y, width, height, GetBpp(PixelCodec)));
+                        //byte[] palette = PixelCodec.CreatePixelPalette(input, (((y * width) + x) * 4));
+                        //palette.CopyTo(output, GetSwizzledOffset(x, y, width, height, GetBpp(PixelCodec)));
+
+                        PixelCodec.EncodePixel(input, (((y * width) + x) * 4), output, GetSwizzledOffset(x, y, width, height, Bpp));
                     }
                 }
 
@@ -81,7 +87,7 @@ namespace VrSharp.SvrTexture
             public override byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)
             {
                 byte[] output   = new byte[width * height * 4];
-                byte[,] clut    = ClutData;
+                byte[][] clut    = ClutData;
                 int StartOffset = offset;
                 bool IsSwizzled = (width >= 128 && height >= 128);
 
@@ -98,10 +104,10 @@ namespace VrSharp.SvrTexture
                         else
                             entry = (byte)((entry >> (x & 0x01) * 4) & 0x0F);
 
-                        output[(((y * width) + x) * 4) + 3] = clut[entry, 3];
-                        output[(((y * width) + x) * 4) + 2] = clut[entry, 2];
-                        output[(((y * width) + x) * 4) + 1] = clut[entry, 1];
-                        output[(((y * width) + x) * 4) + 0] = clut[entry, 0];
+                        output[(((y * width) + x) * 4) + 3] = clut[entry][3];
+                        output[(((y * width) + x) * 4) + 2] = clut[entry][2];
+                        output[(((y * width) + x) * 4) + 1] = clut[entry][1];
+                        output[(((y * width) + x) * 4) + 0] = clut[entry][0];
 
                         if ((x & 0x01) != 0)
                             offset++;
@@ -159,7 +165,7 @@ namespace VrSharp.SvrTexture
             public override byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)
             {
                 byte[] output   = new byte[width * height * 4];
-                byte[,] clut    = ClutData;
+                byte[][] clut    = ClutData;
                 int StartOffset = offset;
 
                 for (int y = 0; y < height; y++)
@@ -169,10 +175,10 @@ namespace VrSharp.SvrTexture
                         byte entry = input[StartOffset + GetSwizzledOffset8(x, y, width, height)];
                         entry      = (byte)((entry & 0xE7) | ((entry & 0x10) >> 1) | ((entry & 0x08) << 1));
 
-                        output[(((y * width) + x) * 4) + 3] = clut[entry, 3];
-                        output[(((y * width) + x) * 4) + 2] = clut[entry, 2];
-                        output[(((y * width) + x) * 4) + 1] = clut[entry, 1];
-                        output[(((y * width) + x) * 4) + 0] = clut[entry, 0];
+                        output[(((y * width) + x) * 4) + 3] = clut[entry][3];
+                        output[(((y * width) + x) * 4) + 2] = clut[entry][2];
+                        output[(((y * width) + x) * 4) + 1] = clut[entry][1];
+                        output[(((y * width) + x) * 4) + 0] = clut[entry][0];
 
                         offset++;
                     }
@@ -223,7 +229,7 @@ namespace VrSharp.SvrTexture
             public override byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)
             {
                 byte[] output   = new byte[width * height * 4];
-                byte[,] clut    = ClutData;
+                byte[][] clut    = ClutData;
                 int StartOffset = offset;
                 bool IsSwizzled = (width >= 128 && height >= 128);
 
@@ -240,10 +246,10 @@ namespace VrSharp.SvrTexture
                         else
                             entry = (byte)((entry >> (x & 0x01) * 4) & 0x0F);
 
-                        output[(((y * width) + x) * 4) + 3] = clut[entry, 3];
-                        output[(((y * width) + x) * 4) + 2] = clut[entry, 2];
-                        output[(((y * width) + x) * 4) + 1] = clut[entry, 1];
-                        output[(((y * width) + x) * 4) + 0] = clut[entry, 0];
+                        output[(((y * width) + x) * 4) + 3] = clut[entry][3];
+                        output[(((y * width) + x) * 4) + 2] = clut[entry][2];
+                        output[(((y * width) + x) * 4) + 1] = clut[entry][1];
+                        output[(((y * width) + x) * 4) + 0] = clut[entry][0];
 
                         if ((x & 0x01) != 0)
                             offset++;
@@ -300,7 +306,7 @@ namespace VrSharp.SvrTexture
             public override byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)
             {
                 byte[] output   = new byte[width * height * 4];
-                byte[,] clut    = ClutData;
+                byte[][] clut    = ClutData;
                 int StartOffset = offset;
 
                 for (int y = 0; y < height; y++)
@@ -310,10 +316,10 @@ namespace VrSharp.SvrTexture
                         byte entry = input[StartOffset + GetSwizzledOffset8(x, y, width, height)];
                         entry      = (byte)((entry & 0xE7) | ((entry & 0x10) >> 1) | ((entry & 0x08) << 1));
 
-                        output[(((y * width) + x) * 4) + 3] = clut[entry, 3];
-                        output[(((y * width) + x) * 4) + 2] = clut[entry, 2];
-                        output[(((y * width) + x) * 4) + 1] = clut[entry, 1];
-                        output[(((y * width) + x) * 4) + 0] = clut[entry, 0];
+                        output[(((y * width) + x) * 4) + 3] = clut[entry][3];
+                        output[(((y * width) + x) * 4) + 2] = clut[entry][2];
+                        output[(((y * width) + x) * 4) + 1] = clut[entry][1];
+                        output[(((y * width) + x) * 4) + 0] = clut[entry][0];
 
                         offset++;
                     }

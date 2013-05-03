@@ -14,7 +14,7 @@ namespace VrSharp.PvrTexture
 
             public override int Bpp
             {
-                get { return pixelCodec.Bpp; }
+                get { return PixelCodec.Bpp; }
             }
 
             public override byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)
@@ -27,6 +27,7 @@ namespace VrSharp.PvrTexture
                 {
                     for (int x = 0; x < width; x++)
                     {
+                        /*
                         byte[] palette = PixelCodec.GetPixelPalette(input, StartOffset + TwiddledMap.GetTwiddledOffset(x, y));
 
                         output[(((y * width) + x) * 4) + 3] = palette[3];
@@ -35,6 +36,9 @@ namespace VrSharp.PvrTexture
                         output[(((y * width) + x) * 4) + 0] = palette[0];
 
                         offset += (GetBpp(PixelCodec) / 8);
+                         * */
+
+                        PixelCodec.DecodePixel(input, StartOffset + TwiddledMap.GetTwiddledOffset(x, y), output, (((y * width) + x) * 4));
                     }
                 }
 
@@ -50,8 +54,12 @@ namespace VrSharp.PvrTexture
                 {
                     for (int x = 0; x < width; x++)
                     {
+                        /*
                         byte[] palette = PixelCodec.CreatePixelPalette(input, (((y * width) + x) * 4));
                         palette.CopyTo(output, TwiddledMap.GetTwiddledOffset(x, y));
+                         */
+
+                        PixelCodec.EncodePixel(input, (((y * width) + x) * 4), output, TwiddledMap.GetTwiddledOffset(x, y));
                     }
                 }
 
@@ -71,7 +79,7 @@ namespace VrSharp.PvrTexture
 
             public override int Bpp
             {
-                get { return pixelCodec.Bpp; }
+                get { return PixelCodec.Bpp; }
             }
 
             public override byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)
@@ -84,6 +92,7 @@ namespace VrSharp.PvrTexture
                 {
                     for (int x = 0; x < width; x++)
                     {
+                        /*
                         byte[] palette = PixelCodec.GetPixelPalette(input, StartOffset + TwiddledMap.GetTwiddledOffset(x, y));
 
                         output[(((y * width) + x) * 4) + 3] = palette[3];
@@ -92,6 +101,9 @@ namespace VrSharp.PvrTexture
                         output[(((y * width) + x) * 4) + 0] = palette[0];
 
                         offset += (GetBpp(PixelCodec) / 8);
+                         * */
+
+                        PixelCodec.DecodePixel(input, StartOffset + TwiddledMap.GetTwiddledOffset(x, y), output, (((y * width) + x) * 4));
                     }
                 }
 
@@ -141,7 +153,7 @@ namespace VrSharp.PvrTexture
             {
                 int StartOffset = offset;
                 byte[] output   = new byte[width * height * 4];
-                byte[,] clut    = ClutData;
+                byte[][] clut    = ClutData;
 
                 TwiddledMap TwiddledMap = new TwiddledMap(width / 2, GetBpp(PixelCodec));
 
@@ -155,10 +167,10 @@ namespace VrSharp.PvrTexture
                         {
                             for (int x2 = 0; x2 < 2; x2++)
                             {
-                                output[((((y + y2) * width) + (x + x2)) * 4) + 3] = clut[entry + (x2 * 2) + y2, 3];
-                                output[((((y + y2) * width) + (x + x2)) * 4) + 2] = clut[entry + (x2 * 2) + y2, 2];
-                                output[((((y + y2) * width) + (x + x2)) * 4) + 1] = clut[entry + (x2 * 2) + y2, 1];
-                                output[((((y + y2) * width) + (x + x2)) * 4) + 0] = clut[entry + (x2 * 2) + y2, 0];
+                                output[((((y + y2) * width) + (x + x2)) * 4) + 3] = clut[entry + (x2 * 2) + y2][3];
+                                output[((((y + y2) * width) + (x + x2)) * 4) + 2] = clut[entry + (x2 * 2) + y2][2];
+                                output[((((y + y2) * width) + (x + x2)) * 4) + 1] = clut[entry + (x2 * 2) + y2][1];
+                                output[((((y + y2) * width) + (x + x2)) * 4) + 0] = clut[entry + (x2 * 2) + y2][0];
                             }
                         }
 
@@ -200,7 +212,7 @@ namespace VrSharp.PvrTexture
             {
                 int StartOffset = offset;
                 byte[] output   = new byte[width * height * 4];
-                byte[,] clut    = ClutData;
+                byte[][] clut    = ClutData;
 
                 TwiddledMap TwiddledMap = new TwiddledMap(width / 2, GetBpp(PixelCodec));
 
@@ -214,10 +226,10 @@ namespace VrSharp.PvrTexture
                         {
                             for (int x2 = 0; x2 < 2; x2++)
                             {
-                                output[((((y + y2) * width) + (x + x2)) * 4) + 3] = clut[entry + (x2 * 2) + y2, 3];
-                                output[((((y + y2) * width) + (x + x2)) * 4) + 2] = clut[entry + (x2 * 2) + y2, 2];
-                                output[((((y + y2) * width) + (x + x2)) * 4) + 1] = clut[entry + (x2 * 2) + y2, 1];
-                                output[((((y + y2) * width) + (x + x2)) * 4) + 0] = clut[entry + (x2 * 2) + y2, 0];
+                                output[((((y + y2) * width) + (x + x2)) * 4) + 3] = clut[entry + (x2 * 2) + y2][3];
+                                output[((((y + y2) * width) + (x + x2)) * 4) + 2] = clut[entry + (x2 * 2) + y2][2];
+                                output[((((y + y2) * width) + (x + x2)) * 4) + 1] = clut[entry + (x2 * 2) + y2][1];
+                                output[((((y + y2) * width) + (x + x2)) * 4) + 0] = clut[entry + (x2 * 2) + y2][0];
                             }
                         }
 
@@ -271,7 +283,7 @@ namespace VrSharp.PvrTexture
             public override byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)
             {
                 byte[] output = new byte[width * height * 4];
-                byte[,] clut  = ClutData;
+                byte[][] clut  = ClutData;
                 int ChunkSize = Math.Min(width, height);
                 TwiddledMap TwiddledMap = new TwiddledMap(ChunkSize, GetBpp(PixelCodec));
 
@@ -288,10 +300,10 @@ namespace VrSharp.PvrTexture
                                 byte entry = input[StartOffset + TwiddledMap.GetTwiddledOffset(x2, y2)];
                                 entry = (byte)((entry >> ((y2 & 0x01) * 4)) & 0x0F);
 
-                                output[((((y + y2) * width) + (x + x2)) * 4) + 3] = clut[entry, 3];
-                                output[((((y + y2) * width) + (x + x2)) * 4) + 2] = clut[entry, 2];
-                                output[((((y + y2) * width) + (x + x2)) * 4) + 1] = clut[entry, 1];
-                                output[((((y + y2) * width) + (x + x2)) * 4) + 0] = clut[entry, 0];
+                                output[((((y + y2) * width) + (x + x2)) * 4) + 3] = clut[entry][3];
+                                output[((((y + y2) * width) + (x + x2)) * 4) + 2] = clut[entry][2];
+                                output[((((y + y2) * width) + (x + x2)) * 4) + 1] = clut[entry][1];
+                                output[((((y + y2) * width) + (x + x2)) * 4) + 0] = clut[entry][0];
 
                                 if ((x2 & 0x01) != 0)
                                     offset++;
@@ -333,7 +345,7 @@ namespace VrSharp.PvrTexture
             public override byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)
             {
                 byte[] output = new byte[width * height * 4];
-                byte[,] clut  = ClutData;
+                byte[][] clut  = ClutData;
                 int ChunkSize = Math.Min(width, height);
                 TwiddledMap TwiddledMap = new TwiddledMap(ChunkSize, GetBpp(PixelCodec));
 
@@ -349,10 +361,10 @@ namespace VrSharp.PvrTexture
                             {
                                 byte entry = input[StartOffset + TwiddledMap.GetTwiddledOffset(x2, y2)];
 
-                                output[((((y + y2) * width) + (x + x2)) * 4) + 3] = clut[entry, 3];
-                                output[((((y + y2) * width) + (x + x2)) * 4) + 2] = clut[entry, 2];
-                                output[((((y + y2) * width) + (x + x2)) * 4) + 1] = clut[entry, 1];
-                                output[((((y + y2) * width) + (x + x2)) * 4) + 0] = clut[entry, 0];
+                                output[((((y + y2) * width) + (x + x2)) * 4) + 3] = clut[entry][3];
+                                output[((((y + y2) * width) + (x + x2)) * 4) + 2] = clut[entry][2];
+                                output[((((y + y2) * width) + (x + x2)) * 4) + 1] = clut[entry][1];
+                                output[((((y + y2) * width) + (x + x2)) * 4) + 0] = clut[entry][0];
 
                                 offset++;
                             }
@@ -402,7 +414,7 @@ namespace VrSharp.PvrTexture
 
             public override int Bpp
             {
-                get { return pixelCodec.Bpp; }
+                get { return PixelCodec.Bpp; }
             }
 
             public override byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)
@@ -413,6 +425,7 @@ namespace VrSharp.PvrTexture
                 {
                     for (int x = 0; x < width; x++)
                     {
+                        /*
                         byte[] palette = PixelCodec.GetPixelPalette(input, offset);
 
                         output[(((y * width) + x) * 4) + 3] = palette[3];
@@ -421,6 +434,11 @@ namespace VrSharp.PvrTexture
                         output[(((y * width) + x) * 4) + 0] = palette[0];
 
                         offset += (GetBpp(PixelCodec) / 8);
+                         * */
+
+                        PixelCodec.DecodePixel(input, offset, output, (((y * width) + x) * 4));
+
+                        offset += PixelCodec.Bpp >> 3;
                     }
                 }
 
@@ -436,10 +454,16 @@ namespace VrSharp.PvrTexture
                 {
                     for (int x = 0; x < width; x++)
                     {
+                        /*
                         byte[] palette = PixelCodec.CreatePixelPalette(input, (((y * width) + x) * 4));
                         palette.CopyTo(output, offset);
 
                         offset += (GetBpp(PixelCodec) / 8);
+                         */
+
+                        PixelCodec.EncodePixel(input, (((y * width) + x) * 4), output, offset);
+
+                        offset += PixelCodec.Bpp >> 3;
                     }
                 }
 
@@ -458,7 +482,7 @@ namespace VrSharp.PvrTexture
 
             public override int Bpp
             {
-                get { return pixelCodec.Bpp; }
+                get { return PixelCodec.Bpp; }
             }
 
             public override byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)
@@ -478,6 +502,7 @@ namespace VrSharp.PvrTexture
                         {
                             for (int x2 = 0; x2 < ChunkSize; x2++)
                             {
+                                /*
                                 byte[] palette = PixelCodec.GetPixelPalette(input, StartOffset + TwiddledMap.GetTwiddledOffset(x2, y2));
 
                                 output[((((y + y2) * width) + (x + x2)) * 4) + 3] = palette[3];
@@ -486,6 +511,9 @@ namespace VrSharp.PvrTexture
                                 output[((((y + y2) * width) + (x + x2)) * 4) + 0] = palette[0];
 
                                 offset += (GetBpp(PixelCodec) / 8);
+                                 */
+
+                                PixelCodec.DecodePixel(input, StartOffset + TwiddledMap.GetTwiddledOffset(x2, y2), output, ((((y + y2) * width) + (x + x2)) * 4));
                             }
                         }
                     }
@@ -512,10 +540,14 @@ namespace VrSharp.PvrTexture
                         {
                             for (int x2 = 0; x2 < ChunkSize; x2++)
                             {
+                                /*
                                 byte[] palette = PixelCodec.CreatePixelPalette(input, ((((y + y2) * width) + (x + x2)) * 4));
                                 palette.CopyTo(output, StartOffset + TwiddledMap.GetTwiddledOffset(x2, y2));
 
                                 offset += (GetBpp(PixelCodec) / 8);
+                                 */
+
+                                PixelCodec.EncodePixel(input, ((((y + y2) * width) + (x + x2)) * 4), output, StartOffset + TwiddledMap.GetTwiddledOffset(x2, y2));
                             }
                         }
                     }
@@ -549,7 +581,7 @@ namespace VrSharp.PvrTexture
             {
                 int StartOffset = offset;
                 byte[] output   = new byte[width * height * 4];
-                byte[,] clut    = ClutData;
+                byte[][] clut    = ClutData;
 
                 TwiddledMap TwiddledMap = new TwiddledMap(width / 2, GetBpp(PixelCodec));
 
@@ -563,10 +595,10 @@ namespace VrSharp.PvrTexture
                         {
                             for (int x2 = 0; x2 < 2; x2++)
                             {
-                                output[((((y + y2) * width) + (x + x2)) * 4) + 3] = clut[entry + (x2 * 2) + y2, 3];
-                                output[((((y + y2) * width) + (x + x2)) * 4) + 2] = clut[entry + (x2 * 2) + y2, 2];
-                                output[((((y + y2) * width) + (x + x2)) * 4) + 1] = clut[entry + (x2 * 2) + y2, 1];
-                                output[((((y + y2) * width) + (x + x2)) * 4) + 0] = clut[entry + (x2 * 2) + y2, 0];
+                                output[((((y + y2) * width) + (x + x2)) * 4) + 3] = clut[entry + (x2 * 2) + y2][3];
+                                output[((((y + y2) * width) + (x + x2)) * 4) + 2] = clut[entry + (x2 * 2) + y2][2];
+                                output[((((y + y2) * width) + (x + x2)) * 4) + 1] = clut[entry + (x2 * 2) + y2][1];
+                                output[((((y + y2) * width) + (x + x2)) * 4) + 0] = clut[entry + (x2 * 2) + y2][0];
                             }
                         }
 
@@ -608,7 +640,7 @@ namespace VrSharp.PvrTexture
             {
                 int StartOffset = offset;
                 byte[] output   = new byte[width * height * 4];
-                byte[,] clut    = ClutData;
+                byte[][] clut    = ClutData;
 
                 TwiddledMap TwiddledMap = new TwiddledMap(width / 2, GetBpp(PixelCodec));
 
@@ -622,10 +654,10 @@ namespace VrSharp.PvrTexture
                         {
                             for (int x2 = 0; x2 < 2; x2++)
                             {
-                                output[((((y + y2) * width) + (x + x2)) * 4) + 3] = clut[entry + (x2 * 2) + y2, 3];
-                                output[((((y + y2) * width) + (x + x2)) * 4) + 2] = clut[entry + (x2 * 2) + y2, 2];
-                                output[((((y + y2) * width) + (x + x2)) * 4) + 1] = clut[entry + (x2 * 2) + y2, 1];
-                                output[((((y + y2) * width) + (x + x2)) * 4) + 0] = clut[entry + (x2 * 2) + y2, 0];
+                                output[((((y + y2) * width) + (x + x2)) * 4) + 3] = clut[entry + (x2 * 2) + y2][3];
+                                output[((((y + y2) * width) + (x + x2)) * 4) + 2] = clut[entry + (x2 * 2) + y2][2];
+                                output[((((y + y2) * width) + (x + x2)) * 4) + 1] = clut[entry + (x2 * 2) + y2][1];
+                                output[((((y + y2) * width) + (x + x2)) * 4) + 0] = clut[entry + (x2 * 2) + y2][0];
                             }
                         }
 

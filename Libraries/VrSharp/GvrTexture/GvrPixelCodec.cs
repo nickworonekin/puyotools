@@ -17,6 +17,7 @@ namespace VrSharp.GvrTexture
                 get { return 16; }
             }
 
+            /*
             public override byte[,] GetClut(byte[] input, int offset, int entries)
             {
                 byte[,] clut = new byte[entries, 4];
@@ -49,6 +50,7 @@ namespace VrSharp.GvrTexture
 
                 return clut;
             }
+            */
 
             public override void DecodePixel(byte[] source, int sourceIndex, byte[] destination, int destinationIndex)
             {
@@ -79,6 +81,7 @@ namespace VrSharp.GvrTexture
                 get { return 16; }
             }
 
+            /*
             public override byte[,] GetClut(byte[] input, int offset, int entries)
             {
                 byte[,] clut = new byte[entries, 4];
@@ -116,6 +119,7 @@ namespace VrSharp.GvrTexture
 
                 return clut;
             }
+            */
 
             public override void DecodePixel(byte[] source, int sourceIndex, byte[] destination, int destinationIndex)
             {
@@ -153,6 +157,7 @@ namespace VrSharp.GvrTexture
                 get { return 16; }
             }
 
+            /*
             public override byte[,] GetClut(byte[] input, int offset, int entries)
             {
                 byte[,] clut = new byte[entries, 4];
@@ -220,6 +225,7 @@ namespace VrSharp.GvrTexture
 
                 return clut;
             }
+            */
 
             public override void DecodePixel(byte[] source, int sourceIndex, byte[] destination, int destinationIndex)
             {
