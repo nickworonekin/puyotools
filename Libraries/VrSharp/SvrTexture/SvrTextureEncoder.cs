@@ -7,6 +7,11 @@ namespace VrSharp.SvrTexture
 {
     public class SvrTextureEncoder : VrTextureEncoder
     {
+        #region Fields
+        public SvrPixelFormat PixelFormat { get; private set; }
+        public SvrDataFormat DataFormat { get; private set; }
+        #endregion
+
         #region Constructors
         /// <summary>
         /// Open a bitmap from a file.
@@ -17,8 +22,8 @@ namespace VrSharp.SvrTexture
         public SvrTextureEncoder(string file, SvrPixelFormat PixelFormat, SvrDataFormat DataFormat)
             : base(file)
         {
-            this.PixelFormat = (byte)PixelFormat;
-            this.DataFormat  = (byte)DataFormat;
+            this.PixelFormat = PixelFormat;
+            this.DataFormat  = DataFormat;
 
             InitSuccess = Initalize();
         }
@@ -32,8 +37,8 @@ namespace VrSharp.SvrTexture
         public SvrTextureEncoder(Stream stream, SvrPixelFormat PixelFormat, SvrDataFormat DataFormat)
             : base(stream)
         {
-            this.PixelFormat = (byte)PixelFormat;
-            this.DataFormat  = (byte)DataFormat;
+            this.PixelFormat = PixelFormat;
+            this.DataFormat  = DataFormat;
 
             InitSuccess = Initalize();
         }
@@ -47,8 +52,8 @@ namespace VrSharp.SvrTexture
         public SvrTextureEncoder(byte[] array, SvrPixelFormat PixelFormat, SvrDataFormat DataFormat)
             : base(array)
         {
-            this.PixelFormat = (byte)PixelFormat;
-            this.DataFormat  = (byte)DataFormat;
+            this.PixelFormat = PixelFormat;
+            this.DataFormat  = DataFormat;
 
             InitSuccess = Initalize();
         }
@@ -62,13 +67,14 @@ namespace VrSharp.SvrTexture
         public SvrTextureEncoder(Bitmap bitmap, SvrPixelFormat PixelFormat, SvrDataFormat DataFormat)
             : base(bitmap)
         {
-            this.PixelFormat = (byte)PixelFormat;
-            this.DataFormat  = (byte)DataFormat;
+            this.PixelFormat = PixelFormat;
+            this.DataFormat  = DataFormat;
 
             InitSuccess = Initalize();
         }
         #endregion
 
+        /*
         #region Misc
         /// <summary>
         /// Returns information about the texture.  (Use an explicit cast to get SvrTextureInfo.)
@@ -87,6 +93,7 @@ namespace VrSharp.SvrTexture
             return TextureInfo;
         }
         #endregion
+         * */
 
         #region Clut
         protected override void CreateVpClut(byte[] ClutData, ushort NumClutEntries)
@@ -168,8 +175,8 @@ namespace VrSharp.SvrTexture
             {
                 Writer.Write(Encoding.UTF8.GetBytes("PVRT"));
                 Writer.Write((DataOffset + TextureSize) - 24);
-                Writer.Write(PixelFormat);
-                Writer.Write(DataFormat);
+                Writer.Write((byte)PixelFormat);
+                Writer.Write((byte)DataFormat);
                 Writer.Write(new byte[] { 0x00, 0x00 });
                 Writer.Write(TextureWidth);
                 Writer.Write(TextureHeight);

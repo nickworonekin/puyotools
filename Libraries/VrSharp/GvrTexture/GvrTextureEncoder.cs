@@ -8,7 +8,9 @@ namespace VrSharp.GvrTexture
     public class GvrTextureEncoder : VrTextureEncoder
     {
         #region Fields
-        byte DataFlags; // Data Flags
+        public GvrPixelFormat PixelFormat { get; private set; }
+        public GvrDataFormat DataFormat { get; private set; }
+        public GvrDataFlags DataFlags { get; private set; } // Data Flags
         #endregion
 
         #region Constructors
@@ -21,8 +23,8 @@ namespace VrSharp.GvrTexture
         public GvrTextureEncoder(string file, GvrPixelFormat PixelFormat, GvrDataFormat DataFormat)
             : base(file)
         {
-            this.PixelFormat = (byte)PixelFormat;
-            this.DataFormat  = (byte)DataFormat;
+            this.PixelFormat = PixelFormat;
+            this.DataFormat  = DataFormat;
 
             InitSuccess = Initalize();
         }
@@ -36,8 +38,8 @@ namespace VrSharp.GvrTexture
         public GvrTextureEncoder(Stream stream, GvrPixelFormat PixelFormat, GvrDataFormat DataFormat)
             : base(stream)
         {
-            this.PixelFormat = (byte)PixelFormat;
-            this.DataFormat  = (byte)DataFormat;
+            this.PixelFormat = PixelFormat;
+            this.DataFormat  = DataFormat;
 
             InitSuccess = Initalize();
         }
@@ -51,8 +53,8 @@ namespace VrSharp.GvrTexture
         public GvrTextureEncoder(byte[] array, GvrPixelFormat PixelFormat, GvrDataFormat DataFormat)
             : base(array)
         {
-            this.PixelFormat = (byte)PixelFormat;
-            this.DataFormat  = (byte)DataFormat;
+            this.PixelFormat = PixelFormat;
+            this.DataFormat  = DataFormat;
 
             InitSuccess = Initalize();
         }
@@ -66,8 +68,8 @@ namespace VrSharp.GvrTexture
         public GvrTextureEncoder(Bitmap bitmap, GvrPixelFormat PixelFormat, GvrDataFormat DataFormat)
             : base(bitmap)
         {
-            this.PixelFormat = (byte)PixelFormat;
-            this.DataFormat  = (byte)DataFormat;
+            this.PixelFormat = PixelFormat;
+            this.DataFormat  = DataFormat;
 
             InitSuccess = Initalize();
         }
@@ -81,6 +83,7 @@ namespace VrSharp.GvrTexture
         }
         #endregion
 
+        /*
         #region Misc
         /// <summary>
         /// Returns information about the texture. (Use an explicit cast to get GvrTextureInfo.)
@@ -93,13 +96,14 @@ namespace VrSharp.GvrTexture
             GvrTextureInfo TextureInfo = new GvrTextureInfo();
             TextureInfo.TextureWidth   = TextureWidth;
             TextureInfo.TextureHeight  = TextureHeight;
-            TextureInfo.PixelFormat    = ((DataFlags & 0x0A) != 0 ? TextureInfo.DataFormat : (byte)0xFF);
+            TextureInfo.PixelFormat    = DataFormat;
             TextureInfo.DataFormat     = DataFormat;
             TextureInfo.DataFlags      = DataFlags;
 
             return TextureInfo;
         }
         #endregion
+         */
 
         #region Clut
         protected override void CreateVpClut(byte[] ClutData, ushort NumClutEntries)
@@ -118,9 +122,9 @@ namespace VrSharp.GvrTexture
             if (!InitSuccess) return;
 
             if (Mipmaps && DataCodec.GetNumClutEntries() == 0) // No mipmaps for palettized textures yet
-                DataFlags |= 0x01;
+                DataFlags |= GvrDataFlags.Mipmaps;
             if (ExternalClut && DataCodec.GetNumClutEntries() != 0)
-                DataFlags |= 0x02;
+                DataFlags |= GvrDataFlags.ExternalClut;
         }
 
         // Initalize the bitmap
@@ -169,8 +173,8 @@ namespace VrSharp.GvrTexture
         protected override byte[] WritePvrtHeader(int TextureSize)
         {
             // Before we write, set the clut data flag if the texture contains an internal clut
-            if (DataCodec.GetNumClutEntries() != 0 && (DataFlags & 0x02) == 0)
-                DataFlags |= 0x08;
+            if (DataCodec.GetNumClutEntries() != 0 && (DataFlags & GvrDataFlags.ExternalClut) == 0)
+                DataFlags |= GvrDataFlags.InternalClut;
 
             MemoryStream PvrtHeader = new MemoryStream();
             using (BinaryWriter Writer = new BinaryWriter(PvrtHeader))
@@ -178,8 +182,8 @@ namespace VrSharp.GvrTexture
                 Writer.Write(Encoding.UTF8.GetBytes("GVRT"));
                 Writer.Write((DataOffset + TextureSize) - 24);
                 Writer.Write(new byte[] { 0x00, 0x00 });
-                Writer.Write((byte)((PixelFormat << 4) | (DataFlags & 0x0F)));
-                Writer.Write(DataFormat);
+                Writer.Write((byte)(((byte)PixelFormat << 4) | ((byte)DataFlags & 0x0F)));
+                Writer.Write((byte)DataFormat);
                 Writer.Write(SwapUShort(TextureWidth));
                 Writer.Write(SwapUShort(TextureHeight));
                 Writer.Flush();

@@ -6,6 +6,11 @@ namespace VrSharp.SvrTexture
 {
     public class SvrTexture : VrTexture
     {
+        #region Fields
+        public SvrPixelFormat PixelFormat { get; private set; }
+        public SvrDataFormat DataFormat { get; private set; }
+        #endregion
+
         #region Constructors
         /// <summary>
         /// Open a Svr texture from a file.
@@ -79,6 +84,7 @@ namespace VrSharp.SvrTexture
         }
         #endregion
 
+        /*
         #region Misc
         /// <summary>
         /// Returns information about the texture.  (Use an explicit cast to get SvrTextureInfo.)
@@ -99,6 +105,7 @@ namespace VrSharp.SvrTexture
             return TextureInfo;
         }
         #endregion
+         * */
 
         #region Header
         // Read the header and sets up the appropiate values.
@@ -134,8 +141,8 @@ namespace VrSharp.SvrTexture
             TextureWidth  = BitConverter.ToUInt16(TextureData, PvrtOffset + 0x0C);
             TextureHeight = BitConverter.ToUInt16(TextureData, PvrtOffset + 0x0E);
 
-            PixelFormat = TextureData[PvrtOffset + 0x08];
-            DataFormat  = TextureData[PvrtOffset + 0x09];
+            PixelFormat = (SvrPixelFormat)TextureData[PvrtOffset + 0x08];
+            DataFormat  = (SvrDataFormat)TextureData[PvrtOffset + 0x09];
 
             // Get the codecs and make sure we can decode using them
             PixelCodec = SvrCodecList.GetPixelCodec((SvrPixelFormat)PixelFormat);

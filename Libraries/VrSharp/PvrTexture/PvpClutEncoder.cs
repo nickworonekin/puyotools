@@ -41,8 +41,11 @@ namespace VrSharp.PvrTexture
             {
                 Writer.Write(Encoding.UTF8.GetBytes("PVPL"));
                 Writer.Write(ClutData.Length + 8);
-                Writer.Write((ushort)0x0000); // I don't know what this is for
-                Writer.Write((ushort)PixelFormat);
+                //Writer.Write((ushort)0x0000); // I don't know what this is for
+                //Writer.Write((ushort)PixelFormat);
+                Writer.Write((byte)PixelFormat);
+                Writer.Write((byte)0);
+                Writer.Write((ushort)0x0000);
                 Writer.Write((ushort)0x0000);
                 //Writer.Write(0x00000000); // Appears to be blank
                 Writer.Write(ClutEntires);

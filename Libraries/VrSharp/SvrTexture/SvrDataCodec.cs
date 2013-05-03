@@ -12,6 +12,11 @@ namespace VrSharp.SvrTexture
             public override bool CanEncode() { return true; }
             public override int GetBpp(VrPixelCodec PixelCodec) { return PixelCodec.GetBpp(); }
 
+            public override int Bpp
+            {
+                get { return pixelCodec.Bpp; }
+            }
+
             public override byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)
             {
                 byte[] output   = new byte[width * height * 4];
@@ -62,6 +67,16 @@ namespace VrSharp.SvrTexture
             public override int GetBpp(VrPixelCodec PixelCodec) { return 4; }
             public override int GetNumClutEntries()  { return 16; }
             public override bool NeedsExternalClut() { return true; }
+
+            public override int Bpp
+            {
+                get { return 4; }
+            }
+
+            public override int ClutEntries
+            {
+                get { return 16; }
+            }
 
             public override byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)
             {
@@ -131,6 +146,16 @@ namespace VrSharp.SvrTexture
             public override int GetNumClutEntries()  { return 256; }
             public override bool NeedsExternalClut() { return true; }
 
+            public override int Bpp
+            {
+                get { return 8; }
+            }
+
+            public override int ClutEntries
+            {
+                get { return 256; }
+            }
+
             public override byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)
             {
                 byte[] output   = new byte[width * height * 4];
@@ -184,6 +209,16 @@ namespace VrSharp.SvrTexture
             public override bool CanEncode() { return true; }
             public override int GetBpp(VrPixelCodec PixelCodec) { return 4; }
             public override int GetNumClutEntries() { return 16; }
+
+            public override int Bpp
+            {
+                get { return 4; }
+            }
+
+            public override int ClutEntries
+            {
+                get { return 16; }
+            }
 
             public override byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)
             {
@@ -251,6 +286,16 @@ namespace VrSharp.SvrTexture
             public override bool CanEncode() { return true; }
             public override int GetBpp(VrPixelCodec PixelCodec) { return 8; }
             public override int GetNumClutEntries() { return 256; }
+
+            public override int Bpp
+            {
+                get { return 8; }
+            }
+
+            public override int ClutEntries
+            {
+                get { return 256; }
+            }
 
             public override byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)
             {

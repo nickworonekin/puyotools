@@ -229,7 +229,7 @@ namespace PuyoTools.Modules.Archive
                     // No need to check it again.
                     oldPosition = files[i].Stream.Position;
                     VrSharp.GvrTexture.GvrTexture texture = new VrSharp.GvrTexture.GvrTexture(files[i].Stream, files[i].Length);
-                    VrSharp.GvrTexture.GvrTextureInfo textureInfo = (VrSharp.GvrTexture.GvrTextureInfo)texture.GetTextureInfo();
+                    //VrSharp.GvrTexture.GvrTextureInfo textureInfo = (VrSharp.GvrTexture.GvrTextureInfo)texture.GetTextureInfo();
                     files[i].Stream.Position = oldPosition;
 
                     // Write out the file number
@@ -242,27 +242,27 @@ namespace PuyoTools.Modules.Archive
                     }
                     if (settings.Formats)
                     {
-                        destination.WriteByte((byte)((textureInfo.PixelFormat << 4) | (textureInfo.DataFlags & 0xF)));
-                        destination.WriteByte(textureInfo.DataFormat);
+                        destination.WriteByte((byte)(((byte)texture.PixelFormat << 4) | ((byte)texture.DataFlags & 0xF)));
+                        destination.WriteByte((byte)texture.DataFormat);
                     }
                     if (settings.Dimensions)
                     {
                         ushort dimensions = 0;
-                        dimensions |= (ushort)(((byte)Math.Log(textureInfo.TextureWidth, 2) - 2) & 0xF);
-                        dimensions |= (ushort)((((byte)Math.Log(textureInfo.TextureHeight, 2) - 2) & 0xF) << 4);
+                        dimensions |= (ushort)(((byte)Math.Log(texture.TextureWidth, 2) - 2) & 0xF);
+                        dimensions |= (ushort)((((byte)Math.Log(texture.TextureHeight, 2) - 2) & 0xF) << 4);
                         PTStream.WriteUInt16BE(destination, dimensions);
                     }
                     if (settings.GlobalIndex)
                     {
-                        PTStream.WriteUInt32BE(destination, textureInfo.GlobalIndex);
+                        PTStream.WriteUInt32BE(destination, texture.GlobalIndex);
                     }
 
                     // Now write out the file information
                     oldPosition = destination.Position;
                     destination.Position = entryOffset;
-                    files[i].Stream.Position += textureInfo.PvrtOffset;
+                    files[i].Stream.Position += texture.PvrtOffset;
 
-                    PTStream.CopyPartToPadded(files[i].Stream, destination, files[i].Length - textureInfo.PvrtOffset, 16, 0);
+                    PTStream.CopyPartToPadded(files[i].Stream, destination, files[i].Length - texture.PvrtOffset, 16, 0);
 
                     entryOffset = destination.Position;
                     destination.Position = oldPosition;

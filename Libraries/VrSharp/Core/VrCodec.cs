@@ -38,6 +38,57 @@ namespace VrSharp
         {
             return null;
         }
+
+        public abstract int Bpp { get; }
+
+        public virtual void DecodePixel(byte[] source, int sourceIndex, byte[] destination, int destinationIndex)
+        {
+            throw new NotImplementedException();
+        }
+
+        public virtual void EncodePixel(byte[] source, int sourceIndex, byte[] destination, int destinationIndex)
+        {
+            throw new NotImplementedException();
+        }
+
+        public byte[] EncodeClut(byte[,] palette, int numEntries)
+        {
+            byte[] destination = new byte[numEntries * (GetBpp() / 8)];
+            int destinationIndex = 0;
+
+            byte[] pixel = new byte[4];
+
+            for (int i = 0; i < numEntries; i++)
+            {
+                pixel[3] = palette[i, 3];
+                pixel[2] = palette[i, 2];
+                pixel[1] = palette[i, 1];
+                pixel[0] = palette[i, 0];
+
+                EncodePixel(pixel, 0, destination, destinationIndex);
+                destinationIndex += (GetBpp() / 8);
+            }
+
+            return destination;
+        }
+
+        public byte[,] DecodeClut(byte[] source, int sourceIndex, int numEntries)
+        {
+            byte[,] palette = new byte[numEntries, 4];
+            byte[] pixel = new byte[4];
+
+            for (int i = 0; i < numEntries; i++)
+            {
+                DecodePixel(source, sourceIndex + (i * GetBpp() / 8), pixel, 0);
+
+                palette[i, 3] = pixel[3];
+                palette[i, 2] = pixel[2];
+                palette[i, 1] = pixel[1];
+                palette[i, 0] = pixel[0];
+            }
+
+            return palette;
+        }
     }
     #endregion
 
@@ -45,10 +96,29 @@ namespace VrSharp
     // Base codec for the data codecs
     public abstract class VrDataCodec : VrCodec
     {
+        protected VrPixelCodec pixelCodec;
+
+        public VrDataCodec() { }
+
+        public VrDataCodec(VrPixelCodec pixelCodec)
+        {
+            this.pixelCodec = pixelCodec;
+        }
+
         public abstract bool CanDecode(); // Returns if this format can be decoded
         public abstract bool CanEncode(); // Returns if this format can be encoded
 
         public abstract int GetBpp(VrPixelCodec PixelCodec); // Returns the bits per pixel for this pixel codec
+
+        public virtual int Bpp
+        {
+            get { return 0; }
+        }
+
+        public virtual int ClutEntries
+        {
+            get { return 0; }
+        }
 
         // Returns the number of entries in the clut (0 if there is no clut)
         public virtual int GetNumClutEntries() { return 0; }

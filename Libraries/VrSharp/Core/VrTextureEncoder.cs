@@ -3,7 +3,11 @@ using System.IO;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
-using ImageManipulation;
+using System.Collections.Generic;
+
+using nQuant;
+
+//using ImageManipulation;
 
 namespace VrSharp
 {
@@ -15,13 +19,13 @@ namespace VrSharp
         protected byte[] RawImageData;    // Raw Image Data
         protected Bitmap BitmapImageData; // Bitmap Image (to use for mipmaps)
 
-        protected ushort TextureWidth;  // Vr Texture Width
-        protected ushort TextureHeight; // Vr Texture Height
+        public ushort TextureWidth { get; protected set; }  // Vr Texture Width
+        public ushort TextureHeight { get; protected set; } // Vr Texture Height
 
-        protected uint GlobalIndex; // Global Index
+        public uint GlobalIndex { get; protected set; } // Global Index
 
-        protected byte PixelFormat;        // Pixel Format
-        protected byte DataFormat;         // Data Format
+        //protected byte PixelFormat;        // Pixel Format
+        //protected byte DataFormat;         // Data Format
         protected VrPixelCodec PixelCodec; // Pixel Codec
         protected VrDataCodec DataCodec;   // Data Codec
 
@@ -254,7 +258,7 @@ namespace VrSharp
         /// Returns information about the texture.
         /// </summary>
         /// <returns></returns>
-        public abstract VrTextureInfo GetTextureInfo();
+        //public abstract VrTextureInfo GetTextureInfo();
 
         // Swap endian of a 16-bit unsigned integer (a ushort)
         protected ushort SwapUShort(ushort x)
@@ -320,9 +324,29 @@ namespace VrSharp
         // Make sure you test to see if DataCodec.GetNumClutEntries != 0
         protected void PalettizeBitmap()
         {
-            OctreeQuantizer Quantizer = new OctreeQuantizer(DataCodec.GetNumClutEntries() - 1, DataCodec.GetBpp(PixelCodec));
-            BitmapImageData = Quantizer.Quantize(BitmapImageData);
-            RawImageData    = ConvertBitmapToIndex(BitmapImageData); // We need to convert it to indexes instead of colors
+            //OctreeQuantizer Quantizer = new OctreeQuantizer(DataCodec.GetNumClutEntries() - 1, DataCodec.GetBpp(PixelCodec));
+            //BitmapImageData = Quantizer.Quantize(BitmapImageData);
+            //RawImageData    = ConvertBitmapToIndex(BitmapImageData); // We need to convert it to indexes instead of colors
+
+            // We only need to convert it to a palletized 8-bit texture if it is not yet already one.
+            if (BitmapImageData.PixelFormat != PixelFormat.Format8bppIndexed)
+            {
+                // If it is not a 32-bit RGBA image, convert it to one.
+                if (BitmapImageData.PixelFormat != PixelFormat.Format32bppArgb)
+                {
+                    Bitmap newBitmap = new Bitmap(BitmapImageData.Width, BitmapImageData.Height, PixelFormat.Format32bppArgb);
+                    using (Graphics g = Graphics.FromImage(newBitmap))
+                    {
+                        g.DrawImage(BitmapImageData, new Rectangle(0, 0, BitmapImageData.Width, BitmapImageData.Height));
+                    }
+                    BitmapImageData = newBitmap;
+                }
+
+                // This quantizer only works with 32-bit RGBA images
+                WuQuantizer quantizer = new WuQuantizer();
+                BitmapImageData = (Bitmap)quantizer.QuantizeImage(BitmapImageData, DataCodec.GetNumClutEntries());
+                RawImageData = ConvertBitmapToIndex(BitmapImageData);
+            }
 
             // We have a clut that we need to create
             if (!TexNeedsExternalClut())

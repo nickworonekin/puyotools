@@ -8,7 +8,9 @@ namespace VrSharp.PvrTexture
     public class PvrTextureEncoder : VrTextureEncoder
     {
         #region Fields
-        PvrCompressionFormat CompressionFormat; // Compression Format
+        public PvrPixelFormat PixelFormat { get; private set; }
+        public PvrDataFormat DataFormat { get; private set; }
+        public PvrCompressionFormat CompressionFormat { get; private set; } // Compression Format
         PvrCompressionCodec CompressionCodec;   // Compression Codec
         #endregion
 
@@ -22,8 +24,8 @@ namespace VrSharp.PvrTexture
         public PvrTextureEncoder(string file, PvrPixelFormat PixelFormat, PvrDataFormat DataFormat)
             : base(file)
         {
-            this.PixelFormat = (byte)PixelFormat;
-            this.DataFormat  = (byte)DataFormat;
+            this.PixelFormat = PixelFormat;
+            this.DataFormat  = DataFormat;
 
             InitSuccess = Initalize();
         }
@@ -37,8 +39,8 @@ namespace VrSharp.PvrTexture
         public PvrTextureEncoder(Stream stream, PvrPixelFormat PixelFormat, PvrDataFormat DataFormat)
             : base(stream)
         {
-            this.PixelFormat = (byte)PixelFormat;
-            this.DataFormat  = (byte)DataFormat;
+            this.PixelFormat = PixelFormat;
+            this.DataFormat  = DataFormat;
 
             InitSuccess = Initalize();
         }
@@ -52,8 +54,8 @@ namespace VrSharp.PvrTexture
         public PvrTextureEncoder(byte[] array, PvrPixelFormat PixelFormat, PvrDataFormat DataFormat)
             : base(array)
         {
-            this.PixelFormat = (byte)PixelFormat;
-            this.DataFormat  = (byte)DataFormat;
+            this.PixelFormat = PixelFormat;
+            this.DataFormat  = DataFormat;
 
             InitSuccess = Initalize();
         }
@@ -67,14 +69,15 @@ namespace VrSharp.PvrTexture
         public PvrTextureEncoder(Bitmap bitmap, PvrPixelFormat PixelFormat, PvrDataFormat DataFormat)
             : base(bitmap)
         {
-            this.PixelFormat = (byte)PixelFormat;
-            this.DataFormat  = (byte)DataFormat;
+            this.PixelFormat = PixelFormat;
+            this.DataFormat  = DataFormat;
 
             InitSuccess = Initalize();
         }
         #endregion
 
         #region Misc
+        /*
         /// <summary>
         /// Returns information about the texture.  (Use an explicit cast to get PvrTextureInfo.)
         /// </summary>
@@ -92,6 +95,7 @@ namespace VrSharp.PvrTexture
 
             return TextureInfo;
         }
+         * */
 
         protected override byte[] DoPostEncodeEvents(byte[] TextureData)
         {
@@ -202,8 +206,8 @@ namespace VrSharp.PvrTexture
             {
                 Writer.Write(Encoding.UTF8.GetBytes("PVRT"));
                 Writer.Write((DataOffset + TextureSize) - 24);
-                Writer.Write(PixelFormat);
-                Writer.Write(DataFormat);
+                Writer.Write((byte)PixelFormat);
+                Writer.Write((byte)DataFormat);
                 Writer.Write(new byte[] { 0x00, 0x00 });
                 Writer.Write(TextureWidth);
                 Writer.Write(TextureHeight);

@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>VrSharp</RootNamespace>
     <AssemblyName>VrSharp</AssemblyName>
-    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <StartupObject>
     </StartupObject>
@@ -21,6 +21,7 @@
     </FileUpgradeFlags>
     <OldToolsVersion>3.5</OldToolsVersion>
     <UpgradeBackupLocation />
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -88,5 +89,16 @@
     <Compile Include="PvrTexture\PvrTexture.cs" />
     <Compile Include="SvrTexture\SvpClut.cs" />
     <Compile Include="SvrTexture\SvrTexture.cs" />
+    <Compile Include="WuQuantizer\Box.cs" />
+    <Compile Include="WuQuantizer\ColorData.cs" />
+    <Compile Include="WuQuantizer\CubeCut.cs" />
+    <Compile Include="WuQuantizer\IWuQuantizer.cs" />
+    <Compile Include="WuQuantizer\Lookup.cs" />
+    <Compile Include="WuQuantizer\LookupData.cs" />
+    <Compile Include="WuQuantizer\Pixel.cs" />
+    <Compile Include="WuQuantizer\QuantizationException.cs" />
+    <Compile Include="WuQuantizer\QuantizedPalette.cs" />
+    <Compile Include="WuQuantizer\WuQuantizer.cs" />
+    <Compile Include="WuQuantizer\WuQuantizerBase.cs" />
   </ItemGroup>
 </Project>

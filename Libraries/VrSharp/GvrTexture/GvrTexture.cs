@@ -7,7 +7,9 @@ namespace VrSharp.GvrTexture
     public class GvrTexture : VrTexture
     {
         #region Fields
-        byte DataFlags; // Data Flags
+        //public GvrPixelFormat PixelFormat { get; private set; }
+        //public GvrDataFormat DataFormat { get; private set; }
+        //public GvrDataFlags DataFlags { get; private set; } // Data Flags
         #endregion
 
         #region Constructors
@@ -90,10 +92,11 @@ namespace VrSharp.GvrTexture
         {
             if (!InitSuccess) return false;
 
-            return ((DataFlags & 0x02) != 0);
+            return ((DataFlags & GvrDataFlags.ExternalClut) != 0);
         }
         #endregion
 
+        /*
         #region Misc
         /// <summary>
         /// Returns information about the texture. (Use an explicit cast to get GvrTextureInfo.)
@@ -115,6 +118,7 @@ namespace VrSharp.GvrTexture
             return TextureInfo;
         }
         #endregion
+         * */
 
         #region Header
         // Read the header and sets up the appropiate values.
@@ -151,18 +155,18 @@ namespace VrSharp.GvrTexture
             TextureWidth  = (ushort)((TextureData[PvrtOffset + 0x0C] << 8) | TextureData[PvrtOffset + 0x0D]);
             TextureHeight = (ushort)((TextureData[PvrtOffset + 0x0E] << 8) | TextureData[PvrtOffset + 0x0F]);
 
-            PixelFormat = (byte)(TextureData[PvrtOffset + 0x0A] >> 4); // Only the first 4 bits matter
-            DataFormat  = TextureData[PvrtOffset + 0x0B];
-            DataFlags   = (byte)(TextureData[PvrtOffset + 0x0A] & 0x0F); // Only the last 4 bits matter
+            PixelFormat = (GvrPixelFormat)(TextureData[PvrtOffset + 0x0A] >> 4); // Only the first 4 bits matter
+            DataFormat  = (GvrDataFormat)TextureData[PvrtOffset + 0x0B];
+            DataFlags   = (GvrDataFlags)(TextureData[PvrtOffset + 0x0A] & 0x0F); // Only the last 4 bits matter
 
             // Get the codecs and make sure we can decode using them
             PixelCodec = GvrCodecList.GetPixelCodec((GvrPixelFormat)PixelFormat);
             DataCodec  = GvrCodecList.GetDataCodec((GvrDataFormat)DataFormat);
             if (DataCodec == null || !DataCodec.CanDecode()) return false;
-            if ((DataFlags & 0x0A) != 0 && (PixelCodec == null || !PixelCodec.CanDecode())) return false;
+            if ((DataFlags & GvrDataFlags.Clut) != 0 && (PixelCodec == null || !PixelCodec.CanDecode())) return false;
 
             // Set the clut and data offsets
-            if ((DataFlags & 0x08) == 0 || DataCodec.GetNumClutEntries() == 0 || NeedsExternalClut())
+            if ((DataFlags & GvrDataFlags.InternalClut) == 0 || DataCodec.GetNumClutEntries() == 0 || NeedsExternalClut())
             {
                 ClutOffset = -1;
                 DataOffset = PvrtOffset + 0x10;
@@ -223,6 +227,112 @@ namespace VrSharp.GvrTexture
 
             return IsGvrTexture(buffer, 0, length);
         }
+        #endregion
+
+        #region Texture Check
+        /// <summary>
+        /// Determines if this is a GVR texture.
+        /// </summary>
+        /// <param name="source">Byte array containing the data.</param>
+        /// <param name="offset">The offset in the byte array to start at.</param>
+        /// <param name="length">Length of the data (in bytes).</param>
+        /// <returns>True if this is a GVR texture, false otherwise.</returns>
+        public static bool Is(byte[] source, int offset, int length)
+        {
+            // GBIX and GVRT
+            if (length >= 32 &&
+                Compare(source, "GBIX", offset + 0x00) &&
+                Compare(source, "GVRT", offset + 0x10) &&
+                BitConverter.ToUInt32(source, offset + 0x14) == length - 24)
+                return true;
+
+            // GCIX and GVRT
+            else if (length >= 32 &&
+                Compare(source, "GCIX", offset + 0x00) &&
+                Compare(source, "GVRT", offset + 0x10) &&
+                BitConverter.ToUInt32(source, offset + 0x14) == length - 24)
+                return true;
+
+            // GVRT (and no GBIX or GCIX chunk)
+            else if (length > 16 &&
+                Compare(source, "GVRT", offset + 0x00) &&
+                BitConverter.ToUInt32(source, (int)offset + 0x04) == length - 8)
+                return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines if this is a GVR texture.
+        /// </summary>
+        /// <param name="source">Byte array containing the data.</param>
+        /// <returns>True if this is a GVR texture, false otherwise.</returns>
+        public static bool Is(byte[] source)
+        {
+            return Is(source, 0, source.Length);
+        }
+
+        /// <summary>
+        /// Determines if this is a GVR texture.
+        /// </summary>
+        /// <param name="source">The stream to read from. The stream position is not changed.</param>
+        /// <param name="length">Number of bytes to read.</param>
+        /// <returns>True if this is a GVR texture, false otherwise.</returns>
+        public static bool Is(Stream source, int length)
+        {
+            // If the length is < 16, then there is no way this is a valid texture.
+            if (length < 16)
+            {
+                return false;
+            }
+
+            // Let's see if we should check 16 bytes or 32 bytes
+            int amountToRead = 0;
+            if (length < 32)
+            {
+                amountToRead = 16;
+            }
+            else
+            {
+                amountToRead = 32;
+            }
+
+            byte[] buffer = new byte[amountToRead];
+            source.Read(buffer, 0, amountToRead);
+            source.Position -= amountToRead;
+
+            return Is(buffer, 0, amountToRead);
+        }
+
+        /// <summary>
+        /// Determines if this is a GVR texture.
+        /// </summary>
+        /// <param name="source">The stream to read from. The stream position is not changed.</param>
+        /// <returns>True if this is a GVR texture, false otherwise.</returns>
+        public static bool Is(Stream source)
+        {
+            return Is(source, (int)(source.Length - source.Position));
+        }
+        #endregion
+
+        #region Texture Properties
+        /// <summary>
+        /// The texture's pixel format. This only applies to palettized textures.
+        /// </summary>
+        public GvrPixelFormat PixelFormat { get; private set; }
+
+        /// <summary>
+        /// The texture's data flags. Can contain one or more of the following:
+        /// <para>- GvrDataFlags.Mipmaps</para>
+        /// <para>- GvrDataFlags.ExternalClut</para>
+        /// <para>- GvrDataFlags.InternalClut</para>
+        /// </summary>
+        public GvrDataFlags DataFlags { get; private set; }
+
+        /// <summary>
+        /// The texture's data format.
+        /// </summary>
+        public GvrDataFormat DataFormat { get; private set; }
         #endregion
     }
 }

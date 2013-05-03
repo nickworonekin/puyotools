@@ -7,7 +7,9 @@ namespace VrSharp.PvrTexture
     public class PvrTexture : VrTexture
     {
         #region Fields
-        PvrCompressionFormat CompressionFormat; // Compression Format
+        public PvrPixelFormat PixelFormat { get; private set; }
+        public PvrDataFormat DataFormat { get; private set; }
+        public PvrCompressionFormat CompressionFormat { get; private set; } // Compression Format
         PvrCompressionCodec CompressionCodec;   // Compression Codec
         #endregion
 
@@ -84,6 +86,7 @@ namespace VrSharp.PvrTexture
         }
         #endregion
 
+        /*
         #region Misc
         /// <summary>
         /// Returns information about the texture.  (Use an explicit cast to get PvrTextureInfo.)
@@ -105,6 +108,7 @@ namespace VrSharp.PvrTexture
             return TextureInfo;
         }
         #endregion
+         * */
 
         #region Header
         // Read the header and sets up the appropiate values.
@@ -150,8 +154,8 @@ namespace VrSharp.PvrTexture
             TextureWidth  = BitConverter.ToUInt16(TextureData, PvrtOffset + 0x0C);
             TextureHeight = BitConverter.ToUInt16(TextureData, PvrtOffset + 0x0E);
 
-            PixelFormat = TextureData[PvrtOffset + 0x08];
-            DataFormat  = TextureData[PvrtOffset + 0x09];
+            PixelFormat = (PvrPixelFormat)TextureData[PvrtOffset + 0x08];
+            DataFormat  = (PvrDataFormat)TextureData[PvrtOffset + 0x09];
 
             // Get the codecs and make sure we can decode using them
             PixelCodec = PvrCodecList.GetPixelCodec((PvrPixelFormat)PixelFormat);

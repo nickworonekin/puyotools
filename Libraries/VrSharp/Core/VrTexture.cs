@@ -14,18 +14,18 @@ namespace VrSharp
         protected byte[] TextureData;  // Vr Texture Data
         protected byte[] RawImageData; // Raw Image Data
 
-        protected uint GlobalIndex; // Vr Texture Global Index
+        //public uint GlobalIndex { get; protected set; } // Vr Texture Global Index
 
-        protected ushort TextureWidth;  // Vr Texture Width
-        protected ushort TextureHeight; // Vr Texture Height
+        //public ushort TextureWidth { get; protected set; }  // Vr Texture Width
+        //public ushort TextureHeight { get; protected set; } // Vr Texture Height
 
-        protected byte PixelFormat;        // Pixel Format
-        protected byte DataFormat;         // Data Format
+        //protected byte PixelFormat;        // Pixel Format
+        //protected byte DataFormat;         // Data Format
         protected VrPixelCodec PixelCodec; // Pixel Codec
         protected VrDataCodec DataCodec;   // Data Codec
 
-        protected int GbixOffset; // Gbix Offset
-        protected int PvrtOffset; // Pvrt (Gvrt) Offset
+        //protected int GbixOffset; // Gbix Offset
+        //public int PvrtOffset { get; protected set; } // Pvrt (Gvrt) Offset
         protected int ClutOffset; // Clut Offset
         protected int DataOffset; // Data Offset
         #endregion
@@ -263,11 +263,13 @@ namespace VrSharp
             return InitSuccess;
         }
 
+        /*
         /// <summary>
         /// Returns information about the texture.
         /// </summary>
         /// <returns></returns>
         public abstract VrTextureInfo GetTextureInfo();
+         * */
         #endregion
 
         #region Private Properties
@@ -347,6 +349,90 @@ namespace VrSharp
 
             return true;
         }
+        #endregion
+
+        #region Texture Properties
+        /// <summary>
+        /// The texture's global index, or 0 if this texture does not have a global index defined.
+        /// </summary>
+        public uint GlobalIndex { get; protected set; }
+
+        /// <summary>
+        /// Width of the texture (in pixels).
+        /// </summary>
+        public ushort TextureWidth { get; protected set; }
+
+        /// <summary>
+        /// Height of the texture (in pixels).
+        /// </summary>
+        public ushort TextureHeight { get; protected set; }
+
+        /// <summary>
+        /// Offset of the GBIX (or GCIX) chunk in the texture file, or -1 if this chunk is not present.
+        /// </summary>
+        public int GbixOffset { get; protected set; }
+
+        /// <summary>
+        /// Offset of the PVRT (or GVRT) chunk in the texture file.
+        /// </summary>
+        public int PvrtOffset { get; protected set; }
+        #endregion
+
+        #region Constructors & Initalizers
+        protected virtual bool Initalize()
+        {
+            return false;
+        }
+
+        /*
+        /// <summary>
+        /// Determines if this is a VR texture.
+        /// </summary>
+        /// <param name="source">Byte array containing the data.</param>
+        /// <param name="offset">The offset in the byte array to start at.</param>
+        /// <param name="length">Length of the data (in bytes).</param>
+        /// <returns>True if this is a VR texture, false otherwise.</returns>
+        public virtual bool Is(byte[] source, int offset, int length)
+        {
+            return false;
+        }
+
+        /// <summary>
+        /// Determines if this is a VR texture.
+        /// </summary>
+        /// <param name="source">Byte array containing the data.</param>
+        /// <returns>True if this is a VR texture, false otherwise.</returns>
+        public virtual bool Is(byte[] source)
+        {
+            return Is(source, 0, source.Length);
+        }
+
+
+        /// <summary>
+        /// Determines if this is a VR texture.
+        /// </summary>
+        /// <param name="source">The stream to read from. The stream position is not changed.</param>
+        /// <param name="length">Number of bytes to read.</param>
+        /// <returns>True if this is a VR texture, false otherwise.</returns>
+        public virtual bool Is(Stream source, int length)
+        {
+            byte[] buffer = new byte[length];
+            source.Read(buffer, 0, length);
+            source.Position -= length;
+
+            return Is(buffer, 0, length);
+        }
+
+        /// <summary>
+        /// Determines if this is a VR texture.
+        /// </summary>
+        /// <param name="source">The stream to read from. The stream position is not changed.</param>
+        /// <returns>True if this is a VR texture, false otherwise.</returns>
+        public virtual bool Is(Stream source)
+        {
+            return Is(source, (int)(source.Length - source.Position));
+        }
+        */
         #endregion
     }
 }

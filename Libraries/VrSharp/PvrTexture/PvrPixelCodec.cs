@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 
 namespace VrSharp.PvrTexture
 {
@@ -12,6 +13,11 @@ namespace VrSharp.PvrTexture
             public override bool CanEncode() { return true; }
             public override int GetBpp() { return 16; }
 
+            public override int Bpp
+            {
+                get { return 16; }
+            }
+
             public override byte[,] GetClut(byte[] input, int offset, int entries)
             {
                 byte[,] clut = new byte[entries, 4];
@@ -24,6 +30,11 @@ namespace VrSharp.PvrTexture
                     clut[i, 2] = (byte)(((pixel >> 10) & 0x1F) * 0xFF / 0x1F);
                     clut[i, 1] = (byte)(((pixel >> 5)  & 0x1F) * 0xFF / 0x1F);
                     clut[i, 0] = (byte)(((pixel >> 0)  & 0x1F) * 0xFF / 0x1F);
+
+                    //clut[i, 3] = (byte)(((pixel >> 15) & 0x01) << 15);
+                    //clut[i, 2] = (byte)(((pixel >> 10) & 0x1F) << 10);
+                    //clut[i, 1] = (byte)(((pixel >> 5)  & 0x1F) << 10);
+                    //clut[i, 0] = (byte)(((pixel >> 0)  & 0x1F) << 10);
 
                     offset += 2;
                 }
@@ -40,6 +51,11 @@ namespace VrSharp.PvrTexture
                 palette[2] = (byte)(((pixel >> 10) & 0x1F) * 0xFF / 0x1F);
                 palette[1] = (byte)(((pixel >> 5)  & 0x1F) * 0xFF / 0x1F);
                 palette[0] = (byte)(((pixel >> 0)  & 0x1F) * 0xFF / 0x1F);
+
+                //palette[3] = (byte)(((pixel >> 15) & 0x01) << 15);
+                //palette[2] = (byte)(((pixel >> 10) & 0x1F) * 0xFF / 0x1F);
+                //palette[1] = (byte)(((pixel >> 5)  & 0x1F) * 0xFF / 0x1F);
+                //palette[0] = (byte)(((pixel >> 0)  & 0x1F) * 0xFF / 0x1F);
 
                 return palette;
             }
@@ -74,6 +90,28 @@ namespace VrSharp.PvrTexture
 
                 return BitConverter.GetBytes(pixel);
             }
+
+            public override void DecodePixel(byte[] source, int sourceIndex, byte[] destination, int destinationIndex)
+            {
+                ushort pixel = BitConverter.ToUInt16(source, sourceIndex);
+
+                destination[destinationIndex + 3] = (byte)(((pixel >> 15) & 0x01) * 0xFF);
+                destination[destinationIndex + 2] = (byte)(((pixel >> 10) & 0x1F) * 0xFF / 0x1F);
+                destination[destinationIndex + 1] = (byte)(((pixel >> 5) & 0x1F) * 0xFF / 0x1F);
+                destination[destinationIndex + 0] = (byte)(((pixel >> 0) & 0x1F) * 0xFF / 0x1F);
+            }
+
+            public override void EncodePixel(byte[] source, int sourceIndex, byte[] destination, int destinationIndex)
+            {
+                ushort pixel = 0x0000;
+                pixel |= (ushort)((source[sourceIndex + 3] >> 7) << 15);
+                pixel |= (ushort)((source[sourceIndex + 2] >> 3) << 10);
+                pixel |= (ushort)((source[sourceIndex + 1] >> 3) << 5);
+                pixel |= (ushort)((source[sourceIndex + 0] >> 3) << 0);
+
+                destination[destinationIndex + 1] = (byte)((pixel >> 8) & 0xFF);
+                destination[destinationIndex + 0] = (byte)(pixel & 0xFF);
+            }
         }
         #endregion
 
@@ -84,6 +122,11 @@ namespace VrSharp.PvrTexture
             public override bool CanDecode() { return true; }
             public override bool CanEncode() { return true; }
             public override int GetBpp() { return 16; }
+
+            public override int Bpp
+            {
+                get { return 16; }
+            }
 
             public override byte[,] GetClut(byte[] input, int offset, int entries)
             {
@@ -145,6 +188,27 @@ namespace VrSharp.PvrTexture
 
                 return BitConverter.GetBytes(pixel);
             }
+
+            public override void DecodePixel(byte[] source, int sourceIndex, byte[] destination, int destinationIndex)
+            {
+                ushort pixel = BitConverter.ToUInt16(source, sourceIndex);
+
+                destination[destinationIndex + 3] = 0xFF;
+                destination[destinationIndex + 2] = (byte)(((pixel >> 11) & 0x1F) * 0xFF / 0x1F);
+                destination[destinationIndex + 1] = (byte)(((pixel >> 5)  & 0x3F) * 0xFF / 0x3F);
+                destination[destinationIndex + 0] = (byte)(((pixel >> 0)  & 0x1F) * 0xFF / 0x1F);
+            }
+
+            public override void EncodePixel(byte[] source, int sourceIndex, byte[] destination, int destinationIndex)
+            {
+                ushort pixel = 0x0000;
+                pixel |= (ushort)((source[sourceIndex + 2] >> 3) << 11);
+                pixel |= (ushort)((source[sourceIndex + 1] >> 2) << 5);
+                pixel |= (ushort)((source[sourceIndex + 0] >> 3) << 0);
+
+                destination[destinationIndex + 1] = (byte)((pixel >> 8) & 0xFF);
+                destination[destinationIndex + 0] = (byte)(pixel & 0xFF);
+            }
         }
         #endregion
 
@@ -155,6 +219,11 @@ namespace VrSharp.PvrTexture
             public override bool CanDecode() { return true; }
             public override bool CanEncode() { return true; }
             public override int GetBpp() { return 16; }
+
+            public override int Bpp
+            {
+                get { return 16; }
+            }
 
             public override byte[,] GetClut(byte[] input, int offset, int entries)
             {
@@ -217,6 +286,28 @@ namespace VrSharp.PvrTexture
                 pixel |= (ushort)(((input[offset + 0] * 0x0F / 0xFF) & 0x0F) << 0);
 
                 return BitConverter.GetBytes(pixel);
+            }
+
+            public override void DecodePixel(byte[] source, int sourceIndex, byte[] destination, int destinationIndex)
+            {
+                ushort pixel = BitConverter.ToUInt16(source, sourceIndex);
+
+                destination[destinationIndex + 3] = (byte)(((pixel >> 12) & 0x0F) * 0xFF);
+                destination[destinationIndex + 2] = (byte)(((pixel >> 8)  & 0x0F) * 0xFF / 0x0F);
+                destination[destinationIndex + 1] = (byte)(((pixel >> 4)  & 0x0F) * 0xFF / 0x0F);
+                destination[destinationIndex + 0] = (byte)(((pixel >> 0)  & 0x0F) * 0xFF / 0x0F);
+            }
+
+            public override void EncodePixel(byte[] source, int sourceIndex, byte[] destination, int destinationIndex)
+            {
+                ushort pixel = 0x0000;
+                pixel |= (ushort)((source[sourceIndex + 3] >> 4) << 12);
+                pixel |= (ushort)((source[sourceIndex + 2] >> 4) << 8);
+                pixel |= (ushort)((source[sourceIndex + 1] >> 4) << 4);
+                pixel |= (ushort)((source[sourceIndex + 0] >> 4) << 0);
+
+                destination[destinationIndex + 1] = (byte)((pixel >> 8) & 0xFF);
+                destination[destinationIndex + 0] = (byte)(pixel & 0xFF);
             }
         }
         #endregion

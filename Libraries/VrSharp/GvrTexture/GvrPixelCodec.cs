@@ -12,6 +12,11 @@ namespace VrSharp.GvrTexture
             public override bool CanEncode() { return true; }
             public override int GetBpp()     { return 16; }
 
+            public override int Bpp
+            {
+                get { return 16; }
+            }
+
             public override byte[,] GetClut(byte[] input, int offset, int entries)
             {
                 byte[,] clut = new byte[entries, 4];
@@ -44,6 +49,20 @@ namespace VrSharp.GvrTexture
 
                 return clut;
             }
+
+            public override void DecodePixel(byte[] source, int sourceIndex, byte[] destination, int destinationIndex)
+            {
+                destination[destinationIndex + 3] = source[sourceIndex];
+                destination[destinationIndex + 2] = source[sourceIndex + 1];
+                destination[destinationIndex + 1] = source[sourceIndex + 1];
+                destination[destinationIndex + 0] = source[sourceIndex + 1];
+            }
+
+            public override void EncodePixel(byte[] source, int sourceIndex, byte[] destination, int destinationIndex)
+            {
+                destination[destinationIndex + 0] = source[sourceIndex + 3];
+                destination[destinationIndex + 0] = (byte)((0.30 * source[sourceIndex + 2]) + (0.59 * source[sourceIndex + 1]) + (0.11 * source[sourceIndex + 0]));
+            }
         }
         #endregion
 
@@ -54,6 +73,11 @@ namespace VrSharp.GvrTexture
             public override bool CanDecode() { return true; }
             public override bool CanEncode() { return true; }
             public override int GetBpp() { return 16; }
+
+            public override int Bpp
+            {
+                get { return 16; }
+            }
 
             public override byte[,] GetClut(byte[] input, int offset, int entries)
             {
@@ -92,6 +116,27 @@ namespace VrSharp.GvrTexture
 
                 return clut;
             }
+
+            public override void DecodePixel(byte[] source, int sourceIndex, byte[] destination, int destinationIndex)
+            {
+                ushort pixel = SwapUShort(BitConverter.ToUInt16(source, sourceIndex));
+
+                destination[destinationIndex + 3] = 0xFF;
+                destination[destinationIndex + 2] = (byte)(((pixel >> 11) & 0x1F) * 0xFF / 0x1F);
+                destination[destinationIndex + 1] = (byte)(((pixel >> 5)  & 0x3F) * 0xFF / 0x3F);
+                destination[destinationIndex + 0] = (byte)(((pixel >> 0)  & 0x1F) * 0xFF / 0x1F);
+            }
+
+            public override void EncodePixel(byte[] source, int sourceIndex, byte[] destination, int destinationIndex)
+            {
+                ushort pixel = 0x0000;
+                pixel |= (ushort)((source[sourceIndex + 2] >> 3) << 11);
+                pixel |= (ushort)((source[sourceIndex + 1] >> 2) << 5);
+                pixel |= (ushort)((source[sourceIndex + 0] >> 3) << 0);
+
+                destination[destinationIndex + 1] = (byte)(pixel & 0xFF);
+                destination[destinationIndex + 0] = (byte)((pixel >> 8) & 0xFF);
+            }
         }
         #endregion
 
@@ -102,6 +147,11 @@ namespace VrSharp.GvrTexture
             public override bool CanDecode() { return true; }
             public override bool CanEncode() { return true; }
             public override int GetBpp() { return 16; }
+
+            public override int Bpp
+            {
+                get { return 16; }
+            }
 
             public override byte[,] GetClut(byte[] input, int offset, int entries)
             {
@@ -143,17 +193,25 @@ namespace VrSharp.GvrTexture
 
                     if (input[i, 3] <= 0xDA) // Argb3444
                     {
-                        pixel |= (ushort)(((input[i, 3] * 0x07 / 0xFF) & 0x07) << 12);
-                        pixel |= (ushort)(((input[i, 2] * 0x0F / 0xFF) & 0x0F) << 8);
-                        pixel |= (ushort)(((input[i, 1] * 0x0F / 0xFF) & 0x0F) << 4);
-                        pixel |= (ushort)(((input[i, 0] * 0x0F / 0xFF) & 0x0F) << 0);
+                        //pixel |= (ushort)(((input[i, 3] * 0x07 / 0xFF) & 0x07) << 12);
+                        //pixel |= (ushort)(((input[i, 2] * 0x0F / 0xFF) & 0x0F) << 8);
+                        //pixel |= (ushort)(((input[i, 1] * 0x0F / 0xFF) & 0x0F) << 4);
+                        //pixel |= (ushort)(((input[i, 0] * 0x0F / 0xFF) & 0x0F) << 0);
+                        pixel |= (ushort)((input[i, 3] >> 5) << 12);
+                        pixel |= (ushort)((input[i, 2] >> 4) << 8);
+                        pixel |= (ushort)((input[i, 1] >> 4) << 4);
+                        pixel |= (ushort)((input[i, 0] >> 4) << 0);
                     }
                     else // Rgb555
                     {
+                        //pixel |= 0x8000;
+                        //pixel |= (ushort)(((input[i, 2] * 0x1F / 0xFF) & 0x1F) << 10);
+                        //pixel |= (ushort)(((input[i, 1] * 0x1F / 0xFF) & 0x1F) << 5);
+                        //pixel |= (ushort)(((input[i, 0] * 0x1F / 0xFF) & 0x1F) << 0);
                         pixel |= 0x8000;
-                        pixel |= (ushort)(((input[i, 2] * 0x1F / 0xFF) & 0x1F) << 10);
-                        pixel |= (ushort)(((input[i, 1] * 0x1F / 0xFF) & 0x1F) << 5);
-                        pixel |= (ushort)(((input[i, 0] * 0x1F / 0xFF) & 0x1F) << 0);
+                        pixel |= (ushort)((input[i, 2] >> 3) << 10);
+                        pixel |= (ushort)((input[i, 1] >> 3) << 5);
+                        pixel |= (ushort)((input[i, 0] >> 3) << 0);
                     }
 
                     BitConverter.GetBytes(SwapUShort(pixel)).CopyTo(clut, offset);
@@ -161,6 +219,49 @@ namespace VrSharp.GvrTexture
                 }
 
                 return clut;
+            }
+
+            public override void DecodePixel(byte[] source, int sourceIndex, byte[] destination, int destinationIndex)
+            {
+                ushort pixel = SwapUShort(BitConverter.ToUInt16(source, sourceIndex));
+
+                if ((pixel & 0x8000) != 0) // Argb3444
+                {
+                    destination[destinationIndex + 3] = (byte)(((pixel >> 12) & 0x07) * 0xFF / 0x07);
+                    destination[destinationIndex + 2] = (byte)(((pixel >> 8)  & 0x0F) * 0xFF / 0x0F);
+                    destination[destinationIndex + 1] = (byte)(((pixel >> 4)  & 0x0F) * 0xFF / 0x0F);
+                    destination[destinationIndex + 0] = (byte)(((pixel >> 0)  & 0x0F) * 0xFF / 0x0F);
+                }
+                else // Rgb555
+                {
+                    destination[destinationIndex + 3] = 0xFF;
+                    destination[destinationIndex + 2] = (byte)(((pixel >> 10) & 0x1F) * 0xFF / 0x1F);
+                    destination[destinationIndex + 1] = (byte)(((pixel >> 5)  & 0x1F) * 0xFF / 0x1F);
+                    destination[destinationIndex + 0] = (byte)(((pixel >> 0)  & 0x1F) * 0xFF / 0x1F);
+                }
+            }
+
+            public override void EncodePixel(byte[] source, int sourceIndex, byte[] destination, int destinationIndex)
+            {
+                ushort pixel = 0x0000;
+
+                if (source[sourceIndex + 3] <= 0xDA) // Argb3444
+                {
+                    pixel |= (ushort)((source[sourceIndex + 3] >> 5) << 12);
+                    pixel |= (ushort)((source[sourceIndex + 2] >> 4) << 8);
+                    pixel |= (ushort)((source[sourceIndex + 1] >> 4) << 4);
+                    pixel |= (ushort)((source[sourceIndex + 0] >> 4) << 0);
+                }
+                else // Rgb555
+                {
+                    pixel |= 0x8000;
+                    pixel |= (ushort)((source[sourceIndex + 2] >> 3) << 10);
+                    pixel |= (ushort)((source[sourceIndex + 1] >> 3) << 5);
+                    pixel |= (ushort)((source[sourceIndex + 0] >> 3) << 0);
+                }
+
+                destination[destinationIndex + 1] = (byte)(pixel & 0xFF);
+                destination[destinationIndex + 0] = (byte)((pixel >> 8) & 0xFF);
             }
         }
         #endregion

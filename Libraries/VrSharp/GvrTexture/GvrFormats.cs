@@ -27,6 +27,17 @@ namespace VrSharp.GvrTexture
         Unknown     = 0xFF,
     }
 
+    // Gvr Data Flags
+    [Flags]
+    public enum GvrDataFlags : byte
+    {
+        None         = 0x0,
+        Mipmaps      = 0x1,
+        ExternalClut = 0x2,
+        InternalClut = 0x8,
+        Clut         = ExternalClut | InternalClut,
+    }
+
     public static class GvrCodecList
     {
         // Gets the pixel codec

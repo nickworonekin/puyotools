@@ -44,6 +44,7 @@ namespace VrConvert
                 }
 
                 // Output information to the console
+                /*
                 GvrTextureInfo TextureInfo = (GvrTextureInfo)GvrTexture.GetTextureInfo();
                 Console.WriteLine();
                 Console.WriteLine("Texture Type : Gvr");
@@ -53,6 +54,17 @@ namespace VrConvert
                 Console.WriteLine("Data Format  : {0} ({1})", TextureInfo.DataFormat.ToString("X2"), GetDataFormatAsText(TextureInfo.DataFormat));
                 if (TextureInfo.DataFlags != 0x00)
                     Console.WriteLine("Data Flags   : {0} ({1})", TextureInfo.DataFlags.ToString("X2"), GetDataFlagsAsText(TextureInfo.DataFlags));
+                Console.WriteLine();
+                 */
+                //GvrTextureInfo TextureInfo = (GvrTextureInfo)GvrTexture.GetTextureInfo();
+                Console.WriteLine();
+                Console.WriteLine("Texture Type : Gvr");
+                Console.WriteLine("Dimensions   : {0}x{1}", GvrTexture.TextureWidth, GvrTexture.TextureHeight);
+                if (GvrTexture.PixelFormat != GvrPixelFormat.Unknown)
+                    Console.WriteLine("Pixel Format : {0} ({1})", GvrTexture.PixelFormat.ToString("X2"), GetPixelFormatAsText(GvrTexture.PixelFormat));
+                Console.WriteLine("Data Format  : {0} ({1})", GvrTexture.DataFormat.ToString("X2"), GetDataFormatAsText(GvrTexture.DataFormat));
+                if (GvrTexture.DataFlags != GvrDataFlags.None)
+                    Console.WriteLine("Data Flags   : {0} ({1})", GvrTexture.DataFlags.ToString("X2"), GetDataFlagsAsText(GvrTexture.DataFlags));
                 Console.WriteLine();
 
                 // Decode the texture
@@ -66,9 +78,9 @@ namespace VrConvert
                 return true;
             }
 
-            private string GetPixelFormatAsText(byte PixelFormat)
+            private string GetPixelFormatAsText(GvrPixelFormat PixelFormat)
             {
-                switch ((GvrPixelFormat)PixelFormat)
+                switch (PixelFormat)
                 {
                     case GvrPixelFormat.IntensityA8:
                         return "Intensity 8-bit w/ Alpha";
@@ -80,9 +92,9 @@ namespace VrConvert
 
                 return String.Empty;
             }
-            private string GetDataFormatAsText(byte DataFormat)
+            private string GetDataFormatAsText(GvrDataFormat DataFormat)
             {
-                switch ((GvrDataFormat)DataFormat)
+                switch (DataFormat)
                 {
                     case GvrDataFormat.Intensity4:
                         return "Intensity 4-bit";
@@ -108,15 +120,15 @@ namespace VrConvert
 
                 return String.Empty;
             }
-            private string GetDataFlagsAsText(byte DataFlags)
+            private string GetDataFlagsAsText(GvrDataFlags DataFlags)
             {
                 List<string> Flags = new List<string>();
 
-                if ((DataFlags & 0x01) != 0) // Contains Mipmaps
+                if ((DataFlags & GvrDataFlags.Mipmaps) != 0) // Contains Mipmaps
                     Flags.Add("Mipmaps");
-                if ((DataFlags & 0x02) != 0) // External Clut
+                if ((DataFlags & GvrDataFlags.ExternalClut) != 0) // External Clut
                     Flags.Add("External Clut");
-                if ((DataFlags & 0x08) != 0) // Internal Clut
+                if ((DataFlags & GvrDataFlags.InternalClut) != 0) // Internal Clut
                     Flags.Add("Internal Clut");
 
                 if (Flags.Count == 0)
@@ -161,6 +173,7 @@ namespace VrConvert
                 }
 
                 // Output information to the console
+                /*
                 PvrTextureInfo TextureInfo = (PvrTextureInfo)PvrTexture.GetTextureInfo();
                 Console.WriteLine();
                 Console.WriteLine("Texture Type : Pvr");
@@ -169,6 +182,16 @@ namespace VrConvert
                 Console.WriteLine("Dimensions   : {0}x{1}",   TextureInfo.TextureWidth, TextureInfo.TextureHeight);
                 Console.WriteLine("Pixel Format : {0} ({1})", TextureInfo.PixelFormat.ToString("X2"), GetPixelFormatAsText(TextureInfo.PixelFormat));
                 Console.WriteLine("Data Format  : {0} ({1})", TextureInfo.DataFormat.ToString("X2"),  GetDataFormatAsText(TextureInfo.DataFormat));
+                Console.WriteLine();
+                 */
+                //PvrTextureInfo TextureInfo = (PvrTextureInfo)PvrTexture.GetTextureInfo();
+                Console.WriteLine();
+                Console.WriteLine("Texture Type : Pvr");
+                if (PvrTexture.CompressionFormat != PvrCompressionFormat.None)
+                    Console.WriteLine("Compression  : {0}", PvrTexture.CompressionFormat);
+                Console.WriteLine("Dimensions   : {0}x{1}", PvrTexture.TextureWidth, PvrTexture.TextureHeight);
+                Console.WriteLine("Pixel Format : {0} ({1})", PvrTexture.PixelFormat.ToString("X2"), GetPixelFormatAsText(PvrTexture.PixelFormat));
+                Console.WriteLine("Data Format  : {0} ({1})", PvrTexture.DataFormat.ToString("X2"), GetDataFormatAsText(PvrTexture.DataFormat));
                 Console.WriteLine();
 
                 // Decode the texture
@@ -182,7 +205,7 @@ namespace VrConvert
                 return true;
             }
 
-            private string GetPixelFormatAsText(byte PixelFormat)
+            private string GetPixelFormatAsText(PvrPixelFormat PixelFormat)
             {
                 switch ((PvrPixelFormat)PixelFormat)
                 {
@@ -196,7 +219,7 @@ namespace VrConvert
 
                 return String.Empty;
             }
-            private string GetDataFormatAsText(byte DataFormat)
+            private string GetDataFormatAsText(PvrDataFormat DataFormat)
             {
                 switch ((PvrDataFormat)DataFormat)
                 {
@@ -262,12 +285,21 @@ namespace VrConvert
                 }
 
                 // Output information to the console
+                /*
                 SvrTextureInfo TextureInfo = (SvrTextureInfo)SvrTexture.GetTextureInfo();
                 Console.WriteLine();
                 Console.WriteLine("Texture Type : Svr");
                 Console.WriteLine("Dimensions   : {0}x{1}",   TextureInfo.TextureWidth, TextureInfo.TextureHeight);
                 Console.WriteLine("Pixel Format : {0} ({1})", TextureInfo.PixelFormat.ToString("X2"), GetPixelFormatAsText(TextureInfo.PixelFormat));
                 Console.WriteLine("Data Format  : {0} ({1})", TextureInfo.DataFormat.ToString("X2"),  GetDataFormatAsText(TextureInfo.DataFormat));
+                Console.WriteLine();
+                 */
+                //SvrTextureInfo TextureInfo = (SvrTextureInfo)SvrTexture.GetTextureInfo();
+                Console.WriteLine();
+                Console.WriteLine("Texture Type : Svr");
+                Console.WriteLine("Dimensions   : {0}x{1}", SvrTexture.TextureWidth, SvrTexture.TextureHeight);
+                Console.WriteLine("Pixel Format : {0} ({1})", SvrTexture.PixelFormat.ToString("X2"), GetPixelFormatAsText(SvrTexture.PixelFormat));
+                Console.WriteLine("Data Format  : {0} ({1})", SvrTexture.DataFormat.ToString("X2"), GetDataFormatAsText(SvrTexture.DataFormat));
                 Console.WriteLine();
 
                 // Decode the texture
@@ -281,7 +313,7 @@ namespace VrConvert
                 return true;
             }
 
-            private string GetPixelFormatAsText(byte PixelFormat)
+            private string GetPixelFormatAsText(SvrPixelFormat PixelFormat)
             {
                 switch ((SvrPixelFormat)PixelFormat)
                 {
@@ -293,7 +325,7 @@ namespace VrConvert
 
                 return String.Empty;
             }
-            private string GetDataFormatAsText(byte DataFormat)
+            private string GetDataFormatAsText(SvrDataFormat DataFormat)
             {
                 switch ((SvrDataFormat)DataFormat)
                 {
