@@ -156,7 +156,7 @@ namespace VrSharp.PvrTexture
             PvrtOffset = 0x10;
 
             // See if we need to palettize the bitmap and raw image data
-            if (DataCodec.GetNumClutEntries() != 0)
+            if (DataCodec.ClutEntries != 0)
                 PalettizeBitmap();
 
             return true;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Drawing;
+using System.Text;
 
 namespace VrSharp.PvrTexture
 {
@@ -68,17 +69,17 @@ namespace VrSharp.PvrTexture
                 return false;
 
             // Determine the offsets of the GBIX (if present) and PVRT header chunks.
-            if (Compare(TextureData, "GBIX", 0x00))
+            if (PTMethods.Contains(TextureData, 0x00, Encoding.UTF8.GetBytes("GBIX")))
             {
                 GbixOffset = 0x00;
                 PvrtOffset = 0x10;
             }
-            else if (Compare(TextureData, "GBIX", 0x04))
+            else if (PTMethods.Contains(TextureData, 0x04, Encoding.UTF8.GetBytes("GBIX")))
             {
                 GbixOffset = 0x04;
                 PvrtOffset = 0x14;
             }
-            else if (Compare(TextureData, "PVRT", 0x04))
+            else if (PTMethods.Contains(TextureData, 0x04, Encoding.UTF8.GetBytes("PVRT")))
             {
                 GbixOffset = -1;
                 PvrtOffset = 0x04;
@@ -115,7 +116,7 @@ namespace VrSharp.PvrTexture
             DataCodec.PixelCodec = PixelCodec;
 
             // Set the clut and data offsets
-            if (DataCodec.GetNumClutEntries() == 0 || DataCodec.NeedsExternalClut())
+            if (DataCodec.ClutEntries == 0 || DataCodec.NeedsExternalClut)
             {
                 ClutOffset = -1;
                 DataOffset = PvrtOffset + 0x10;
@@ -123,7 +124,7 @@ namespace VrSharp.PvrTexture
             else
             {
                 ClutOffset = PvrtOffset + 0x10;
-                DataOffset = ClutOffset + (DataCodec.GetNumClutEntries() * (PixelCodec.Bpp >> 3));
+                DataOffset = ClutOffset + (DataCodec.ClutEntries * (PixelCodec.Bpp >> 3));
             }
 
             // Get the compression format and determine if we need to decompress this texture
@@ -191,30 +192,30 @@ namespace VrSharp.PvrTexture
         {
             // GBIX and PVRT
             if (length >= 0x20 &&
-                Compare(source, "GBIX", offset + 0x00) &&
-                Compare(source, "PVRT", offset + 0x10) &&
+                PTMethods.Contains(source, offset + 0x00, Encoding.UTF8.GetBytes("GBIX")) &&
+                PTMethods.Contains(source, offset + 0x10, Encoding.UTF8.GetBytes("PVRT")) &&
                 source[offset + 0x19] < 0x60 &&
                 BitConverter.ToUInt32(source, offset + 0x14) == length - 24)
                 return true;
 
             // PVRT (and no GBIX chunk)
             else if (length >= 0x10 &&
-                Compare(source, "PVRT", offset + 0x00) &&
+                PTMethods.Contains(source, offset + 0x00, Encoding.UTF8.GetBytes("PVRT")) &&
                 source[offset + 0x09] < 0x60 &&
                 BitConverter.ToUInt32(source, offset + 0x04) == length - 8)
                 return true;
 
             // GBIX and PVRT with RLE compression
             else if (length >= 0x24 &&
-                Compare(source, "GBIX", offset + 0x04) &&
-                Compare(source, "PVRT", offset + 0x14) &&
+                PTMethods.Contains(source, offset + 0x04, Encoding.UTF8.GetBytes("GBIX")) &&
+                PTMethods.Contains(source, offset + 0x14, Encoding.UTF8.GetBytes("PVRT")) &&
                 source[offset + 0x1D] < 0x60 &&
                 BitConverter.ToUInt32(source, offset + 0x18) == BitConverter.ToUInt32(source, offset + 0x00) - 24)
                 return true;
 
             // PVRT (and no GBIX chunk) with RLE compression 
             else if (length >= 0x14 &&
-                Compare(source, "PVRT", offset + 0x04) &&
+                PTMethods.Contains(source, offset + 0x04, Encoding.UTF8.GetBytes("PVRT")) &&
                 source[offset + 0x0D] < 0x60 &&
                 BitConverter.ToUInt32(source, offset + 0x08) == BitConverter.ToUInt32(source, offset + 0x00) - 8)
                 return true;

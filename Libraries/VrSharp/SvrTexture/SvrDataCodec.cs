@@ -73,8 +73,6 @@ namespace VrSharp.SvrTexture
             {
                 get { return true; }
             }
-            public override int GetNumClutEntries()  { return 16; }
-            public override bool NeedsExternalClut() { return true; }
 
             public override int Bpp
             {
@@ -84,6 +82,11 @@ namespace VrSharp.SvrTexture
             public override int ClutEntries
             {
                 get { return 16; }
+            }
+
+            public override bool NeedsExternalClut
+            {
+                get { return true; }
             }
 
             public override byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)
@@ -152,8 +155,6 @@ namespace VrSharp.SvrTexture
             {
                 get { return true; }
             }
-            public override int GetNumClutEntries()  { return 256; }
-            public override bool NeedsExternalClut() { return true; }
 
             public override int Bpp
             {
@@ -163,6 +164,11 @@ namespace VrSharp.SvrTexture
             public override int ClutEntries
             {
                 get { return 256; }
+            }
+
+            public override bool NeedsExternalClut
+            {
+                get { return true; }
             }
 
             public override byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)
@@ -218,7 +224,6 @@ namespace VrSharp.SvrTexture
             {
                 get { return true; }
             }
-            public override int GetNumClutEntries() { return 16; }
 
             public override int Bpp
             {
@@ -296,7 +301,6 @@ namespace VrSharp.SvrTexture
             {
                 get { return true; }
             }
-            public override int GetNumClutEntries() { return 256; }
 
             public override int Bpp
             {

@@ -88,19 +88,27 @@ namespace VrSharp
         public abstract bool CanEncode { get; }
         public abstract int Bpp { get; }
 
-
-
         public virtual int ClutEntries
         {
             get { return 0; }
         }
 
+        public virtual bool NeedsExternalClut
+        {
+            get { return false; }
+        }
+
+        public virtual bool ContainsMipmaps
+        {
+            get { return false; }
+        }
+
         // Returns the number of entries in the clut (0 if there is no clut)
-        public virtual int GetNumClutEntries() { return 0; }
+        //public virtual int GetNumClutEntries() { return 0; }
         // Returns if the format requires an external clut file
-        public virtual bool NeedsExternalClut() { return false; }
+        //public virtual bool NeedsExternalClut() { return false; }
         // Returns if the texture contains mipmaps
-        public virtual bool ContainsMipmaps() { return false; }
+        //public virtual bool ContainsMipmaps() { return false; }
 
         // Decode texture data
         public abstract byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec);
@@ -125,7 +133,7 @@ namespace VrSharp
         public void SetClut(byte[] clut, int offset, VrPixelCodec PixelCodec)
         {
             //ClutData = PixelCodec.GetClut(clut, offset, GetNumClutEntries());
-            ClutData = PixelCodec.DecodeClut(clut, offset, GetNumClutEntries());
+            ClutData = PixelCodec.DecodeClut(clut, offset, ClutEntries);
         }
     }
     #endregion

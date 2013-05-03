@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Drawing;
+using System.Text;
 
 namespace VrSharp.GvrTexture
 {
@@ -67,8 +68,8 @@ namespace VrSharp.GvrTexture
                 return false;
 
             // Determine the offsets of the GBIX/GCIX (if present) and GCIX header chunks.
-            if (Compare(TextureData, "GBIX", 0x00) ||
-                Compare(TextureData, "GCIX", 0x00))
+            if (PTMethods.Contains(TextureData, 0, Encoding.UTF8.GetBytes("GBIX")) ||
+                PTMethods.Contains(TextureData, 0, Encoding.UTF8.GetBytes("GCIX")))
             {
                 GbixOffset = 0x00;
                 PvrtOffset = 0x10;
@@ -106,7 +107,7 @@ namespace VrSharp.GvrTexture
             DataCodec.PixelCodec = PixelCodec;
 
             // Set the clut and data offsets
-            if ((DataFlags & GvrDataFlags.InternalClut) == 0 || DataCodec.GetNumClutEntries() == 0 || NeedsExternalClut())
+            if ((DataFlags & GvrDataFlags.InternalClut) == 0 || DataCodec.ClutEntries == 0 || NeedsExternalClut())
             {
                 ClutOffset = -1;
                 DataOffset = PvrtOffset + 0x10;
@@ -114,7 +115,7 @@ namespace VrSharp.GvrTexture
             else
             {
                 ClutOffset = PvrtOffset + 0x10;
-                DataOffset = ClutOffset + (DataCodec.GetNumClutEntries() * (PixelCodec.Bpp >> 3));
+                DataOffset = ClutOffset + (DataCodec.ClutEntries * (PixelCodec.Bpp >> 3));
             }
 
             RawImageData = new byte[TextureWidth * TextureHeight * 4];
@@ -163,21 +164,21 @@ namespace VrSharp.GvrTexture
         {
             // GBIX and GVRT
             if (length >= 32 &&
-                Compare(source, "GBIX", offset + 0x00) &&
-                Compare(source, "GVRT", offset + 0x10) &&
+                PTMethods.Contains(source, offset + 0x00, Encoding.UTF8.GetBytes("GBIX")) &&
+                PTMethods.Contains(source, offset + 0x10, Encoding.UTF8.GetBytes("GVRT")) &&
                 BitConverter.ToUInt32(source, offset + 0x14) == length - 24)
                 return true;
 
             // GCIX and GVRT
             else if (length >= 32 &&
-                Compare(source, "GCIX", offset + 0x00) &&
-                Compare(source, "GVRT", offset + 0x10) &&
+                PTMethods.Contains(source, offset + 0x00, Encoding.UTF8.GetBytes("GCIX")) &&
+                PTMethods.Contains(source, offset + 0x10, Encoding.UTF8.GetBytes("GVRT")) &&
                 BitConverter.ToUInt32(source, offset + 0x14) == length - 24)
                 return true;
 
             // GVRT (and no GBIX or GCIX chunk)
             else if (length > 16 &&
-                Compare(source, "GVRT", offset + 0x00) &&
+                PTMethods.Contains(source, offset + 0x00, Encoding.UTF8.GetBytes("GVRT")) &&
                 BitConverter.ToUInt32(source, offset + 0x04) == length - 8)
                 return true;
 

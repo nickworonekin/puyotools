@@ -77,11 +77,15 @@ namespace VrSharp.PvrTexture
             {
                 get { return false; }
             }
-            public override bool ContainsMipmaps() { return true; }
 
             public override int Bpp
             {
                 get { return PixelCodec.Bpp; }
+            }
+
+            public override bool ContainsMipmaps
+            {
+                get { return true; }
             }
 
             public override byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)
@@ -140,7 +144,6 @@ namespace VrSharp.PvrTexture
             {
                 get { return false; }
             }
-            public override int GetNumClutEntries() { return 1024; }
 
             public override int Bpp
             {
@@ -199,8 +202,6 @@ namespace VrSharp.PvrTexture
             {
                 get { return false; }
             }
-            public override int GetNumClutEntries() { return 1024; }
-            public override bool ContainsMipmaps() { return true; }
 
             public override int Bpp
             {
@@ -210,6 +211,11 @@ namespace VrSharp.PvrTexture
             public override int ClutEntries
             {
                 get { return 1024; }
+            }
+
+            public override bool ContainsMipmaps
+            {
+                get { return true; }
             }
 
             public override byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)
@@ -272,8 +278,6 @@ namespace VrSharp.PvrTexture
             {
                 get { return false; }
             }
-            public override int GetNumClutEntries()  { return 16; }
-            public override bool NeedsExternalClut() { return true; }
 
             public override int Bpp
             {
@@ -283,6 +287,11 @@ namespace VrSharp.PvrTexture
             public override int ClutEntries
             {
                 get { return 16; }
+            }
+
+            public override bool NeedsExternalClut
+            {
+                get { return true; }
             }
 
             public override byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)
@@ -335,8 +344,6 @@ namespace VrSharp.PvrTexture
             {
                 get { return true; }
             }
-            public override int GetNumClutEntries()  { return 256; }
-            public override bool NeedsExternalClut() { return true; }
 
             public override int Bpp
             {
@@ -346,6 +353,11 @@ namespace VrSharp.PvrTexture
             public override int ClutEntries
             {
                 get { return 256; }
+            }
+
+            public override bool NeedsExternalClut
+            {
+                get { return true; }
             }
 
             public override byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)
@@ -574,7 +586,6 @@ namespace VrSharp.PvrTexture
             {
                 get { return false; }
             }
-            public override int GetNumClutEntries() { return 512; }
 
             public override int Bpp
             {
@@ -633,8 +644,6 @@ namespace VrSharp.PvrTexture
             {
                 get { return false; }
             }
-            public override int GetNumClutEntries() { return 256; }
-            public override bool ContainsMipmaps() { return true; }
 
             public override int Bpp
             {
@@ -644,6 +653,11 @@ namespace VrSharp.PvrTexture
             public override int ClutEntries
             {
                 get { return 256; }
+            }
+
+            public override bool ContainsMipmaps
+            {
+                get { return true; }
             }
 
             public override byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)

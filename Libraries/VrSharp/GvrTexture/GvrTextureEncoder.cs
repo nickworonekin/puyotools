@@ -121,9 +121,9 @@ namespace VrSharp.GvrTexture
         {
             if (!InitSuccess) return;
 
-            if (Mipmaps && DataCodec.GetNumClutEntries() == 0) // No mipmaps for palettized textures yet
+            if (Mipmaps && DataCodec.ClutEntries == 0) // No mipmaps for palettized textures yet
                 DataFlags |= GvrDataFlags.Mipmaps;
-            if (ExternalClut && DataCodec.GetNumClutEntries() != 0)
+            if (ExternalClut && DataCodec.ClutEntries != 0)
                 DataFlags |= GvrDataFlags.ExternalClut;
         }
 
@@ -140,8 +140,8 @@ namespace VrSharp.GvrTexture
 
             if (DataCodec == null)      return false;
             if (!DataCodec.CanEncode) return false;
-            if (PixelCodec == null && DataCodec.GetNumClutEntries() != 0)      return false;
-            if (!PixelCodec.CanEncode && DataCodec.GetNumClutEntries() != 0) return false;
+            if (PixelCodec == null && DataCodec.ClutEntries != 0) return false;
+            if (!PixelCodec.CanEncode && DataCodec.ClutEntries != 0) return false;
 
             DataCodec.PixelCodec = PixelCodec;
 
@@ -149,7 +149,7 @@ namespace VrSharp.GvrTexture
             PvrtOffset = 0x10;
 
             // See if we need to palettize the bitmap and raw image data
-            if (DataCodec.GetNumClutEntries() != 0)
+            if (DataCodec.ClutEntries != 0)
                 PalettizeBitmap();
 
             return true;
@@ -175,7 +175,7 @@ namespace VrSharp.GvrTexture
         protected override byte[] WritePvrtHeader(int TextureSize)
         {
             // Before we write, set the clut data flag if the texture contains an internal clut
-            if (DataCodec.GetNumClutEntries() != 0 && (DataFlags & GvrDataFlags.ExternalClut) == 0)
+            if (DataCodec.ClutEntries != 0 && (DataFlags & GvrDataFlags.ExternalClut) == 0)
                 DataFlags |= GvrDataFlags.InternalClut;
 
             MemoryStream PvrtHeader = new MemoryStream();

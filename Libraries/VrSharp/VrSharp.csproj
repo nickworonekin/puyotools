@@ -55,6 +55,7 @@
     <Reference Include="System.Drawing" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\PTMethods.cs" />
     <Compile Include="Core\VpClut.cs" />
     <Compile Include="Core\VpClutEncoder.cs" />
     <Compile Include="Core\VrTexture.cs" />

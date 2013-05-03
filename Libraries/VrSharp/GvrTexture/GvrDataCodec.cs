@@ -310,7 +310,7 @@ namespace VrSharp.GvrTexture
                         {
                             for (int x2 = 0; x2 < 4; x2++)
                             {
-                                ushort pixel = SwapUShort(BitConverter.ToUInt16(input, offset));
+                                ushort pixel = PTMethods.ToUInt16BE(input, offset);
 
                                 //output[((((y + y2) * width) + (x + x2)) * 4) + 3] = 0xFF;
                                 //output[((((y + y2) * width) + (x + x2)) * 4) + 2] = (byte)(((pixel >> 11) & 0x1F) << 11);
@@ -388,7 +388,7 @@ namespace VrSharp.GvrTexture
                         {
                             for (int x2 = 0; x2 < 4; x2++)
                             {
-                                ushort pixel = SwapUShort(BitConverter.ToUInt16(input, offset));
+                                ushort pixel = PTMethods.ToUInt16BE(input, offset);
 
                                 if ((pixel & 0x8000) != 0) // Rgb555
                                 {
@@ -552,7 +552,6 @@ namespace VrSharp.GvrTexture
             {
                 get { return true; }
             }
-            public override int GetNumClutEntries() { return 16; }
 
             public override int Bpp
             {
@@ -632,7 +631,6 @@ namespace VrSharp.GvrTexture
             {
                 get { return true; }
             }
-            public override int GetNumClutEntries() { return 256; }
 
             public override int Bpp
             {
@@ -727,8 +725,8 @@ namespace VrSharp.GvrTexture
                                 ushort[] pixel = new ushort[2];
 
                                 // Get the first two colors
-                                pixel[0] = SwapUShort(BitConverter.ToUInt16(input, offset));
-                                pixel[1] = SwapUShort(BitConverter.ToUInt16(input, offset + 2));
+                                pixel[0] = PTMethods.ToUInt16BE(input, offset);
+                                pixel[1] = PTMethods.ToUInt16BE(input, offset + 2);
 
                                 Clut[0, 3] = 0xFF;
                                 Clut[0, 2] = (byte)(((pixel[0] >> 11) & 0x1F) * 0xFF / 0x1F);

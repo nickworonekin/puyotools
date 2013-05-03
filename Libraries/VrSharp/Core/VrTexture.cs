@@ -237,7 +237,7 @@ namespace VrSharp
         public virtual bool ContainsMipmaps()
         {
             if (!InitSuccess) return false;
-            return DataCodec.ContainsMipmaps();
+            return DataCodec.ContainsMipmaps;
         }
 
         /// <summary>
@@ -280,7 +280,7 @@ namespace VrSharp
         {
             if (!InitSuccess) return false;
 
-            return DataCodec.NeedsExternalClut();
+            return DataCodec.NeedsExternalClut;
         }
         #endregion
 
@@ -359,6 +359,7 @@ namespace VrSharp
 
         // Function for checking headers
         // Checks to see if the string matches the byte data at the specific offset
+        /*
         protected static bool Compare(byte[] array, string str, int offset)
         {
             if (offset < 0 || offset + str.Length > array.Length)
@@ -372,6 +373,7 @@ namespace VrSharp
 
             return true;
         }
+         * */
         #endregion
     }
 }
