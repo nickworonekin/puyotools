@@ -18,10 +18,10 @@ namespace VrSharp
     // Base codec for the pixel codecs
     public abstract class VrPixelCodec : VrCodec
     {
-        public abstract bool CanDecode(); // Returns if this format can be decoded
-        public abstract bool CanEncode(); // Returns if this format can be encoded
+        //public abstract bool CanDecode(); // Returns if this format can be decoded
+        //public abstract bool CanEncode(); // Returns if this format can be encoded
 
-        public abstract int GetBpp(); // Returns the bits per pixel for this pixel codec
+        //public abstract int GetBpp(); // Returns the bits per pixel for this pixel codec
 
         // Gets the clut for this pixel format and returns it as Argb8888
         //public abstract byte[,] GetClut(byte[] input, int offset, int entries);
@@ -39,6 +39,7 @@ namespace VrSharp
         //    return null;
         //}
 
+        public abstract bool CanEncode { get; }
         public abstract int Bpp { get; }
 
         public abstract void DecodePixel(byte[] source, int sourceIndex, byte[] destination, int destinationIndex);
@@ -79,15 +80,15 @@ namespace VrSharp
     {
         public VrPixelCodec PixelCodec;
 
-        public abstract bool CanDecode(); // Returns if this format can be decoded
-        public abstract bool CanEncode(); // Returns if this format can be encoded
+        //public abstract bool CanDecode(); // Returns if this format can be decoded
+        //public abstract bool CanEncode(); // Returns if this format can be encoded
 
-        public abstract int GetBpp(VrPixelCodec PixelCodec); // Returns the bits per pixel for this pixel codec
+        //public abstract int GetBpp(VrPixelCodec PixelCodec); // Returns the bits per pixel for this pixel codec
 
-        public virtual int Bpp
-        {
-            get { return 0; }
-        }
+        public abstract bool CanEncode { get; }
+        public abstract int Bpp { get; }
+
+
 
         public virtual int ClutEntries
         {

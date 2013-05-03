@@ -84,21 +84,21 @@ namespace VrConvert
             Stopwatch timer = Stopwatch.StartNew();
 
             // Decode the data now
-            if (GvrTexture.IsGvrTexture(VrData))
+            if (GvrTexture.Is(VrData))
             {
                 if (AutoClutArgIndex != -1)
                     ClutFile = InputPath + Path.GetFileNameWithoutExtension(InputFile) + ".gvp";
 
                 DecodeSuccess = new VrDecoder.Gvr().DecodeTexture(VrData, ClutFile, out BitmapData);
             }
-            else if (PvrTexture.IsPvrTexture(VrData))
+            else if (PvrTexture.Is(VrData))
             {
                 if (AutoClutArgIndex != -1)
                     ClutFile = InputPath + Path.GetFileNameWithoutExtension(InputFile) + ".pvp";
 
                 DecodeSuccess = new VrDecoder.Pvr().DecodeTexture(VrData, ClutFile, out BitmapData);
             }
-            else if (SvrTexture.IsSvrTexture(VrData))
+            else if (SvrTexture.Is(VrData))
             {
                 if (AutoClutArgIndex != -1)
                     ClutFile = InputPath + Path.GetFileNameWithoutExtension(InputFile) + ".svp";

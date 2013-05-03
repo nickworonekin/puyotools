@@ -114,8 +114,10 @@ namespace VrSharp.SvrTexture
             DataCodec  = SvrCodecList.GetDataCodec((SvrDataFormat)DataFormat);
 
             if (PixelCodec == null || DataCodec == null)           return false;
-            if (!PixelCodec.CanEncode() || !DataCodec.CanEncode()) return false;
+            if (!PixelCodec.CanEncode || !DataCodec.CanEncode) return false;
             if (!CanEncode((SvrPixelFormat)PixelFormat, (SvrDataFormat)DataFormat, TextureWidth, TextureHeight)) return false;
+
+            DataCodec.PixelCodec = PixelCodec;
 
             GbixOffset = 0x00;
             PvrtOffset = 0x10;

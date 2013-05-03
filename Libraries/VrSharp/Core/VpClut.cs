@@ -98,7 +98,7 @@ namespace VrSharp
         {
             if (!InitSuccess) return new byte[0];
 
-            byte[] clut = new byte[NumClutEntries * (PixelCodec.GetBpp() / 8)];
+            byte[] clut = new byte[NumClutEntries * (PixelCodec.Bpp >> 3)];
             Array.Copy(ClutData, 0x10, clut, 0x00, clut.Length);
 
             return clut;

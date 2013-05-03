@@ -121,7 +121,7 @@ namespace VrSharp.PvrTexture
         {
             if (!InitSuccess) return;
 
-            if (CompressionFormat == PvrCompressionFormat.Rle && DataCodec.GetBpp(PixelCodec) >= 8)
+            if (CompressionFormat == PvrCompressionFormat.Rle && DataCodec.Bpp >= 8)
             {
                 // We want to use Rle compression and our texture has a bpp of at least 8.
                 CompressionCodec = PvrCodecList.GetCompressionCodec(CompressionFormat);
@@ -147,8 +147,10 @@ namespace VrSharp.PvrTexture
             CompressionCodec  = null;
 
             if (PixelCodec == null || DataCodec == null)           return false;
-            if (!PixelCodec.CanEncode() || !DataCodec.CanEncode()) return false;
+            if (!PixelCodec.CanEncode || !DataCodec.CanEncode) return false;
             if (!CanEncode((PvrPixelFormat)PixelFormat, (PvrDataFormat)DataFormat, TextureWidth, TextureHeight)) return false;
+
+            DataCodec.PixelCodec = PixelCodec;
 
             GbixOffset = 0x00;
             PvrtOffset = 0x10;

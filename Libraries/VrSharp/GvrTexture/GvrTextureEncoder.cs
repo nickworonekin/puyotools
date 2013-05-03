@@ -139,9 +139,11 @@ namespace VrSharp.GvrTexture
             DataCodec  = GvrCodecList.GetDataCodec((GvrDataFormat)DataFormat);
 
             if (DataCodec == null)      return false;
-            if (!DataCodec.CanEncode()) return false;
+            if (!DataCodec.CanEncode) return false;
             if (PixelCodec == null && DataCodec.GetNumClutEntries() != 0)      return false;
-            if (!PixelCodec.CanEncode() && DataCodec.GetNumClutEntries() != 0) return false;
+            if (!PixelCodec.CanEncode && DataCodec.GetNumClutEntries() != 0) return false;
+
+            DataCodec.PixelCodec = PixelCodec;
 
             GbixOffset = 0x00;
             PvrtOffset = 0x10;

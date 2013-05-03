@@ -108,10 +108,10 @@ namespace VrSharp.PvrTexture
 
             // Get the codecs and make sure we can decode using them
             PixelCodec = PvrCodecList.GetPixelCodec(PixelFormat);
-            if (PixelCodec == null || !PixelCodec.CanDecode()) return false;
+            if (PixelCodec == null) return false;
 
             DataCodec = PvrCodecList.GetDataCodec(DataFormat);
-            if (DataCodec == null || !DataCodec.CanDecode()) return false;
+            if (DataCodec == null) return false;
             DataCodec.PixelCodec = PixelCodec;
 
             // Set the clut and data offsets
@@ -123,7 +123,7 @@ namespace VrSharp.PvrTexture
             else
             {
                 ClutOffset = PvrtOffset + 0x10;
-                DataOffset = ClutOffset + (DataCodec.GetNumClutEntries() * (PixelCodec.GetBpp() / 8));
+                DataOffset = ClutOffset + (DataCodec.GetNumClutEntries() * (PixelCodec.Bpp >> 3));
             }
 
             // Get the compression format and determine if we need to decompress this texture

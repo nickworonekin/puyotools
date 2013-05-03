@@ -289,7 +289,7 @@ namespace VrSharp
             if (DataCodec.GetNumClutEntries() != 0 && !TexNeedsExternalClut())
             {
                 ClutOffset = PvrtOffset + 0x10;
-                DataOffset = ClutOffset + (DataCodec.GetNumClutEntries() * (PixelCodec.GetBpp() / 8));
+                DataOffset = ClutOffset + (DataCodec.GetNumClutEntries() * (PixelCodec.Bpp >> 3));
             }
             else
             {
@@ -354,7 +354,7 @@ namespace VrSharp
             if (!TexNeedsExternalClut())
             {
                 ClutOffset = PvrtOffset + 0x10;
-                DataOffset = ClutOffset + (DataCodec.GetNumClutEntries() * (PixelCodec.GetBpp() / 8));
+                DataOffset = ClutOffset + (DataCodec.GetNumClutEntries() * (PixelCodec.Bpp >> 3));
             }
 
             // Build the clut list
@@ -379,7 +379,7 @@ namespace VrSharp
             if (!TexNeedsExternalClut())
             {
                 ClutOffset = PvrtOffset + 0x10;
-                DataOffset = ClutOffset + (DataCodec.GetNumClutEntries() * (PixelCodec.GetBpp() / 8));
+                DataOffset = ClutOffset + (DataCodec.GetNumClutEntries() * (PixelCodec.Bpp >> 3));
             }
 
             // If the texture contains an external clut, create a vp clut encoder to write it

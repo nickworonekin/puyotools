@@ -8,9 +8,10 @@ namespace VrSharp.SvrTexture
         // Rectangle
         public class Rectangle : SvrDataCodec
         {
-            public override bool CanDecode() { return true; }
-            public override bool CanEncode() { return true; }
-            public override int GetBpp(VrPixelCodec PixelCodec) { return PixelCodec.GetBpp(); }
+            public override bool CanEncode
+            {
+                get { return true; }
+            }
 
             public override int Bpp
             {
@@ -46,7 +47,7 @@ namespace VrSharp.SvrTexture
 
             public override byte[] Encode(byte[] input, int width, int height, VrPixelCodec PixelCodec)
             {
-                byte[] output = new byte[width * height * (GetBpp(PixelCodec) / 8)];
+                byte[] output = new byte[width * height * (Bpp >> 3)];
 
                 for (int y = 0; y < height; y++)
                 {
@@ -68,9 +69,10 @@ namespace VrSharp.SvrTexture
         // 4-bit Texture with External Clut
         public class Index4ExtClut : SvrDataCodec
         {
-            public override bool CanDecode() { return true; }
-            public override bool CanEncode() { return true; }
-            public override int GetBpp(VrPixelCodec PixelCodec) { return 4; }
+            public override bool CanEncode
+            {
+                get { return true; }
+            }
             public override int GetNumClutEntries()  { return 16; }
             public override bool NeedsExternalClut() { return true; }
 
@@ -146,9 +148,10 @@ namespace VrSharp.SvrTexture
         // 8-bit Texture with External Clut
         public class Index8ExtClut : SvrDataCodec
         {
-            public override bool CanDecode() { return true; }
-            public override bool CanEncode() { return true; }
-            public override int GetBpp(VrPixelCodec PixelCodec) { return 8; }
+            public override bool CanEncode
+            {
+                get { return true; }
+            }
             public override int GetNumClutEntries()  { return 256; }
             public override bool NeedsExternalClut() { return true; }
 
@@ -211,9 +214,10 @@ namespace VrSharp.SvrTexture
         // 4-bit Texture with Clut
         public class Index4 : SvrDataCodec
         {
-            public override bool CanDecode() { return true; }
-            public override bool CanEncode() { return true; }
-            public override int GetBpp(VrPixelCodec PixelCodec) { return 4; }
+            public override bool CanEncode
+            {
+                get { return true; }
+            }
             public override int GetNumClutEntries() { return 16; }
 
             public override int Bpp
@@ -288,9 +292,10 @@ namespace VrSharp.SvrTexture
         // 8-bit Texture with Clut
         public class Index8 : SvrDataCodec
         {
-            public override bool CanDecode() { return true; }
-            public override bool CanEncode() { return true; }
-            public override int GetBpp(VrPixelCodec PixelCodec) { return 8; }
+            public override bool CanEncode
+            {
+                get { return true; }
+            }
             public override int GetNumClutEntries() { return 256; }
 
             public override int Bpp

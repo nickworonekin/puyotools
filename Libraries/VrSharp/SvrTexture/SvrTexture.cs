@@ -89,10 +89,10 @@ namespace VrSharp.SvrTexture
 
             // Get the codecs and make sure we can decode using them
             PixelCodec = SvrCodecList.GetPixelCodec(PixelFormat);
-            if (PixelCodec == null || !PixelCodec.CanDecode()) return false;
+            if (PixelCodec == null) return false;
 
             DataCodec = SvrCodecList.GetDataCodec(DataFormat);
-            if (DataCodec == null || !DataCodec.CanDecode()) return false;
+            if (DataCodec == null) return false;
             DataCodec.PixelCodec = PixelCodec;
 
             // Set the clut and data offsets
@@ -104,7 +104,7 @@ namespace VrSharp.SvrTexture
             else
             {
                 ClutOffset = PvrtOffset + 0x10;
-                DataOffset = ClutOffset + (DataCodec.GetNumClutEntries() * (PixelCodec.GetBpp() / 8));
+                DataOffset = ClutOffset + (DataCodec.GetNumClutEntries() * (PixelCodec.Bpp >> 3));
             }
 
             RawImageData = new byte[TextureWidth * TextureHeight * 4];

@@ -14,7 +14,7 @@ namespace VrSharp.PvrTexture
                 byte[] output     = new byte[BitConverter.ToUInt32(input, 0x00)];
                 int SourcePointer = DataOffset;
                 int DestPointer   = 0x00;
-                int PixelSize     = (DataCodec.GetBpp(PixelCodec) / 8);
+                int PixelSize     = (DataCodec.Bpp >> 3);
 
                 // Copy the header
                 if (DataOffset - 4 > 0)
@@ -42,13 +42,13 @@ namespace VrSharp.PvrTexture
             public override byte[] Compress(byte[] input, int DataOffset, VrPixelCodec PixelCodec, VrDataCodec DataCodec)
             {
                 // We can't compress 4-bit textures
-                if (DataCodec.GetBpp(PixelCodec) < 8)
+                if (DataCodec.Bpp < 8)
                     return input;
 
                 MemoryStream output = new MemoryStream();
                 int SourcePointer   = DataOffset;
                 int DestPointer     = DataOffset + 4;
-                int PixelSize = (DataCodec.GetBpp(PixelCodec) / 8);
+                int PixelSize = (DataCodec.Bpp >> 3);
 
                 using (BinaryWriter Writer = new BinaryWriter(output))
                 {
@@ -66,7 +66,7 @@ namespace VrSharp.PvrTexture
                         int repeat = 0;
                         while (SourcePointer + PixelSize < input.Length && repeat < 255)
                         {
-                            bool match =true;
+                            bool match = true;
 
                             for (int i = 0; i < PixelSize && match; i++)
                             {

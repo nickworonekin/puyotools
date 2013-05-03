@@ -412,8 +412,8 @@ namespace VrConvert
                 Console.WriteLine();
                 Console.WriteLine("Texture Type : Svr");
                 Console.WriteLine("Dimensions   : {0}x{1}", SvrTextureEncoder.TextureWidth, SvrTextureEncoder.TextureHeight);
-                Console.WriteLine("Pixel Format : {0} ({1})", SvrTextureEncoder.PixelFormat.ToString("X2"), GetPixelFormatAsText(SvrTextureEncoder.PixelFormat));
-                Console.WriteLine("Data Format  : {0} ({1})", SvrTextureEncoder.DataFormat.ToString("X2"), GetDataFormatAsText(SvrTextureEncoder.DataFormat));
+                Console.WriteLine("Pixel Format : {0} ({1})", SvrTextureEncoder.PixelFormat, GetPixelFormatAsText(SvrTextureEncoder.PixelFormat));
+                Console.WriteLine("Data Format  : {0} ({1})", SvrTextureEncoder.DataFormat, GetDataFormatAsText(SvrTextureEncoder.DataFormat));
                 Console.WriteLine();
 
                 // Encode the texture

@@ -8,9 +8,10 @@ namespace VrSharp.PvrTexture
         // Square Twiddled
         public class SquareTwiddled : PvrDataCodec
         {
-            public override bool CanDecode() { return true; }
-            public override bool CanEncode() { return true; }
-            public override int GetBpp(VrPixelCodec PixelCodec) { return PixelCodec.GetBpp(); }
+            public override bool CanEncode
+            {
+                get { return true; }
+            }
 
             public override int Bpp
             {
@@ -21,7 +22,7 @@ namespace VrSharp.PvrTexture
             {
                 int StartOffset = offset;
                 byte[] output   = new byte[width * height * 4];
-                TwiddledMap TwiddledMap = new TwiddledMap(width, GetBpp(PixelCodec));
+                TwiddledMap TwiddledMap = new TwiddledMap(width, PixelCodec.Bpp);
 
                 for (int y = 0; y < height; y++)
                 {
@@ -47,8 +48,8 @@ namespace VrSharp.PvrTexture
 
             public override byte[] Encode(byte[] input, int width, int height, VrPixelCodec PixelCodec)
             {
-                byte[] output = new byte[width * height * (GetBpp(PixelCodec) / 8)];
-                TwiddledMap TwiddledMap = new TwiddledMap(width, GetBpp(PixelCodec));
+                byte[] output = new byte[width * height * (Bpp >> 3)];
+                TwiddledMap TwiddledMap = new TwiddledMap(width, PixelCodec.Bpp);
 
                 for (int y = 0; y < height; y++)
                 {
@@ -72,9 +73,10 @@ namespace VrSharp.PvrTexture
         // Square Twiddled with Mipmaps
         public class SquareTwiddledMipmaps : PvrDataCodec
         {
-            public override bool CanDecode() { return true;  }
-            public override bool CanEncode() { return false; }
-            public override int GetBpp(VrPixelCodec PixelCodec) { return PixelCodec.GetBpp(); }
+            public override bool CanEncode
+            {
+                get { return false; }
+            }
             public override bool ContainsMipmaps() { return true; }
 
             public override int Bpp
@@ -86,7 +88,7 @@ namespace VrSharp.PvrTexture
             {
                 int StartOffset = offset;
                 byte[] output   = new byte[width * height * 4];
-                TwiddledMap TwiddledMap = new TwiddledMap(width, GetBpp(PixelCodec));
+                TwiddledMap TwiddledMap = new TwiddledMap(width, PixelCodec.Bpp);
 
                 for (int y = 0; y < height; y++)
                 {
@@ -118,7 +120,7 @@ namespace VrSharp.PvrTexture
                     MipmapWidth >>= 1;
 
                 for (int i = 1; i < MipmapWidth; i <<= 1)
-                    offset += Math.Max(i * i * (GetBpp(PixelCodec) / 8), 4);
+                    offset += Math.Max(i * i * (PixelCodec.Bpp >> 3), 4);
 
                 return Decode(input, offset, MipmapWidth, MipmapWidth, PixelCodec);
             }
@@ -134,9 +136,10 @@ namespace VrSharp.PvrTexture
         // Vq
         public class Vq : PvrDataCodec
         {
-            public override bool CanDecode() { return true;  }
-            public override bool CanEncode() { return false; }
-            public override int GetBpp(VrPixelCodec PixelCodec) { return 8; }
+            public override bool CanEncode
+            {
+                get { return false; }
+            }
             public override int GetNumClutEntries() { return 1024; }
 
             public override int Bpp
@@ -155,7 +158,7 @@ namespace VrSharp.PvrTexture
                 byte[] output   = new byte[width * height * 4];
                 byte[][] clut    = ClutData;
 
-                TwiddledMap TwiddledMap = new TwiddledMap(width / 2, GetBpp(PixelCodec));
+                TwiddledMap TwiddledMap = new TwiddledMap(width / 2, Bpp);
 
                 for (int y = 0; y < height; y += 2)
                 {
@@ -192,9 +195,10 @@ namespace VrSharp.PvrTexture
         // Vq with Mipmaps
         public class VqMipmaps : PvrDataCodec
         {
-            public override bool CanDecode() { return true;  }
-            public override bool CanEncode() { return false; }
-            public override int GetBpp(VrPixelCodec PixelCodec) { return 8; }
+            public override bool CanEncode
+            {
+                get { return false; }
+            }
             public override int GetNumClutEntries() { return 1024; }
             public override bool ContainsMipmaps() { return true; }
 
@@ -214,7 +218,7 @@ namespace VrSharp.PvrTexture
                 byte[] output   = new byte[width * height * 4];
                 byte[][] clut    = ClutData;
 
-                TwiddledMap TwiddledMap = new TwiddledMap(width / 2, GetBpp(PixelCodec));
+                TwiddledMap TwiddledMap = new TwiddledMap(width / 2, Bpp);
 
                 for (int y = 0; y < height; y += 2)
                 {
@@ -264,9 +268,10 @@ namespace VrSharp.PvrTexture
         // 4-bit Texture with External Clut
         public class Index4 : PvrDataCodec
         {
-            public override bool CanDecode() { return true; }
-            public override bool CanEncode() { return true; }
-            public override int GetBpp(VrPixelCodec PixelCodec) { return 4; }
+            public override bool CanEncode
+            {
+                get { return false; }
+            }
             public override int GetNumClutEntries()  { return 16; }
             public override bool NeedsExternalClut() { return true; }
 
@@ -285,7 +290,7 @@ namespace VrSharp.PvrTexture
                 byte[] output = new byte[width * height * 4];
                 byte[][] clut  = ClutData;
                 int ChunkSize = Math.Min(width, height);
-                TwiddledMap TwiddledMap = new TwiddledMap(ChunkSize, GetBpp(PixelCodec));
+                TwiddledMap TwiddledMap = new TwiddledMap(ChunkSize, Bpp);
 
                 for (int y = 0; y < height; y += ChunkSize)
                 {
@@ -326,9 +331,10 @@ namespace VrSharp.PvrTexture
         // 8-bit Texture with External Clut
         public class Index8 : PvrDataCodec
         {
-            public override bool CanDecode() { return true; }
-            public override bool CanEncode() { return true; }
-            public override int GetBpp(VrPixelCodec PixelCodec) { return 8; }
+            public override bool CanEncode
+            {
+                get { return true; }
+            }
             public override int GetNumClutEntries()  { return 256; }
             public override bool NeedsExternalClut() { return true; }
 
@@ -347,7 +353,7 @@ namespace VrSharp.PvrTexture
                 byte[] output = new byte[width * height * 4];
                 byte[][] clut  = ClutData;
                 int ChunkSize = Math.Min(width, height);
-                TwiddledMap TwiddledMap = new TwiddledMap(ChunkSize, GetBpp(PixelCodec));
+                TwiddledMap TwiddledMap = new TwiddledMap(ChunkSize, Bpp);
 
                 for (int y = 0; y < height; y += ChunkSize)
                 {
@@ -380,7 +386,7 @@ namespace VrSharp.PvrTexture
                 int offset = 0;
                 byte[] output = new byte[width * height];
                 int ChunkSize = Math.Min(width, height);
-                TwiddledMap TwiddledMap = new TwiddledMap(ChunkSize, GetBpp(PixelCodec));
+                TwiddledMap TwiddledMap = new TwiddledMap(ChunkSize, Bpp);
 
                 for (int y = 0; y < height; y += ChunkSize)
                 {
@@ -408,9 +414,10 @@ namespace VrSharp.PvrTexture
         // Rectangle
         public class Rectangle : PvrDataCodec
         {
-            public override bool CanDecode() { return true; }
-            public override bool CanEncode() { return true; }
-            public override int GetBpp(VrPixelCodec PixelCodec) { return PixelCodec.GetBpp(); }
+            public override bool CanEncode
+            {
+                get { return true; }
+            }
 
             public override int Bpp
             {
@@ -448,7 +455,7 @@ namespace VrSharp.PvrTexture
             public override byte[] Encode(byte[] input, int width, int height, VrPixelCodec PixelCodec)
             {
                 int offset    = 0;
-                byte[] output = new byte[width * height * (GetBpp(PixelCodec) / 8)];
+                byte[] output = new byte[width * height * (PixelCodec.Bpp >> 3)];
 
                 for (int y = 0; y < height; y++)
                 {
@@ -476,9 +483,10 @@ namespace VrSharp.PvrTexture
         // Rectangle Twiddled
         public class RectangleTwiddled : PvrDataCodec
         {
-            public override bool CanDecode() { return true; }
-            public override bool CanEncode() { return true; }
-            public override int GetBpp(VrPixelCodec PixelCodec) { return PixelCodec.GetBpp(); }
+            public override bool CanEncode
+            {
+                get { return true; }
+            }
 
             public override int Bpp
             {
@@ -490,7 +498,7 @@ namespace VrSharp.PvrTexture
                 byte[] output = new byte[width * height * 4];
                 int ChunkSize = Math.Min(width, height);
 
-                TwiddledMap TwiddledMap = new TwiddledMap(ChunkSize, GetBpp(PixelCodec));
+                TwiddledMap TwiddledMap = new TwiddledMap(ChunkSize, PixelCodec.Bpp);
 
                 for (int y = 0; y < height; y += ChunkSize)
                 {
@@ -525,10 +533,10 @@ namespace VrSharp.PvrTexture
             public override byte[] Encode(byte[] input, int width, int height, VrPixelCodec PixelCodec)
             {
                 int offset    = 0;
-                byte[] output = new byte[width * height * (GetBpp(PixelCodec) / 8)];
+                byte[] output = new byte[width * height * (PixelCodec.Bpp >> 3)];
                 int ChunkSize = Math.Min(width, height);
 
-                TwiddledMap TwiddledMap = new TwiddledMap(width, GetBpp(PixelCodec));
+                TwiddledMap TwiddledMap = new TwiddledMap(width, PixelCodec.Bpp);
 
                 for (int y = 0; y < height; y += ChunkSize)
                 {
@@ -562,9 +570,10 @@ namespace VrSharp.PvrTexture
         // Small Vq
         public class SmallVq : PvrDataCodec
         {
-            public override bool CanDecode() { return true;  }
-            public override bool CanEncode() { return false; }
-            public override int GetBpp(VrPixelCodec PixelCodec) { return 8; }
+            public override bool CanEncode
+            {
+                get { return false; }
+            }
             public override int GetNumClutEntries() { return 512; }
 
             public override int Bpp
@@ -583,7 +592,7 @@ namespace VrSharp.PvrTexture
                 byte[] output   = new byte[width * height * 4];
                 byte[][] clut    = ClutData;
 
-                TwiddledMap TwiddledMap = new TwiddledMap(width / 2, GetBpp(PixelCodec));
+                TwiddledMap TwiddledMap = new TwiddledMap(width / 2, Bpp);
 
                 for (int y = 0; y < height; y += 2)
                 {
@@ -620,9 +629,10 @@ namespace VrSharp.PvrTexture
         // Small Vq with Mipmaps
         public class SmallVqMipmaps : PvrDataCodec
         {
-            public override bool CanDecode() { return true;  }
-            public override bool CanEncode() { return false; }
-            public override int GetBpp(VrPixelCodec PixelCodec) { return 8; }
+            public override bool CanEncode
+            {
+                get { return false; }
+            }
             public override int GetNumClutEntries() { return 256; }
             public override bool ContainsMipmaps() { return true; }
 
@@ -642,7 +652,7 @@ namespace VrSharp.PvrTexture
                 byte[] output   = new byte[width * height * 4];
                 byte[][] clut    = ClutData;
 
-                TwiddledMap TwiddledMap = new TwiddledMap(width / 2, GetBpp(PixelCodec));
+                TwiddledMap TwiddledMap = new TwiddledMap(width / 2, Bpp);
 
                 for (int y = 0; y < height; y += 2)
                 {

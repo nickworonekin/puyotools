@@ -8,9 +8,10 @@ namespace VrSharp.GvrTexture
         // Intensity 4-bit
         public class Intensity4 : GvrDataCodec
         {
-            public override bool CanDecode() { return true; }
-            public override bool CanEncode() { return true; }
-            public override int GetBpp(VrPixelCodec PixelCodec) { return 4; }
+            public override bool CanEncode
+            {
+                get { return true; }
+            }
 
             public override int Bpp
             {
@@ -81,9 +82,10 @@ namespace VrSharp.GvrTexture
         // Intensity 8-bit
         public class Intensity8 : GvrDataCodec
         {
-            public override bool CanDecode() { return true; }
-            public override bool CanEncode() { return true; }
-            public override int GetBpp(VrPixelCodec PixelCodec) { return 8; }
+            public override bool CanEncode
+            {
+                get { return true; }
+            }
 
             public override int Bpp
             {
@@ -148,9 +150,10 @@ namespace VrSharp.GvrTexture
         // Intensity 4-bit with Alpha
         public class IntensityA4 : GvrDataCodec
         {
-            public override bool CanDecode() { return true; }
-            public override bool CanEncode() { return true; }
-            public override int GetBpp(VrPixelCodec PixelCodec) { return 8; }
+            public override bool CanEncode
+            {
+                get { return true; }
+            }
 
             public override int Bpp
             {
@@ -216,9 +219,10 @@ namespace VrSharp.GvrTexture
         // Intensity 8-bit with Alpha
         public class IntensityA8 : GvrDataCodec
         {
-            public override bool CanDecode() { return true; }
-            public override bool CanEncode() { return true; }
-            public override int GetBpp(VrPixelCodec PixelCodec) { return 16; }
+            public override bool CanEncode
+            {
+                get { return true; }
+            }
 
             public override int Bpp
             {
@@ -284,9 +288,10 @@ namespace VrSharp.GvrTexture
         // Rgb565
         public class Rgb565 : GvrDataCodec
         {
-            public override bool CanDecode() { return true; }
-            public override bool CanEncode() { return true; }
-            public override int GetBpp(VrPixelCodec PixelCodec) { return 16; }
+            public override bool CanEncode
+            {
+                get { return true; }
+            }
 
             public override int Bpp
             {
@@ -361,9 +366,10 @@ namespace VrSharp.GvrTexture
         // Rgb5a3
         public class Rgb5a3 : GvrDataCodec
         {
-            public override bool CanDecode() { return true; }
-            public override bool CanEncode() { return true; }
-            public override int GetBpp(VrPixelCodec PixelCodec) { return 16; }
+            public override bool CanEncode
+            {
+                get { return true; }
+            }
 
             public override int Bpp
             {
@@ -469,9 +475,10 @@ namespace VrSharp.GvrTexture
         // Argb8888
         public class Argb8888 : GvrDataCodec
         {
-            public override bool CanDecode() { return true; }
-            public override bool CanEncode() { return true; }
-            public override int GetBpp(VrPixelCodec PixelCodec) { return 32; }
+            public override bool CanEncode
+            {
+                get { return true; }
+            }
 
             public override int Bpp
             {
@@ -541,9 +548,10 @@ namespace VrSharp.GvrTexture
         // 4-bit Texture with Clut
         public class Index4 : GvrDataCodec
         {
-            public override bool CanDecode() { return true; }
-            public override bool CanEncode() { return true; }
-            public override int GetBpp(VrPixelCodec PixelCodec) { return 4; }
+            public override bool CanEncode
+            {
+                get { return true; }
+            }
             public override int GetNumClutEntries() { return 16; }
 
             public override int Bpp
@@ -620,9 +628,10 @@ namespace VrSharp.GvrTexture
         // 8-bit Texture with Clut
         public class Index8 : GvrDataCodec
         {
-            public override bool CanDecode() { return true; }
-            public override bool CanEncode() { return true; }
-            public override int GetBpp(VrPixelCodec PixelCodec) { return 8; }
+            public override bool CanEncode
+            {
+                get { return true; }
+            }
             public override int GetNumClutEntries() { return 256; }
 
             public override int Bpp
@@ -691,9 +700,10 @@ namespace VrSharp.GvrTexture
         // Dxt1 Texture Compression
         public class Dxt1 : GvrDataCodec
         {
-            public override bool CanDecode() { return true;  }
-            public override bool CanEncode() { return false; }
-            public override int GetBpp(VrPixelCodec PixelCodec) { return 0; }
+            public override bool CanEncode
+            {
+                get { return false; }
+            }
 
             public override int Bpp
             {
