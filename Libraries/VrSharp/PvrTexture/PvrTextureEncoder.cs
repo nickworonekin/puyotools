@@ -218,5 +218,15 @@ namespace VrSharp.PvrTexture
 
             return PvrtHeader.ToArray();
         }
+
+        #region Texture Properties
+        /// <summary>
+        /// The texture's compression format. The default value is PvrCompressionFormat.None.
+        /// </summary>
+        //public PvrCompressionFormat CompressionFormat;
+
+        //private PvrPixelFormat PixelFormat;
+        //private PvrDataFormat DataFormat;
+        #endregion
     }
 }

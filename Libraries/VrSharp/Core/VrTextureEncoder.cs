@@ -19,10 +19,10 @@ namespace VrSharp
         protected byte[] RawImageData;    // Raw Image Data
         protected Bitmap BitmapImageData; // Bitmap Image (to use for mipmaps)
 
-        public ushort TextureWidth { get; protected set; }  // Vr Texture Width
-        public ushort TextureHeight { get; protected set; } // Vr Texture Height
+        //public ushort TextureWidth { get; protected set; }  // Vr Texture Width
+        //public ushort TextureHeight { get; protected set; } // Vr Texture Height
 
-        public uint GlobalIndex { get; protected set; } // Global Index
+        //public uint GlobalIndex { get; protected set; } // Global Index
 
         //protected byte PixelFormat;        // Pixel Format
         //protected byte DataFormat;         // Data Format
@@ -37,9 +37,13 @@ namespace VrSharp
         //protected byte[,] TextureClut;       // Texture Clut
         protected byte[][] TextureClut;
         protected VpClutEncoder ClutEncoder; // Clut Encoder
+
+
+        public bool Initalized { get; protected set; }
         #endregion
 
         #region Constructors
+        /*
         /// <summary>
         /// Open a bitmap from a file.
         /// </summary>
@@ -122,6 +126,7 @@ namespace VrSharp
             BitmapImageData = bitmap;
             RawImageData    = ConvertBitmapToRaw(bitmap);
         }
+         */
         #endregion
 
         #region Get Texture
@@ -282,9 +287,13 @@ namespace VrSharp
         #endregion
 
         #region Private Methods
+        protected virtual MemoryStream EncodeTextureNew() { return null; }
+
         // Encode the texture
         private byte[] EncodeTexture()
         {
+            return EncodeTextureNew().ToArray();
+            /*
             // Get the offsets (GbixOffset and PvrtOffset are already set)
             if (DataCodec.ClutEntries != 0 && !TexNeedsExternalClut())
             {
@@ -320,6 +329,7 @@ namespace VrSharp
             TextureData = DoPostEncodeEvents(TextureData);
 
             return TextureData;
+             * */
         }
 
         // Palettize the bitmap used for the raw texture data
@@ -436,6 +446,203 @@ namespace VrSharp
         // Writes the Pvrt header for a Vr Texture.
         // TextureSize includes the clut, data, and any mipmaps
         protected abstract byte[] WritePvrtHeader(int TextureSize);
+        #endregion
+
+        #region Constructors & Initalizers
+        public VrTextureEncoder(string file)
+        {
+            try
+            {
+                BitmapImageData = new Bitmap(file);
+
+                TextureWidth  = (ushort)BitmapImageData.Width;
+                TextureHeight = (ushort)BitmapImageData.Height;
+
+                RawImageData = ConvertBitmapToRaw(BitmapImageData);
+            }
+            catch
+            {
+                BitmapImageData = null;
+                RawImageData = null;
+            }
+        }
+
+        public VrTextureEncoder(byte[] source)
+        {
+            try
+            {
+                BitmapImageData = new Bitmap(new MemoryStream(source));
+
+                TextureWidth  = (ushort)BitmapImageData.Width;
+                TextureHeight = (ushort)BitmapImageData.Height;
+
+                RawImageData = ConvertBitmapToRaw(BitmapImageData);
+            }
+            catch
+            {
+                BitmapImageData = null;
+                RawImageData = null;
+            }
+        }
+
+        public VrTextureEncoder(byte[] source, int offset, int length)
+        {
+            try
+            {
+                MemoryStream buffer = new MemoryStream(length);
+                buffer.Write(source, offset, length);
+                BitmapImageData = new Bitmap(buffer);
+
+                TextureWidth  = (ushort)BitmapImageData.Width;
+                TextureHeight = (ushort)BitmapImageData.Height;
+
+                RawImageData = ConvertBitmapToRaw(BitmapImageData);
+            }
+            catch
+            {
+                BitmapImageData = null;
+                RawImageData = null;
+            }
+        }
+
+        public VrTextureEncoder(Stream source) : this(source, (int)(source.Length - source.Position)) { }
+
+        public VrTextureEncoder(Stream source, int length)
+        {
+            try
+            {
+                MemoryStream buffer = new MemoryStream(length);
+                PTStream.CopyPartTo(source, buffer, length);
+                BitmapImageData = new Bitmap(buffer);
+
+                TextureWidth  = (ushort)BitmapImageData.Width;
+                TextureHeight = (ushort)BitmapImageData.Height;
+
+                RawImageData = ConvertBitmapToRaw(BitmapImageData);
+            }
+            catch
+            {
+                BitmapImageData = null;
+                RawImageData = null;
+            }
+        }
+
+        public VrTextureEncoder(Bitmap source)
+        {
+            try
+            {
+                BitmapImageData = source;
+
+                TextureWidth  = (ushort)BitmapImageData.Width;
+                TextureHeight = (ushort)BitmapImageData.Height;
+
+                RawImageData = ConvertBitmapToRaw(BitmapImageData);
+            }
+            catch
+            {
+                BitmapImageData = null;
+                RawImageData = null;
+            }
+        }
+        #endregion
+
+        #region Texture Properties
+        /// <summary>
+        /// Sets the texture's global index. This only matters if IncludeGbixHeader is true. The default value is 0.
+        /// </summary>
+        public uint GlobalIndex;
+
+        /// <summary>
+        /// Width of the texture (in pixels).
+        /// </summary>
+        public ushort TextureWidth { get; protected set; }
+
+        /// <summary>
+        /// Height of the texture (in pixels).
+        /// </summary>
+        public ushort TextureHeight { get; protected set; }
+
+        /// <summary>
+        /// Indicates whether or not to include the GBIX header in the texture. The default value is true.
+        /// </summary>
+        public bool IncludeGbixHeader;
+        #endregion
+
+        #region Texture Conversion
+        private byte[] BitmapToRaw(Bitmap source)
+        {
+            Bitmap img = source;
+            byte[] destination = new byte[img.Width * img.Height * 4];
+
+            // If this is not a 32-bit ARGB bitmap, convert it to one
+            if (img.PixelFormat != PixelFormat.Format32bppArgb)
+            {
+                Bitmap newImage = new Bitmap(img.Width, img.Height, PixelFormat.Format32bppArgb);
+                using (Graphics g = Graphics.FromImage(img))
+                {
+                    g.DrawImage(img, 0, 0, img.Width, img.Height);
+                }
+                img = newImage;
+            }
+
+            // Copy over the data to the destination. It's ok to do it without utilizing Stride
+            // since each pixel takes up 4 bytes (aka Stride will always be equal to Width)
+            BitmapData bitmapData = img.LockBits(new Rectangle(0, 0, img.Width, img.Height), ImageLockMode.ReadOnly, img.PixelFormat);
+            Marshal.Copy(bitmapData.Scan0, destination, 0, destination.Length);
+            img.UnlockBits(bitmapData);
+
+            return destination;
+        }
+
+        private unsafe byte[] BitmapToRawIndexed(Bitmap source, int maxColors, out byte[][] palette)
+        {
+            Bitmap img = source;
+            byte[] destination = new byte[img.Width * img.Height];
+
+            // If this is not a 32-bit ARGB bitmap, convert it to one
+            if (img.PixelFormat != PixelFormat.Format32bppArgb)
+            {
+                Bitmap newImage = new Bitmap(img.Width, img.Height, PixelFormat.Format32bppArgb);
+                using (Graphics g = Graphics.FromImage(img))
+                {
+                    g.DrawImage(img, 0, 0, img.Width, img.Height);
+                }
+                img = newImage;
+            }
+
+            // Quantize the image
+            WuQuantizer quantizer = new WuQuantizer();
+            img = (Bitmap)quantizer.QuantizeImage(img, maxColors);
+
+            // Copy over the data to the destination. We need to use Stride in this case, as it may not
+            // always be equal to Width.
+            BitmapData bitmapData = img.LockBits(new Rectangle(0, 0, img.Width, img.Height), ImageLockMode.ReadOnly, img.PixelFormat);
+
+            byte* pointer = (byte*)bitmapData.Scan0;
+            for (int y = 0; y < bitmapData.Height; y++)
+            {
+                for (int x = 0; x < bitmapData.Width; x++)
+                {
+                    destination[(y * img.Width) + x] = pointer[(y * bitmapData.Stride) + x];
+                }
+            }
+
+            img.UnlockBits(bitmapData);
+
+            // Copy over the palette
+            palette = new byte[maxColors][];
+            for (int i = 0; i < maxColors; i++)
+            {
+                palette[i] = new byte[4];
+
+                palette[i][3] = img.Palette.Entries[i].A;
+                palette[i][2] = img.Palette.Entries[i].R;
+                palette[i][1] = img.Palette.Entries[i].G;
+                palette[i][0] = img.Palette.Entries[i].B;
+            }
+
+            return destination;
+        }
         #endregion
     }
 }

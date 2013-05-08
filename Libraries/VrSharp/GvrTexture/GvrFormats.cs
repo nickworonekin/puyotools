@@ -38,6 +38,19 @@ namespace VrSharp.GvrTexture
         Clut         = ExternalClut | InternalClut,
     }
 
+    public enum GvrGbixType
+    {
+        /// <summary>
+        /// A magic code of "GBIX". This is generally used for textures in GameCube games.
+        /// </summary>
+        Gbix,
+
+        /// <summary>
+        /// A magic code of "GCIX". This is generally used for textures in Wii games.
+        /// </summary>
+        Gcix,
+    }
+
     public static class GvrCodecList
     {
         // Gets the pixel codec

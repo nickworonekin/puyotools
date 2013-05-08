@@ -183,6 +183,8 @@ namespace VrConvert
                         return GvrDataFormat.Index4;
                     case "index8": case "09":
                         return GvrDataFormat.Index8;
+                    case "cmp": case "0E":
+                        return GvrDataFormat.Dxt1;
                 }
 
                 return GvrDataFormat.Unknown; // Unknown format

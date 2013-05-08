@@ -61,10 +61,10 @@ namespace VrConvert
                 Console.WriteLine("Texture Type : Gvr");
                 Console.WriteLine("Dimensions   : {0}x{1}", GvrTexture.TextureWidth, GvrTexture.TextureHeight);
                 if (GvrTexture.PixelFormat != GvrPixelFormat.Unknown)
-                    Console.WriteLine("Pixel Format : {0} ({1})", GvrTexture.PixelFormat.ToString("X2"), GetPixelFormatAsText(GvrTexture.PixelFormat));
-                Console.WriteLine("Data Format  : {0} ({1})", GvrTexture.DataFormat.ToString("X2"), GetDataFormatAsText(GvrTexture.DataFormat));
+                    Console.WriteLine("Pixel Format : {0} ({1})", GvrTexture.PixelFormat, GetPixelFormatAsText(GvrTexture.PixelFormat));
+                Console.WriteLine("Data Format  : {0} ({1})", GvrTexture.DataFormat, GetDataFormatAsText(GvrTexture.DataFormat));
                 if (GvrTexture.DataFlags != GvrDataFlags.None)
-                    Console.WriteLine("Data Flags   : {0} ({1})", GvrTexture.DataFlags.ToString("X2"), GetDataFlagsAsText(GvrTexture.DataFlags));
+                    Console.WriteLine("Data Flags   : {0} ({1})", GvrTexture.DataFlags, GetDataFlagsAsText(GvrTexture.DataFlags));
                 Console.WriteLine();
 
                 // Decode the texture
@@ -190,8 +190,8 @@ namespace VrConvert
                 if (PvrTexture.CompressionFormat != PvrCompressionFormat.None)
                     Console.WriteLine("Compression  : {0}", PvrTexture.CompressionFormat);
                 Console.WriteLine("Dimensions   : {0}x{1}", PvrTexture.TextureWidth, PvrTexture.TextureHeight);
-                Console.WriteLine("Pixel Format : {0} ({1})", PvrTexture.PixelFormat.ToString("X2"), GetPixelFormatAsText(PvrTexture.PixelFormat));
-                Console.WriteLine("Data Format  : {0} ({1})", PvrTexture.DataFormat.ToString("X2"), GetDataFormatAsText(PvrTexture.DataFormat));
+                Console.WriteLine("Pixel Format : {0} ({1})", PvrTexture.PixelFormat, GetPixelFormatAsText(PvrTexture.PixelFormat));
+                Console.WriteLine("Data Format  : {0} ({1})", PvrTexture.DataFormat, GetDataFormatAsText(PvrTexture.DataFormat));
                 Console.WriteLine();
 
                 // Decode the texture
@@ -298,8 +298,8 @@ namespace VrConvert
                 Console.WriteLine();
                 Console.WriteLine("Texture Type : Svr");
                 Console.WriteLine("Dimensions   : {0}x{1}", SvrTexture.TextureWidth, SvrTexture.TextureHeight);
-                Console.WriteLine("Pixel Format : {0} ({1})", SvrTexture.PixelFormat.ToString("X2"), GetPixelFormatAsText(SvrTexture.PixelFormat));
-                Console.WriteLine("Data Format  : {0} ({1})", SvrTexture.DataFormat.ToString("X2"), GetDataFormatAsText(SvrTexture.DataFormat));
+                Console.WriteLine("Pixel Format : {0} ({1})", SvrTexture.PixelFormat, GetPixelFormatAsText(SvrTexture.PixelFormat));
+                Console.WriteLine("Data Format  : {0} ({1})", SvrTexture.DataFormat, GetDataFormatAsText(SvrTexture.DataFormat));
                 Console.WriteLine();
 
                 // Decode the texture

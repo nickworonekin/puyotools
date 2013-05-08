@@ -214,6 +214,19 @@ namespace VrSharp.SvrTexture
         {
             return Is(source, (int)(source.Length - source.Position));
         }
+
+        /// <summary>
+        /// Determines if this is a SVR texture.
+        /// </summary>
+        /// <param name="file">Filename of the file that contains the data.</param>
+        /// <returns>True if this is a SVR texture, false otherwise.</returns>
+        public static bool Is(string file)
+        {
+            using (FileStream stream = File.OpenRead(file))
+            {
+                return Is(stream);
+            }
+        }
         #endregion
     }
 }

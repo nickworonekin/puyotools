@@ -187,5 +187,10 @@ namespace VrSharp.SvrTexture
 
             return PvrtHeader.ToArray();
         }
+
+        #region Texture Properties
+        //private SvrPixelFormat PixelFormat;
+        //private SvrDataFormat DataFormat;
+        #endregion
     }
 }

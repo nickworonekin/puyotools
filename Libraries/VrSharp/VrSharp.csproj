@@ -56,8 +56,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\PTMethods.cs" />
+    <Compile Include="Core\PTStream.cs" />
     <Compile Include="Core\VpClut.cs" />
     <Compile Include="Core\VpClutEncoder.cs" />
+    <Compile Include="Core\VrExceptions.cs" />
     <Compile Include="Core\VrTexture.cs" />
     <Compile Include="Core\VrTextureEncoder.cs" />
     <Compile Include="GvrTexture\GvpClutEncoder.cs" />
