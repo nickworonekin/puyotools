@@ -445,5 +445,32 @@ namespace VrSharp.SvrTexture
             return (PagePos + BlockPos + ColoumPos + ByteNum) << 1;
         }
         #endregion
+
+        #region Get Codec
+        public static SvrDataCodec GetDataCodec(SvrDataFormat format)
+        {
+            switch (format)
+            {
+                case SvrDataFormat.Rectangle:
+                    return new Rectangle();
+                case SvrDataFormat.Index4ExtClut:
+                    return new Index4ExtClut();
+                case SvrDataFormat.Index8ExtClut:
+                    return new Index8ExtClut();
+                case SvrDataFormat.Index4RectRgb5a3:
+                case SvrDataFormat.Index4SqrRgb5a3:
+                case SvrDataFormat.Index4RectArgb8:
+                case SvrDataFormat.Index4SqrArgb8:
+                    return new Index4();
+                case SvrDataFormat.Index8RectRgb5a3:
+                case SvrDataFormat.Index8SqrRgb5a3:
+                case SvrDataFormat.Index8RectArgb8:
+                case SvrDataFormat.Index8SqrArgb8:
+                    return new Index8();
+            }
+
+            return null;
+        }
+        #endregion
     }
 }

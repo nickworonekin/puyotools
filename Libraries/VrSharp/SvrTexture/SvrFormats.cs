@@ -27,6 +27,7 @@ namespace VrSharp.SvrTexture
         Unknown          = 0xFF,
     }
 
+    /*
     public static class SvrCodecList
     {
         // Gets the pixel codec
@@ -68,5 +69,5 @@ namespace VrSharp.SvrTexture
 
             return null;
         }
-    }
+    }*/
 }

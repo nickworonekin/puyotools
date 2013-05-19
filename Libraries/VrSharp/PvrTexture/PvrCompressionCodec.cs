@@ -100,5 +100,16 @@ namespace VrSharp.PvrTexture
 
         public abstract byte[] Decompress(byte[] input, int DataOffset, VrPixelCodec PixelCodec, VrDataCodec DataCodec);
         public abstract byte[] Compress(byte[] input, int DataOffset, VrPixelCodec PixelCodec, VrDataCodec DataCodec);
+
+        public static PvrCompressionCodec GetCompressionCodec(PvrCompressionFormat format)
+        {
+            switch (format)
+            {
+                case PvrCompressionFormat.Rle:
+                    return new Rle();
+            }
+
+            return null;
+        }
     }
 }

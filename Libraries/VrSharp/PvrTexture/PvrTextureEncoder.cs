@@ -8,13 +8,14 @@ namespace VrSharp.PvrTexture
     public class PvrTextureEncoder : VrTextureEncoder
     {
         #region Fields
-        public PvrPixelFormat PixelFormat { get; private set; }
-        public PvrDataFormat DataFormat { get; private set; }
-        public PvrCompressionFormat CompressionFormat { get; private set; } // Compression Format
+        //public PvrPixelFormat PixelFormat { get; private set; }
+        //public PvrDataFormat DataFormat { get; private set; }
+        //public PvrCompressionFormat CompressionFormat { get; private set; } // Compression Format
         PvrCompressionCodec CompressionCodec;   // Compression Codec
         #endregion
 
         #region Constructors
+        /*
         /// <summary>
         /// Open a bitmap from a file.
         /// </summary>
@@ -97,13 +98,14 @@ namespace VrSharp.PvrTexture
         }
          * */
 
+        /*
         protected override byte[] DoPostEncodeEvents(byte[] TextureData)
         {
             if (CompressionFormat != PvrCompressionFormat.None)
                 return CompressionCodec.Compress(TextureData, DataOffset, PixelCodec, DataCodec);
 
             return TextureData;
-        }
+        }*/
         #endregion
 
         #region Clut
@@ -124,7 +126,7 @@ namespace VrSharp.PvrTexture
             if (CompressionFormat == PvrCompressionFormat.Rle && DataCodec.Bpp >= 8)
             {
                 // We want to use Rle compression and our texture has a bpp of at least 8.
-                CompressionCodec = PvrCodecList.GetCompressionCodec(CompressionFormat);
+                CompressionCodec = PvrCompressionCodec.GetCompressionCodec(CompressionFormat);
                 if (CompressionCodec != null)
                     this.CompressionFormat = PvrCompressionFormat.Rle;
                 else
@@ -132,6 +134,7 @@ namespace VrSharp.PvrTexture
             }
         }
 
+        /*
         // Initalize the bitmap
         private bool Initalize()
         {
@@ -140,8 +143,8 @@ namespace VrSharp.PvrTexture
             if ((TextureWidth & (TextureWidth - 1)) != 0 || (TextureHeight & (TextureHeight - 1)) != 0)
                 return false;
 
-            PixelCodec = PvrCodecList.GetPixelCodec((PvrPixelFormat)PixelFormat);
-            DataCodec  = PvrCodecList.GetDataCodec((PvrDataFormat)DataFormat);
+            PixelCodec = PvrPixelCodec.GetPixelCodec((PvrPixelFormat)PixelFormat);
+            DataCodec  = PvrDataCodec.GetDataCodec((PvrDataFormat)DataFormat);
 
             CompressionFormat = PvrCompressionFormat.None;
             CompressionCodec  = null;
@@ -182,8 +185,8 @@ namespace VrSharp.PvrTexture
             }
 
             return true;
-        }
-
+        }*/
+        /*
         // Write the Gbix header
         protected override byte[] WriteGbixHeader()
         {
@@ -217,16 +220,243 @@ namespace VrSharp.PvrTexture
             }
 
             return PvrtHeader.ToArray();
-        }
+        }*/
 
         #region Texture Properties
         /// <summary>
         /// The texture's compression format. The default value is PvrCompressionFormat.None.
         /// </summary>
-        //public PvrCompressionFormat CompressionFormat;
+        public PvrCompressionFormat CompressionFormat;
 
-        //private PvrPixelFormat PixelFormat;
-        //private PvrDataFormat DataFormat;
+        public PvrPixelFormat PixelFormat { get; private set; }
+        public PvrDataFormat DataFormat { get; private set; }
+        #endregion
+
+        #region Constructors & Initalizers
+        /// <summary>
+        /// Opens a texture to encode from a file.
+        /// </summary>
+        /// <param name="file">Filename of the file that contains the texture data.</param>
+        /// <param name="pixelFormat">Pixel format to encode the texture to.</param>
+        /// <param name="dataFormat">Data format to encode the texture to.</param>
+        public PvrTextureEncoder(string file, PvrPixelFormat pixelFormat, PvrDataFormat dataFormat) : base(file)
+        {
+            if (RawImageData != null)
+            {
+                InitSuccess = Initalize(pixelFormat, dataFormat);
+            }
+            else
+            {
+                InitSuccess = false;
+            }
+        }
+
+        /// <summary>
+        /// Opens a texture to encode from a byte array.
+        /// </summary>
+        /// <param name="source">Byte array that contains the texture data.</param>
+        /// <param name="pixelFormat">Pixel format to encode the texture to.</param>
+        /// <param name="dataFormat">Data format to encode the texture to.</param>
+        public PvrTextureEncoder(byte[] source, PvrPixelFormat pixelFormat, PvrDataFormat dataFormat)
+            : base(source)
+        {
+            if (RawImageData != null)
+            {
+                InitSuccess = Initalize(pixelFormat, dataFormat);
+            }
+            else
+            {
+                InitSuccess = false;
+            }
+        }
+
+        /// <summary>
+        /// Opens a texture to encode from a byte array.
+        /// </summary>
+        /// <param name="source">Byte array that contains the texture data.</param>
+        /// <param name="offset">Offset of the texture in the array.</param>
+        /// <param name="length">Number of bytes to read.</param>
+        /// <param name="pixelFormat">Pixel format to encode the texture to.</param>
+        /// <param name="dataFormat">Data format to encode the texture to.</param>
+        public PvrTextureEncoder(byte[] source, int offset, int length, PvrPixelFormat pixelFormat, PvrDataFormat dataFormat)
+            : base(source, offset, length)
+        {
+            if (RawImageData != null)
+            {
+                InitSuccess = Initalize(pixelFormat, dataFormat);
+            }
+            else
+            {
+                InitSuccess = false;
+            }
+        }
+
+        /// <summary>
+        /// Opens a texture to encode from a stream.
+        /// </summary>
+        /// <param name="source">Stream that contains the texture data.</param>
+        /// <param name="pixelFormat">Pixel format to encode the texture to.</param>
+        /// <param name="dataFormat">Data format to encode the texture to.</param>
+        public PvrTextureEncoder(Stream source, PvrPixelFormat pixelFormat, PvrDataFormat dataFormat)
+            : base(source)
+        {
+            if (RawImageData != null)
+            {
+                InitSuccess = Initalize(pixelFormat, dataFormat);
+            }
+            else
+            {
+                InitSuccess = false;
+            }
+        }
+
+        /// <summary>
+        /// Opens a texture to encode from a stream.
+        /// </summary>
+        /// <param name="source">Stream that contains the texture data.</param>
+        /// <param name="length">Number of bytes to read.</param>
+        /// <param name="pixelFormat">Pixel format to encode the texture to.</param>
+        /// <param name="dataFormat">Data format to encode the texture to.</param>
+        public PvrTextureEncoder(Stream source, int length, PvrPixelFormat pixelFormat, PvrDataFormat dataFormat)
+            : base(source, length)
+        {
+            if (RawImageData != null)
+            {
+                InitSuccess = Initalize(pixelFormat, dataFormat);
+            }
+            else
+            {
+                InitSuccess = false;
+            }
+        }
+
+        /// <summary>
+        /// Opens a texture to encode from a bitmap.
+        /// </summary>
+        /// <param name="source">Bitmap to encode.</param>
+        /// <param name="pixelFormat">Pixel format to encode the texture to.</param>
+        /// <param name="dataFormat">Data format to encode the texture to.</param>
+        public PvrTextureEncoder(Bitmap source, PvrPixelFormat pixelFormat, PvrDataFormat dataFormat)
+            : base(source)
+        {
+            if (RawImageData != null)
+            {
+                InitSuccess = Initalize(pixelFormat, dataFormat);
+            }
+            else
+            {
+                InitSuccess = false;
+            }
+        }
+
+        private bool Initalize(PvrPixelFormat pixelFormat, PvrDataFormat dataFormat)
+        {
+            // Set the default values
+            IncludeGbixHeader = true;
+            GlobalIndex = 0;
+            CompressionFormat = PvrCompressionFormat.None;
+
+            // Make sure the dimensions of the texture are valid
+            if (TextureWidth < 4 || TextureHeight < 4 || TextureWidth > 1024 || TextureHeight > 1024)
+                return false;
+
+            if ((TextureWidth & (TextureWidth - 1)) != 0 || (TextureHeight & (TextureHeight - 1)) != 0)
+                return false;
+
+            // Set the data format and pixel format and load the appropiate codecs
+            PixelFormat = pixelFormat;
+            PixelCodec = PvrPixelCodec.GetPixelCodec(PixelFormat);
+
+            DataFormat = dataFormat;
+            DataCodec = PvrDataCodec.GetDataCodec(DataFormat);
+
+            // Make sure the pixel and data codecs exists and we can encode to it
+            if (PixelCodec == null || !PixelCodec.CanEncode) return false;
+            if (DataCodec == null || !DataCodec.CanEncode) return false;
+
+            // Palettize the bitmap if this data format is palettized.
+            if (DataCodec.ClutEntries != 0)
+            {
+                PalettizeBitmap();
+            }
+
+            return true;
+        }
+        #endregion
+
+        #region Encode Texture
+        protected override MemoryStream EncodeTexture()
+        {
+            // Calculate what the length of the texture will be
+            int textureLength = 16 + (TextureWidth * TextureHeight * DataCodec.Bpp / 8);
+            if (IncludeGbixHeader)
+            {
+                textureLength += 16;
+            }
+            if (DataCodec.ClutEntries != 0 && !DataCodec.NeedsExternalClut)
+            {
+                textureLength += (DataCodec.ClutEntries * PixelCodec.Bpp / 8);
+            }
+
+            MemoryStream destination = new MemoryStream(textureLength);
+
+            // Write out the GBIX header (if we are including one)
+            if (IncludeGbixHeader)
+            {
+                destination.WriteByte((byte)'G');
+                destination.WriteByte((byte)'B');
+                destination.WriteByte((byte)'I');
+                destination.WriteByte((byte)'X');
+
+                PTStream.WriteUInt32(destination, 8);
+                PTStream.WriteUInt32(destination, GlobalIndex);
+                PTStream.WriteUInt32(destination, 0);
+            }
+
+            // Write out the PVRT header
+            destination.WriteByte((byte)'P');
+            destination.WriteByte((byte)'V');
+            destination.WriteByte((byte)'R');
+            destination.WriteByte((byte)'T');
+
+            PTStream.WriteInt32(destination, textureLength - 24);
+
+            destination.WriteByte((byte)PixelFormat);
+            destination.WriteByte((byte)DataFormat);
+            PTStream.WriteUInt16(destination, 0);
+
+            PTStream.WriteUInt16(destination, TextureWidth);
+            PTStream.WriteUInt16(destination, TextureHeight);
+
+            // If we have an internal clut, write it
+            if (DataCodec.ClutEntries != 0 && !DataCodec.NeedsExternalClut)
+            {
+                byte[] clut = PixelCodec.EncodeClut(TextureClut, DataCodec.ClutEntries);
+                destination.Write(clut, 0, clut.Length);
+            }
+
+            // Write the texture data
+            byte[] textureData = DataCodec.Encode(RawImageData, TextureWidth, TextureHeight, null);
+            destination.Write(textureData, 0, textureData.Length);
+
+            // Compress the texture
+            if (CompressionFormat != PvrCompressionFormat.None)
+            {
+                CompressionCodec = PvrCompressionCodec.GetCompressionCodec(CompressionFormat);
+
+                if (CompressionCodec != null)
+                {
+                    // Ok, we need to convert the current stream to an array, compress it, then write it back to a new stream
+                    byte[] buffer = destination.ToArray();
+                    buffer = CompressionCodec.Compress(buffer, (IncludeGbixHeader ? 0x10 : 0), PixelCodec, DataCodec);
+
+                    destination = new MemoryStream();
+                    destination.Write(buffer, 0, buffer.Length);
+                }
+            }
+
+            return destination;
+        }
         #endregion
     }
 }

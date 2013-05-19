@@ -99,10 +99,10 @@ namespace VrSharp.GvrTexture
             DataFormat  = (GvrDataFormat)TextureData[PvrtOffset + 0x0B];
 
             // Get the codecs and make sure we can decode using them
-            PixelCodec = GvrCodecList.GetPixelCodec(PixelFormat);
+            PixelCodec = GvrPixelCodec.GetPixelCodec(PixelFormat);
             if ((DataFlags & GvrDataFlags.Clut) != 0 && PixelCodec == null) return false;
 
-            DataCodec = GvrCodecList.GetDataCodec(DataFormat);
+            DataCodec = GvrDataCodec.GetDataCodec(DataFormat);
             if (DataCodec == null) return false;
             DataCodec.PixelCodec = PixelCodec;
 

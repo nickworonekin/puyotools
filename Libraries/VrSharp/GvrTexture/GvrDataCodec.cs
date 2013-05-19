@@ -316,6 +316,7 @@ namespace VrSharp.GvrTexture
                                 //output[((((y + y2) * width) + (x + x2)) * 4) + 2] = (byte)(((pixel >> 11) & 0x1F) << 11);
                                 //output[((((y + y2) * width) + (x + x2)) * 4) + 1] = (byte)(((pixel >> 5) & 0x3F) << 10);
                                 //output[((((y + y2) * width) + (x + x2)) * 4) + 0] = (byte)(((pixel >> 0) & 0x1F) << 11);
+                                output[((((y + y2) * width) + (x + x2)) * 4) + 3] = 0xFF;
                                 output[((((y + y2) * width) + (x + x2)) * 4) + 2] = (byte)(((pixel >> 11) & 0x1F) * 0xFF / 0x1F);
                                 output[((((y + y2) * width) + (x + x2)) * 4) + 1] = (byte)(((pixel >> 5)  & 0x3F) * 0xFF / 0x3F);
                                 output[((((y + y2) * width) + (x + x2)) * 4) + 0] = (byte)(((pixel >> 0)  & 0x1F) * 0xFF / 0x1F);
@@ -967,6 +968,37 @@ namespace VrSharp.GvrTexture
 
                 return temp;
             }
+        }
+        #endregion
+
+        #region Get Codec
+        public static GvrDataCodec GetDataCodec(GvrDataFormat format)
+        {
+            switch (format)
+            {
+                case GvrDataFormat.Intensity4:
+                    return new Intensity4();
+                case GvrDataFormat.Intensity8:
+                    return new Intensity8();
+                case GvrDataFormat.IntensityA4:
+                    return new IntensityA4();
+                case GvrDataFormat.IntensityA8:
+                    return new IntensityA8();
+                case GvrDataFormat.Rgb565:
+                    return new Rgb565();
+                case GvrDataFormat.Rgb5a3:
+                    return new Rgb5a3();
+                case GvrDataFormat.Argb8888:
+                    return new Argb8888();
+                case GvrDataFormat.Index4:
+                    return new Index4();
+                case GvrDataFormat.Index8:
+                    return new Index8();
+                case GvrDataFormat.Dxt1:
+                    return new Dxt1();
+            }
+
+            return null;
         }
         #endregion
     }

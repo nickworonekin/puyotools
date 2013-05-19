@@ -154,7 +154,7 @@ namespace PuyoTools.Modules.Archive
                 destination.WriteByte((byte)'0');
 
                 // Write out crap bytes
-                PTStream.WriteInt32(destination, PTMethods.RoundUp(20 + (files.Count * 4), 8));
+                PTStream.WriteInt32(destination, PTMethods.RoundUp(28 + (files.Count * 4), 8));
                 PTStream.WriteInt32BE(destination, files.Count + 2);
                 PTStream.WriteInt32BE(destination, 0);
                 PTStream.WriteInt32BE(destination, 20);

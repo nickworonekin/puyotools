@@ -39,7 +39,7 @@ namespace VrConvert
                     Console.WriteLine("       or image cannot be converted to the specified pixel/data formats.");
                     return false;
                 }
-                GvrTextureEncoder.WriteGbix(GlobalIndex);
+                //GvrTextureEncoder.WriteGbix(GlobalIndex);
 
                 // Output information to the console
                 /*
@@ -219,7 +219,7 @@ namespace VrConvert
                     Console.WriteLine("       or image cannot be converted to the specified pixel/data formats.");
                     return false;
                 }
-                PvrTextureEncoder.WriteGbix(GlobalIndex);
+                //PvrTextureEncoder.WriteGbix(GlobalIndex);
                 if (CompressionFormat != PvrCompressionFormat.None)
                     PvrTextureEncoder.SetCompressionFormat(CompressionFormat);
 
@@ -398,7 +398,7 @@ namespace VrConvert
                     Console.WriteLine("       or image cannot be converted to the specified pixel/data formats.");
                     return false;
                 }
-                SvrTextureEncoder.WriteGbix(GlobalIndex);
+                //SvrTextureEncoder.WriteGbix(GlobalIndex);
 
                 // Output information to the console
                 /*

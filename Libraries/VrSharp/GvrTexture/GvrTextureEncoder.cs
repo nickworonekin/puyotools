@@ -162,6 +162,7 @@ namespace VrSharp.GvrTexture
             return true;
         }
         */
+        /*
         // Write the Gbix header
         protected override byte[] WriteGbixHeader()
         {
@@ -199,7 +200,7 @@ namespace VrSharp.GvrTexture
             }
 
             return PvrtHeader.ToArray();
-        }
+        }*/
 
         #region Constructors & Initalizers
         /// <summary>
@@ -334,7 +335,7 @@ namespace VrSharp.GvrTexture
 
             // Set the data format and pixel format and load the appropiate codecs
             DataFormat = dataFormat;
-            DataCodec = GvrCodecList.GetDataCodec(DataFormat);
+            DataCodec = GvrDataCodec.GetDataCodec(DataFormat);
 
             // Make sure the data codec exists and we can encode to it
             if (DataCodec == null || !DataCodec.CanEncode) return false;
@@ -343,7 +344,7 @@ namespace VrSharp.GvrTexture
             if (DataCodec.ClutEntries != 0)
             {
                 PixelFormat = pixelFormat;
-                PixelCodec = GvrCodecList.GetPixelCodec(PixelFormat);
+                PixelCodec = GvrPixelCodec.GetPixelCodec(PixelFormat);
 
                 // Make sure the pixel codec exists and we can encode to it
                 if (PixelCodec == null || !PixelCodec.CanEncode) return false;
@@ -385,7 +386,8 @@ namespace VrSharp.GvrTexture
         public GvrDataFormat DataFormat { get; private set; }
         #endregion
 
-        protected override MemoryStream EncodeTextureNew()
+        #region Encode Texture
+        protected override MemoryStream EncodeTexture()
         {
             // Before we write anything, let's make sure the data flags are set properly
             if ((DataFlags & GvrDataFlags.InternalClut) != 0 && (DataFlags & GvrDataFlags.ExternalClut) != 0)
@@ -445,7 +447,14 @@ namespace VrSharp.GvrTexture
             PTStream.WriteInt32(destination, textureLength - 24);
 
             PTStream.WriteUInt16(destination, 0);
-            destination.WriteByte((byte)(((byte)PixelFormat << 4) | ((byte)DataFlags & 0x0F)));
+            if (PixelFormat != GvrPixelFormat.Unknown)
+            {
+                destination.WriteByte((byte)(((byte)PixelFormat << 4) | ((byte)DataFlags & 0x0F)));
+            }
+            else
+            {
+                destination.WriteByte((byte)((byte)DataFlags & 0xF));
+            }
             destination.WriteByte((byte)DataFormat);
 
             PTStream.WriteUInt16BE(destination, TextureWidth);
@@ -464,5 +473,6 @@ namespace VrSharp.GvrTexture
 
             return destination;
         }
+        #endregion
     }
 }

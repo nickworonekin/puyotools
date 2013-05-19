@@ -89,10 +89,10 @@ namespace VrSharp.SvrTexture
             DataFormat  = (SvrDataFormat)TextureData[PvrtOffset + 0x09];
 
             // Get the codecs and make sure we can decode using them
-            PixelCodec = SvrCodecList.GetPixelCodec(PixelFormat);
+            PixelCodec = SvrPixelCodec.GetPixelCodec(PixelFormat);
             if (PixelCodec == null) return false;
 
-            DataCodec = SvrCodecList.GetDataCodec(DataFormat);
+            DataCodec = SvrDataCodec.GetDataCodec(DataFormat);
             if (DataCodec == null) return false;
             DataCodec.PixelCodec = PixelCodec;
 
@@ -189,13 +189,9 @@ namespace VrSharp.SvrTexture
             {
                 amountToRead = 16;
             }
-            else if (length < 36)
-            {
-                amountToRead = 32;
-            }
             else
             {
-                amountToRead = 36;
+                amountToRead = 32;
             }
 
             byte[] buffer = new byte[amountToRead];

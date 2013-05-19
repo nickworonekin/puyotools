@@ -74,7 +74,7 @@ namespace VrSharp.SvrTexture
             // Sometimes, the pixel codec specified in the texture file
             // is not the same one specified in the clut file. As such, we should
             // always use the one specified in the clut file.
-            PixelCodec = SvrCodecList.GetPixelCodec((SvrPixelFormat)ClutData[0x08]);
+            PixelCodec = SvrPixelCodec.GetPixelCodec((SvrPixelFormat)ClutData[0x08]);
 
             return true;
         }

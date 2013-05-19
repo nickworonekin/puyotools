@@ -31,10 +31,11 @@ namespace VrSharp.PvrTexture
     // Pvr Compression Formats
     public enum PvrCompressionFormat
     {
-        Rle,
         None,
+        Rle,
     }
 
+    /*
     public static class PvrCodecList
     {
         // Gets the pixel codec
@@ -95,5 +96,5 @@ namespace VrSharp.PvrTexture
 
             return null;
         }
-    }
+    }*/
 }

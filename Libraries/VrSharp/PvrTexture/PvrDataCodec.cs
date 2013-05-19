@@ -771,5 +771,37 @@ namespace VrSharp.PvrTexture
             }
         }
         #endregion
+
+        #region Get Codec
+        public static PvrDataCodec GetDataCodec(PvrDataFormat format)
+        {
+            switch (format)
+            {
+                case PvrDataFormat.SquareTwiddled:
+                    return new SquareTwiddled();
+                case PvrDataFormat.SquareTwiddledMipmaps:
+                case PvrDataFormat.SquareTwiddledMipmapsDup:
+                    return new SquareTwiddledMipmaps();
+                case PvrDataFormat.Vq:
+                    return new Vq();
+                case PvrDataFormat.VqMipmaps:
+                    return new VqMipmaps();
+                case PvrDataFormat.Index4:
+                    return new Index4();
+                case PvrDataFormat.Index8:
+                    return new Index8();
+                case PvrDataFormat.Rectangle:
+                    return new Rectangle();
+                case PvrDataFormat.RectangleTwiddled:
+                    return new RectangleTwiddled();
+                case PvrDataFormat.SmallVq:
+                    return new SmallVq();
+                case PvrDataFormat.SmallVqMipmaps:
+                    return new SmallVqMipmaps();
+            }
+
+            return null;
+        }
+        #endregion
     }
 }

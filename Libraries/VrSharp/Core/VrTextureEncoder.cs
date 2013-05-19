@@ -7,8 +7,6 @@ using System.Collections.Generic;
 
 using nQuant;
 
-//using ImageManipulation;
-
 namespace VrSharp
 {
     public abstract class VrTextureEncoder
@@ -29,17 +27,17 @@ namespace VrSharp
         protected VrPixelCodec PixelCodec; // Pixel Codec
         protected VrDataCodec DataCodec;   // Data Codec
 
-        protected int GbixOffset; // Gbix Offset
-        protected int PvrtOffset; // Pvrt (Gvrt) Offset
-        protected int ClutOffset; // Clut Offset
-        protected int DataOffset; // Data Offset
+        //protected int GbixOffset; // Gbix Offset
+        //protected int PvrtOffset; // Pvrt (Gvrt) Offset
+        //protected int ClutOffset; // Clut Offset
+        //protected int DataOffset; // Data Offset
 
         //protected byte[,] TextureClut;       // Texture Clut
         protected byte[][] TextureClut;
         protected VpClutEncoder ClutEncoder; // Clut Encoder
 
 
-        public bool Initalized { get; protected set; }
+        //public bool Initalized { get; protected set; }
         #endregion
 
         #region Constructors
@@ -147,7 +145,7 @@ namespace VrSharp
         {
             if (!InitSuccess) return null;
 
-            return EncodeTexture();
+            return EncodeTexture().ToArray();
         }
 
         /// <summary>
@@ -158,7 +156,7 @@ namespace VrSharp
         {
             if (!InitSuccess) return null;
 
-            return new MemoryStream(EncodeTexture());
+            return EncodeTexture();
         }
         #endregion
 
@@ -218,6 +216,7 @@ namespace VrSharp
         #endregion
 
         #region Header
+        /*
         /// <summary>
         /// Add or leave out the Gbix header in the texture
         /// </summary>
@@ -248,6 +247,7 @@ namespace VrSharp
 
             GlobalIndex = gbix;
         }
+         */
         #endregion
 
         #region Misc
@@ -265,7 +265,7 @@ namespace VrSharp
         /// </summary>
         /// <returns></returns>
         //public abstract VrTextureInfo GetTextureInfo();
-
+        /*
         // Swap endian of a 16-bit unsigned integer (a ushort)
         protected ushort SwapUShort(ushort x)
         {
@@ -283,13 +283,14 @@ namespace VrSharp
 
         // Does post build events on the encoded texture
         // Mainly used for compression
-        protected virtual byte[] DoPostEncodeEvents(byte[] TextureData) { return TextureData; }
+        protected virtual byte[] DoPostEncodeEvents(byte[] TextureData) { return TextureData; }*/
         #endregion
 
         #region Private Methods
-        protected virtual MemoryStream EncodeTextureNew() { return null; }
+        protected abstract MemoryStream EncodeTexture();
 
         // Encode the texture
+        /*
         private byte[] EncodeTexture()
         {
             return EncodeTextureNew().ToArray();
@@ -329,8 +330,7 @@ namespace VrSharp
             TextureData = DoPostEncodeEvents(TextureData);
 
             return TextureData;
-             * */
-        }
+        }*/
 
         // Palettize the bitmap used for the raw texture data
         // Make sure you test to see if DataCodec.GetNumClutEntries != 0
@@ -343,7 +343,7 @@ namespace VrSharp
             // We only need to convert it to a palletized 8-bit texture if it is not yet already one.
             if (BitmapImageData.PixelFormat != PixelFormat.Format8bppIndexed)
             {
-                // If it is not a 32-bit RGBA image, convert it to one.
+                // If it is not a 32-bit ARGB image, convert it to one.
                 if (BitmapImageData.PixelFormat != PixelFormat.Format32bppArgb)
                 {
                     Bitmap newBitmap = new Bitmap(BitmapImageData.Width, BitmapImageData.Height, PixelFormat.Format32bppArgb);
@@ -354,18 +354,18 @@ namespace VrSharp
                     BitmapImageData = newBitmap;
                 }
 
-                // This quantizer only works with 32-bit RGBA images
+                // This quantizer only works with 32-bit ARGB images
                 WuQuantizer quantizer = new WuQuantizer();
                 BitmapImageData = (Bitmap)quantizer.QuantizeImage(BitmapImageData, DataCodec.ClutEntries);
                 RawImageData = ConvertBitmapToIndex(BitmapImageData);
             }
 
             // We have a clut that we need to create
-            if (!TexNeedsExternalClut())
-            {
-                ClutOffset = PvrtOffset + 0x10;
-                DataOffset = ClutOffset + (DataCodec.ClutEntries * (PixelCodec.Bpp >> 3));
-            }
+            //if (!TexNeedsExternalClut())
+            //{
+            //    ClutOffset = PvrtOffset + 0x10;
+            //    DataOffset = ClutOffset + (DataCodec.ClutEntries * (PixelCodec.Bpp >> 3));
+            //}
 
             // Build the clut list
             //TextureClut = new byte[DataCodec.GetNumClutEntries(), 4];
@@ -386,11 +386,11 @@ namespace VrSharp
                  * */
             }
 
-            if (!TexNeedsExternalClut())
-            {
-                ClutOffset = PvrtOffset + 0x10;
-                DataOffset = ClutOffset + (DataCodec.ClutEntries * (PixelCodec.Bpp >> 3));
-            }
+            //if (!TexNeedsExternalClut())
+            //{
+            //    ClutOffset = PvrtOffset + 0x10;
+            //    DataOffset = ClutOffset + (DataCodec.ClutEntries * (PixelCodec.Bpp >> 3));
+            //}
 
             // If the texture contains an external clut, create a vp clut encoder to write it
             if (TexNeedsExternalClut())
@@ -442,10 +442,10 @@ namespace VrSharp
         }
 
         // Writes the Gbix header for a Vr Texture.
-        protected abstract byte[] WriteGbixHeader();
+        //protected abstract byte[] WriteGbixHeader();
         // Writes the Pvrt header for a Vr Texture.
         // TextureSize includes the clut, data, and any mipmaps
-        protected abstract byte[] WritePvrtHeader(int TextureSize);
+        //protected abstract byte[] WritePvrtHeader(int TextureSize);
         #endregion
 
         #region Constructors & Initalizers
@@ -458,7 +458,7 @@ namespace VrSharp
                 TextureWidth  = (ushort)BitmapImageData.Width;
                 TextureHeight = (ushort)BitmapImageData.Height;
 
-                RawImageData = ConvertBitmapToRaw(BitmapImageData);
+                RawImageData = BitmapToRaw(BitmapImageData);
             }
             catch
             {
@@ -476,7 +476,7 @@ namespace VrSharp
                 TextureWidth  = (ushort)BitmapImageData.Width;
                 TextureHeight = (ushort)BitmapImageData.Height;
 
-                RawImageData = ConvertBitmapToRaw(BitmapImageData);
+                RawImageData = BitmapToRaw(BitmapImageData);
             }
             catch
             {
@@ -496,7 +496,7 @@ namespace VrSharp
                 TextureWidth  = (ushort)BitmapImageData.Width;
                 TextureHeight = (ushort)BitmapImageData.Height;
 
-                RawImageData = ConvertBitmapToRaw(BitmapImageData);
+                RawImageData = BitmapToRaw(BitmapImageData);
             }
             catch
             {
@@ -518,7 +518,7 @@ namespace VrSharp
                 TextureWidth  = (ushort)BitmapImageData.Width;
                 TextureHeight = (ushort)BitmapImageData.Height;
 
-                RawImageData = ConvertBitmapToRaw(BitmapImageData);
+                RawImageData = BitmapToRaw(BitmapImageData);
             }
             catch
             {
@@ -536,7 +536,7 @@ namespace VrSharp
                 TextureWidth  = (ushort)BitmapImageData.Width;
                 TextureHeight = (ushort)BitmapImageData.Height;
 
-                RawImageData = ConvertBitmapToRaw(BitmapImageData);
+                RawImageData = BitmapToRaw(BitmapImageData);
             }
             catch
             {

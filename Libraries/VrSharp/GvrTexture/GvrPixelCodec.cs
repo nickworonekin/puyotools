@@ -129,5 +129,22 @@ namespace VrSharp.GvrTexture
             }
         }
         #endregion
+
+        #region Get Codec
+        public static GvrPixelCodec GetPixelCodec(GvrPixelFormat format)
+        {
+            switch (format)
+            {
+                case GvrPixelFormat.IntensityA8:
+                    return new IntensityA8();
+                case GvrPixelFormat.Rgb565:
+                    return new Rgb565();
+                case GvrPixelFormat.Rgb5a3:
+                    return new Rgb5a3();
+            }
+
+            return null;
+        }
+        #endregion
     }
 }

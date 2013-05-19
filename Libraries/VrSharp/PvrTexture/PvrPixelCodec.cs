@@ -117,5 +117,22 @@ namespace VrSharp.PvrTexture
             }
         }
         #endregion
+
+        #region Get Codec
+        public static PvrPixelCodec GetPixelCodec(PvrPixelFormat format)
+        {
+            switch (format)
+            {
+                case PvrPixelFormat.Argb1555:
+                    return new Argb1555();
+                case PvrPixelFormat.Rgb565:
+                    return new Rgb565();
+                case PvrPixelFormat.Argb4444:
+                    return new Argb4444();
+            }
+
+            return null;
+        }
+        #endregion
     }
 }

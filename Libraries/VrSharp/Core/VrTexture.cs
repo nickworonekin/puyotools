@@ -49,6 +49,7 @@ namespace VrSharp
         #endregion
 
         #region Constructors & Initalizers
+        // Open a texture from a file.
         public VrTexture(string file)
         {
             try
@@ -70,19 +71,8 @@ namespace VrSharp
             }
         }
 
-        public VrTexture(byte[] source)
-        {
-            TextureData = source;
-
-            if (TextureData != null)
-            {
-                InitSuccess = Initalize();
-            }
-            else
-            {
-                InitSuccess = false;
-            }
-        }
+        // Open a texture from a byte array.
+        public VrTexture(byte[] source) : this(source, 0, source.Length) { }
 
         public VrTexture(byte[] source, int offset, int length)
         {
@@ -106,6 +96,7 @@ namespace VrSharp
             }
         }
 
+        // Open a texture from a stream.
         public VrTexture(Stream source) : this(source, (int)(source.Length - source.Position)) { }
 
         public VrTexture(Stream source, int length)
@@ -174,6 +165,60 @@ namespace VrSharp
             if (!InitSuccess) return null;
 
             return ConvertRawToBitmap(DecodeTexture(), TextureWidth, TextureHeight);
+        }
+
+        /// <summary>
+        /// Returns the decoded texture as an array containg raw 32-bit ARGB data.
+        /// </summary>
+        /// <returns></returns>
+        public byte[] ToArray()
+        {
+            if (!InitSuccess) return null;
+
+            return DecodeTexture();
+        }
+
+        /// <summary>
+        /// Returns the decoded texture as a bitmap.
+        /// </summary>
+        /// <returns></returns>
+        public Bitmap ToBitmap()
+        {
+            if (!InitSuccess) return null;
+
+            byte[] data = DecodeTexture();
+
+            Bitmap img = new Bitmap(TextureWidth, TextureHeight, PixelFormat.Format32bppArgb);
+            BitmapData bitmapData = img.LockBits(new Rectangle(0, 0, img.Width, img.Height), ImageLockMode.WriteOnly, img.PixelFormat);
+            Marshal.Copy(data, 0, bitmapData.Scan0, data.Length);
+            img.UnlockBits(bitmapData);
+
+            return img;
+        }
+
+        /// <summary>
+        /// Returns the decoded texture as a stream containg a PNG.
+        /// </summary>
+        /// <returns></returns>
+        public MemoryStream ToStream()
+        {
+            if (!InitSuccess) return null;
+
+            MemoryStream destination = new MemoryStream();
+            ToBitmap().Save(destination, ImageFormat.Png);
+
+            return destination;
+        }
+
+        /// <summary>
+        /// Saves the decoded texture to the specified file.
+        /// </summary>
+        /// <param name="file">Name of the file to save the data to.</param>
+        public void Save(string file)
+        {
+            if (!InitSuccess) return;
+
+            ToBitmap().Save(file, ImageFormat.Png);
         }
         #endregion
 

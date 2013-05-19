@@ -74,7 +74,7 @@ namespace VrSharp.PvrTexture
             // Sometimes, the pixel codec specified in the texture file
             // is not the same one specified in the clut file. As such, we should
             // always use the one specified in the clut file.
-            PixelCodec = PvrCodecList.GetPixelCodec((PvrPixelFormat)ClutData[0x08]);
+            PixelCodec = PvrPixelCodec.GetPixelCodec((PvrPixelFormat)ClutData[0x08]);
 
             return true;
         }

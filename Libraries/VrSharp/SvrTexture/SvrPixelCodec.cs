@@ -116,5 +116,20 @@ namespace VrSharp.SvrTexture
             }
         }
         #endregion
+
+        #region Get Codec
+        public static SvrPixelCodec GetPixelCodec(SvrPixelFormat format)
+        {
+            switch (format)
+            {
+                case SvrPixelFormat.Rgb5a3:
+                    return new Rgb5a3();
+                case SvrPixelFormat.Argb8888:
+                    return new Argb8888();
+            }
+
+            return null;
+        }
+        #endregion
     }
 }

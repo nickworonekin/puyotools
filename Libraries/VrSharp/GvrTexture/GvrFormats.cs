@@ -51,6 +51,7 @@ namespace VrSharp.GvrTexture
         Gcix,
     }
 
+    /*
     public static class GvrCodecList
     {
         // Gets the pixel codec
@@ -98,5 +99,5 @@ namespace VrSharp.GvrTexture
 
             return null;
         }
-    }
+    }*/
 }
