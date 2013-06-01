@@ -8,75 +8,306 @@ namespace PuyoTools.Modules.Compression
         public abstract void Decompress(byte[] source, long offset, Stream destination, int length);
         public abstract void Compress(byte[] source, long offset, Stream destination, int length, string fname);
 
-        #region Helper methods for Decompress
-        public void Decompress(Stream source, Stream destination)
-        {
-            // Since no length is specified, the length will be size between the current offset
-            // and the length of the stream.
-            Decompress(source, destination, (int)(source.Length - source.Position));
-        }
-
+        #region Decompress Methods
+        /// <summary>
+        /// Decompress data from a stream.
+        /// </summary>
+        /// <param name="source">The stream to read from.</param>
+        /// <param name="destination">The stream to write to.</param>
+        /// <param name="length">Number of bytes to read.</param>
         public void Decompress(Stream source, Stream destination, int length)
         {
-            // Read in the rest of the input stream
+            // Temporary!!!
+            // This will eventually become the abstract method.
             byte[] buffer = new byte[length];
             source.Read(buffer, 0, length);
 
-            // Now we can decompress the data
-            Decompress(buffer, 0, destination, length);
+            Decompress(buffer, 0L, destination, length);
         }
 
+        /// <summary>
+        /// Decompress data from a file. This method can read from and write to the same file.
+        /// </summary>
+        /// <param name="sourcePath">File to decompress.</param>
+        /// <param name="destinationPath">File to decompress to.</param>
+        public void Decompress(string sourcePath, string destinationPath)
+        {
+            // If we're reading from and writing to the same file, write the output to a temporary
+            // file then move and replace the original file.
+            if (sourcePath == destinationPath)
+            {
+                string tempPath = Path.GetTempFileName();
+
+                using (FileStream source = File.OpenRead(sourcePath), destination = File.Create(tempPath))
+                {
+                    Decompress(source, destination, (int)source.Length);
+                }
+
+                File.Delete(sourcePath);
+                File.Move(tempPath, destinationPath);
+            }
+            else
+            {
+                using (FileStream source = File.OpenRead(sourcePath), destination = File.Create(destinationPath))
+                {
+                    Decompress(source, destination, (int)source.Length);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Decompress data from a stream.
+        /// </summary>
+        /// <param name="source">The stream to read from.</param>
+        /// <param name="destination">The stream to write to.</param>
+        public void Decompress(Stream source, Stream destination)
+        {
+            Decompress(source, destination, (int)(source.Length - source.Position));
+        }
+
+        /// <summary>
+        /// Decompress data from a byte array.
+        /// </summary>
+        /// <param name="source">Byte array containing the data.</param>
+        /// <param name="destination">Byte array to write the data to.</param>
+        public void Decompress(byte[] source, out byte[] destination)
+        {
+            Decompress(source, 0, out destination, source.Length);
+        }
+
+        /// <summary>
+        /// Decompress data from a byte array.
+        /// </summary>
+        /// <param name="source">Byte array containing the data.</param>
+        /// <param name="destination">The stream to write to.</param>
         public void Decompress(byte[] source, Stream destination)
         {
             Decompress(source, 0, destination, source.Length);
         }
+
+        /// <summary>
+        /// Decompress data from a byte array.
+        /// </summary>
+        /// <param name="source">Byte array containing the data.</param>
+        /// <param name="sourceIndex">Index of the data in the source array.</param>
+        /// <param name="destination">Byte array to write the data to.</param>
+        /// <param name="length">Length of the data in the source array.</param>
+        public void Decompress(byte[] source, int sourceIndex, out byte[] destination, int length)
+        {
+            using (MemoryStream sourceStream = new MemoryStream(), destinationStream = new MemoryStream())
+            {
+                sourceStream.Write(source, sourceIndex, length);
+                sourceStream.Position = 0;
+
+                Decompress(sourceStream, destinationStream, length);
+
+                destination = destinationStream.ToArray();
+            }
+        }
+
+        /// <summary>
+        /// Decompress data from a byte array.
+        /// </summary>
+        /// <param name="source">Byte array containing the data.</param>
+        /// <param name="sourceIndex">Index of the data in the source array.</param>
+        /// <param name="destination">The stream to write to.</param>
+        /// <param name="length">Length of the data in the source array.</param>
+        public void Decompress(byte[] source, int sourceIndex, Stream destination, int length)
+        {
+            using (MemoryStream sourceStream = new MemoryStream())
+            {
+                sourceStream.Write(source, sourceIndex, length);
+                sourceStream.Position = 0;
+
+                Decompress(sourceStream, destination, length);
+            }
+        }
         #endregion
 
-        #region Helper methods for Compress
-        public void Compress(Stream source, Stream destination)
+        #region Compress Methods
+        /// <summary>
+        /// Compress data from a stream.
+        /// </summary>
+        /// <param name="source">The stream to read from.</param>
+        /// <param name="destination">The stream to write to.</param>
+        /// <param name="length">Number of bytes to read.</param>
+        /// <param name="settings">Settings to use when compressing.</param>
+        public void Compress(Stream source, Stream destination, int length, ModuleWriterSettings settings)
         {
-            // Since no length is specified, the length will be size between the current offset
-            // and the length of the stream.
-            Compress(source, destination, (int)(source.Length - source.Position));
-        }
-
-        public void Compress(Stream source, Stream destination, int length)
-        {
-            Compress(source, destination, length, String.Empty);
-        }
-
-        public void Compress(Stream source, Stream destination, string fname)
-        {
-            Compress(source, destination, (int)(source.Length - source.Position), fname);
-        }
-
-        public void Compress(Stream source, Stream destination, int length, string fname)
-        {
-            // Read in the rest of the input stream
+            // Temporary!!!
+            // This will eventually become the abstract method.
             byte[] buffer = new byte[length];
             source.Read(buffer, 0, length);
 
-            // Now we can decompress the data
-            Compress(buffer, 0, destination, length, fname);
+            Compress(buffer, 0L, destination, length, String.Empty);
         }
 
+        /// <summary>
+        /// Compress data from a file. This method can read from and write to the same file.
+        /// </summary>
+        /// <param name="sourcePath">File to decompress.</param>
+        /// <param name="destinationPath">File to decompress to.</param>
+        public void Compress(string sourcePath, string destinationPath)
+        {
+            Compress(sourcePath, destinationPath, null);
+        }
+
+        /// <summary>
+        /// Compress data from a file. This method can read from and write to the same file.
+        /// </summary>
+        /// <param name="sourcePath">File to decompress.</param>
+        /// <param name="destinationPath">File to decompress to.</param>
+        /// <param name="settings">Settings to use when compressing.</param>
+        public void Compress(string sourcePath, string destinationPath, ModuleWriterSettings settings)
+        {
+            // If we're reading from and writing to the same file, write the output to a temporary
+            // file then move and replace the original file.
+            if (sourcePath == destinationPath)
+            {
+                string tempPath = Path.GetTempFileName();
+
+                using (FileStream source = File.OpenRead(sourcePath), destination = File.Create(tempPath))
+                {
+                    Compress(source, destination, (int)source.Length, settings);
+                }
+
+                File.Delete(sourcePath);
+                File.Move(tempPath, destinationPath);
+            }
+            else
+            {
+                using (FileStream source = File.OpenRead(sourcePath), destination = File.Create(destinationPath))
+                {
+                    Compress(source, destination, (int)source.Length, settings);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Compress data from a stream.
+        /// </summary>
+        /// <param name="source">The stream to read from.</param>
+        /// <param name="destination">The stream to write to.</param>
+        public void Compress(Stream source, Stream destination)
+        {
+            Compress(source, destination, null);
+        }
+
+        /// <summary>
+        /// Compress data from a stream.
+        /// </summary>
+        /// <param name="source">The stream to read from.</param>
+        /// <param name="destination">The stream to write to.</param>
+        /// <param name="settings">Settings to use when compressing.</param>
+        public void Compress(Stream source, Stream destination, ModuleWriterSettings settings)
+        {
+            Compress(source, destination, (int)(source.Length - source.Position), settings);
+        }
+
+        /// <summary>
+        /// Compress data from a byte array.
+        /// </summary>
+        /// <param name="source">Byte array containing the data.</param>
+        /// <param name="destination">Byte array to write the data to.</param>
+        public void Compress(byte[] source, out byte[] destination)
+        {
+            Compress(source, out destination, null);
+        }
+
+        /// <summary>
+        /// Compress data from a byte array.
+        /// </summary>
+        /// <param name="source">Byte array containing the data.</param>
+        /// <param name="destination">Byte array to write the data to.</param>
+        /// <param name="settings">Settings to use when compressing.</param>
+        public void Compress(byte[] source, out byte[] destination, ModuleWriterSettings settings)
+        {
+            Compress(source, 0, out destination, source.Length, settings);
+        }
+
+        /// <summary>
+        /// Compress data from a byte array.
+        /// </summary>
+        /// <param name="source">Byte array containing the data.</param>
+        /// <param name="destination">The stream to write to.</param>
         public void Compress(byte[] source, Stream destination)
         {
-            Compress(source, 0, destination, source.Length, String.Empty);
-        }
-        #endregion
-
-        #region Helper methods for Is
-        public bool Is(Stream source, string fname)
-        {
-            // Since no length is specified, the length will be size between the current offset
-            // and the length of the stream.
-            return Is(source, (int)(source.Length - source.Position), fname);
+            Compress(source, destination, null);
         }
 
-        public bool Is(byte[] source, string fname)
+        /// <summary>
+        /// Compress data from a byte array.
+        /// </summary>
+        /// <param name="source">Byte array containing the data.</param>
+        /// <param name="destination">The stream to write to.</param>
+        /// <param name="settings">Settings to use when compressing.</param>
+        public void Compress(byte[] source, Stream destination, ModuleWriterSettings settings)
         {
-            return Is(new MemoryStream(source), fname);
+            Compress(source, 0, destination, source.Length, settings);
+        }
+
+        /// <summary>
+        /// Compress data from a byte array.
+        /// </summary>
+        /// <param name="source">Byte array containing the data.</param>
+        /// <param name="sourceIndex">Index of the data in the source array.</param>
+        /// <param name="destination">Byte array to write the data to.</param>
+        /// <param name="length">Length of the data in the source array.</param>
+        public void Compress(byte[] source, int sourceIndex, out byte[] destination, int length)
+        {
+            Compress(source, sourceIndex, out destination, length, null);
+        }
+
+        /// <summary>
+        /// Compress data from a byte array.
+        /// </summary>
+        /// <param name="source">Byte array containing the data.</param>
+        /// <param name="sourceIndex">Index of the data in the source array.</param>
+        /// <param name="destination">Byte array to write the data to.</param>
+        /// <param name="length">Length of the data in the source array.</param>
+        /// <param name="settings">Settings to use when compressing.</param>
+        public void Compress(byte[] source, int sourceIndex, out byte[] destination, int length, ModuleWriterSettings settings)
+        {
+            using (MemoryStream sourceStream = new MemoryStream(), destinationStream = new MemoryStream())
+            {
+                sourceStream.Write(source, sourceIndex, length);
+                sourceStream.Position = 0;
+
+                Compress(sourceStream, destinationStream, length, settings);
+
+                destination = destinationStream.ToArray();
+            }
+        }
+
+        /// <summary>
+        /// Compress data from a byte array.
+        /// </summary>
+        /// <param name="source">Byte array containing the data.</param>
+        /// <param name="sourceIndex">Index of the data in the source array.</param>
+        /// <param name="destination">The stream to write to.</param>
+        /// <param name="length">Length of the data in the source array.</param>
+        public void Compress(byte[] source, int sourceIndex, Stream destination, int length)
+        {
+            Compress(source, sourceIndex, destination, length, null);
+        }
+
+        /// <summary>
+        /// Compress data from a byte array.
+        /// </summary>
+        /// <param name="source">Byte array containing the data.</param>
+        /// <param name="sourceIndex">Index of the data in the source array.</param>
+        /// <param name="destination">The stream to write to.</param>
+        /// <param name="length">Length of the data in the source array.</param>
+        /// <param name="settings">Settings to use when compressing.</param>
+        public void Compress(byte[] source, int sourceIndex, Stream destination, int length, ModuleWriterSettings settings)
+        {
+            using (MemoryStream sourceStream = new MemoryStream())
+            {
+                sourceStream.Write(source, sourceIndex, length);
+                sourceStream.Position = 0;
+
+                Compress(sourceStream, destination, length, settings);
+            }
         }
         #endregion
     }

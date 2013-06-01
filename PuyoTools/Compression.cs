@@ -41,7 +41,8 @@ namespace PuyoTools
 
         public static void Compress(Stream source, Stream destination, int length, string fname, CompressionFormat format)
         {
-            Formats[format].Compress(source, destination, length, fname);
+            //Formats[format].Compress(source, destination, length, fname);
+            Formats[format].Decompress(source, destination, length);
         }
 
         public static CompressionFormat GetFormat(Stream source, int length, string fname)

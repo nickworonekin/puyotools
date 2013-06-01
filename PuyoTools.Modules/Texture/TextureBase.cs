@@ -129,20 +129,6 @@ namespace PuyoTools.Modules.Texture
         }
 
         #endregion
-
-        #region Helper methods for Is
-        public bool Is(Stream source, string fname)
-        {
-            // Since no length is specified, the length will be size between the current offset
-            // and the length of the stream.
-            return Is(source, (int)(source.Length - source.Position), fname);
-        }
-
-        public bool Is(byte[] source, string fname)
-        {
-            return Is(new MemoryStream(source), fname);
-        }
-        #endregion
     }
 
     public class TextureWriterSettings
