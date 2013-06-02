@@ -56,7 +56,16 @@ namespace PuyoTools
         {
             Formats[format].Read(source, out destination, length);
         }
+        public static void Read(Stream source, Stream destination, int length, TextureReaderSettings settings, TextureFormat format)
+        {
+            Formats[format].Read(source, destination, length, settings);
+        }
 
+        public static void Read(Stream source, out Bitmap destination, int length, TextureReaderSettings settings, TextureFormat format)
+        {
+            Formats[format].Read(source, out destination, length, settings);
+        }
+        /*
         public static void ReadWithPalette(Stream source, Stream palette, Stream destination, int length, int paletteLength, TextureFormat format)
         {
             Formats[format].ReadWithPalette(source, palette, destination, length, paletteLength);
@@ -66,7 +75,7 @@ namespace PuyoTools
         {
             Formats[format].ReadWithPalette(source, palette, out destination, length, paletteLength);
         }
-
+        */
         public static void Write(Stream source, Stream destination, string fname, TextureFormat format)
         {
             return;

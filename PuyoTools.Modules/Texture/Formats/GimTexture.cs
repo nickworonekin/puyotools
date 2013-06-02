@@ -30,21 +30,24 @@ namespace PuyoTools.Modules.Texture
             get { return false; }
         }
 
-        public override void Read(byte[] source, long offset, out Bitmap destination, int length)
+        /// <summary>
+        /// Decodes a texture from a stream.
+        /// </summary>
+        /// <param name="source">The stream to read from.</param>
+        /// <param name="destination">The stream to write to.</param>
+        /// <param name="length">Number of bytes to read.</param>
+        /// <param name="settings">Settings to use when decoding.</param>
+        public override void Read(Stream source, Stream destination, int length, TextureReaderSettings settings)
         {
-            // We may need to copy source to a new array. Let's check to see if we need to
-            byte[] data = source;
-            if (offset != 0 || length != source.Length)
-            {
-                data = new byte[length];
-                Array.Copy(source, offset, data, 0, length);
-            }
+            // Temporary until the GimSharp rewrite is done and complete.
+            byte[] buffer = new byte[length];
+            source.Read(buffer, 0, length);
 
-            // Do it like this until the GimSharp rewrite.
-            GimFile textureInput = new GimFile(data);
+            GimFile textureInput = new GimFile(buffer);
             ImgFile textureOutput = new ImgFile(textureInput.GetDecompressedData(), textureInput.GetWidth(), textureInput.GetHeight(), ImageFormat.Png);
 
-            destination = new Bitmap(new MemoryStream(textureOutput.GetCompressedData()));
+            buffer = textureOutput.GetCompressedData();
+            destination.Write(buffer, 0, buffer.Length);
         }
 
         public override void Write(byte[] source, long offset, Stream destination, int length, string fname)

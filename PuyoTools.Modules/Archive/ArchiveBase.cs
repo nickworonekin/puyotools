@@ -8,13 +8,86 @@ namespace PuyoTools.Modules.Archive
     {
         public abstract string FileExtension { get; }
 
+        #region Open Methods
+        /// <summary>
+        /// Open an archive from a stream.
+        /// </summary>
+        /// <param name="source">The stream to read from.</param>
+        /// <param name="length">Number of bytes to read.</param>
+        /// <returns>An ArchiveReader object.</returns>
         public abstract ArchiveReader Open(Stream source, int length);
+
+        /// <summary>
+        /// Open an archive from a file.
+        /// </summary>
+        /// <param name="path">File to open.</param>
+        /// <returns>An ArchiveReader object.</returns>
+        public ArchiveReader Open(string path)
+        {
+            using (FileStream source = File.OpenRead(path))
+            {
+                return Open(source, (int)source.Length);
+            }
+        }
+
+        /// <summary>
+        /// Open an archive from a stream.
+        /// </summary>
+        /// <param name="source">The stream to read from.</param>
+        /// <returns>An ArchiveReader object.</returns>
+        public ArchiveReader Open(Stream source)
+        {
+            return Open(source, (int)(source.Length - source.Position));
+        }
+
+        /// <summary>
+        /// Open an archive from a byte array.
+        /// </summary>
+        /// <param name="source">Byte array containing the data.</param>
+        /// <returns>An ArchiveReader object.</returns>
+        public ArchiveReader Open(byte[] source)
+        {
+            return Open(source, 0, source.Length);
+        }
+
+        /// <summary>
+        /// Open an archive from a byte array.
+        /// </summary>
+        /// <param name="source">Byte array containing the data.</param>
+        /// <param name="sourceIndex">Index of the data in the source array.</param>
+        /// <param name="length">Length of the data in the source array.</param>
+        /// <returns>An ArchiveReader object.</returns>
+        public ArchiveReader Open(byte[] source, int sourceIndex, int length)
+        {
+            using (MemoryStream sourceStream = new MemoryStream())
+            {
+                sourceStream.Write(source, sourceIndex, length);
+                sourceStream.Position = 0;
+
+                return Open(sourceStream, length);
+            }
+        }
+        #endregion
+
+        #region Create Methods
+        /// <summary>
+        /// Create an archive.
+        /// </summary>
+        /// <param name="destination">The stream to write to.</param>
+        /// <param name="settings">Settings to use for the archive.</param>
+        /// <returns>An ArchiveWriter object.</returns>
         public abstract ArchiveWriter Create(Stream destination, ModuleWriterSettings settings);
 
+        /// <summary>
+        /// Create an archive.
+        /// </summary>
+        /// <param name="destination">The stream to write to.</param>
+        /// <returns>An ArchiveWriter object.</returns>
         public ArchiveWriter Create(Stream destination)
         {
             return Create(destination, null);
         }
+        #endregion
     }
 
     public abstract class ArchiveReader

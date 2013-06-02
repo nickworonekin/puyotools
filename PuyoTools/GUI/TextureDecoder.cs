@@ -86,7 +86,11 @@ namespace PuyoTools.GUI
                             textureData = new MemoryStream(); // Just incase some data was written
                             using (FileStream paletteData = File.OpenRead(paletteName))
                             {
-                                Texture.ReadWithPalette(source, paletteData, textureData, (int)source.Length, (int)paletteData.Length, format);
+                                TextureReaderSettings textureSettings = new TextureReaderSettings();
+                                textureSettings.PaletteStream = paletteData;
+                                textureSettings.PaletteLength = (int)paletteData.Length;
+
+                                Texture.Read(source, textureData, (int)source.Length, textureSettings, format);
                             }
 
                             // Delete the palette file if the user chose to delete the source texture

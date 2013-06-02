@@ -27,28 +27,42 @@ namespace PuyoTools.Modules.Texture
             get { return false; }
         }
 
-        public override void Read(byte[] source, long offset, out Bitmap destination, int length)
-        {
-            // Some PVR textures require an external clut, so we'll just pass this off to ReadWithCLUT
-            ReadWithPalette(source, offset, null, 0, out destination, length, 0);
-        }
-
-        public override void ReadWithPalette(byte[] source, long offset, byte[] palette, long paletteOffset, out Bitmap destination, int length, int paletteLength)
+        /// <summary>
+        /// Decodes a texture from a stream.
+        /// </summary>
+        /// <param name="source">The stream to read from.</param>
+        /// <param name="destination">The stream to write to.</param>
+        /// <param name="length">Number of bytes to read.</param>
+        /// <param name="settings">Settings to use when decoding.</param>
+        public override void Read(Stream source, Stream destination, int length, TextureReaderSettings settings)
         {
             // Reading PVR textures is done through VrSharp, so just pass it to that
-            VrSharp.PvrTexture.PvrTexture texture = new VrSharp.PvrTexture.PvrTexture(source, (int)offset, length);
+            VrSharp.PvrTexture.PvrTexture texture = new VrSharp.PvrTexture.PvrTexture(source, length);
 
-            // Check to see if this texture requires an external palette.
-            // If it does and none was set, throw an exception.
+            // Check to see if this texture requires an external palette and throw an exception
+            // if we do not have one defined
             if (texture.NeedsExternalClut())
             {
-                if (palette != null && paletteLength > 0)
-                    texture.SetClut(new PvpClut(palette, paletteOffset, paletteLength));
+                if (settings != null && settings.PaletteStream != null)
+                {
+                    if (settings.PaletteLength == -1)
+                    {
+                        texture.SetClut(new PvpClut(settings.PaletteStream));
+                    }
+                    else
+                    {
+                        texture.SetClut(new PvpClut(settings.PaletteStream, settings.PaletteLength));
+                    }
+                }
                 else
+                {
                     throw new TextureNeedsPaletteException();
+                }
             }
 
-            destination = texture.GetTextureAsBitmap();
+            MemoryStream destinationStream = texture.ToStream();
+            destinationStream.Position = 0;
+            PTStream.CopyTo(destinationStream, destination);
         }
 
         public override void Write(byte[] source, long offset, Stream destination, int length, string fname)

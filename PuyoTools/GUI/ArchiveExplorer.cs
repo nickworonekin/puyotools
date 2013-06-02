@@ -93,26 +93,30 @@ namespace PuyoTools.GUI
                 {
                     ArchiveEntry paletteEntry = info.Archive.GetFile(paletteFileIndex);
 
+                    TextureReaderSettings textureSettings = new TextureReaderSettings();
+
                     // Get the palette data (we may need to copy over the data to another stream)
-                    Stream paletteData;
                     if (data == paletteEntry.Stream)
                     {
                         paletteEntry.Stream.Position = paletteEntry.Offset;
 
-                        paletteData = new MemoryStream();
-                        PTStream.CopyPartTo(paletteEntry.Stream, paletteData, paletteEntry.Length);
+                        textureSettings.PaletteStream = new MemoryStream();
+                        PTStream.CopyPartTo(paletteEntry.Stream, textureSettings.PaletteStream, paletteEntry.Length);
 
-                        paletteData.Position = 0;
+                        textureSettings.PaletteStream.Position = 0;
                     }
                     else
                     {
-                        paletteData = paletteEntry.Stream;
-                        paletteData.Position = paletteEntry.Offset;
+                        textureSettings.PaletteStream = paletteEntry.Stream;
+                        textureSettings.PaletteStream.Position = paletteEntry.Offset;
                     }
+
+                    textureSettings.PaletteLength = paletteEntry.Length;
 
                     // Now open the texture
                     data.Position = oldPosition;
-                    viewer.OpenTexture(data, paletteData, length, paletteEntry.Length, fname, format);
+                    //viewer.OpenTexture(data, paletteData, length, paletteEntry.Length, fname, format);
+                    viewer.OpenTexture(data, length, fname, textureSettings, format);
                     viewer.Show();
                 }
             }

@@ -26,6 +26,7 @@ namespace PuyoTools.Modules
             return null;
         }
 
+        #region Is Methods
         /// <summary>
         /// Determines if the data is in the specified format.
         /// </summary>
@@ -88,6 +89,7 @@ namespace PuyoTools.Modules
                 return Is(buffer, length, fname);
             }
         }
+        #endregion
     }
 
     public abstract class ModuleWriterSettings

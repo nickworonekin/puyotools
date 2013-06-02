@@ -15,14 +15,67 @@ namespace PuyoTools.Modules.Compression
             get { return true; }
         }
 
-        public override void Decompress(byte[] source, long offset, Stream destination, int length)
+        /// <summary>
+        /// Decompress data from a stream.
+        /// </summary>
+        /// <param name="source">The stream to read from.</param>
+        /// <param name="destination">The stream to write to.</param>
+        /// <param name="length">Number of bytes to read.</param>
+        public override void Decompress(Stream source, Stream destination, int length)
         {
-            // We need to copy source to a MemoryStream in order to use the below implimentation
-            MemoryStream data = new MemoryStream();
-            data.Write(source, (int)offset, length);
+            int bitPos = 9;
+            byte currentByte;
+            int lookBehindOffset, lookBehindLength;
 
-            data.Position = 0;
-            Decode(data, destination);
+            currentByte = ReadByte(source);
+            for (; ; )
+            {
+                if (GetControlBit(ref bitPos, ref currentByte, source) != 0)
+                {
+                    // Direct byte
+                    destination.WriteByte(ReadByte(source));
+                    continue;
+                }
+
+                if (GetControlBit(ref bitPos, ref currentByte, source) != 0)
+                {
+                    lookBehindOffset = ReadByte(source);
+                    lookBehindOffset |= ReadByte(source) << 8;
+                    if (lookBehindOffset == 0)
+                    {
+                        // End of the compressed data
+                        break;
+                    }
+
+                    lookBehindLength = lookBehindOffset & 7;
+                    lookBehindOffset = (lookBehindOffset >> 3) | -0x2000;
+                    if (lookBehindLength == 0)
+                    {
+                        lookBehindLength = ReadByte(source) + 1;
+                    }
+                    else
+                    {
+                        lookBehindLength += 2;
+                    }
+                }
+                else
+                {
+                    lookBehindLength = 0;
+                    lookBehindLength = (lookBehindLength << 1) | GetControlBit(ref bitPos, ref currentByte, source);
+                    lookBehindLength = (lookBehindLength << 1) | GetControlBit(ref bitPos, ref currentByte, source);
+                    lookBehindOffset = ReadByte(source) | -0x100;
+                    lookBehindLength += 2;
+                }
+
+                for (int i = 0; i < lookBehindLength; i++)
+                {
+                    long writePosition = destination.Position;
+                    destination.Seek(writePosition + lookBehindOffset, SeekOrigin.Begin);
+                    byte b = ReadByte(destination);
+                    destination.Seek(writePosition, SeekOrigin.Begin);
+                    destination.WriteByte(b);
+                }
+            }
         }
 
         public override void Compress(byte[] source, long offset, Stream destination, int length, string fname)
@@ -40,7 +93,7 @@ namespace PuyoTools.Modules.Compression
 
         public override bool Is(Stream source, int length, string fname)
         {
-            return (Path.GetExtension(fname) == ".prs");
+            return (Path.GetExtension(fname) == ".prs" && length > 2 && PTStream.Contains(source, length - 2, new byte[] { 0, 0 }));
         }
 
         // An implementation of FraGag.Compression.Prs follows below.
@@ -160,63 +213,6 @@ namespace PuyoTools.Modules.Compression
             byte[] bytes = data.ToArray();
             destination.Write(bytes, 0, bytes.Length);
             data.SetLength(0);
-        }
-
-        private static void Decode(Stream source, Stream destination)
-        {
-            int bitPos = 9;
-            byte currentByte;
-            int lookBehindOffset, lookBehindLength;
-
-            currentByte = ReadByte(source);
-            for (; ; )
-            {
-                if (GetControlBit(ref bitPos, ref currentByte, source) != 0)
-                {
-                    // Direct byte
-                    destination.WriteByte(ReadByte(source));
-                    continue;
-                }
-
-                if (GetControlBit(ref bitPos, ref currentByte, source) != 0)
-                {
-                    lookBehindOffset = ReadByte(source);
-                    lookBehindOffset |= ReadByte(source) << 8;
-                    if (lookBehindOffset == 0)
-                    {
-                        // End of the compressed data
-                        break;
-                    }
-
-                    lookBehindLength = lookBehindOffset & 7;
-                    lookBehindOffset = (lookBehindOffset >> 3) | -0x2000;
-                    if (lookBehindLength == 0)
-                    {
-                        lookBehindLength = ReadByte(source) + 1;
-                    }
-                    else
-                    {
-                        lookBehindLength += 2;
-                    }
-                }
-                else
-                {
-                    lookBehindLength = 0;
-                    lookBehindLength = (lookBehindLength << 1) | GetControlBit(ref bitPos, ref currentByte, source);
-                    lookBehindLength = (lookBehindLength << 1) | GetControlBit(ref bitPos, ref currentByte, source);
-                    lookBehindOffset = ReadByte(source) | -0x100;
-                    lookBehindLength += 2;
-                }
-
-                for (int i = 0; i < lookBehindLength; i++)
-                {
-                    long writePosition = destination.Position;
-                    destination.Seek(writePosition + lookBehindOffset, SeekOrigin.Begin);
-                    byte b = ReadByte(destination);
-                    destination.Seek(writePosition, SeekOrigin.Begin);
-                    destination.WriteByte(b);
-                }
-            }
         }
 
         private static int GetControlBit(ref int bitPos, ref byte currentByte, Stream source)

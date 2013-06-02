@@ -5,7 +5,7 @@ namespace PuyoTools.Modules.Compression
 {
     public abstract class CompressionBase : ModuleBase
     {
-        public abstract void Decompress(byte[] source, long offset, Stream destination, int length);
+        public virtual void Decompress(byte[] source, long offset, Stream destination, int length) { }
         public abstract void Compress(byte[] source, long offset, Stream destination, int length, string fname);
 
         #region Decompress Methods
@@ -15,7 +15,7 @@ namespace PuyoTools.Modules.Compression
         /// <param name="source">The stream to read from.</param>
         /// <param name="destination">The stream to write to.</param>
         /// <param name="length">Number of bytes to read.</param>
-        public void Decompress(Stream source, Stream destination, int length)
+        public virtual void Decompress(Stream source, Stream destination, int length)
         {
             // Temporary!!!
             // This will eventually become the abstract method.
@@ -132,7 +132,7 @@ namespace PuyoTools.Modules.Compression
         /// <param name="destination">The stream to write to.</param>
         /// <param name="length">Number of bytes to read.</param>
         /// <param name="settings">Settings to use when compressing.</param>
-        public void Compress(Stream source, Stream destination, int length, ModuleWriterSettings settings)
+        public virtual void Compress(Stream source, Stream destination, int length, ModuleWriterSettings settings)
         {
             // Temporary!!!
             // This will eventually become the abstract method.
@@ -308,6 +308,17 @@ namespace PuyoTools.Modules.Compression
 
                 Compress(sourceStream, destination, length, settings);
             }
+        }
+
+        /// <summary>
+        /// Compress data from a stream.
+        /// </summary>
+        /// <param name="source">The stream to read from.</param>
+        /// <param name="destination">The stream to write to.</param>
+        /// <param name="length">Number of bytes to read.</param>
+        public void Compress(Stream source, Stream destination, int length)
+        {
+            Compress(source, destination, length, null);
         }
         #endregion
     }

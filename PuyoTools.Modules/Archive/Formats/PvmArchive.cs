@@ -112,6 +112,12 @@ namespace PuyoTools.Modules.Archive
 
             public override ArchiveEntry GetFile(int index)
             {
+                // If this archive does not contain any global indicies, then just return the data as is.
+                if (!containsGlobalIndex)
+                {
+                    return base.GetFile(index);
+                }
+
                 // Make sure index is not out of bounds
                 if (index < 0 || index > Files.Length)
                     throw new IndexOutOfRangeException();
@@ -127,15 +133,8 @@ namespace PuyoTools.Modules.Archive
                 data.WriteByte((byte)'X');
                 PTStream.WriteInt32(data, 8);
 
-                if (containsGlobalIndex)
-                {
-                    Files[index].Stream.Position = 0xC + (index * tableEntryLength) + globalIndexOffset;
-                    PTStream.WriteUInt32(data, PTStream.ReadUInt32(Files[index].Stream));
-                }
-                else
-                {
-                    data.Position += 4;
-                }
+                Files[index].Stream.Position = 0xC + (index * tableEntryLength) + globalIndexOffset;
+                PTStream.WriteUInt32(data, PTStream.ReadUInt32(Files[index].Stream));
 
                 data.Position += 4;
 

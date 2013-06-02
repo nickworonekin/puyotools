@@ -42,10 +42,10 @@ namespace PuyoTools.GUI
             DisplayTexture(textureBitmap, fname, format);
         }
 
-        public void OpenTexture(Stream data, Stream paletteData, int length, int paletteLength, string fname, TextureFormat format)
+        public void OpenTexture(Stream data, int length, string fname, TextureReaderSettings settings, TextureFormat format)
         {
             Bitmap textureBitmap;
-            Texture.ReadWithPalette(data, paletteData, out textureBitmap, length, paletteLength, format);
+            Texture.Read(data, out textureBitmap, length, settings, format);
 
             DisplayTexture(textureBitmap, fname, format);
         }
@@ -157,7 +157,11 @@ namespace PuyoTools.GUI
                         data.Position = 0;
                         using (FileStream paletteData = File.OpenRead(paletteName))
                         {
-                            OpenTexture(data, paletteData, (int)data.Length, (int)paletteData.Length, ofd.SafeFileName, textureFormat);
+                            TextureReaderSettings textureSettings = new TextureReaderSettings();
+                            textureSettings.PaletteStream = paletteData;
+                            textureSettings.PaletteLength = (int)paletteData.Length;
+
+                            OpenTexture(data, (int)data.Length, ofd.SafeFileName, textureSettings, textureFormat);
                         }
                     }
                 }
