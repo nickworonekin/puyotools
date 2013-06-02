@@ -5,6 +5,11 @@ namespace PuyoTools.Modules.Compression
 {
     public class PrsCompression : CompressionBase
     {
+        /*
+         * PRS compression implementation from FraGag.Compression.Prs
+         * https://github.com/FraGag/prs.net
+         */
+
         public override string Name
         {
             get { return "PRS"; }
@@ -78,30 +83,18 @@ namespace PuyoTools.Modules.Compression
             }
         }
 
-        public override void Compress(byte[] source, long offset, Stream destination, int length, string fname)
+        /// <summary>
+        /// Compress data from a stream.
+        /// </summary>
+        /// <param name="source">The stream to read from.</param>
+        /// <param name="destination">The stream to write to.</param>
+        /// <param name="length">Number of bytes to read.</param>
+        /// <param name="settings">Settings to use when compressing.</param>
+        public override void Compress(Stream source2, Stream destination, int length, ModuleWriterSettings settings)
         {
-            // We may need to copy source to a new array. Let's check to see if we need to
-            byte[] data = source;
-            if (offset != 0 || length != source.Length)
-            {
-                data = new byte[length];
-                Array.Copy(source, offset, data, 0, length);
-            }
+            byte[] source = new byte[length];
+            source2.Read(source, 0, length);
 
-            Encode(data, destination);
-        }
-
-        public override bool Is(Stream source, int length, string fname)
-        {
-            return (Path.GetExtension(fname) == ".prs" && length > 2 && PTStream.Contains(source, length - 2, new byte[] { 0, 0 }));
-        }
-
-        // An implementation of FraGag.Compression.Prs follows below.
-        // Soruce: https://github.com/FraGag/prs.net
-
-        #region FraGag.Compression.Prs Implementation
-        private static void Encode(byte[] source, Stream destination)
-        {
             byte bitPos = 0;
             byte controlByte = 0;
 
@@ -160,6 +153,18 @@ namespace PuyoTools.Modules.Compression
 
             destination.WriteByte(0);
             destination.WriteByte(0);
+        }
+
+        /// <summary>
+        /// Determines if the data is in the specified format.
+        /// </summary>
+        /// <param name="source">The stream to read from.</param>
+        /// <param name="length">Number of bytes to read.</param>
+        /// <param name="fname">Name of the file.</param>
+        /// <returns>True if the data is in the specified format, false otherwise.</returns>
+        public override bool Is(Stream source, int length, string fname)
+        {
+            return (Path.GetExtension(fname) == ".prs" && length > 2 && PTStream.Contains(source, length - 2, new byte[] { 0, 0 }));
         }
 
         private static void Copy(int offset, int size, ref byte controlByte, ref byte bitPos, MemoryStream data, Stream destination)
@@ -239,6 +244,5 @@ namespace PuyoTools.Modules.Compression
 
             return (byte)value;
         }
-        #endregion
     }
 }

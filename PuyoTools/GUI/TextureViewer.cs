@@ -187,7 +187,7 @@ namespace PuyoTools.GUI
         {
             SaveFileDialog sfd = new SaveFileDialog();
             sfd.FileName = Path.GetFileNameWithoutExtension(textureNameLabel.Text) + ".png";
-            sfd.Filter = "All Files (*.*)|*.*";
+            sfd.Filter = "PNG Image (*.png)|*.png";
             sfd.Title = "Save Texture";
 
             if (sfd.ShowDialog() == DialogResult.OK)

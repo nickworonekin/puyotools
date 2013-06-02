@@ -9,65 +9,114 @@ namespace VrSharp
     public abstract class VrTexture
     {
         #region Fields
-        protected bool InitSuccess = false; // Initalization
+        protected bool initalized = false; // Is the texture initalized?
 
-        protected byte[] TextureData;  // Vr Texture Data
-        protected byte[] RawImageData; // Raw Image Data
+        protected byte[] encodedData; // Encoded texture data (VR data)
+        protected byte[] decodedData; // Decoded texture data (32-bit ARGB)
 
-        protected VrPixelCodec PixelCodec; // Pixel Codec
-        protected VrDataCodec DataCodec;   // Data Codec
+        protected VrPixelCodec pixelCodec; // Pixel codec
+        protected VrDataCodec dataCodec;   // Data codec
 
-        protected int ClutOffset; // Clut Offset
-        protected int DataOffset; // Data Offset
+        protected int paletteOffset; // Offset of the palette data in the texture (-1 if there is none)
+        protected int dataOffset;    // Offset of the actual data in the texture
         #endregion
 
         #region Texture Properties
         /// <summary>
         /// The texture's global index, or 0 if this texture does not have a global index defined.
         /// </summary>
-        public uint GlobalIndex { get; protected set; }
+        public uint GlobalIndex
+        {
+            get
+            {
+                if (!initalized)
+                {
+                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
+                }
+
+                return globalIndex;
+            }
+        }
+        protected uint globalIndex;
 
         /// <summary>
         /// Width of the texture (in pixels).
         /// </summary>
-        public ushort TextureWidth { get; protected set; }
+        public ushort TextureWidth
+        {
+            get
+            {
+                if (!initalized)
+                {
+                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
+                }
+
+                return textureWidth;
+            }
+        }
+        protected ushort textureWidth;
 
         /// <summary>
         /// Height of the texture (in pixels).
         /// </summary>
-        public ushort TextureHeight { get; protected set; }
+        public ushort TextureHeight
+        {
+            get
+            {
+                if (!initalized)
+                {
+                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
+                }
+
+                return textureHeight;
+            }
+        }
+        protected ushort textureHeight;
 
         /// <summary>
         /// Offset of the GBIX (or GCIX) chunk in the texture file, or -1 if this chunk is not present.
         /// </summary>
-        public int GbixOffset { get; protected set; }
+        public int GbixOffset
+        {
+            get
+            {
+                if (!initalized)
+                {
+                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
+                }
+
+                return gbixOffset;
+            }
+        }
+        protected int gbixOffset;
 
         /// <summary>
         /// Offset of the PVRT (or GVRT) chunk in the texture file.
         /// </summary>
-        public int PvrtOffset { get; protected set; }
+        public int PvrtOffset
+        {
+            get
+            {
+                if (!initalized)
+                {
+                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
+                }
+
+                return pvrtOffset;
+            }
+        }
+        protected int pvrtOffset;
         #endregion
 
         #region Constructors & Initalizers
         // Open a texture from a file.
         public VrTexture(string file)
         {
-            try
-            {
-                TextureData = File.ReadAllBytes(file);
-            }
-            catch
-            {
-                TextureData = null;
-            }
+            encodedData = File.ReadAllBytes(file);
 
-            if (TextureData != null)
+            if (encodedData != null)
             {
-                InitSuccess = Initalize();
-            }
-            else
-            {
-                InitSuccess = false;
+                initalized = Initalize();
             }
         }
 
@@ -78,21 +127,17 @@ namespace VrSharp
         {
             if (source == null || (offset == 0 && source.Length == length))
             {
-                TextureData = source;
+                encodedData = source;
             }
             else if (source != null)
             {
-                TextureData = new byte[length];
-                Array.Copy(source, offset, TextureData, 0, length);
+                encodedData = new byte[length];
+                Array.Copy(source, offset, encodedData, 0, length);
             }
 
-            if (TextureData != null)
+            if (encodedData != null)
             {
-                InitSuccess = Initalize();
-            }
-            else
-            {
-                InitSuccess = false;
+                initalized = Initalize();
             }
         }
 
@@ -101,23 +146,12 @@ namespace VrSharp
 
         public VrTexture(Stream source, int length)
         {
-            try
-            {
-                TextureData = new byte[length];
-                source.Read(TextureData, 0, length);
-            }
-            catch
-            {
-                TextureData = null;
-            }
+            encodedData = new byte[length];
+            source.Read(encodedData, 0, length);
 
-            if (TextureData != null)
+            if (encodedData != null)
             {
-                InitSuccess = Initalize();
-            }
-            else
-            {
-                InitSuccess = false;
+                initalized = Initalize();
             }
         }
 
@@ -126,54 +160,15 @@ namespace VrSharp
 
         #region Get Texture
         /// <summary>
-        /// Get the texture as a byte array (clone of GetTextureAsArray).
-        /// </summary>
-        /// <returns></returns>
-        public byte[] GetTexture()
-        {
-            return GetTextureAsArray();
-        }
-
-        /// <summary>
-        /// Get the texture as a byte array.
-        /// </summary>
-        /// <returns></returns>
-        public byte[] GetTextureAsArray()
-        {
-            if (!InitSuccess) return null;
-
-            return ConvertRawToArray(DecodeTexture(), TextureWidth, TextureHeight);
-        }
-
-        /// <summary>
-        /// Get the texture as a memory stream.
-        /// </summary>
-        /// <returns></returns>
-        public MemoryStream GetTextureAsStream()
-        {
-            if (!InitSuccess) return null;
-
-            return ConvertRawToStream(DecodeTexture(), TextureWidth, TextureHeight);
-        }
-
-        /// <summary>
-        /// Get the texture as a System.Drawing.Bitmap object.
-        /// </summary>
-        /// <returns></returns>
-        public Bitmap GetTextureAsBitmap()
-        {
-            if (!InitSuccess) return null;
-
-            return ConvertRawToBitmap(DecodeTexture(), TextureWidth, TextureHeight);
-        }
-
-        /// <summary>
         /// Returns the decoded texture as an array containg raw 32-bit ARGB data.
         /// </summary>
         /// <returns></returns>
         public byte[] ToArray()
         {
-            if (!InitSuccess) return null;
+            if (!initalized)
+            {
+                throw new TextureNotInitalizedException("Cannot decode this texture as it is not initalized.");
+            }
 
             return DecodeTexture();
         }
@@ -184,7 +179,10 @@ namespace VrSharp
         /// <returns></returns>
         public Bitmap ToBitmap()
         {
-            if (!InitSuccess) return null;
+            if (!initalized)
+            {
+                throw new TextureNotInitalizedException("Cannot decode this texture as it is not initalized.");
+            }
 
             byte[] data = DecodeTexture();
 
@@ -202,7 +200,10 @@ namespace VrSharp
         /// <returns></returns>
         public MemoryStream ToStream()
         {
-            if (!InitSuccess) return null;
+            if (!initalized)
+            {
+                throw new TextureNotInitalizedException("Cannot decode this texture as it is not initalized.");
+            }
 
             MemoryStream destination = new MemoryStream();
             ToBitmap().Save(destination, ImageFormat.Png);
@@ -216,13 +217,31 @@ namespace VrSharp
         /// <param name="file">Name of the file to save the data to.</param>
         public void Save(string file)
         {
-            if (!InitSuccess) return;
+            if (!initalized)
+            {
+                throw new TextureNotInitalizedException("Cannot decode this texture as it is not initalized.");
+            }
 
             ToBitmap().Save(file, ImageFormat.Png);
+        }
+
+        /// <summary>
+        /// Saves the decoded texture to the specified stream.
+        /// </summary>
+        /// <param name="destination">The stream to save the texture to.</param>
+        public void Save(Stream destination)
+        {
+            if (!initalized)
+            {
+                throw new TextureNotInitalizedException("Cannot decode this texture as it is not initalized.");
+            }
+
+            ToBitmap().Save(destination, ImageFormat.Png);
         }
         #endregion
 
         #region Get Texture Mipmap
+        /*
         /// <summary>
         /// Get a mipmap in the texture as a byte array (clone of GetTextureMipmapAsArray).
         /// </summary>
@@ -273,18 +292,26 @@ namespace VrSharp
             int size;
             byte[] TextureMipmap = DecodeTextureMipmap(mipmap, out size);
             return ConvertRawToBitmap(TextureMipmap, size, size);
-        }
+        }*/
 
         /// <summary>
         /// Returns if the texture contains mipmaps.
         /// </summary>
         /// <returns></returns>
-        public virtual bool ContainsMipmaps()
+        public virtual bool ContainsMipmaps
         {
-            if (!InitSuccess) return false;
-            return DataCodec.ContainsMipmaps;
+            get
+            {
+                if (!initalized)
+                {
+                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
+                }
+
+                return dataCodec.ContainsMipmaps;
+            }
         }
 
+        /*
         /// <summary>
         /// Returns the number of mipmaps in the texture, or 0 if there are none.
         /// </summary>
@@ -296,36 +323,56 @@ namespace VrSharp
 
             return (int)Math.Log(TextureWidth, 2) + 1;
         }
+         */
         #endregion
 
-        #region Clut
+        #region Palette
         /// <summary>
-        /// Set the clut data from an external clut file.
+        /// Set the palette data from an external palette file.
         /// </summary>
-        /// <param name="clut">A VpClut object</param>
-        public virtual void SetClut(VpClut clut)
+        /// <param name="palette">A VpPalette object</param>
+        protected virtual void SetPalette(VpPalette palette)
         {
             // Should throw an ArgumentException if not the right type of
             // VrClut (ex: passing a PvpClut for a GvrTexture).
+            if (!initalized)
+            {
+                throw new TextureNotInitalizedException("Cannot set the palette for this texture as it is not initalized.");
+            }
 
-            if (!InitSuccess) return;
-            if (!NeedsExternalClut()) return; // Can't use DataCodec here
+            // No need to set an external palette if this data format doesn't require one.
+            // We can't just call the data codec here as the data format does not determine
+            // if a GVR uses an external palette.
+            if (!NeedsExternalPalette)
+            {
+                return;
+            }
 
-            if (clut.PixelCodec != null)
-                DataCodec.SetClutExternal(clut.GetClut(clut.PixelCodec), clut.GetNumClutEntries(), clut.PixelCodec);
+            if (palette.PixelCodec != null)
+            {
+                dataCodec.SetClutExternal(palette.GetPalette(palette.PixelCodec), palette.GetNumPaletteEntries(), palette.PixelCodec);
+            }
             else
-                DataCodec.SetClutExternal(clut.GetClut(PixelCodec), clut.GetNumClutEntries(), PixelCodec);
+            {
+                dataCodec.SetClutExternal(palette.GetPalette(pixelCodec), palette.GetNumPaletteEntries(), pixelCodec);
+            }
         }
 
         /// <summary>
-        /// Returns if the texture needs an external clut file.
+        /// Returns if the texture needs an external palette file.
         /// </summary>
         /// <returns></returns>
-        public virtual bool NeedsExternalClut()
+        public virtual bool NeedsExternalPalette
         {
-            if (!InitSuccess) return false;
+            get
+            {
+                if (!initalized)
+                {
+                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
+                }
 
-            return DataCodec.NeedsExternalClut;
+                return dataCodec.NeedsExternalClut;
+            }
         }
         #endregion
 
@@ -334,53 +381,29 @@ namespace VrSharp
         /// Returns if the texture was loaded successfully.
         /// </summary>
         /// <returns></returns>
-        public bool LoadSuccess()
+        public bool Initalized
         {
-            return InitSuccess;
+            get { return initalized; }
         }
         #endregion
 
         #region Private Properties
-        // Convert raw image data to a bitmap
-        private Bitmap ConvertRawToBitmap(byte[] input, int width, int height)
-        {
-            Bitmap bitmap = new Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-            BitmapData bitmapData = bitmap.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.WriteOnly, bitmap.PixelFormat);
-            Marshal.Copy(input, 0, bitmapData.Scan0, input.Length);
-            bitmap.UnlockBits(bitmapData);
-
-            return bitmap;
-        }
-
-        // Convert raw image data to a memory stream
-        private MemoryStream ConvertRawToStream(byte[] input, int width, int height)
-        {
-            Bitmap bitmap       = ConvertRawToBitmap(input, width, height);
-            MemoryStream stream = new MemoryStream();
-            bitmap.Save(stream, ImageFormat.Png);
-
-            return stream;
-        }
-
-        // Convert raw image data to a byte array
-        private byte[] ConvertRawToArray(byte[] input, int width, int height)
-        {
-            return ConvertRawToStream(input, width, height).ToArray();
-        }
-
         // Decode a texture that does not contain mipmaps
         private byte[] DecodeTexture()
         {
-            if (ClutOffset != -1) // The texture contains a clut
-                DataCodec.SetClut(TextureData, ClutOffset, PixelCodec);
+            if (paletteOffset != -1) // The texture contains an embedded palette
+            {
+                dataCodec.SetClut(encodedData, paletteOffset, pixelCodec);
+            }
 
-            if (ContainsMipmaps()) // If the texture contains mipmaps we have to get the largest texture
-                return DataCodec.DecodeMipmap(TextureData, DataOffset, 0, TextureWidth, TextureHeight, PixelCodec);
+            if (ContainsMipmaps) // If the texture contains mipmaps we have to get the largest texture
+                return dataCodec.DecodeMipmap(encodedData, dataOffset, 0, textureWidth, textureHeight, pixelCodec);
 
-            return DataCodec.Decode(TextureData, DataOffset, TextureWidth, TextureHeight, PixelCodec);
+            return dataCodec.Decode(encodedData, dataOffset, textureWidth, textureHeight, pixelCodec);
         }
 
         // Decode a texture that contains mipmaps
+        /*
         private byte[] DecodeTextureMipmap(int mipmap, out int size)
         {
             if (!ContainsMipmaps()) // No mipmaps = no texture
@@ -396,29 +419,12 @@ namespace VrSharp
             if (size == 0) // Mipmap > number of mipmaps
                 return null;
 
-            if (ClutOffset != -1) // The texture contains a clut
-                DataCodec.SetClut(TextureData, ClutOffset, PixelCodec);
+            if (PaletteOffset != -1) // The texture contains a clut
+                DataCodec.SetClut(TextureData, PaletteOffset, PixelCodec);
 
             return DataCodec.DecodeMipmap(TextureData, DataOffset, mipmap, size, size, PixelCodec);
         }
-
-        // Function for checking headers
-        // Checks to see if the string matches the byte data at the specific offset
-        /*
-        protected static bool Compare(byte[] array, string str, int offset)
-        {
-            if (offset < 0 || offset + str.Length > array.Length)
-                return false; // Out of bounds
-
-            for (int i = 0; i < str.Length; i++)
-            {
-                if (array[offset + i] != str[i])
-                    return false;
-            }
-
-            return true;
-        }
-         * */
+         */
         #endregion
     }
 }

@@ -111,7 +111,7 @@ namespace VrSharp.PvrTexture
         #region Clut
         protected override void CreateVpClut(byte[] ClutData, ushort NumClutEntries)
         {
-            ClutEncoder = new PvpClutEncoder(ClutData, NumClutEntries, (PvrPixelFormat)PixelFormat);
+            ClutEncoder = new PvpPaletteEncoder(ClutData, NumClutEntries, (PvrPixelFormat)PixelFormat);
         }
         #endregion
 

@@ -5,9 +5,6 @@ namespace PuyoTools.Modules.Compression
 {
     public abstract class CompressionBase : ModuleBase
     {
-        public virtual void Decompress(byte[] source, long offset, Stream destination, int length) { }
-        public abstract void Compress(byte[] source, long offset, Stream destination, int length, string fname);
-
         #region Decompress Methods
         /// <summary>
         /// Decompress data from a stream.
@@ -15,15 +12,7 @@ namespace PuyoTools.Modules.Compression
         /// <param name="source">The stream to read from.</param>
         /// <param name="destination">The stream to write to.</param>
         /// <param name="length">Number of bytes to read.</param>
-        public virtual void Decompress(Stream source, Stream destination, int length)
-        {
-            // Temporary!!!
-            // This will eventually become the abstract method.
-            byte[] buffer = new byte[length];
-            source.Read(buffer, 0, length);
-
-            Decompress(buffer, 0L, destination, length);
-        }
+        public abstract void Decompress(Stream source, Stream destination, int length);
 
         /// <summary>
         /// Decompress data from a file. This method can read from and write to the same file.
@@ -132,15 +121,7 @@ namespace PuyoTools.Modules.Compression
         /// <param name="destination">The stream to write to.</param>
         /// <param name="length">Number of bytes to read.</param>
         /// <param name="settings">Settings to use when compressing.</param>
-        public virtual void Compress(Stream source, Stream destination, int length, ModuleWriterSettings settings)
-        {
-            // Temporary!!!
-            // This will eventually become the abstract method.
-            byte[] buffer = new byte[length];
-            source.Read(buffer, 0, length);
-
-            Compress(buffer, 0L, destination, length, String.Empty);
-        }
+        public abstract void Compress(Stream source, Stream destination, int length, ModuleWriterSettings settings);
 
         /// <summary>
         /// Compress data from a file. This method can read from and write to the same file.

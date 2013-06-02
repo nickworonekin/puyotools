@@ -3,13 +3,13 @@ using System.IO;
 
 namespace VrSharp
 {
-    public abstract class VpClutEncoder
+    public abstract class VpPaletteEncoder
     {
         #region Fields
         protected bool InitSuccess = false; // Initalization
 
-        protected byte[] ClutData;    // Clut Data
-        protected ushort ClutEntires; // Num of Entries in the Clut
+        protected byte[] PaletteData;    // Palette Data
+        protected ushort PaletteEntires; // Num of Entries in the Palette
         #endregion
 
         #region Constructors
@@ -18,18 +18,18 @@ namespace VrSharp
         /// </summary>
         /// <param name="stream">MemoryStream that contains the clut data.</param>
         /// <param name="NumClutEntries">Number of entries in the clut.</param>
-        public VpClutEncoder(MemoryStream stream, ushort NumClutEntries)
+        public VpPaletteEncoder(MemoryStream stream, ushort NumClutEntries)
         {
             stream.Seek(0, SeekOrigin.Begin); // Seek to the beginning
-            try { ClutData = stream.ToArray(); }
+            try { PaletteData = stream.ToArray(); }
             catch
             {
-                ClutData    = new byte[0];
+                PaletteData    = new byte[0];
                 InitSuccess = false;
                 return;
             }
 
-            ClutEntires = NumClutEntries;
+            PaletteEntires = NumClutEntries;
             InitSuccess = true;
         }
 
@@ -38,23 +38,23 @@ namespace VrSharp
         /// </summary>
         /// <param name="array">Byte array that contains the clut data.</param>
         /// <param name="NumClutEntries">Number of entries in the clut.</param>
-        public VpClutEncoder(byte[] array, ushort NumClutEntries)
+        public VpPaletteEncoder(byte[] array, ushort NumClutEntries)
         {
             if (array != null)
-                ClutData = array;
+                PaletteData = array;
             else
             {
-                ClutData    = new byte[0];
+                PaletteData    = new byte[0];
                 InitSuccess = false;
                 return;
             }
 
-            ClutEntires = NumClutEntries;
+            PaletteEntires = NumClutEntries;
             InitSuccess = true;
         }
         #endregion
 
-        #region Clut
+        #region Palette
         /// <summary>
         /// Returns the clut as an array (clone of GetClutAsArray).
         /// </summary>
@@ -100,11 +100,11 @@ namespace VrSharp
         #region Private Methods
         private byte[] EncodeClut()
         {
-            byte[] VpClutData = new byte[0x10 + ClutData.Length];
+            byte[] VpClutData = new byte[0x10 + PaletteData.Length];
 
             byte[] PvplHeader = WritePvplHeader();
             PvplHeader.CopyTo(VpClutData, 0x00);
-            ClutData.CopyTo(VpClutData, 0x10);
+            PaletteData.CopyTo(VpClutData, 0x10);
 
             return VpClutData;
         }

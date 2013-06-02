@@ -34,7 +34,7 @@ namespace VrSharp
 
         //protected byte[,] TextureClut;       // Texture Clut
         protected byte[][] TextureClut;
-        protected VpClutEncoder ClutEncoder; // Clut Encoder
+        protected VpPaletteEncoder ClutEncoder; // Clut Encoder
 
 
         //public bool Initalized { get; protected set; }

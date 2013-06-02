@@ -11,7 +11,19 @@ namespace VrSharp.GvrTexture
         /// <summary>
         /// The texture's pixel format. This only applies to palettized textures.
         /// </summary>
-        public GvrPixelFormat PixelFormat { get; private set; }
+        public GvrPixelFormat PixelFormat
+        {
+            get
+            {
+                if (!initalized)
+                {
+                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
+                }
+
+                return pixelFormat;
+            }
+        }
+        private GvrPixelFormat pixelFormat;
 
         /// <summary>
         /// The texture's data flags. Can contain one or more of the following:
@@ -19,12 +31,36 @@ namespace VrSharp.GvrTexture
         /// <para>- GvrDataFlags.ExternalClut</para>
         /// <para>- GvrDataFlags.InternalClut</para>
         /// </summary>
-        public GvrDataFlags DataFlags { get; private set; }
+        public GvrDataFlags DataFlags
+        {
+            get
+            {
+                if (!initalized)
+                {
+                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
+                }
+
+                return dataFlags;
+            }
+        }
+        private GvrDataFlags dataFlags;
 
         /// <summary>
         /// The texture's data format.
         /// </summary>
-        public GvrDataFormat DataFormat { get; private set; }
+        public GvrDataFormat DataFormat
+        {
+            get
+            {
+                if (!initalized)
+                {
+                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
+                }
+
+                return dataFormat;
+            }
+        }
+        private GvrDataFormat dataFormat;
         #endregion
 
         #region Constructors & Initalizers
@@ -64,91 +100,90 @@ namespace VrSharp.GvrTexture
         protected override bool Initalize()
         {
             // Check to see if what we are dealing with is a GVR texture
-            if (!Is(TextureData))
+            if (!Is(encodedData))
                 return false;
 
             // Determine the offsets of the GBIX/GCIX (if present) and GCIX header chunks.
-            if (PTMethods.Contains(TextureData, 0, Encoding.UTF8.GetBytes("GBIX")) ||
-                PTMethods.Contains(TextureData, 0, Encoding.UTF8.GetBytes("GCIX")))
+            if (PTMethods.Contains(encodedData, 0, Encoding.UTF8.GetBytes("GBIX")) ||
+                PTMethods.Contains(encodedData, 0, Encoding.UTF8.GetBytes("GCIX")))
             {
-                GbixOffset = 0x00;
-                PvrtOffset = 0x10;
+                gbixOffset = 0x00;
+                pvrtOffset = 0x10;
             }
             else
             {
-                GbixOffset = -1;
-                PvrtOffset = 0x00;
+                gbixOffset = -1;
+                pvrtOffset = 0x00;
             }
 
             // Read the global index (if it is present). If it is not present, just set it to 0.
-            if (GbixOffset != -1)
+            if (gbixOffset != -1)
             {
-                GlobalIndex = (uint)(TextureData[GbixOffset + 0x08] << 24 | TextureData[GbixOffset + 0x09] << 16 | TextureData[GbixOffset + 0x0A] << 8 | TextureData[GbixOffset + 0x0B]);
+                globalIndex = PTMethods.ToUInt32BE(encodedData, gbixOffset + 0x08);
             }
             else
             {
-                GlobalIndex = 0;
+                globalIndex = 0;
             }
 
             // Read information about the texture
-            TextureWidth  = (ushort)((TextureData[PvrtOffset + 0x0C] << 8) | TextureData[PvrtOffset + 0x0D]);
-            TextureHeight = (ushort)((TextureData[PvrtOffset + 0x0E] << 8) | TextureData[PvrtOffset + 0x0F]);
+            textureWidth  = PTMethods.ToUInt16BE(encodedData, pvrtOffset + 0x0C);
+            textureHeight = PTMethods.ToUInt16BE(encodedData, pvrtOffset + 0x0E);
 
-            PixelFormat = (GvrPixelFormat)(TextureData[PvrtOffset + 0x0A] >> 4); // Only the first 4 bits matter
-            DataFlags   = (GvrDataFlags)(TextureData[PvrtOffset + 0x0A] & 0x0F); // Only the last 4 bits matter
-            DataFormat  = (GvrDataFormat)TextureData[PvrtOffset + 0x0B];
+            pixelFormat = (GvrPixelFormat)(encodedData[pvrtOffset + 0x0A] >> 4); // Only the first 4 bits matter
+            dataFlags   = (GvrDataFlags)(encodedData[pvrtOffset + 0x0A] & 0x0F); // Only the last 4 bits matter
+            dataFormat  = (GvrDataFormat)encodedData[pvrtOffset + 0x0B];
 
             // Get the codecs and make sure we can decode using them
-            PixelCodec = GvrPixelCodec.GetPixelCodec(PixelFormat);
-            if ((DataFlags & GvrDataFlags.Clut) != 0 && PixelCodec == null) return false;
+            pixelCodec = GvrPixelCodec.GetPixelCodec(pixelFormat);
+            if ((dataFlags & GvrDataFlags.Clut) != 0 && pixelCodec == null) return false;
 
-            DataCodec = GvrDataCodec.GetDataCodec(DataFormat);
-            if (DataCodec == null) return false;
-            DataCodec.PixelCodec = PixelCodec;
+            dataCodec = GvrDataCodec.GetDataCodec(dataFormat);
+            if (dataCodec == null) return false;
+            dataCodec.PixelCodec = pixelCodec;
 
             // Set the clut and data offsets
-            if ((DataFlags & GvrDataFlags.InternalClut) == 0 || DataCodec.ClutEntries == 0 || NeedsExternalClut())
+            if ((dataFlags & GvrDataFlags.InternalClut) == 0 || dataCodec.ClutEntries == 0 || NeedsExternalPalette)
             {
-                ClutOffset = -1;
-                DataOffset = PvrtOffset + 0x10;
+                paletteOffset = -1;
+                dataOffset = pvrtOffset + 0x10;
             }
             else
             {
-                ClutOffset = PvrtOffset + 0x10;
-                DataOffset = ClutOffset + (DataCodec.ClutEntries * (PixelCodec.Bpp >> 3));
+                paletteOffset = pvrtOffset + 0x10;
+                dataOffset = paletteOffset + (dataCodec.ClutEntries * (pixelCodec.Bpp >> 3));
             }
 
-            RawImageData = new byte[TextureWidth * TextureHeight * 4];
+            decodedData = new byte[textureWidth * textureHeight * 4];
             return true;
         }
         #endregion
 
-        #region Clut
+        #region Palette
         /// <summary>
-        /// Set the clut data from an external clut file.
+        /// Set the palette data from an external palette file.
         /// </summary>
-        /// <param name="clut">A GvpClut object</param>
-        public override void SetClut(VpClut clut)
+        /// <param name="clut">A GvpPalette object</param>
+        public void SetPalette(GvpPalette palette)
         {
-            if (!(clut is GvpClut)) // Make sure this is a GvpClut object
-            {
-                throw new ArgumentException(String.Format(
-                    "VpClut type is {0} when it needs to be GvpClut.",
-                    clut.GetType()));
-            }
-
-            base.SetClut(clut);
+            SetPalette((VpPalette)palette);
         }
 
         /// <summary>
         /// Returns if the texture needs an external clut file.
         /// </summary>
         /// <returns></returns>
-        public override bool NeedsExternalClut()
+        public override bool NeedsExternalPalette
         {
-            if (!InitSuccess) return false;
+            get
+            {
+                if (!initalized)
+                {
+                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
+                }
 
-            return ((DataFlags & GvrDataFlags.ExternalClut) != 0);
+                return ((DataFlags & GvrDataFlags.ExternalClut) != 0);
+            }
         }
         #endregion
 

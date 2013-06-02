@@ -2,12 +2,12 @@
 using System.IO;
 using System.Text;
 
-namespace VrSharp.SvrTexture
+namespace VrSharp.GvrTexture
 {
-    public class SvpClutEncoder : VpClutEncoder
+    public class GvpPaletteEncoder : VpPaletteEncoder
     {
         #region Fields
-        SvrPixelFormat PixelFormat; // Pixel Format
+        GvrPixelFormat PixelFormat; // Pixel Format
         #endregion
 
         #region Constructors
@@ -16,7 +16,7 @@ namespace VrSharp.SvrTexture
         /// </summary>
         /// <param name="stream">MemoryStream that contains the clut data.</param>
         /// <param name="NumClutEntries">Number of entries in the clut.</param>
-        public SvpClutEncoder(MemoryStream stream, ushort NumClutEntries, SvrPixelFormat PixelFormat)
+        public GvpPaletteEncoder(MemoryStream stream, ushort NumClutEntries, GvrPixelFormat PixelFormat)
             : base(stream, NumClutEntries)
         {
             this.PixelFormat = PixelFormat;
@@ -26,7 +26,7 @@ namespace VrSharp.SvrTexture
         /// Load a clut from a byte array.
         /// </summary>
         /// <param name="array">Byte array that contains the clut data.</param>
-        public SvpClutEncoder(byte[] array, ushort NumClutEntries, SvrPixelFormat PixelFormat)
+        public GvpPaletteEncoder(byte[] array, ushort NumClutEntries, GvrPixelFormat PixelFormat)
             : base(array, NumClutEntries)
         {
             this.PixelFormat = PixelFormat;
@@ -39,13 +39,11 @@ namespace VrSharp.SvrTexture
             MemoryStream PvplHeader = new MemoryStream();
             using (BinaryWriter Writer = new BinaryWriter(PvplHeader))
             {
-                Writer.Write(Encoding.UTF8.GetBytes("PVPL"));
-                Writer.Write(ClutData.Length + 8);
+                Writer.Write(Encoding.UTF8.GetBytes("GVPL"));
+                Writer.Write(PaletteData.Length + 8);
                 Writer.Write((ushort)0x0000); // I don't know what this is for
-                Writer.Write((ushort)PixelFormat);
-                Writer.Write((ushort)0x0000);
-                //Writer.Write(0x00000000); // Appears to be blank
-                Writer.Write(ClutEntires);
+                Writer.Write(0x00000000); // Appears to be blank
+                Writer.Write(SwapUShort(PaletteEntires));
                 Writer.Flush();
             }
 

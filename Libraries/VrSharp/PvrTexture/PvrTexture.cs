@@ -8,24 +8,60 @@ namespace VrSharp.PvrTexture
     public class PvrTexture : VrTexture
     {
         #region Fields
-        private PvrCompressionCodec CompressionCodec; // Compression Codec
+        private PvrCompressionCodec compressionCodec; // Compression Codec
         #endregion
 
         #region Texture Properties
         /// <summary>
         /// The texture's pixel format.
         /// </summary>
-        public PvrPixelFormat PixelFormat { get; private set; }
+        public PvrPixelFormat PixelFormat
+        {
+            get
+            {
+                if (!initalized)
+                {
+                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
+                }
+
+                return pixelFormat;
+            }
+        }
+        private PvrPixelFormat pixelFormat;
 
         /// <summary>
         /// The texture's data format.
         /// </summary>
-        public PvrDataFormat DataFormat { get; private set; }
+        public PvrDataFormat DataFormat
+        {
+            get
+            {
+                if (!initalized)
+                {
+                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
+                }
+
+                return dataFormat;
+            }
+        }
+        private PvrDataFormat dataFormat;
 
         /// <summary>
         /// The texture's compression format (if it is compressed).
         /// </summary>
-        public PvrCompressionFormat CompressionFormat { get; private set; }
+        public PvrCompressionFormat CompressionFormat
+        {
+            get
+            {
+                if (!initalized)
+                {
+                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
+                }
+
+                return compressionFormat;
+            }
+        }
+        private PvrCompressionFormat compressionFormat;
         #endregion
 
         #region Constructors & Initalizers
@@ -65,115 +101,108 @@ namespace VrSharp.PvrTexture
         protected override bool Initalize()
         {
             // Check to see if what we are dealing with is a PVR texture
-            if (!Is(TextureData))
+            if (!Is(encodedData))
                 return false;
 
             // Determine the offsets of the GBIX (if present) and PVRT header chunks.
-            if (PTMethods.Contains(TextureData, 0x00, Encoding.UTF8.GetBytes("GBIX")))
+            if (PTMethods.Contains(encodedData, 0x00, Encoding.UTF8.GetBytes("GBIX")))
             {
-                GbixOffset = 0x00;
-                PvrtOffset = 0x10;
+                gbixOffset = 0x00;
+                pvrtOffset = 0x10;
             }
-            else if (PTMethods.Contains(TextureData, 0x04, Encoding.UTF8.GetBytes("GBIX")))
+            else if (PTMethods.Contains(encodedData, 0x04, Encoding.UTF8.GetBytes("GBIX")))
             {
-                GbixOffset = 0x04;
-                PvrtOffset = 0x14;
+                gbixOffset = 0x04;
+                pvrtOffset = 0x14;
             }
-            else if (PTMethods.Contains(TextureData, 0x04, Encoding.UTF8.GetBytes("PVRT")))
+            else if (PTMethods.Contains(encodedData, 0x04, Encoding.UTF8.GetBytes("PVRT")))
             {
-                GbixOffset = -1;
-                PvrtOffset = 0x04;
+                gbixOffset = -1;
+                pvrtOffset = 0x04;
             }
             else
             {
-                GbixOffset = -1;
-                PvrtOffset = 0x00;
+                gbixOffset = -1;
+                pvrtOffset = 0x00;
             }
 
             // Read the global index (if it is present). If it is not present, just set it to 0.
-            if (GbixOffset != -1)
+            if (gbixOffset != -1)
             {
-                GlobalIndex = BitConverter.ToUInt32(TextureData, GbixOffset + 0x08);
+                globalIndex = BitConverter.ToUInt32(encodedData, gbixOffset + 0x08);
             }
             else
             {
-                GlobalIndex = 0;
+                globalIndex = 0;
             }
 
             // Read information about the texture
-            TextureWidth  = BitConverter.ToUInt16(TextureData, PvrtOffset + 0x0C);
-            TextureHeight = BitConverter.ToUInt16(TextureData, PvrtOffset + 0x0E);
+            textureWidth  = BitConverter.ToUInt16(encodedData, pvrtOffset + 0x0C);
+            textureHeight = BitConverter.ToUInt16(encodedData, pvrtOffset + 0x0E);
 
-            PixelFormat = (PvrPixelFormat)TextureData[PvrtOffset + 0x08];
-            DataFormat  = (PvrDataFormat)TextureData[PvrtOffset + 0x09];
+            pixelFormat = (PvrPixelFormat)encodedData[pvrtOffset + 0x08];
+            dataFormat  = (PvrDataFormat)encodedData[pvrtOffset + 0x09];
 
             // Get the codecs and make sure we can decode using them
-            PixelCodec = PvrPixelCodec.GetPixelCodec(PixelFormat);
-            if (PixelCodec == null) return false;
+            pixelCodec = PvrPixelCodec.GetPixelCodec(pixelFormat);
+            if (pixelCodec == null) return false;
 
-            DataCodec = PvrDataCodec.GetDataCodec(DataFormat);
-            if (DataCodec == null) return false;
-            DataCodec.PixelCodec = PixelCodec;
+            dataCodec = PvrDataCodec.GetDataCodec(dataFormat);
+            if (dataCodec == null) return false;
+            dataCodec.PixelCodec = pixelCodec;
 
             // Set the clut and data offsets
-            if (DataCodec.ClutEntries == 0 || DataCodec.NeedsExternalClut)
+            if (dataCodec.ClutEntries == 0 || dataCodec.NeedsExternalClut)
             {
-                ClutOffset = -1;
-                DataOffset = PvrtOffset + 0x10;
+                paletteOffset = -1;
+                dataOffset = PvrtOffset + 0x10;
             }
             else
             {
-                ClutOffset = PvrtOffset + 0x10;
-                DataOffset = ClutOffset + (DataCodec.ClutEntries * (PixelCodec.Bpp >> 3));
+                paletteOffset = PvrtOffset + 0x10;
+                dataOffset = paletteOffset + (dataCodec.ClutEntries * (pixelCodec.Bpp >> 3));
             }
 
             // Get the compression format and determine if we need to decompress this texture
-            CompressionFormat = GetCompressionFormat(TextureData, PvrtOffset, DataOffset);
-            CompressionCodec = PvrCompressionCodec.GetCompressionCodec(CompressionFormat);
+            compressionFormat = GetCompressionFormat(encodedData, PvrtOffset, dataOffset);
+            compressionCodec = PvrCompressionCodec.GetCompressionCodec(compressionFormat);
 
-            if (CompressionFormat != PvrCompressionFormat.None && CompressionCodec != null)
+            if (compressionFormat != PvrCompressionFormat.None && compressionCodec != null)
             {
-                TextureData = CompressionCodec.Decompress(TextureData, DataOffset, PixelCodec, DataCodec);
+                encodedData = compressionCodec.Decompress(encodedData, dataOffset, pixelCodec, dataCodec);
 
                 // Now place the offsets in the appropiate area
                 if (CompressionFormat == PvrCompressionFormat.Rle)
                 {
-                    if (GbixOffset != -1) GbixOffset -= 4;
-                    PvrtOffset -= 4;
-                    if (ClutOffset != -1) ClutOffset -= 4;
-                    DataOffset -= 4;
+                    if (GbixOffset != -1) gbixOffset -= 4;
+                    pvrtOffset -= 4;
+                    if (paletteOffset != -1) paletteOffset -= 4;
+                    dataOffset -= 4;
                 }
             }
 
-            RawImageData = new byte[TextureWidth * TextureHeight * 4];
+            decodedData = new byte[textureWidth * textureHeight * 4];
             return true;
         }
         #endregion
 
-        #region Clut
+        #region Palette
         /// <summary>
-        /// Set the clut data from an external clut file.
+        /// Set the palette data from an external palette file.
         /// </summary>
-        /// <param name="clut">A PvpClut object</param>
-        public override void SetClut(VpClut clut)
+        /// <param name="clut">A PvpPalette object</param>
+        public void SetPalette(PvpPalette clut)
         {
-            if (!(clut is PvpClut)) // Make sure this is a PvpClut object
-            {
-                throw new ArgumentException(String.Format(
-                    "VpClut type is {0} when it needs to be PvpClut.",
-                    clut.GetType()));
-            }
-
-            base.SetClut(clut);
+            SetPalette((VpPalette)clut);
         }
         #endregion
 
         #region Compression Format
         // Gets the compression format used on the PVR
-        private PvrCompressionFormat GetCompressionFormat(byte[] data, int PvrtOffset, int DataOffset)
+        private PvrCompressionFormat GetCompressionFormat(byte[] data, int pvrtOffset, int dataOffset)
         {
             // RLE compression
-            if (BitConverter.ToUInt32(data, 0x00) == BitConverter.ToUInt32(data, PvrtOffset + 4) - PvrtOffset + DataOffset + 8)
+            if (BitConverter.ToUInt32(data, 0x00) == BitConverter.ToUInt32(data, pvrtOffset + 4) - pvrtOffset + dataOffset + 8)
                 return PvrCompressionFormat.Rle;
 
             return PvrCompressionFormat.None;

@@ -3,16 +3,16 @@ using System.IO;
 
 namespace VrSharp
 {
-    public abstract class VpClut
+    public abstract class VpPalette
     {
         #region Fields
         protected bool InitSuccess = false; // Initalization
 
-        protected byte[] ClutData; // Vp Clut Data
+        protected byte[] ClutData; // Vp Palette Data
 
-        protected ushort NumClutEntries; // Number of Clut Entries
+        protected ushort NumPaletteEntries; // Number of Palette Entries
 
-        protected byte PixelFormat;        // Pixel Format
+        protected byte PixelFormat;     // Pixel Format
         public VrPixelCodec PixelCodec; // Pixel Codec
         #endregion
 
@@ -21,7 +21,7 @@ namespace VrSharp
         /// Open a Vp clut from a file.
         /// </summary>
         /// <param name="file">Filename of the file that contains the clut data.</param>
-        public VpClut(string file)
+        public VpPalette(string file)
         {
             byte[] data;
             try
@@ -37,14 +37,14 @@ namespace VrSharp
         /// Open a Vp clut from a stream.
         /// </summary>
         /// <param name="stream">Stream that contains the clut data.</param>
-        public VpClut(Stream stream) : this(stream, (int)(stream.Length - stream.Position)) { }
+        public VpPalette(Stream stream) : this(stream, (int)(stream.Length - stream.Position)) { }
 
         /// <summary>
         /// Open a Vp clut from a stream.
         /// </summary>
         /// <param name="stream">Stream that contains the clut data.</param>
         /// <param name="length">Number of bytes to read.</param>
-        public VpClut(Stream stream, int length)
+        public VpPalette(Stream stream, int length)
         {
             byte[] data;
             try
@@ -61,7 +61,7 @@ namespace VrSharp
         /// Open a Vp clut from a byte array.
         /// </summary>
         /// <param name="array">Byte array that contains the clut data.</param>
-        public VpClut(byte[] array) : this(array, 0, array.Length) { }
+        public VpPalette(byte[] array) : this(array, 0, array.Length) { }
 
         /// <summary>
         /// Open a Vp clut from a byte array.
@@ -69,7 +69,7 @@ namespace VrSharp
         /// <param name="array">Byte array that contains the clut data.</param>
         /// <param name="offset">Offset of the clut data in the array.</param>
         /// <param name="length">Number of bytes to read.</param>
-        public VpClut(byte[] array, long offset, int length)
+        public VpPalette(byte[] array, long offset, int length)
         {
             byte[] data;
             if (array == null)
@@ -88,36 +88,36 @@ namespace VrSharp
         }
         #endregion
 
-        #region Clut
+        #region Palette
         /// <summary>
-        /// Get the clut data.
+        /// Get the palette data.
         /// </summary>
         /// <param name="PixelCodec">Pixel Codec used for the clut.</param>
         /// <returns></returns>
-        public byte[] GetClut(VrPixelCodec PixelCodec)
+        public byte[] GetPalette(VrPixelCodec PixelCodec)
         {
             if (!InitSuccess) return new byte[0];
 
-            byte[] clut = new byte[NumClutEntries * (PixelCodec.Bpp >> 3)];
+            byte[] clut = new byte[NumPaletteEntries * (PixelCodec.Bpp >> 3)];
             Array.Copy(ClutData, 0x10, clut, 0x00, clut.Length);
 
             return clut;
         }
 
         /// <summary>
-        /// Get the number of entries in the clut file.
+        /// Get the number of entries in the palette file.
         /// </summary>
         /// <returns></returns>
-        public ushort GetNumClutEntries()
+        public ushort GetNumPaletteEntries()
         {
             if (!InitSuccess) return 0;
-            return NumClutEntries;
+            return NumPaletteEntries;
         }
         #endregion
 
         #region Misc
         /// <summary>
-        /// Returns if the clut was loaded successfully.
+        /// Returns if the palette was loaded successfully.
         /// </summary>
         /// <returns></returns>
         public bool LoadSuccess()

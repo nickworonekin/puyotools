@@ -41,17 +41,17 @@ namespace PuyoTools.Modules.Texture
 
             // Check to see if this texture requires an external palette and throw an exception
             // if we do not have one defined
-            if (texture.NeedsExternalClut())
+            if (texture.NeedsExternalPalette)
             {
                 if (settings != null && settings.PaletteStream != null)
                 {
                     if (settings.PaletteLength == -1)
                     {
-                        texture.SetClut(new SvpClut(settings.PaletteStream));
+                        texture.SetPalette(new SvpPalette(settings.PaletteStream));
                     }
                     else
                     {
-                        texture.SetClut(new SvpClut(settings.PaletteStream, settings.PaletteLength));
+                        texture.SetPalette(new SvpPalette(settings.PaletteStream, settings.PaletteLength));
                     }
                 }
                 else
@@ -60,9 +60,7 @@ namespace PuyoTools.Modules.Texture
                 }
             }
 
-            MemoryStream destinationStream = texture.ToStream();
-            destinationStream.Position = 0;
-            PTStream.CopyTo(destinationStream, destination);
+            texture.Save(destination);
         }
 
         public override void Write(byte[] source, long offset, Stream destination, int length, string fname)

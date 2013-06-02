@@ -99,7 +99,7 @@ namespace VrSharp.SvrTexture
         #region Clut
         protected override void CreateVpClut(byte[] ClutData, ushort NumClutEntries)
         {
-            ClutEncoder = new SvpClutEncoder(ClutData, NumClutEntries, (SvrPixelFormat)PixelFormat);
+            ClutEncoder = new SvpPaletteEncoder(ClutData, NumClutEntries, (SvrPixelFormat)PixelFormat);
         }
         #endregion
 

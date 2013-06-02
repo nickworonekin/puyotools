@@ -1,59 +1,59 @@
 ﻿using System;
 using System.IO;
 
-namespace VrSharp.GvrTexture
+namespace VrSharp.SvrTexture
 {
-    public class GvpClut : VpClut
+    public class SvpPalette : VpPalette
     {
         #region Constructors
         /// <summary>
-        /// Open a Gvp clut from a file.
+        /// Open a Svp clut from a file.
         /// </summary>
         /// <param name="file">Filename of the file that contains the clut data.</param>
-        public GvpClut(string file)
+        public SvpPalette(string file)
             : base(file)
         {
             InitSuccess = ReadHeader();
         }
 
         /// <summary>
-        /// Open a Gvp clut from a stream.
+        /// Open a Svp clut from a stream.
         /// </summary>
         /// <param name="stream">Stream that contains the clut data.</param>
-        public GvpClut(Stream stream)
+        public SvpPalette(Stream stream)
             : base(stream)
         {
             InitSuccess = ReadHeader();
         }
 
         /// <summary>
-        /// Open a Gvp clut from a stream.
+        /// Open a Svp clut from a stream.
         /// </summary>
         /// <param name="stream">Stream that contains the clut data.</param>
         /// <param name="length">Number of bytes to read.</param>
-        public GvpClut(Stream stream, int length)
+        public SvpPalette(Stream stream, int length)
             : base(stream, length)
         {
             InitSuccess = ReadHeader();
         }
 
         /// <summary>
-        /// Open a Gvp clut from a byte array.
+        /// Open a Svp clut from a byte array.
         /// </summary>
         /// <param name="array">Byte array that contains the clut data.</param>
-        public GvpClut(byte[] array)
+        public SvpPalette(byte[] array)
             : base(array)
         {
             InitSuccess = ReadHeader();
         }
 
         /// <summary>
-        /// Open a Gvp clut from a byte array.
+        /// Open a Svp clut from a byte array.
         /// </summary>
         /// <param name="array">Byte array that contains the clut data.</param>
         /// <param name="offset">Offset of the clut data in the array.</param>
         /// <param name="length">Number of bytes to read.</param>
-        public GvpClut(byte[] array, long offset, int length)
+        public SvpPalette(byte[] array, long offset, int length)
             : base(array, offset, length)
         {
             InitSuccess = ReadHeader();
@@ -65,22 +65,24 @@ namespace VrSharp.GvrTexture
         // Returns true if successful, otherwise false
         private bool ReadHeader()
         {
-            if (!IsGvpClut(ClutData))
+            if (!IsSvpClut(ClutData))
                 return false;
 
-            NumClutEntries = (ushort)((ClutData[0x0E] << 8) | ClutData[0x0F]);
+            NumPaletteEntries = BitConverter.ToUInt16(ClutData, 0x0E);
 
-            // I don't know how gvp's are supposed to be formatted
-            PixelFormat = (byte)GvrPixelFormat.Unknown;
-            PixelCodec  = null;
+            // Get the correct pixel codec from the clut file.
+            // Sometimes, the pixel codec specified in the texture file
+            // is not the same one specified in the clut file. As such, we should
+            // always use the one specified in the clut file.
+            PixelCodec = SvrPixelCodec.GetPixelCodec((SvrPixelFormat)ClutData[0x08]);
 
             return true;
         }
 
-        // Checks if the input file is a gvp
-        private bool IsGvpClut(byte[] data)
+        // Checks if the input file is a svp
+        private bool IsSvpClut(byte[] data)
         {
-            if (Compare(data, "GVPL", 0x00) &&
+            if (Compare(data, "PVPL", 0x00) &&
                 BitConverter.ToUInt32(data, 0x04) == data.Length - 8)
                 return true;
 
