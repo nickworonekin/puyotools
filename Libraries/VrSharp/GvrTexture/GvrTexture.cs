@@ -28,8 +28,8 @@ namespace VrSharp.GvrTexture
         /// <summary>
         /// The texture's data flags. Can contain one or more of the following:
         /// <para>- GvrDataFlags.Mipmaps</para>
-        /// <para>- GvrDataFlags.ExternalClut</para>
-        /// <para>- GvrDataFlags.InternalClut</para>
+        /// <para>- GvrDataFlags.ExternalPalette</para>
+        /// <para>- GvrDataFlags.InternalPalette</para>
         /// </summary>
         public GvrDataFlags DataFlags
         {
@@ -154,7 +154,6 @@ namespace VrSharp.GvrTexture
                 dataOffset = paletteOffset + (dataCodec.PaletteEntries * (pixelCodec.Bpp >> 3));
             }
 
-            decodedData = new byte[textureWidth * textureHeight * 4];
             return true;
         }
         #endregion

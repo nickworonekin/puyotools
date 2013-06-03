@@ -12,7 +12,6 @@ namespace VrSharp
         protected bool initalized = false; // Is the texture initalized?
 
         protected byte[] encodedData; // Encoded texture data (VR data)
-        protected byte[] decodedData; // Decoded texture data (32-bit ARGB)
 
         protected VrPixelCodec pixelCodec; // Pixel codec
         protected VrDataCodec dataCodec;   // Data codec

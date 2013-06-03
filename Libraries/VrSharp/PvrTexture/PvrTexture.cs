@@ -181,7 +181,6 @@ namespace VrSharp.PvrTexture
                 }
             }
 
-            decodedData = new byte[textureWidth * textureHeight * 4];
             return true;
         }
         #endregion

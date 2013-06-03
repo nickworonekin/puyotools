@@ -132,7 +132,6 @@ namespace VrSharp.SvrTexture
                 dataOffset = paletteOffset + (dataCodec.PaletteEntries * (pixelCodec.Bpp >> 3));
             }
 
-            decodedData = new byte[textureWidth * textureHeight * 4];
             return true;
         }
         #endregion

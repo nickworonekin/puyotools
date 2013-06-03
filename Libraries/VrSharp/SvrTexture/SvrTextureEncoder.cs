@@ -7,196 +7,43 @@ namespace VrSharp.SvrTexture
 {
     public class SvrTextureEncoder : VrTextureEncoder
     {
-        #region Fields
-        //public SvrPixelFormat PixelFormat { get; private set; }
-        //public SvrDataFormat DataFormat { get; private set; }
-        #endregion
-
-        /*
-        #region Constructors
-        /// <summary>
-        /// Open a bitmap from a file.
-        /// </summary>
-        /// <param name="file">Filename of the file that contains the bitmap data.</param>
-        /// <param name="PixelFormat">Pixel Format</param>
-        /// <param name="DataFormat">Data Format</param>
-        public SvrTextureEncoder(string file, SvrPixelFormat PixelFormat, SvrDataFormat DataFormat)
-            : base(file)
-        {
-            this.PixelFormat = PixelFormat;
-            this.DataFormat  = DataFormat;
-
-            InitSuccess = Initalize();
-        }
-
-        /// <summary>
-        /// Open a bitmap from a stream.
-        /// </summary>
-        /// <param name="stream">Stream that contains the bitmap data.</param>
-        /// <param name="PixelFormat">Pixel Format</param>
-        /// <param name="DataFormat">Data Format</param>
-        public SvrTextureEncoder(Stream stream, SvrPixelFormat PixelFormat, SvrDataFormat DataFormat)
-            : base(stream)
-        {
-            this.PixelFormat = PixelFormat;
-            this.DataFormat  = DataFormat;
-
-            InitSuccess = Initalize();
-        }
-
-        /// <summary>
-        /// Open a bitmap from a byte array.
-        /// </summary>
-        /// <param name="array">Byte array that contains the bitmap data.</param>
-        /// <param name="PixelFormat">Pixel Format</param>
-        /// <param name="DataFormat">Data Format</param>
-        public SvrTextureEncoder(byte[] array, SvrPixelFormat PixelFormat, SvrDataFormat DataFormat)
-            : base(array)
-        {
-            this.PixelFormat = PixelFormat;
-            this.DataFormat  = DataFormat;
-
-            InitSuccess = Initalize();
-        }
-
-        /// <summary>
-        /// Open a bitmap from a System.Drawing.Bitmap.
-        /// </summary>
-        /// <param name="bitmap">A System.Drawing.Bitmap instance.</param>
-        /// <param name="PixelFormat">Pixel Format</param>
-        /// <param name="DataFormat">Data Format</param>
-        public SvrTextureEncoder(Bitmap bitmap, SvrPixelFormat PixelFormat, SvrDataFormat DataFormat)
-            : base(bitmap)
-        {
-            this.PixelFormat = PixelFormat;
-            this.DataFormat  = DataFormat;
-
-            InitSuccess = Initalize();
-        }
-        #endregion
-
-        /*
-        #region Misc
-        /// <summary>
-        /// Returns information about the texture.  (Use an explicit cast to get SvrTextureInfo.)
-        /// </summary>
-        /// <returns></returns>
-        public override VrTextureInfo GetTextureInfo()
-        {
-            if (!InitSuccess) return new SvrTextureInfo();
-
-            SvrTextureInfo TextureInfo = new SvrTextureInfo();
-            TextureInfo.TextureWidth   = TextureWidth;
-            TextureInfo.TextureHeight  = TextureHeight;
-            TextureInfo.PixelFormat    = PixelFormat;
-            TextureInfo.DataFormat     = DataFormat;
-
-            return TextureInfo;
-        }
-        #endregion
-         * */
-
-        #region Clut
-        protected override void CreateVpClut(byte[] ClutData, ushort NumClutEntries)
-        {
-            ClutEncoder = new SvpPaletteEncoder(ClutData, NumClutEntries, (SvrPixelFormat)PixelFormat);
-        }
-        #endregion
-
-        /*
-        // Initalize the bitmap
-        private bool Initalize()
-        {
-            // Make sure the width and height are correct
-            if (TextureWidth < 8 || TextureHeight < 8) return false;
-            if ((TextureWidth & (TextureWidth - 1)) != 0 || (TextureHeight & (TextureHeight - 1)) != 0)
-                return false;
-
-            PixelCodec = SvrPixelCodec.GetPixelCodec((SvrPixelFormat)PixelFormat);
-            DataCodec  = SvrDataCodec.GetDataCodec((SvrDataFormat)DataFormat);
-
-            if (PixelCodec == null || DataCodec == null)           return false;
-            if (!PixelCodec.CanEncode || !DataCodec.CanEncode) return false;
-            if (!CanEncode((SvrPixelFormat)PixelFormat, (SvrDataFormat)DataFormat, TextureWidth, TextureHeight)) return false;
-
-            DataCodec.PixelCodec = PixelCodec;
-
-            GbixOffset = 0x00;
-            PvrtOffset = 0x10;
-
-            // See if we need to palettize the bitmap and raw image data
-            if (DataCodec.ClutEntries != 0)
-                PalettizeBitmap();
-
-            return true;
-        }
-
-        // Checks to see if we can encode the texture based on data format specific things
-        private bool CanEncode(SvrPixelFormat PixelFormat, SvrDataFormat DataFormat, int width, int height)
-        {
-            // The converter should check to see that a pixel codec and data codec exists,
-            // along with checking that width >= 8 and height >= 8.
-            switch (DataFormat)
-            {
-                case SvrDataFormat.Index4RectRgb5a3:
-                case SvrDataFormat.Index8RectRgb5a3:
-                    return (PixelFormat == SvrPixelFormat.Rgb5a3);
-                case SvrDataFormat.Index4SqrRgb5a3:
-                case SvrDataFormat.Index8SqrRgb5a3:
-                    return (width == height && PixelFormat == SvrPixelFormat.Rgb5a3);
-                case SvrDataFormat.Index4RectArgb8:
-                case SvrDataFormat.Index8RectArgb8:
-                    return (PixelFormat == SvrPixelFormat.Argb8888);
-                case SvrDataFormat.Index4SqrArgb8:
-                case SvrDataFormat.Index8SqrArgb8:
-                    return (width == height && PixelFormat == SvrPixelFormat.Argb8888);
-            }
-
-            return true;
-        }*/
-
-        /*
-        // Write the Gbix header
-        protected override byte[] WriteGbixHeader()
-        {
-            MemoryStream GbixHeader = new MemoryStream();
-            using (BinaryWriter Writer = new BinaryWriter(GbixHeader))
-            {
-                Writer.Write(Encoding.UTF8.GetBytes("GBIX"));
-                Writer.Write(0x00000008);
-                Writer.Write(GlobalIndex);
-                Writer.Write(new byte[] { 0x00, 0x00, 0x00, 0x00 });
-                Writer.Flush();
-            }
-
-            return GbixHeader.ToArray();
-        }
-
-        // Write the Pvrt header
-        protected override byte[] WritePvrtHeader(int TextureSize)
-        {
-            MemoryStream PvrtHeader = new MemoryStream();
-            using (BinaryWriter Writer = new BinaryWriter(PvrtHeader))
-            {
-                Writer.Write(Encoding.UTF8.GetBytes("PVRT"));
-                Writer.Write((DataOffset + TextureSize) - 24);
-                Writer.Write((byte)PixelFormat);
-                Writer.Write((byte)DataFormat);
-                Writer.Write(new byte[] { 0x00, 0x00 });
-                Writer.Write(TextureWidth);
-                Writer.Write(TextureHeight);
-                Writer.Flush();
-            }
-
-            return PvrtHeader.ToArray();
-        }*/
-
         #region Texture Properties
-        public SvrPixelFormat PixelFormat { get; private set; }
-        public SvrDataFormat DataFormat { get; private set; }
+        /// <summary>
+        /// The texture's pixel format.
+        /// </summary>
+        public SvrPixelFormat PixelFormat
+        {
+            get
+            {
+                if (!initalized)
+                {
+                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
+                }
+
+                return pixelFormat;
+            }
+        }
+        private SvrPixelFormat pixelFormat;
+
+        /// <summary>
+        /// The texture's data format.
+        /// </summary>
+        public SvrDataFormat DataFormat
+        {
+            get
+            {
+                if (!initalized)
+                {
+                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
+                }
+
+                return dataFormat;
+            }
+        }
+        private SvrDataFormat dataFormat;
         #endregion
 
-                #region Constructors & Initalizers
+        #region Constructors & Initalizers
         /// <summary>
         /// Opens a texture to encode from a file.
         /// </summary>
@@ -205,13 +52,9 @@ namespace VrSharp.SvrTexture
         /// <param name="dataFormat">Data format to encode the texture to.</param>
         public SvrTextureEncoder(string file, SvrPixelFormat pixelFormat, SvrDataFormat dataFormat) : base(file)
         {
-            if (RawImageData != null)
+            if (decodedData != null)
             {
-                InitSuccess = Initalize(pixelFormat, dataFormat);
-            }
-            else
-            {
-                InitSuccess = false;
+                initalized = Initalize(pixelFormat, dataFormat);
             }
         }
 
@@ -224,13 +67,9 @@ namespace VrSharp.SvrTexture
         public SvrTextureEncoder(byte[] source, SvrPixelFormat pixelFormat, SvrDataFormat dataFormat)
             : base(source)
         {
-            if (RawImageData != null)
+            if (decodedData != null)
             {
-                InitSuccess = Initalize(pixelFormat, dataFormat);
-            }
-            else
-            {
-                InitSuccess = false;
+                initalized = Initalize(pixelFormat, dataFormat);
             }
         }
 
@@ -245,13 +84,9 @@ namespace VrSharp.SvrTexture
         public SvrTextureEncoder(byte[] source, int offset, int length, SvrPixelFormat pixelFormat, SvrDataFormat dataFormat)
             : base(source, offset, length)
         {
-            if (RawImageData != null)
+            if (decodedData != null)
             {
-                InitSuccess = Initalize(pixelFormat, dataFormat);
-            }
-            else
-            {
-                InitSuccess = false;
+                initalized = Initalize(pixelFormat, dataFormat);
             }
         }
 
@@ -264,13 +99,9 @@ namespace VrSharp.SvrTexture
         public SvrTextureEncoder(Stream source, SvrPixelFormat pixelFormat, SvrDataFormat dataFormat)
             : base(source)
         {
-            if (RawImageData != null)
+            if (decodedData != null)
             {
-                InitSuccess = Initalize(pixelFormat, dataFormat);
-            }
-            else
-            {
-                InitSuccess = false;
+                initalized = Initalize(pixelFormat, dataFormat);
             }
         }
 
@@ -284,13 +115,9 @@ namespace VrSharp.SvrTexture
         public SvrTextureEncoder(Stream source, int length, SvrPixelFormat pixelFormat, SvrDataFormat dataFormat)
             : base(source, length)
         {
-            if (RawImageData != null)
+            if (decodedData != null)
             {
-                InitSuccess = Initalize(pixelFormat, dataFormat);
-            }
-            else
-            {
-                InitSuccess = false;
+                initalized = Initalize(pixelFormat, dataFormat);
             }
         }
 
@@ -303,99 +130,99 @@ namespace VrSharp.SvrTexture
         public SvrTextureEncoder(Bitmap source, SvrPixelFormat pixelFormat, SvrDataFormat dataFormat)
             : base(source)
         {
-            if (RawImageData != null)
+            if (decodedData != null)
             {
-                InitSuccess = Initalize(pixelFormat, dataFormat);
-            }
-            else
-            {
-                InitSuccess = false;
+                initalized = Initalize(pixelFormat, dataFormat);
             }
         }
 
         private bool Initalize(SvrPixelFormat pixelFormat, SvrDataFormat dataFormat)
         {
             // Set the default values
-            IncludeGbixHeader = true;
-            GlobalIndex = 0;
-
-            // Make sure the dimensions of the texture are valid
-            if (TextureWidth < 4 || TextureHeight < 4 || TextureWidth > 1024 || TextureHeight > 1024)
-                return false;
-
-            if ((TextureWidth & (TextureWidth - 1)) != 0 || (TextureHeight & (TextureHeight - 1)) != 0)
-                return false;
+            includeGbixHeader = true;
+            globalIndex = 0;
 
             // Set the data format and pixel format and load the appropiate codecs
-            PixelFormat = pixelFormat;
-            PixelCodec = SvrPixelCodec.GetPixelCodec(PixelFormat);
+            this.pixelFormat = pixelFormat;
+            pixelCodec = SvrPixelCodec.GetPixelCodec(pixelFormat);
 
-            DataFormat = dataFormat;
-            DataCodec = SvrDataCodec.GetDataCodec(DataFormat);
+            this.dataFormat = dataFormat;
+            dataCodec = SvrDataCodec.GetDataCodec(dataFormat);
 
             // Make sure the pixel and data codecs exists and we can encode to it
-            if (PixelCodec == null || !PixelCodec.CanEncode) return false;
-            if (DataCodec == null || !DataCodec.CanEncode) return false;
+            if (pixelCodec == null || !pixelCodec.CanEncode) return false;
+            if (dataCodec == null || !dataCodec.CanEncode) return false;
 
             // Set the correct data format (it's ok to do it after getting the codecs).
-            if (DataFormat == SvrDataFormat.Index4RectRgb5a3 || DataFormat == SvrDataFormat.Index4SqrRgb5a3 ||
-                DataFormat == SvrDataFormat.Index4RectArgb8 || DataFormat == SvrDataFormat.Index4SqrArgb8)
+            if (dataFormat == SvrDataFormat.Index4RectRgb5a3 || dataFormat == SvrDataFormat.Index4SqrRgb5a3 ||
+                dataFormat == SvrDataFormat.Index4RectArgb8 || dataFormat == SvrDataFormat.Index4SqrArgb8)
             {
-                if (TextureWidth == TextureHeight) // Square texture
+                if (textureWidth == textureHeight) // Square texture
                 {
-                    if (PixelFormat == SvrPixelFormat.Rgb5a3)
+                    if (pixelFormat == SvrPixelFormat.Rgb5a3)
                     {
-                        DataFormat = SvrDataFormat.Index4SqrRgb5a3;
+                        dataFormat = SvrDataFormat.Index4SqrRgb5a3;
                     }
                     else
                     {
-                        DataFormat = SvrDataFormat.Index4SqrArgb8;
+                        dataFormat = SvrDataFormat.Index4SqrArgb8;
                     }
                 }
                 else // Rectangular texture
                 {
-                    if (PixelFormat == SvrPixelFormat.Rgb5a3)
+                    if (pixelFormat == SvrPixelFormat.Rgb5a3)
                     {
-                        DataFormat = SvrDataFormat.Index4RectRgb5a3;
+                        dataFormat = SvrDataFormat.Index4RectRgb5a3;
                     }
                     else
                     {
-                        DataFormat = SvrDataFormat.Index4RectArgb8;
+                        dataFormat = SvrDataFormat.Index4RectArgb8;
                     }
                 }
             }
 
-            else if (DataFormat == SvrDataFormat.Index8RectRgb5a3 || DataFormat == SvrDataFormat.Index8SqrRgb5a3 ||
-                DataFormat == SvrDataFormat.Index8RectArgb8 || DataFormat == SvrDataFormat.Index8SqrArgb8)
+            else if (dataFormat == SvrDataFormat.Index8RectRgb5a3 || dataFormat == SvrDataFormat.Index8SqrRgb5a3 ||
+                dataFormat == SvrDataFormat.Index8RectArgb8 || dataFormat == SvrDataFormat.Index8SqrArgb8)
             {
-                if (TextureWidth == TextureHeight) // Square texture
+                if (textureWidth == textureHeight) // Square texture
                 {
-                    if (PixelFormat == SvrPixelFormat.Rgb5a3)
+                    if (pixelFormat == SvrPixelFormat.Rgb5a3)
                     {
-                        DataFormat = SvrDataFormat.Index8SqrRgb5a3;
+                        dataFormat = SvrDataFormat.Index8SqrRgb5a3;
                     }
                     else
                     {
-                        DataFormat = SvrDataFormat.Index8SqrArgb8;
+                        dataFormat = SvrDataFormat.Index8SqrArgb8;
                     }
                 }
                 else // Rectangular texture
                 {
-                    if (PixelFormat == SvrPixelFormat.Rgb5a3)
+                    if (pixelFormat == SvrPixelFormat.Rgb5a3)
                     {
-                        DataFormat = SvrDataFormat.Index8RectRgb5a3;
+                        dataFormat = SvrDataFormat.Index8RectRgb5a3;
                     }
                     else
                     {
-                        DataFormat = SvrDataFormat.Index8RectArgb8;
+                        dataFormat = SvrDataFormat.Index8RectArgb8;
                     }
                 }
             }
 
-            // Palettize the bitmap if this data format is palettized.
-            if (DataCodec.PaletteEntries != 0)
+            if (dataCodec.PaletteEntries != 0)
             {
-                PalettizeBitmap();
+                // Convert the bitmap to an array containing indicies.
+                decodedData = BitmapToRawIndexed(decodedBitmap, dataCodec.PaletteEntries, out texturePalette);
+                
+                // If this texture has an external palette file, set up the palette encoder
+                if (NeedsExternalPalette)
+                {
+                    paletteEncoder = new SvpPaletteEncoder(texturePalette, (ushort)dataCodec.PaletteEntries, pixelFormat, pixelCodec);
+                }
+            }
+            else
+            {
+                // Convert the bitmap to an array
+                decodedData = BitmapToRaw(decodedBitmap);
             }
 
             return true;
@@ -406,20 +233,20 @@ namespace VrSharp.SvrTexture
         protected override MemoryStream EncodeTexture()
         {
             // Calculate what the length of the texture will be
-            int textureLength = 16 + (TextureWidth * TextureHeight * DataCodec.Bpp / 8);
-            if (IncludeGbixHeader)
+            int textureLength = 16 + (textureWidth * textureHeight * dataCodec.Bpp / 8);
+            if (includeGbixHeader)
             {
                 textureLength += 16;
             }
-            if (DataCodec.PaletteEntries != 0 && !DataCodec.NeedsExternalPalette)
+            if (dataCodec.PaletteEntries != 0 && !dataCodec.NeedsExternalPalette)
             {
-                textureLength += (DataCodec.PaletteEntries * PixelCodec.Bpp / 8);
+                textureLength += (dataCodec.PaletteEntries * pixelCodec.Bpp / 8);
             }
 
             MemoryStream destination = new MemoryStream(textureLength);
 
             // Write out the GBIX header (if we are including one)
-            if (IncludeGbixHeader)
+            if (includeGbixHeader)
             {
                 destination.WriteByte((byte)'G');
                 destination.WriteByte((byte)'B');
@@ -427,7 +254,7 @@ namespace VrSharp.SvrTexture
                 destination.WriteByte((byte)'X');
 
                 PTStream.WriteUInt32(destination, 8);
-                PTStream.WriteUInt32(destination, GlobalIndex);
+                PTStream.WriteUInt32(destination, globalIndex);
                 PTStream.WriteUInt32(destination, 0);
             }
 
@@ -439,22 +266,22 @@ namespace VrSharp.SvrTexture
 
             PTStream.WriteInt32(destination, textureLength - 24);
 
-            destination.WriteByte((byte)PixelFormat);
-            destination.WriteByte((byte)DataFormat);
+            destination.WriteByte((byte)pixelFormat);
+            destination.WriteByte((byte)dataFormat);
             PTStream.WriteUInt16(destination, 0);
 
-            PTStream.WriteUInt16(destination, TextureWidth);
-            PTStream.WriteUInt16(destination, TextureHeight);
+            PTStream.WriteUInt16(destination, textureWidth);
+            PTStream.WriteUInt16(destination, textureHeight);
 
-            // If we have an internal clut, write it
-            if (DataCodec.PaletteEntries != 0 && !DataCodec.NeedsExternalPalette)
+            // If we have an internal palette, write it
+            if (dataCodec.PaletteEntries != 0 && !dataCodec.NeedsExternalPalette)
             {
-                byte[] clut = PixelCodec.EncodePalette(TextureClut, DataCodec.PaletteEntries);
-                destination.Write(clut, 0, clut.Length);
+                byte[] palette = pixelCodec.EncodePalette(texturePalette, dataCodec.PaletteEntries);
+                destination.Write(palette, 0, palette.Length);
             }
 
             // Write the texture data
-            byte[] textureData = DataCodec.Encode(RawImageData, TextureWidth, TextureHeight, null);
+            byte[] textureData = dataCodec.Encode(decodedData, textureWidth, textureHeight, null);
             destination.Write(textureData, 0, textureData.Length);
 
             return destination;

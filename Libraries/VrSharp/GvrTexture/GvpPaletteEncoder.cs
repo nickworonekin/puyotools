@@ -1,53 +1,50 @@
 ﻿using System;
 using System.IO;
-using System.Text;
 
 namespace VrSharp.GvrTexture
 {
     public class GvpPaletteEncoder : VpPaletteEncoder
     {
         #region Fields
-        GvrPixelFormat PixelFormat; // Pixel Format
+        private GvrPixelFormat pixelFormat; // Pixel format
         #endregion
 
-        #region Constructors
-        /// <summary>
-        /// Load a clut from a memory stream.
-        /// </summary>
-        /// <param name="stream">MemoryStream that contains the clut data.</param>
-        /// <param name="NumClutEntries">Number of entries in the clut.</param>
-        public GvpPaletteEncoder(MemoryStream stream, ushort NumClutEntries, GvrPixelFormat PixelFormat)
-            : base(stream, NumClutEntries)
+        #region Constructors & Initalizers
+        internal GvpPaletteEncoder(byte[][] palette, ushort numColors, GvrPixelFormat pixelFormat, VrPixelCodec pixelCodec)
+            : base(palette, numColors, pixelCodec)
         {
-            this.PixelFormat = PixelFormat;
-        }
-
-        /// <summary>
-        /// Load a clut from a byte array.
-        /// </summary>
-        /// <param name="array">Byte array that contains the clut data.</param>
-        public GvpPaletteEncoder(byte[] array, ushort NumClutEntries, GvrPixelFormat PixelFormat)
-            : base(array, NumClutEntries)
-        {
-            this.PixelFormat = PixelFormat;
+            this.pixelFormat = pixelFormat;
         }
         #endregion
 
-        #region Clut
-        public override byte[] WritePvplHeader()
+        #region Encode Palette
+        protected override MemoryStream EncodePalette()
         {
-            MemoryStream PvplHeader = new MemoryStream();
-            using (BinaryWriter Writer = new BinaryWriter(PvplHeader))
-            {
-                Writer.Write(Encoding.UTF8.GetBytes("GVPL"));
-                Writer.Write(PaletteData.Length + 8);
-                Writer.Write((ushort)0x0000); // I don't know what this is for
-                Writer.Write(0x00000000); // Appears to be blank
-                Writer.Write(SwapUShort(PaletteEntires));
-                Writer.Flush();
-            }
+            // Calculate what the length of the palette will be
+            int paletteLength = 16 + (paletteEntries * pixelCodec.Bpp / 8);
 
-            return PvplHeader.ToArray();
+            MemoryStream destination = new MemoryStream(paletteLength);
+
+            // Write out the GVPL header
+            destination.WriteByte((byte)'G');
+            destination.WriteByte((byte)'V');
+            destination.WriteByte((byte)'P');
+            destination.WriteByte((byte)'L');
+
+            PTStream.WriteInt32(destination, paletteLength - 8);
+
+            destination.WriteByte(0);
+            destination.WriteByte((byte)pixelFormat);
+
+            PTStream.WriteUInt32(destination, 0);
+
+            PTStream.WriteUInt16BE(destination, paletteEntries);
+
+            // Write the palette data
+            byte[] palette = pixelCodec.EncodePalette(decodedPalette, paletteEntries);
+            destination.Write(palette, 0, palette.Length);
+
+            return destination;
         }
         #endregion
     }

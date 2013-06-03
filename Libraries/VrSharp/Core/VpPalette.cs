@@ -6,7 +6,7 @@ namespace VrSharp
     public abstract class VpPalette
     {
         #region Fields
-        protected bool initalized = false; // Is the texture initalized?
+        protected bool initalized = false; // Is the palette initalized?
 
         protected ushort paletteEntries; // Number of palette entries
 
