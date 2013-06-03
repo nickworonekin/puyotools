@@ -453,19 +453,19 @@ namespace VrSharp.SvrTexture
             {
                 case SvrDataFormat.Rectangle:
                     return new Rectangle();
-                case SvrDataFormat.Index4ExtClut:
+                case SvrDataFormat.Index4ExternalPalette:
                     return new Index4ExtClut();
-                case SvrDataFormat.Index8ExtClut:
+                case SvrDataFormat.Index8ExternalPalette:
                     return new Index8ExtClut();
-                case SvrDataFormat.Index4RectRgb5a3:
-                case SvrDataFormat.Index4SqrRgb5a3:
-                case SvrDataFormat.Index4RectArgb8:
-                case SvrDataFormat.Index4SqrArgb8:
+                case SvrDataFormat.Index4Rgb5a3Rectangle:
+                case SvrDataFormat.Index4Rgb5a3Square:
+                case SvrDataFormat.Index4Argb8Rectangle:
+                case SvrDataFormat.Index4Argb8Square:
                     return new Index4();
-                case SvrDataFormat.Index8RectRgb5a3:
-                case SvrDataFormat.Index8SqrRgb5a3:
-                case SvrDataFormat.Index8RectArgb8:
-                case SvrDataFormat.Index8SqrArgb8:
+                case SvrDataFormat.Index8Rgb5a3Rectangle:
+                case SvrDataFormat.Index8Rgb5a3Square:
+                case SvrDataFormat.Index8Argb8Rectangle:
+                case SvrDataFormat.Index8Argb8Square:
                     return new Index8();
             }
 

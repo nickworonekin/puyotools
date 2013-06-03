@@ -79,10 +79,10 @@ namespace VrConvert
             switch (dataFormat)
             {
                 case "rect": return SvrDataFormat.Rectangle;
-                case "index4p": return SvrDataFormat.Index4ExtClut;
-                case "index8p": return SvrDataFormat.Index8ExtClut;
-                case "index4": return SvrDataFormat.Index4RectRgb5a3; // This will be auto corrected.
-                case "index8": return SvrDataFormat.Index8RectRgb5a3; // This will be auto corrected.
+                case "index4p": return SvrDataFormat.Index4ExternalPalette;
+                case "index8p": return SvrDataFormat.Index8ExternalPalette;
+                case "index4": return SvrDataFormat.Index4Rgb5a3Rectangle; // This will be auto corrected.
+                case "index8": return SvrDataFormat.Index8Rgb5a3Rectangle; // This will be auto corrected.
             }
 
             return SvrDataFormat.Unknown;

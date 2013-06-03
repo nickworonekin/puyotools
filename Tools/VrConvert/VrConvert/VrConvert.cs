@@ -20,7 +20,8 @@ namespace VrConvert
                 Console.WriteLine("------------------------");
                 Console.WriteLine("Usage:");
                 Console.WriteLine();
-                Console.WriteLine("Decode: vrconvert -d <input> [-o <output>] [-c <clut>] [-ac]");
+                //Console.WriteLine("Decode: vrconvert -d <input> [-o <output>] [-c <clut>] [-ac]");
+                Console.WriteLine("Decode: vrconvert -d <input> [-o <output>] [-p <palette>]");
                 Console.WriteLine("Encode: vrconvert -e <input> <vrformat> <pixelfmt> <datafmt> [options]");
                 Console.WriteLine("Help:   Decoding: vrconvert -d /?");
                 Console.WriteLine("        Encoding: vrconvert -e /? <vrformat (gvr/pvr/svr)>");
@@ -50,13 +51,14 @@ namespace VrConvert
         {
             // Get the command line arguments
             int OutFileArgIndex  = Array.IndexOf(args, "-o");
-            int ClutArgIndex     = Array.IndexOf(args, "-c");
-            int AutoClutArgIndex = Array.IndexOf(args, "-ac");
+            int ClutArgIndex     = Array.IndexOf(args, "-p");
+            //int AutoClutArgIndex = Array.IndexOf(args, "-ac");
 
             // Get the strings in the command line arguments
             string InputFile  = args[1];
             string OutputFile = (OutFileArgIndex != -1 && OutFileArgIndex < args.Length ? args[OutFileArgIndex + 1] : Path.GetFileNameWithoutExtension(InputFile) + ".png");
-            string ClutFile   = (ClutArgIndex != -1 && AutoClutArgIndex == -1 && ClutArgIndex < args.Length ? args[ClutArgIndex + 1] : null);
+            //string ClutFile   = (ClutArgIndex != -1 && AutoClutArgIndex == -1 && ClutArgIndex < args.Length ? args[ClutArgIndex + 1] : null);
+            string ClutFile = (ClutArgIndex != -1 && ClutArgIndex < args.Length ? args[ClutArgIndex + 1] : null);
 
             string InputPath  = (Path.GetDirectoryName(InputFile) != String.Empty ? Path.GetDirectoryName(InputFile) + Path.DirectorySeparatorChar : String.Empty);
             string OutputPath = InputPath;
@@ -86,27 +88,36 @@ namespace VrConvert
             // Decode the data now
             if (GvrTexture.Is(VrData))
             {
-                if (AutoClutArgIndex != -1)
-                    ClutFile = InputPath + Path.GetFileNameWithoutExtension(InputFile) + ".gvp";
+                //if (AutoClutArgIndex != -1)
+                //    ClutFile = InputPath + Path.GetFileNameWithoutExtension(InputFile) + ".gvp";
+
+                if (ClutFile == null && File.Exists(Path.ChangeExtension(InputFile, ".gvp")))
+                    ClutFile = Path.ChangeExtension(InputFile, ".gvp");
 
                 DecodeSuccess = new VrDecoder.Gvr().DecodeTexture(VrData, ClutFile, out BitmapData);
             }
             else if (PvrTexture.Is(VrData))
             {
-                if (AutoClutArgIndex != -1)
-                    ClutFile = InputPath + Path.GetFileNameWithoutExtension(InputFile) + ".pvp";
+                //if (AutoClutArgIndex != -1)
+                //    ClutFile = InputPath + Path.GetFileNameWithoutExtension(InputFile) + ".pvp";
+
+                if (ClutFile == null && File.Exists(Path.ChangeExtension(InputFile, ".pvp")))
+                    ClutFile = Path.ChangeExtension(InputFile, ".pvp");
 
                 DecodeSuccess = new VrDecoder.Pvr().DecodeTexture(VrData, ClutFile, out BitmapData);
             }
             else if (SvrTexture.Is(VrData))
             {
-                if (AutoClutArgIndex != -1)
-                    ClutFile = InputPath + Path.GetFileNameWithoutExtension(InputFile) + ".svp";
+                //if (AutoClutArgIndex != -1)
+                //    ClutFile = InputPath + Path.GetFileNameWithoutExtension(InputFile) + ".svp";
+
+                if (ClutFile == null && File.Exists(Path.ChangeExtension(InputFile, ".svp")))
+                    ClutFile = Path.ChangeExtension(InputFile, ".svp");
 
                 DecodeSuccess = new VrDecoder.Svr().DecodeTexture(VrData, ClutFile, out BitmapData);
             }
             else
-                Console.WriteLine("ERROR: Not a Gvr, Pvr, or Svr texture.");
+                Console.WriteLine("ERROR: Not a GVR, PVR, or SVR texture.");
 
             // Was the data decoded successfully?
             if (DecodeSuccess && BitmapData != null)
@@ -136,7 +147,7 @@ namespace VrConvert
             // Fixed!
             // Get the command line arguments
             int OutFileArgIndex     = Array.IndexOf(args, "-o");
-            int ClutArgIndex        = Array.IndexOf(args, "-c");
+            int ClutArgIndex        = Array.IndexOf(args, "-p");
             int GlobalIndexArgIndex = Array.IndexOf(args, "-gi");
 
             // Get the strings in the command line arguments
@@ -193,8 +204,10 @@ namespace VrConvert
             if (VrFormat == "gvr")
             {
                 // Convert to a pvr
-                OutputFile = (OutFileArgIndex != -1 && OutFileArgIndex < args.Length ? args[OutFileArgIndex + 1] : Path.GetFileNameWithoutExtension(InputFile) + ".gvr");
-                ClutFile   = (ClutArgIndex != -1 && ClutArgIndex < args.Length ? args[ClutArgIndex + 1] : Path.GetFileNameWithoutExtension(OutputFile) + ".gvp");
+                //OutputFile = (OutFileArgIndex != -1 && OutFileArgIndex < args.Length ? args[OutFileArgIndex + 1] : Path.GetFileNameWithoutExtension(InputFile) + ".gvr");
+                //ClutFile   = (ClutArgIndex != -1 && ClutArgIndex < args.Length ? args[ClutArgIndex + 1] : Path.GetFileNameWithoutExtension(OutputFile) + ".gvp");
+                OutputFile = (OutFileArgIndex != -1 && OutFileArgIndex < args.Length ? args[OutFileArgIndex + 1] : Path.ChangeExtension(InputFile, ".gvr"));
+                ClutFile = (ClutArgIndex != -1 && ClutArgIndex < args.Length ? args[ClutArgIndex + 1] : Path.ChangeExtension(OutputFile, ".gvp"));
 
                 EncodeSuccess = new VrEncoder.Gvr().EncodeTexture(BitmapData, PixelFormat, DataFormat, true, GlobalIndex, out TextureData, out ClutData);
             }
@@ -205,16 +218,20 @@ namespace VrConvert
                 string CompressionFormat = (CompressionArgIndex != -1 && args.Length > CompressionArgIndex + 1 ? args[CompressionArgIndex + 1] : null);
 
                 // Convert to a pvr
-                OutputFile = (OutFileArgIndex != -1 && OutFileArgIndex < args.Length ? args[OutFileArgIndex + 1] : Path.GetFileNameWithoutExtension(InputFile) + ".pvr");
-                ClutFile   = (ClutArgIndex != -1 && ClutArgIndex < args.Length ? args[ClutArgIndex + 1] : Path.GetFileNameWithoutExtension(OutputFile) + ".pvp");
+                //OutputFile = (OutFileArgIndex != -1 && OutFileArgIndex < args.Length ? args[OutFileArgIndex + 1] : Path.GetFileNameWithoutExtension(InputFile) + ".pvr");
+                //ClutFile   = (ClutArgIndex != -1 && ClutArgIndex < args.Length ? args[ClutArgIndex + 1] : Path.GetFileNameWithoutExtension(OutputFile) + ".pvp");
+                OutputFile = (OutFileArgIndex != -1 && OutFileArgIndex < args.Length ? args[OutFileArgIndex + 1] : Path.ChangeExtension(InputFile, ".pvr"));
+                ClutFile = (ClutArgIndex != -1 && ClutArgIndex < args.Length ? args[ClutArgIndex + 1] : Path.ChangeExtension(OutputFile, ".pvp"));
 
                 EncodeSuccess = new VrEncoder.Pvr().EncodeTexture(BitmapData, PixelFormat, DataFormat, CompressionFormat, true, GlobalIndex, out TextureData, out ClutData);
             }
             else if (VrFormat == "svr")
             {
                 // Convert to a svr
-                OutputFile = (OutFileArgIndex != -1 && OutFileArgIndex < args.Length ? args[OutFileArgIndex + 1] : Path.GetFileNameWithoutExtension(InputFile) + ".svr");
-                ClutFile   = (ClutArgIndex != -1 && ClutArgIndex < args.Length ? args[ClutArgIndex + 1] : Path.GetFileNameWithoutExtension(OutputFile) + ".svp");
+                //OutputFile = (OutFileArgIndex != -1 && OutFileArgIndex < args.Length ? args[OutFileArgIndex + 1] : Path.GetFileNameWithoutExtension(InputFile) + ".svr");
+                //ClutFile   = (ClutArgIndex != -1 && ClutArgIndex < args.Length ? args[ClutArgIndex + 1] : Path.GetFileNameWithoutExtension(OutputFile) + ".svp");
+                OutputFile = (OutFileArgIndex != -1 && OutFileArgIndex < args.Length ? args[OutFileArgIndex + 1] : Path.ChangeExtension(InputFile, ".svr"));
+                ClutFile = (ClutArgIndex != -1 && ClutArgIndex < args.Length ? args[ClutArgIndex + 1] : Path.ChangeExtension(OutputFile, ".svp"));
 
                 EncodeSuccess = new VrEncoder.Svr().EncodeTexture(BitmapData, PixelFormat, DataFormat, true, GlobalIndex, out TextureData, out ClutData);
             }
@@ -263,9 +280,9 @@ namespace VrConvert
         {
             Console.WriteLine();
             Console.WriteLine(
-                "\t-o <output> : Set output filename (default is <input>.png)\n" +
-                "\t-c <clut>   : Sets the clut filename\n" +
-                "\t-ac         : Auto find clut file using <input> filename.");
+                "\t-o <output>  : Set output filename (default is <input>.png)\n" +
+                "\t-p <palette> : Sets the palette filename\n");
+                //"\t-ac         : Auto find clut file using <input> filename.");
         }
 
         private static void EncodingHelp(string format)
@@ -296,6 +313,7 @@ namespace VrConvert
                 Console.WriteLine(
                     "[options] Options:\n" +
                     "\t-o <output>  : Set output filename (default is <input>.gvr)\n" +
+                    "\t-p <palette> : Sets the palette filename\n" +
                     //"\t-gbix        : Include Gbix Header (Gamecube)\n" +
                     //"\t-gcix        : Include Gcix Header (Wii)\n" +
                     //"\t-nogbix      : Don't include Gbix/Gcix Header\n" +
@@ -327,6 +345,7 @@ namespace VrConvert
                 Console.WriteLine(
                     "[options] Options:\n" +
                     "\t-o <output>  : Set output filename (default is <input>.pvr)\n" +
+                    "\t-p <palette> : Sets the palette filename\n" +
                     //"\t-gbix        : Include Gbix Header\n" +
                     //"\t-nogbix      : Don't include Gbix Header\n" +
                     "\t-gi <gindex> : Sets the Global Index (default is 0)\n" +
@@ -355,6 +374,7 @@ namespace VrConvert
                 Console.WriteLine(
                     "[options] Options:\n" +
                     "\t-o <output>  : Set output filename (default is <input>.svr)\n" +
+                    "\t-p <palette> : Sets the palette filename\n" +
                     //"\t-gbix        : Include Gbix Header\n" +
                     //"\t-nogbix      : Don't include Gbix Header\n" +
                     "\t-gi <gindex> : Sets the Global Index (default is 0)\n");

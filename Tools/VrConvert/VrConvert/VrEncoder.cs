@@ -43,13 +43,13 @@ namespace VrConvert
 
                 // Output information to the console
                 Console.WriteLine();
-                Console.WriteLine("Texture Type : Gvr");
+                Console.WriteLine("Texture Type : GVR");
                 Console.WriteLine("Dimensions   : {0}x{1}", GvrTextureEncoder.TextureWidth, GvrTextureEncoder.TextureHeight);
                 if (GvrTextureEncoder.PixelFormat != GvrPixelFormat.Unknown)
-                    Console.WriteLine("Pixel Format : {0} ({1})", GvrTextureEncoder.PixelFormat, GetPixelFormatAsText(GvrTextureEncoder.PixelFormat));
-                Console.WriteLine("Data Format  : {0} ({1})", GvrTextureEncoder.DataFormat, GetDataFormatAsText(GvrTextureEncoder.DataFormat));
+                    Console.WriteLine("Pixel Format : {0} ({1})", ((byte)GvrTextureEncoder.PixelFormat).ToString("X2"), GetPixelFormatAsText(GvrTextureEncoder.PixelFormat));
+                Console.WriteLine("Data Format  : {0} ({1})", ((byte)GvrTextureEncoder.DataFormat).ToString("X2"), GetDataFormatAsText(GvrTextureEncoder.DataFormat));
                 if (GvrTextureEncoder.DataFlags != 0x00)
-                    Console.WriteLine("Data Flags   : {0} ({1})", GvrTextureEncoder.DataFlags, GetDataFlagsAsText(GvrTextureEncoder.DataFlags));
+                    Console.WriteLine("Data Flags   : {0} ({1})", ((byte)GvrTextureEncoder.DataFlags).ToString("X2"), GetDataFlagsAsText(GvrTextureEncoder.DataFlags));
                 Console.WriteLine();
 
                 // Encode the texture
@@ -213,12 +213,12 @@ namespace VrConvert
 
                 // Output information to the console
                 Console.WriteLine();
-                Console.WriteLine("Texture Type : Pvr");
+                Console.WriteLine("Texture Type : PVR");
                 if (PvrTextureEncoder.CompressionFormat != PvrCompressionFormat.None)
-                    Console.WriteLine("Compression  : {0}", PvrTextureEncoder.CompressionFormat);
+                    Console.WriteLine("Compression  : {0}", GetCompressionFormatAsText(PvrTextureEncoder.CompressionFormat));
                 Console.WriteLine("Dimensions   : {0}x{1}", PvrTextureEncoder.TextureWidth, PvrTextureEncoder.TextureHeight);
-                Console.WriteLine("Pixel Format : {0} ({1})", PvrTextureEncoder.PixelFormat, GetPixelFormatAsText(PvrTextureEncoder.PixelFormat));
-                Console.WriteLine("Data Format  : {0} ({1})", PvrTextureEncoder.DataFormat, GetDataFormatAsText(PvrTextureEncoder.DataFormat));
+                Console.WriteLine("Pixel Format : {0} ({1})", ((byte)PvrTextureEncoder.PixelFormat).ToString("X2"), GetPixelFormatAsText(PvrTextureEncoder.PixelFormat));
+                Console.WriteLine("Data Format  : {0} ({1})", ((byte)PvrTextureEncoder.DataFormat).ToString("X2"), GetDataFormatAsText(PvrTextureEncoder.DataFormat));
                 Console.WriteLine();
 
                 // Encode the texture
@@ -282,6 +282,15 @@ namespace VrConvert
                         return "Small Vq";
                     case PvrDataFormat.SmallVqMipmaps:
                         return "Small Vq w/ Mipmaps";
+                }
+
+                return String.Empty;
+            }
+            private string GetCompressionFormatAsText(PvrCompressionFormat compressionFormat)
+            {
+                switch (compressionFormat)
+                {
+                    case PvrCompressionFormat.Rle: return "RLE";
                 }
 
                 return String.Empty;
@@ -378,10 +387,10 @@ namespace VrConvert
 
                 // Output information to the console
                 Console.WriteLine();
-                Console.WriteLine("Texture Type : Svr");
+                Console.WriteLine("Texture Type : SVR");
                 Console.WriteLine("Dimensions   : {0}x{1}", SvrTextureEncoder.TextureWidth, SvrTextureEncoder.TextureHeight);
-                Console.WriteLine("Pixel Format : {0} ({1})", SvrTextureEncoder.PixelFormat, GetPixelFormatAsText(SvrTextureEncoder.PixelFormat));
-                Console.WriteLine("Data Format  : {0} ({1})", SvrTextureEncoder.DataFormat, GetDataFormatAsText(SvrTextureEncoder.DataFormat));
+                Console.WriteLine("Pixel Format : {0} ({1})", ((byte)SvrTextureEncoder.PixelFormat).ToString("X2"), GetPixelFormatAsText(SvrTextureEncoder.PixelFormat));
+                Console.WriteLine("Data Format  : {0} ({1})", ((byte)SvrTextureEncoder.DataFormat).ToString("X2"), GetDataFormatAsText(SvrTextureEncoder.DataFormat));
                 Console.WriteLine();
 
                 // Encode the texture
@@ -424,25 +433,25 @@ namespace VrConvert
                 {
                     case SvrDataFormat.Rectangle:
                         return "Rectangle";
-                    case SvrDataFormat.Index4ExtClut:
+                    case SvrDataFormat.Index4ExternalPalette:
                         return "4-bit Indexed w/ External Palette";
-                    case SvrDataFormat.Index8ExtClut:
+                    case SvrDataFormat.Index8ExternalPalette:
                         return "8-bit Indexed w/ External Palette";
-                    case SvrDataFormat.Index4RectRgb5a3:
+                    case SvrDataFormat.Index4Rgb5a3Rectangle:
                         return "4-bit Indexed Rectangle w/ Rgb5a3";
-                    case SvrDataFormat.Index4SqrRgb5a3:
+                    case SvrDataFormat.Index4Rgb5a3Square:
                         return "4-bit Indexed Square w/ Rgb5a3";
-                    case SvrDataFormat.Index4RectArgb8:
+                    case SvrDataFormat.Index4Argb8Rectangle:
                         return "4-bit Indexed Rectangle w/ Argb8888";
-                    case SvrDataFormat.Index4SqrArgb8:
+                    case SvrDataFormat.Index4Argb8Square:
                         return "4-bit Indexed Square w/ Argb8888";
-                    case SvrDataFormat.Index8RectRgb5a3:
+                    case SvrDataFormat.Index8Rgb5a3Rectangle:
                         return "8-bit Indexed Rectangle w/ Rgb5a3";
-                    case SvrDataFormat.Index8SqrRgb5a3:
+                    case SvrDataFormat.Index8Rgb5a3Square:
                         return "8-bit Indexed Square w/ Rgb5a3";
-                    case SvrDataFormat.Index8RectArgb8:
+                    case SvrDataFormat.Index8Argb8Rectangle:
                         return "8-bit Indexed Rectangle w/ Argb8888";
-                    case SvrDataFormat.Index8SqrArgb8:
+                    case SvrDataFormat.Index8Argb8Square:
                         return "8-bit Indexed Square w/ Argb8888";
                 }
 
@@ -469,43 +478,43 @@ namespace VrConvert
                     case "rect": case "60":
                         return SvrDataFormat.Rectangle;
                     case "index4ec": case "62":
-                        return SvrDataFormat.Index4ExtClut;
+                        return SvrDataFormat.Index4ExternalPalette;
                     case "index8ec": case "64":
-                        return SvrDataFormat.Index8ExtClut;
+                        return SvrDataFormat.Index8ExternalPalette;
                     case "index4":
                         if (PixelFormat == SvrPixelFormat.Rgb5a3)
                         {
-                            if (width == height) return SvrDataFormat.Index4SqrRgb5a3;
-                            else return SvrDataFormat.Index4RectRgb5a3;
+                            if (width == height) return SvrDataFormat.Index4Rgb5a3Square;
+                            else return SvrDataFormat.Index4Rgb5a3Rectangle;
                         }
                         else if (PixelFormat == SvrPixelFormat.Argb8888)
                         {
-                            if (width == height) return SvrDataFormat.Index4SqrArgb8;
-                            else return SvrDataFormat.Index4RectArgb8;
+                            if (width == height) return SvrDataFormat.Index4Argb8Square;
+                            else return SvrDataFormat.Index4Argb8Rectangle;
                         }
 
                         break;
                     case "index8":
                         if (PixelFormat == SvrPixelFormat.Rgb5a3)
                         {
-                            if (width == height) return SvrDataFormat.Index8SqrRgb5a3;
-                            else return SvrDataFormat.Index8RectRgb5a3;
+                            if (width == height) return SvrDataFormat.Index8Rgb5a3Square;
+                            else return SvrDataFormat.Index8Rgb5a3Rectangle;
                         }
                         else if (PixelFormat == SvrPixelFormat.Argb8888)
                         {
-                            if (width == height) return SvrDataFormat.Index8SqrArgb8;
-                            else return SvrDataFormat.Index8RectArgb8;
+                            if (width == height) return SvrDataFormat.Index8Argb8Square;
+                            else return SvrDataFormat.Index8Argb8Rectangle;
                         }
 
                         break;
-                    case "66": return SvrDataFormat.Index4RectRgb5a3;
-                    case "67": return SvrDataFormat.Index4SqrRgb5a3;
-                    case "68": return SvrDataFormat.Index4RectArgb8;
-                    case "69": return SvrDataFormat.Index4SqrArgb8;
-                    case "6a": return SvrDataFormat.Index8RectRgb5a3;
-                    case "6b": return SvrDataFormat.Index8SqrRgb5a3;
-                    case "6c": return SvrDataFormat.Index8RectArgb8;
-                    case "6d": return SvrDataFormat.Index8SqrArgb8;
+                    case "66": return SvrDataFormat.Index4Rgb5a3Rectangle;
+                    case "67": return SvrDataFormat.Index4Rgb5a3Square;
+                    case "68": return SvrDataFormat.Index4Argb8Rectangle;
+                    case "69": return SvrDataFormat.Index4Argb8Square;
+                    case "6a": return SvrDataFormat.Index8Rgb5a3Rectangle;
+                    case "6b": return SvrDataFormat.Index8Rgb5a3Square;
+                    case "6c": return SvrDataFormat.Index8Argb8Rectangle;
+                    case "6d": return SvrDataFormat.Index8Argb8Square;
                 }
 
                 return SvrDataFormat.Unknown; // Unknown format

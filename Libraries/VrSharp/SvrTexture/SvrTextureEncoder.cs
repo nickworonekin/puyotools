@@ -154,56 +154,56 @@ namespace VrSharp.SvrTexture
             if (dataCodec == null || !dataCodec.CanEncode) return false;
 
             // Set the correct data format (it's ok to do it after getting the codecs).
-            if (dataFormat == SvrDataFormat.Index4RectRgb5a3 || dataFormat == SvrDataFormat.Index4SqrRgb5a3 ||
-                dataFormat == SvrDataFormat.Index4RectArgb8 || dataFormat == SvrDataFormat.Index4SqrArgb8)
+            if (dataFormat == SvrDataFormat.Index4Rgb5a3Rectangle || dataFormat == SvrDataFormat.Index4Rgb5a3Square ||
+                dataFormat == SvrDataFormat.Index4Argb8Rectangle || dataFormat == SvrDataFormat.Index4Argb8Square)
             {
                 if (textureWidth == textureHeight) // Square texture
                 {
                     if (pixelFormat == SvrPixelFormat.Rgb5a3)
                     {
-                        dataFormat = SvrDataFormat.Index4SqrRgb5a3;
+                        dataFormat = SvrDataFormat.Index4Rgb5a3Square;
                     }
                     else
                     {
-                        dataFormat = SvrDataFormat.Index4SqrArgb8;
+                        dataFormat = SvrDataFormat.Index4Argb8Square;
                     }
                 }
                 else // Rectangular texture
                 {
                     if (pixelFormat == SvrPixelFormat.Rgb5a3)
                     {
-                        dataFormat = SvrDataFormat.Index4RectRgb5a3;
+                        dataFormat = SvrDataFormat.Index4Rgb5a3Rectangle;
                     }
                     else
                     {
-                        dataFormat = SvrDataFormat.Index4RectArgb8;
+                        dataFormat = SvrDataFormat.Index4Argb8Rectangle;
                     }
                 }
             }
 
-            else if (dataFormat == SvrDataFormat.Index8RectRgb5a3 || dataFormat == SvrDataFormat.Index8SqrRgb5a3 ||
-                dataFormat == SvrDataFormat.Index8RectArgb8 || dataFormat == SvrDataFormat.Index8SqrArgb8)
+            else if (dataFormat == SvrDataFormat.Index8Rgb5a3Rectangle || dataFormat == SvrDataFormat.Index8Rgb5a3Square ||
+                dataFormat == SvrDataFormat.Index8Argb8Rectangle || dataFormat == SvrDataFormat.Index8Argb8Square)
             {
                 if (textureWidth == textureHeight) // Square texture
                 {
                     if (pixelFormat == SvrPixelFormat.Rgb5a3)
                     {
-                        dataFormat = SvrDataFormat.Index8SqrRgb5a3;
+                        dataFormat = SvrDataFormat.Index8Rgb5a3Square;
                     }
                     else
                     {
-                        dataFormat = SvrDataFormat.Index8SqrArgb8;
+                        dataFormat = SvrDataFormat.Index8Argb8Square;
                     }
                 }
                 else // Rectangular texture
                 {
                     if (pixelFormat == SvrPixelFormat.Rgb5a3)
                     {
-                        dataFormat = SvrDataFormat.Index8RectRgb5a3;
+                        dataFormat = SvrDataFormat.Index8Rgb5a3Rectangle;
                     }
                     else
                     {
-                        dataFormat = SvrDataFormat.Index8RectArgb8;
+                        dataFormat = SvrDataFormat.Index8Argb8Rectangle;
                     }
                 }
             }
