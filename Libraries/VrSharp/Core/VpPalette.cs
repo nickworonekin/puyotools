@@ -6,141 +6,112 @@ namespace VrSharp
     public abstract class VpPalette
     {
         #region Fields
-        protected bool InitSuccess = false; // Initalization
+        protected bool initalized = false; // Is the texture initalized?
 
-        protected byte[] ClutData; // Vp Palette Data
+        protected ushort paletteEntries; // Number of palette entries
 
-        protected ushort NumPaletteEntries; // Number of Palette Entries
+        protected byte[] encodedData; // Encoded palette data (VR data)
 
-        protected byte PixelFormat;     // Pixel Format
-        public VrPixelCodec PixelCodec; // Pixel Codec
+        protected VrPixelCodec pixelCodec; // Pixel codec
         #endregion
 
-        #region Constructors
-        /// <summary>
-        /// Open a Vp clut from a file.
-        /// </summary>
-        /// <param name="file">Filename of the file that contains the clut data.</param>
+        #region Internal Methods
+        internal ushort PaletteEntries
+        {
+            get
+            {
+                if (!initalized)
+                {
+                    throw new TextureNotInitalizedException("Cannot access this property as the palette is not initalized.");
+                }
+
+                return paletteEntries;
+            }
+        }
+
+        internal byte[] EncodedData
+        {
+            get
+            {
+                if (!initalized)
+                {
+                    throw new TextureNotInitalizedException("Cannot access this property as the palette is not initalized.");
+                }
+
+                return encodedData;
+            }
+        }
+
+        internal VrPixelCodec PixelCodec
+        {
+            get
+            {
+                if (!initalized)
+                {
+                    throw new TextureNotInitalizedException("Cannot access this property as the palette is not initalized.");
+                }
+
+                return pixelCodec;
+            }
+        }
+        #endregion
+
+        #region Constructors & Initalizers
+        // Open a texture from a file.
         public VpPalette(string file)
         {
-            byte[] data;
-            try
-            {
-                data = File.ReadAllBytes(file);
-            }
-            catch { data = new byte[0]; }
+            encodedData = File.ReadAllBytes(file);
 
-            ClutData = data;
+            if (encodedData != null)
+            {
+                initalized = Initalize();
+            }
         }
 
-        /// <summary>
-        /// Open a Vp clut from a stream.
-        /// </summary>
-        /// <param name="stream">Stream that contains the clut data.</param>
-        public VpPalette(Stream stream) : this(stream, (int)(stream.Length - stream.Position)) { }
+        // Open a texture from a byte array.
+        public VpPalette(byte[] source) : this(source, 0, source.Length) { }
 
-        /// <summary>
-        /// Open a Vp clut from a stream.
-        /// </summary>
-        /// <param name="stream">Stream that contains the clut data.</param>
-        /// <param name="length">Number of bytes to read.</param>
-        public VpPalette(Stream stream, int length)
+        public VpPalette(byte[] source, int offset, int length)
         {
-            byte[] data;
-            try
+            if (source == null || (offset == 0 && source.Length == length))
             {
-                data = new byte[length];
-                stream.Read(data, 0, length);
+                encodedData = source;
             }
-            catch { data = new byte[0]; }
-
-            ClutData = data;
-        }
-
-        /// <summary>
-        /// Open a Vp clut from a byte array.
-        /// </summary>
-        /// <param name="array">Byte array that contains the clut data.</param>
-        public VpPalette(byte[] array) : this(array, 0, array.Length) { }
-
-        /// <summary>
-        /// Open a Vp clut from a byte array.
-        /// </summary>
-        /// <param name="array">Byte array that contains the clut data.</param>
-        /// <param name="offset">Offset of the clut data in the array.</param>
-        /// <param name="length">Number of bytes to read.</param>
-        public VpPalette(byte[] array, long offset, int length)
-        {
-            byte[] data;
-            if (array == null)
-                data = new byte[0];
-            else
+            else if (source != null)
             {
-                data = new byte[length];
-                try
-                {
-                    Array.Copy(array, offset, data, 0, length);
-                }
-                catch { data = new byte[0]; }
+                encodedData = new byte[length];
+                Array.Copy(source, offset, encodedData, 0, length);
             }
 
-            ClutData = data;
+            if (encodedData != null)
+            {
+                initalized = Initalize();
+            }
         }
-        #endregion
 
-        #region Palette
-        /// <summary>
-        /// Get the palette data.
-        /// </summary>
-        /// <param name="PixelCodec">Pixel Codec used for the clut.</param>
-        /// <returns></returns>
-        public byte[] GetPalette(VrPixelCodec PixelCodec)
+        // Open a texture from a stream.
+        public VpPalette(Stream source) : this(source, (int)(source.Length - source.Position)) { }
+
+        public VpPalette(Stream source, int length)
         {
-            if (!InitSuccess) return new byte[0];
+            encodedData = new byte[length];
+            source.Read(encodedData, 0, length);
 
-            byte[] clut = new byte[NumPaletteEntries * (PixelCodec.Bpp >> 3)];
-            Array.Copy(ClutData, 0x10, clut, 0x00, clut.Length);
-
-            return clut;
+            if (encodedData != null)
+            {
+                initalized = Initalize();
+            }
         }
 
+        protected abstract bool Initalize();
+
         /// <summary>
-        /// Get the number of entries in the palette file.
+        /// Returns if the texture was loaded successfully.
         /// </summary>
         /// <returns></returns>
-        public ushort GetNumPaletteEntries()
+        public bool Initalized
         {
-            if (!InitSuccess) return 0;
-            return NumPaletteEntries;
-        }
-        #endregion
-
-        #region Misc
-        /// <summary>
-        /// Returns if the palette was loaded successfully.
-        /// </summary>
-        /// <returns></returns>
-        public bool LoadSuccess()
-        {
-            return InitSuccess;
-        }
-        #endregion
-
-        #region Private Properties
-        // Function for checking headers
-        // Checks to see if the string matches the byte data at the specific offset
-        protected static bool Compare(byte[] array, string str, int offset)
-        {
-            if (offset < 0 || offset + str.Length > array.Length)
-                return false; // Out of bounds
-
-            for (int i = 0; i < str.Length; i++)
-            {
-                if (array[offset + i] != str[i])
-                    return false;
-            }
-
-            return true;
+            get { return initalized; }
         }
         #endregion
     }

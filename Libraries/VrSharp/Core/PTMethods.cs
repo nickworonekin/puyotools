@@ -48,5 +48,10 @@ namespace VrSharp
         {
             return (uint)(value[startIndex] << 24 | value[startIndex + 1] << 16 | value[startIndex + 2] << 8 | value[startIndex + 3]);
         }
+
+        public static byte[] GetBytesBE(ushort value)
+        {
+            return new byte[] { (byte)(value >> 8), (byte)(value & 0xFF) };
+        }
     }
 }

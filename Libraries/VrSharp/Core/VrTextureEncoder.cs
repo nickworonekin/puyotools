@@ -208,7 +208,7 @@ namespace VrSharp
         // Returns if the texture needa an external clut file (internal method)
         protected virtual bool TexNeedsExternalClut()
         {
-            return DataCodec.NeedsExternalClut;
+            return DataCodec.NeedsExternalPalette;
         }
 
         // Create a vp clut encoder for an external clut.
@@ -356,7 +356,7 @@ namespace VrSharp
 
                 // This quantizer only works with 32-bit ARGB images
                 WuQuantizer quantizer = new WuQuantizer();
-                BitmapImageData = (Bitmap)quantizer.QuantizeImage(BitmapImageData, DataCodec.ClutEntries);
+                BitmapImageData = (Bitmap)quantizer.QuantizeImage(BitmapImageData, DataCodec.PaletteEntries);
                 RawImageData = ConvertBitmapToIndex(BitmapImageData);
             }
 
@@ -369,8 +369,8 @@ namespace VrSharp
 
             // Build the clut list
             //TextureClut = new byte[DataCodec.GetNumClutEntries(), 4];
-            TextureClut = new byte[DataCodec.ClutEntries][];
-            for (int i = 0; i < DataCodec.ClutEntries; i++)
+            TextureClut = new byte[DataCodec.PaletteEntries][];
+            for (int i = 0; i < DataCodec.PaletteEntries; i++)
             {
                 TextureClut[i] = new byte[4];
                 TextureClut[i][3] = BitmapImageData.Palette.Entries[i].A;
@@ -394,7 +394,7 @@ namespace VrSharp
 
             // If the texture contains an external clut, create a vp clut encoder to write it
             if (TexNeedsExternalClut())
-                CreateVpClut(PixelCodec.EncodeClut(TextureClut, DataCodec.ClutEntries), (ushort)DataCodec.ClutEntries);
+                CreateVpClut(PixelCodec.EncodePalette(TextureClut, DataCodec.PaletteEntries), (ushort)DataCodec.PaletteEntries);
                 //CreateVpClut(PixelCodec.CreateClut(TextureClut), (ushort)DataCodec.GetNumClutEntries());
         }
 

@@ -136,14 +136,14 @@ namespace VrSharp.GvrTexture
 
             // Get the codecs and make sure we can decode using them
             pixelCodec = GvrPixelCodec.GetPixelCodec(pixelFormat);
-            if ((dataFlags & GvrDataFlags.Clut) != 0 && pixelCodec == null) return false;
+            if ((dataFlags & GvrDataFlags.Palette) != 0 && pixelCodec == null) return false;
 
             dataCodec = GvrDataCodec.GetDataCodec(dataFormat);
             if (dataCodec == null) return false;
             dataCodec.PixelCodec = pixelCodec;
 
             // Set the clut and data offsets
-            if ((dataFlags & GvrDataFlags.InternalClut) == 0 || dataCodec.ClutEntries == 0 || NeedsExternalPalette)
+            if ((dataFlags & GvrDataFlags.InternalPalette) == 0 || dataCodec.PaletteEntries == 0 || NeedsExternalPalette)
             {
                 paletteOffset = -1;
                 dataOffset = pvrtOffset + 0x10;
@@ -151,7 +151,7 @@ namespace VrSharp.GvrTexture
             else
             {
                 paletteOffset = pvrtOffset + 0x10;
-                dataOffset = paletteOffset + (dataCodec.ClutEntries * (pixelCodec.Bpp >> 3));
+                dataOffset = paletteOffset + (dataCodec.PaletteEntries * (pixelCodec.Bpp >> 3));
             }
 
             decodedData = new byte[textureWidth * textureHeight * 4];
@@ -182,7 +182,7 @@ namespace VrSharp.GvrTexture
                     throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
                 }
 
-                return ((DataFlags & GvrDataFlags.ExternalClut) != 0);
+                return ((DataFlags & GvrDataFlags.ExternalPalette) != 0);
             }
         }
         #endregion

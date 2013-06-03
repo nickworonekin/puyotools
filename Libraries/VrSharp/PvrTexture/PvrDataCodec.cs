@@ -150,7 +150,7 @@ namespace VrSharp.PvrTexture
                 get { return 8; }
             }
 
-            public override int ClutEntries
+            public override int PaletteEntries
             {
                 get { return 1024; }
             }
@@ -159,7 +159,7 @@ namespace VrSharp.PvrTexture
             {
                 int StartOffset = offset;
                 byte[] output   = new byte[width * height * 4];
-                byte[][] clut    = ClutData;
+                byte[][] clut    = palette;
 
                 TwiddledMap TwiddledMap = new TwiddledMap(width / 2, Bpp);
 
@@ -208,7 +208,7 @@ namespace VrSharp.PvrTexture
                 get { return 8; }
             }
 
-            public override int ClutEntries
+            public override int PaletteEntries
             {
                 get { return 1024; }
             }
@@ -222,7 +222,7 @@ namespace VrSharp.PvrTexture
             {
                 int StartOffset = offset;
                 byte[] output   = new byte[width * height * 4];
-                byte[][] clut    = ClutData;
+                byte[][] clut    = palette;
 
                 TwiddledMap TwiddledMap = new TwiddledMap(width / 2, Bpp);
 
@@ -284,12 +284,12 @@ namespace VrSharp.PvrTexture
                 get { return 4; }
             }
 
-            public override int ClutEntries
+            public override int PaletteEntries
             {
                 get { return 16; }
             }
 
-            public override bool NeedsExternalClut
+            public override bool NeedsExternalPalette
             {
                 get { return true; }
             }
@@ -297,7 +297,7 @@ namespace VrSharp.PvrTexture
             public override byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)
             {
                 byte[] output = new byte[width * height * 4];
-                byte[][] clut  = ClutData;
+                byte[][] clut  = palette;
                 int ChunkSize = Math.Min(width, height);
                 TwiddledMap TwiddledMap = new TwiddledMap(ChunkSize, Bpp);
 
@@ -350,12 +350,12 @@ namespace VrSharp.PvrTexture
                 get { return 8; }
             }
 
-            public override int ClutEntries
+            public override int PaletteEntries
             {
                 get { return 256; }
             }
 
-            public override bool NeedsExternalClut
+            public override bool NeedsExternalPalette
             {
                 get { return true; }
             }
@@ -363,7 +363,7 @@ namespace VrSharp.PvrTexture
             public override byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)
             {
                 byte[] output = new byte[width * height * 4];
-                byte[][] clut  = ClutData;
+                byte[][] clut  = palette;
                 int ChunkSize = Math.Min(width, height);
                 TwiddledMap TwiddledMap = new TwiddledMap(ChunkSize, Bpp);
 
@@ -592,7 +592,7 @@ namespace VrSharp.PvrTexture
                 get { return 8; }
             }
 
-            public override int ClutEntries
+            public override int PaletteEntries
             {
                 get { return 512; }
             }
@@ -601,7 +601,7 @@ namespace VrSharp.PvrTexture
             {
                 int StartOffset = offset;
                 byte[] output   = new byte[width * height * 4];
-                byte[][] clut    = ClutData;
+                byte[][] clut    = palette;
 
                 TwiddledMap TwiddledMap = new TwiddledMap(width / 2, Bpp);
 
@@ -650,7 +650,7 @@ namespace VrSharp.PvrTexture
                 get { return 8; }
             }
 
-            public override int ClutEntries
+            public override int PaletteEntries
             {
                 get { return 256; }
             }
@@ -664,7 +664,7 @@ namespace VrSharp.PvrTexture
             {
                 int StartOffset = offset;
                 byte[] output   = new byte[width * height * 4];
-                byte[][] clut    = ClutData;
+                byte[][] clut    = palette;
 
                 TwiddledMap TwiddledMap = new TwiddledMap(width / 2, Bpp);
 

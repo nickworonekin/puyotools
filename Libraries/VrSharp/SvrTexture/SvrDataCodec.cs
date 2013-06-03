@@ -79,12 +79,12 @@ namespace VrSharp.SvrTexture
                 get { return 4; }
             }
 
-            public override int ClutEntries
+            public override int PaletteEntries
             {
                 get { return 16; }
             }
 
-            public override bool NeedsExternalClut
+            public override bool NeedsExternalPalette
             {
                 get { return true; }
             }
@@ -92,7 +92,7 @@ namespace VrSharp.SvrTexture
             public override byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)
             {
                 byte[] output   = new byte[width * height * 4];
-                byte[][] clut    = ClutData;
+                byte[][] clut    = palette;
                 int StartOffset = offset;
                 bool IsSwizzled = (width >= 128 && height >= 128);
 
@@ -161,12 +161,12 @@ namespace VrSharp.SvrTexture
                 get { return 8; }
             }
 
-            public override int ClutEntries
+            public override int PaletteEntries
             {
                 get { return 256; }
             }
 
-            public override bool NeedsExternalClut
+            public override bool NeedsExternalPalette
             {
                 get { return true; }
             }
@@ -174,7 +174,7 @@ namespace VrSharp.SvrTexture
             public override byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)
             {
                 byte[] output   = new byte[width * height * 4];
-                byte[][] clut    = ClutData;
+                byte[][] clut    = palette;
                 int StartOffset = offset;
 
                 for (int y = 0; y < height; y++)
@@ -230,7 +230,7 @@ namespace VrSharp.SvrTexture
                 get { return 4; }
             }
 
-            public override int ClutEntries
+            public override int PaletteEntries
             {
                 get { return 16; }
             }
@@ -238,7 +238,7 @@ namespace VrSharp.SvrTexture
             public override byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)
             {
                 byte[] output   = new byte[width * height * 4];
-                byte[][] clut    = ClutData;
+                byte[][] clut    = palette;
                 int StartOffset = offset;
                 bool IsSwizzled = (width >= 128 && height >= 128);
 
@@ -307,7 +307,7 @@ namespace VrSharp.SvrTexture
                 get { return 8; }
             }
 
-            public override int ClutEntries
+            public override int PaletteEntries
             {
                 get { return 256; }
             }
@@ -315,7 +315,7 @@ namespace VrSharp.SvrTexture
             public override byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)
             {
                 byte[] output   = new byte[width * height * 4];
-                byte[][] clut    = ClutData;
+                byte[][] clut    = palette;
                 int StartOffset = offset;
 
                 for (int y = 0; y < height; y++)

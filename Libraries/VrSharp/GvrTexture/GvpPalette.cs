@@ -1,90 +1,152 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 
 namespace VrSharp.GvrTexture
 {
     public class GvpPalette : VpPalette
     {
-        #region Constructors
+        #region Palette Properties
         /// <summary>
-        /// Open a Gvp clut from a file.
+        /// The palette's pixel format.
         /// </summary>
-        /// <param name="file">Filename of the file that contains the clut data.</param>
-        public GvpPalette(string file)
-            : base(file)
+        public GvrPixelFormat PixelFormat
         {
-            InitSuccess = ReadHeader();
-        }
+            get
+            {
+                if (!initalized)
+                {
+                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
+                }
 
-        /// <summary>
-        /// Open a Gvp clut from a stream.
-        /// </summary>
-        /// <param name="stream">Stream that contains the clut data.</param>
-        public GvpPalette(Stream stream)
-            : base(stream)
-        {
-            InitSuccess = ReadHeader();
+                return pixelFormat;
+            }
         }
-
-        /// <summary>
-        /// Open a Gvp clut from a stream.
-        /// </summary>
-        /// <param name="stream">Stream that contains the clut data.</param>
-        /// <param name="length">Number of bytes to read.</param>
-        public GvpPalette(Stream stream, int length)
-            : base(stream, length)
-        {
-            InitSuccess = ReadHeader();
-        }
-
-        /// <summary>
-        /// Open a Gvp clut from a byte array.
-        /// </summary>
-        /// <param name="array">Byte array that contains the clut data.</param>
-        public GvpPalette(byte[] array)
-            : base(array)
-        {
-            InitSuccess = ReadHeader();
-        }
-
-        /// <summary>
-        /// Open a Gvp clut from a byte array.
-        /// </summary>
-        /// <param name="array">Byte array that contains the clut data.</param>
-        /// <param name="offset">Offset of the clut data in the array.</param>
-        /// <param name="length">Number of bytes to read.</param>
-        public GvpPalette(byte[] array, long offset, int length)
-            : base(array, offset, length)
-        {
-            InitSuccess = ReadHeader();
-        }
+        private GvrPixelFormat pixelFormat;
         #endregion
 
-        #region Header
-        // Read the header and sets up the appropiate values.
-        // Returns true if successful, otherwise false
-        private bool ReadHeader()
+        #region Constructors & Initalizers
+        /// <summary>
+        /// Open a GVP palette from a file.
+        /// </summary>
+        /// <param name="file">Filename of the file that contains the palette data.</param>
+        public GvpPalette(string file) : base(file) { }
+
+        /// <summary>
+        /// Open a GVP palette from a byte array.
+        /// </summary>
+        /// <param name="source">Byte array that contains the palette data.</param>
+        public GvpPalette(byte[] source) : base(source) { }
+
+        /// <summary>
+        /// Open a GVP palette from a byte array.
+        /// </summary>
+        /// <param name="source">Byte array that contains the palette data.</param>
+        /// <param name="offset">Offset of the palette in the array.</param>
+        /// <param name="length">Number of bytes to read.</param>
+        public GvpPalette(byte[] source, int offset, int length) : base(source, offset, length) { }
+
+        /// <summary>
+        /// Open a GVP palette from a stream.
+        /// </summary>
+        /// <param name="source">Stream that contains the palette data.</param>
+        public GvpPalette(Stream source) : base(source) { }
+
+        /// <summary>
+        /// Open a GVP palette from a stream.
+        /// </summary>
+        /// <param name="source">Stream that contains the palette data.</param>
+        /// <param name="length">Number of bytes to read.</param>
+        public GvpPalette(Stream source, int length) : base(source, length) { }
+
+        protected override bool Initalize()
         {
-            if (!IsGvpClut(ClutData))
+            // Check to see if what we are dealing with is a GVP palette
+            if (!Is(encodedData))
                 return false;
 
-            NumPaletteEntries = (ushort)((ClutData[0x0E] << 8) | ClutData[0x0F]);
+            // Get the pixel format and the codec and make sure we can decode using them
+            pixelFormat = (GvrPixelFormat)encodedData[0x09];
+            pixelCodec = GvrPixelCodec.GetPixelCodec(pixelFormat);
+            if (pixelCodec == null) return false;
 
-            // I don't know how gvp's are supposed to be formatted
-            PixelFormat = (byte)GvrPixelFormat.Unknown;
-            PixelCodec  = null;
+            // Get the number of colors contained in the palette
+            paletteEntries = PTMethods.ToUInt16BE(encodedData, 0x0E);
 
             return true;
         }
+        #endregion
 
-        // Checks if the input file is a gvp
-        private bool IsGvpClut(byte[] data)
+        #region Palette Check
+        /// <summary>
+        /// Determines if this is a GVP palette.
+        /// </summary>
+        /// <param name="source">Byte array containing the data.</param>
+        /// <param name="offset">The offset in the byte array to start at.</param>
+        /// <param name="length">Length of the data (in bytes).</param>
+        /// <returns>True if this is a GVP palette, false otherwise.</returns>
+        public static bool Is(byte[] source, int offset, int length)
         {
-            if (Compare(data, "GVPL", 0x00) &&
-                BitConverter.ToUInt32(data, 0x04) == data.Length - 8)
+            if (length >= 16 &&
+                PTMethods.Contains(source, offset + 0x00, Encoding.UTF8.GetBytes("GVPL")) &&
+                BitConverter.ToUInt32(source, offset + 0x04) == length - 8)
                 return true;
 
             return false;
+        }
+
+        /// <summary>
+        /// Determines if this is a GVP palette.
+        /// </summary>
+        /// <param name="source">Byte array containing the data.</param>
+        /// <returns>True if this is a GVP palette, false otherwise.</returns>
+        public static bool Is(byte[] source)
+        {
+            return Is(source, 0, source.Length);
+        }
+
+        /// <summary>
+        /// Determines if this is a GVP palette.
+        /// </summary>
+        /// <param name="source">The stream to read from. The stream position is not changed.</param>
+        /// <param name="length">Number of bytes to read.</param>
+        /// <returns>True if this is a GVP palette, false otherwise.</returns>
+        public static bool Is(Stream source, int length)
+        {
+            // If the length is < 16, then there is no way this is a valid palette file.
+            if (length < 16)
+            {
+                return false;
+            }
+
+            byte[] buffer = new byte[16];
+            source.Read(buffer, 0, 16);
+            source.Position -= 16;
+
+            return Is(buffer, 0, length);
+        }
+
+        /// <summary>
+        /// Determines if this is a GVP palette.
+        /// </summary>
+        /// <param name="source">The stream to read from. The stream position is not changed.</param>
+        /// <returns>True if this is a GVP palette, false otherwise.</returns>
+        public static bool Is(Stream source)
+        {
+            return Is(source, (int)(source.Length - source.Position));
+        }
+
+        /// <summary>
+        /// Determines if this is a GVP palette.
+        /// </summary>
+        /// <param name="file">Filename of the file that contains the data.</param>
+        /// <returns>True if this is a GVP palette, false otherwise.</returns>
+        public static bool Is(string file)
+        {
+            using (FileStream stream = File.OpenRead(file))
+            {
+                return Is(stream);
+            }
         }
         #endregion
     }

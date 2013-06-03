@@ -393,7 +393,7 @@ namespace VrSharp.SvrTexture
             }
 
             // Palettize the bitmap if this data format is palettized.
-            if (DataCodec.ClutEntries != 0)
+            if (DataCodec.PaletteEntries != 0)
             {
                 PalettizeBitmap();
             }
@@ -411,9 +411,9 @@ namespace VrSharp.SvrTexture
             {
                 textureLength += 16;
             }
-            if (DataCodec.ClutEntries != 0 && !DataCodec.NeedsExternalClut)
+            if (DataCodec.PaletteEntries != 0 && !DataCodec.NeedsExternalPalette)
             {
-                textureLength += (DataCodec.ClutEntries * PixelCodec.Bpp / 8);
+                textureLength += (DataCodec.PaletteEntries * PixelCodec.Bpp / 8);
             }
 
             MemoryStream destination = new MemoryStream(textureLength);
@@ -447,9 +447,9 @@ namespace VrSharp.SvrTexture
             PTStream.WriteUInt16(destination, TextureHeight);
 
             // If we have an internal clut, write it
-            if (DataCodec.ClutEntries != 0 && !DataCodec.NeedsExternalClut)
+            if (DataCodec.PaletteEntries != 0 && !DataCodec.NeedsExternalPalette)
             {
-                byte[] clut = PixelCodec.EncodeClut(TextureClut, DataCodec.ClutEntries);
+                byte[] clut = PixelCodec.EncodePalette(TextureClut, DataCodec.PaletteEntries);
                 destination.Write(clut, 0, clut.Length);
             }
 

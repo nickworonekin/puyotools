@@ -341,7 +341,7 @@ namespace VrSharp.GvrTexture
             if (DataCodec == null || !DataCodec.CanEncode) return false;
 
             // Only palettized formats require a pixel codec.
-            if (DataCodec.ClutEntries != 0)
+            if (DataCodec.PaletteEntries != 0)
             {
                 PixelFormat = pixelFormat;
                 PixelCodec = GvrPixelCodec.GetPixelCodec(PixelFormat);
@@ -351,7 +351,7 @@ namespace VrSharp.GvrTexture
 
                 DataCodec.PixelCodec = PixelCodec;
 
-                DataFlags = GvrDataFlags.InternalClut;
+                DataFlags = GvrDataFlags.InternalPalette;
 
                 // Palettize the bitmap
                 PalettizeBitmap();
@@ -390,16 +390,16 @@ namespace VrSharp.GvrTexture
         protected override MemoryStream EncodeTexture()
         {
             // Before we write anything, let's make sure the data flags are set properly
-            if ((DataFlags & GvrDataFlags.InternalClut) != 0 && (DataFlags & GvrDataFlags.ExternalClut) != 0)
+            if ((DataFlags & GvrDataFlags.InternalPalette) != 0 && (DataFlags & GvrDataFlags.ExternalPalette) != 0)
             {
                 // If both InternalClut and ExternalClut is set, default to ExternalClut.
-                DataFlags &= ~GvrDataFlags.InternalClut;
+                DataFlags &= ~GvrDataFlags.InternalPalette;
             }
 
-            if ((DataFlags & GvrDataFlags.Clut) != 0 && DataCodec.ClutEntries == 0)
+            if ((DataFlags & GvrDataFlags.Palette) != 0 && DataCodec.PaletteEntries == 0)
             {
                 // If this texture has no clut, then don't set any clut flags.
-                DataFlags &= ~GvrDataFlags.Clut;
+                DataFlags &= ~GvrDataFlags.Palette;
             }
 
             // Calculate what the length of the texture will be
@@ -408,9 +408,9 @@ namespace VrSharp.GvrTexture
             {
                 textureLength += 16;
             }
-            if ((DataFlags & GvrDataFlags.InternalClut) != 0)
+            if ((DataFlags & GvrDataFlags.InternalPalette) != 0)
             {
-                textureLength += (DataCodec.ClutEntries * PixelCodec.Bpp / 8);
+                textureLength += (DataCodec.PaletteEntries * PixelCodec.Bpp / 8);
             }
 
             MemoryStream destination = new MemoryStream(textureLength);
@@ -461,9 +461,9 @@ namespace VrSharp.GvrTexture
             PTStream.WriteUInt16BE(destination, TextureHeight);
 
             // If we have an internal clut, write it
-            if ((DataFlags & GvrDataFlags.InternalClut) != 0)
+            if ((DataFlags & GvrDataFlags.InternalPalette) != 0)
             {
-                byte[] clut = PixelCodec.EncodeClut(TextureClut, DataCodec.ClutEntries);
+                byte[] clut = PixelCodec.EncodePalette(TextureClut, DataCodec.PaletteEntries);
                 destination.Write(clut, 0, clut.Length);
             }
 

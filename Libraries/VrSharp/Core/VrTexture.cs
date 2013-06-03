@@ -156,6 +156,15 @@ namespace VrSharp
         }
 
         protected abstract bool Initalize();
+
+        /// <summary>
+        /// Returns if the texture was loaded successfully.
+        /// </summary>
+        /// <returns></returns>
+        public bool Initalized
+        {
+            get { return initalized; }
+        }
         #endregion
 
         #region Get Texture
@@ -333,8 +342,6 @@ namespace VrSharp
         /// <param name="palette">A VpPalette object</param>
         protected virtual void SetPalette(VpPalette palette)
         {
-            // Should throw an ArgumentException if not the right type of
-            // VrClut (ex: passing a PvpClut for a GvrTexture).
             if (!initalized)
             {
                 throw new TextureNotInitalizedException("Cannot set the palette for this texture as it is not initalized.");
@@ -348,14 +355,14 @@ namespace VrSharp
                 return;
             }
 
-            if (palette.PixelCodec != null)
+            // If the palette is not initalized, don't use it
+            if (!palette.Initalized)
             {
-                dataCodec.SetClutExternal(palette.GetPalette(palette.PixelCodec), palette.GetNumPaletteEntries(), palette.PixelCodec);
+                return;
             }
-            else
-            {
-                dataCodec.SetClutExternal(palette.GetPalette(pixelCodec), palette.GetNumPaletteEntries(), pixelCodec);
-            }
+
+            dataCodec.PixelCodec = palette.PixelCodec;
+            dataCodec.SetPalette(palette.EncodedData, 0x10, palette.PaletteEntries);
         }
 
         /// <summary>
@@ -371,19 +378,8 @@ namespace VrSharp
                     throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
                 }
 
-                return dataCodec.NeedsExternalClut;
+                return dataCodec.NeedsExternalPalette;
             }
-        }
-        #endregion
-
-        #region Misc
-        /// <summary>
-        /// Returns if the texture was loaded successfully.
-        /// </summary>
-        /// <returns></returns>
-        public bool Initalized
-        {
-            get { return initalized; }
         }
         #endregion
 
@@ -393,7 +389,7 @@ namespace VrSharp
         {
             if (paletteOffset != -1) // The texture contains an embedded palette
             {
-                dataCodec.SetClut(encodedData, paletteOffset, pixelCodec);
+                dataCodec.SetPalette(encodedData, paletteOffset, dataCodec.PaletteEntries);
             }
 
             if (ContainsMipmaps) // If the texture contains mipmaps we have to get the largest texture

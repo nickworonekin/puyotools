@@ -31,11 +31,11 @@ namespace VrSharp.GvrTexture
     [Flags]
     public enum GvrDataFlags : byte
     {
-        None         = 0x0,
-        Mipmaps      = 0x1,
-        ExternalClut = 0x2,
-        InternalClut = 0x8,
-        Clut         = ExternalClut | InternalClut,
+        None            = 0x0,
+        Mipmaps         = 0x1,
+        ExternalPalette = 0x2,
+        InternalPalette = 0x8,
+        Palette         = ExternalPalette | InternalPalette,
     }
 
     public enum GvrGbixType
@@ -50,54 +50,4 @@ namespace VrSharp.GvrTexture
         /// </summary>
         Gcix,
     }
-
-    /*
-    public static class GvrCodecList
-    {
-        // Gets the pixel codec
-        public static GvrPixelCodec GetPixelCodec(GvrPixelFormat format)
-        {
-            switch (format)
-            {
-                case GvrPixelFormat.IntensityA8:
-                    return new GvrPixelCodec.IntensityA8();
-                case GvrPixelFormat.Rgb565:
-                    return new GvrPixelCodec.Rgb565();
-                case GvrPixelFormat.Rgb5a3:
-                    return new GvrPixelCodec.Rgb5a3();
-            }
-
-            return null;
-        }
-
-        // Gets the data codec
-        public static GvrDataCodec GetDataCodec(GvrDataFormat format)
-        {
-            switch (format)
-            {
-                case GvrDataFormat.Intensity4:
-                    return new GvrDataCodec.Intensity4();
-                case GvrDataFormat.Intensity8:
-                    return new GvrDataCodec.Intensity8();
-                case GvrDataFormat.IntensityA4:
-                    return new GvrDataCodec.IntensityA4();
-                case GvrDataFormat.IntensityA8:
-                    return new GvrDataCodec.IntensityA8();
-                case GvrDataFormat.Rgb565:
-                    return new GvrDataCodec.Rgb565();
-                case GvrDataFormat.Rgb5a3:
-                    return new GvrDataCodec.Rgb5a3();
-                case GvrDataFormat.Argb8888:
-                    return new GvrDataCodec.Argb8888();
-                case GvrDataFormat.Index4:
-                    return new GvrDataCodec.Index4();
-                case GvrDataFormat.Index8:
-                    return new GvrDataCodec.Index8();
-                case GvrDataFormat.Dxt1:
-                    return new GvrDataCodec.Dxt1();
-            }
-
-            return null;
-        }
-    }*/
 }

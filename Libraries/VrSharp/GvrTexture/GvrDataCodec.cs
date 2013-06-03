@@ -351,7 +351,7 @@ namespace VrSharp.GvrTexture
                                 //pixel |= (ushort)(((input[((((y + y2) * width) + (x + x2)) * 4) + 1] * 0x3F / 0xFF) & 0x3F) << 5);
                                 //pixel |= (ushort)(((input[((((y + y2) * width) + (x + x2)) * 4) + 0] * 0x1F / 0xFF) & 0x1F) << 0);
 
-                                BitConverter.GetBytes(SwapUShort(pixel)).CopyTo(output, offset);
+                                PTMethods.GetBytesBE(pixel).CopyTo(output, offset);
                                 offset += 2;
                             }
                         }
@@ -460,7 +460,7 @@ namespace VrSharp.GvrTexture
                                     //pixel |= (ushort)(((input[((((y + y2) * width) + (x + x2)) * 4) + 0] * 0x1F / 0xFF) & 0x1F) << 0);
                                 }
 
-                                BitConverter.GetBytes(SwapUShort(pixel)).CopyTo(output, offset);
+                                PTMethods.GetBytesBE(pixel).CopyTo(output, offset);
                                 offset += 2;
                             }
                         }
@@ -559,7 +559,7 @@ namespace VrSharp.GvrTexture
                 get { return 4; }
             }
 
-            public override int ClutEntries
+            public override int PaletteEntries
             {
                 get { return 16; }
             }
@@ -567,7 +567,7 @@ namespace VrSharp.GvrTexture
             public override byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)
             {
                 byte[] output = new byte[width * height * 4];
-                byte[][] clut  = ClutData;
+                byte[][] clut  = palette;
 
                 for (int y = 0; y < height; y += 8)
                 {
@@ -638,7 +638,7 @@ namespace VrSharp.GvrTexture
                 get { return 8; }
             }
 
-            public override int ClutEntries
+            public override int PaletteEntries
             {
                 get { return 256; }
             }
@@ -646,7 +646,7 @@ namespace VrSharp.GvrTexture
             public override byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)
             {
                 byte[] output = new byte[width * height * 4];
-                byte[][] clut  = ClutData;
+                byte[][] clut  = palette;
 
                 for (int y = 0; y < height; y += 4)
                 {

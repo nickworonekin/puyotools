@@ -121,7 +121,7 @@ namespace VrSharp.SvrTexture
             dataCodec.PixelCodec = pixelCodec;
 
             // Set the clut and data offsets
-            if (dataCodec.ClutEntries == 0 || dataCodec.NeedsExternalClut)
+            if (dataCodec.PaletteEntries == 0 || dataCodec.NeedsExternalPalette)
             {
                 paletteOffset = -1;
                 dataOffset = pvrtOffset + 0x10;
@@ -129,7 +129,7 @@ namespace VrSharp.SvrTexture
             else
             {
                 paletteOffset = pvrtOffset + 0x10;
-                dataOffset = paletteOffset + (dataCodec.ClutEntries * (pixelCodec.Bpp >> 3));
+                dataOffset = paletteOffset + (dataCodec.PaletteEntries * (pixelCodec.Bpp >> 3));
             }
 
             decodedData = new byte[textureWidth * textureHeight * 4];
