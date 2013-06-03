@@ -14,49 +14,36 @@ namespace VrConvert
         // Gvr Texture Decoder
         public class Gvr : VrDecoder
         {
-            public bool DecodeTexture(byte[] VrData, string ClutFile, out MemoryStream BitmapData)
+            public bool DecodeTexture(byte[] VrData, string PaletteFile, out MemoryStream BitmapData)
             {
                 BitmapData = null; // Set the bitmap data to null for now
 
                 // Load the Gvr texture
                 GvrTexture GvrTexture = new GvrTexture(VrData);
-                if (!GvrTexture.LoadSuccess())
+                if (!GvrTexture.Initalized)
                 {
                     Console.WriteLine("ERROR: Unsupported textue format or unable to load texture.");
                     return false;
                 }
 
-                // Set the external clut file
-                if (GvrTexture.NeedsExternalClut())
+                // Set the external palette file
+                if (GvrTexture.NeedsExternalPalette)
                 {
-                    if (ClutFile == null || !File.Exists(ClutFile))
+                    if (PaletteFile == null || !File.Exists(PaletteFile))
                     {
-                        Console.WriteLine("ERROR: Texture needs an external clut file.");
+                        Console.WriteLine("ERROR: Texture needs an external palette file.");
                         return false;
                     }
-                    GvpClut GvpClut = new GvpClut(ClutFile);
-                    if (!GvpClut.LoadSuccess())
+                    GvpPalette GvpPalette = new GvpPalette(PaletteFile);
+                    if (!GvpPalette.Initalized)
                     {
-                        Console.WriteLine("ERROR: Unable to load clut file.");
+                        Console.WriteLine("ERROR: Unable to load palette file.");
                         return false;
                     }
-                    GvrTexture.SetClut(GvpClut);
+                    GvrTexture.SetPalette(GvpPalette);
                 }
 
                 // Output information to the console
-                /*
-                GvrTextureInfo TextureInfo = (GvrTextureInfo)GvrTexture.GetTextureInfo();
-                Console.WriteLine();
-                Console.WriteLine("Texture Type : Gvr");
-                Console.WriteLine("Dimensions   : {0}x{1}", TextureInfo.TextureWidth, TextureInfo.TextureHeight);
-                if (TextureInfo.PixelFormat != (byte)GvrPixelFormat.Unknown)
-                    Console.WriteLine("Pixel Format : {0} ({1})", TextureInfo.PixelFormat.ToString("X2"), GetPixelFormatAsText(TextureInfo.PixelFormat));
-                Console.WriteLine("Data Format  : {0} ({1})", TextureInfo.DataFormat.ToString("X2"), GetDataFormatAsText(TextureInfo.DataFormat));
-                if (TextureInfo.DataFlags != 0x00)
-                    Console.WriteLine("Data Flags   : {0} ({1})", TextureInfo.DataFlags.ToString("X2"), GetDataFlagsAsText(TextureInfo.DataFlags));
-                Console.WriteLine();
-                 */
-                //GvrTextureInfo TextureInfo = (GvrTextureInfo)GvrTexture.GetTextureInfo();
                 Console.WriteLine();
                 Console.WriteLine("Texture Type : Gvr");
                 Console.WriteLine("Dimensions   : {0}x{1}", GvrTexture.TextureWidth, GvrTexture.TextureHeight);
@@ -68,7 +55,7 @@ namespace VrConvert
                 Console.WriteLine();
 
                 // Decode the texture
-                try { BitmapData = GvrTexture.GetTextureAsStream(); }
+                try { BitmapData = GvrTexture.ToStream(); }
                 catch
                 {
                     Console.WriteLine("ERROR: Unable to decode texture.");
@@ -126,10 +113,10 @@ namespace VrConvert
 
                 if ((DataFlags & GvrDataFlags.Mipmaps) != 0) // Contains Mipmaps
                     Flags.Add("Mipmaps");
-                if ((DataFlags & GvrDataFlags.ExternalClut) != 0) // External Clut
-                    Flags.Add("External Clut");
-                if ((DataFlags & GvrDataFlags.InternalClut) != 0) // Internal Clut
-                    Flags.Add("Internal Clut");
+                if ((DataFlags & GvrDataFlags.ExternalPalette) != 0) // External Palette
+                    Flags.Add("External Palette");
+                if ((DataFlags & GvrDataFlags.InternalPalette) != 0) // Internal Palette
+                    Flags.Add("Internal Palette");
 
                 if (Flags.Count == 0)
                     return String.Empty;
@@ -143,48 +130,36 @@ namespace VrConvert
         // Pvr Texture Decoder
         public class Pvr : VrDecoder
         {
-            public bool DecodeTexture(byte[] VrData, string ClutFile, out MemoryStream BitmapData)
+            public bool DecodeTexture(byte[] VrData, string PaletteFile, out MemoryStream BitmapData)
             {
                 BitmapData = null; // Set the bitmap data to null for now
 
                 // Load the Pvr texture
                 PvrTexture PvrTexture = new PvrTexture(VrData);
-                if (!PvrTexture.LoadSuccess())
+                if (!PvrTexture.Initalized)
                 {
                     Console.WriteLine("ERROR: Unsupported textue format or unable to load texture.");
                     return false;
                 }
 
-                // Set the external clut file
-                if (PvrTexture.NeedsExternalClut())
+                // Set the external palette file
+                if (PvrTexture.NeedsExternalPalette)
                 {
-                    if (ClutFile == null || !File.Exists(ClutFile))
+                    if (PaletteFile == null || !File.Exists(PaletteFile))
                     {
-                        Console.WriteLine("ERROR: Texture needs an external clut file.");
+                        Console.WriteLine("ERROR: Texture needs an external palette file.");
                         return false;
                     }
-                    PvpClut PvpClut = new PvpClut(ClutFile);
-                    if (!PvpClut.LoadSuccess())
+                    PvpPalette PvpPalette = new PvpPalette(PaletteFile);
+                    if (!PvpPalette.Initalized)
                     {
-                        Console.WriteLine("ERROR: Unable to load clut file.");
+                        Console.WriteLine("ERROR: Unable to load palette file.");
                         return false;
                     }
-                    PvrTexture.SetClut(PvpClut);
+                    PvrTexture.SetPalette(PvpPalette);
                 }
 
                 // Output information to the console
-                /*
-                PvrTextureInfo TextureInfo = (PvrTextureInfo)PvrTexture.GetTextureInfo();
-                Console.WriteLine();
-                Console.WriteLine("Texture Type : Pvr");
-                if (TextureInfo.CompressionFormat != PvrCompressionFormat.None)
-                    Console.WriteLine("Compression  : {0}",   TextureInfo.CompressionFormat);
-                Console.WriteLine("Dimensions   : {0}x{1}",   TextureInfo.TextureWidth, TextureInfo.TextureHeight);
-                Console.WriteLine("Pixel Format : {0} ({1})", TextureInfo.PixelFormat.ToString("X2"), GetPixelFormatAsText(TextureInfo.PixelFormat));
-                Console.WriteLine("Data Format  : {0} ({1})", TextureInfo.DataFormat.ToString("X2"),  GetDataFormatAsText(TextureInfo.DataFormat));
-                Console.WriteLine();
-                 */
-                //PvrTextureInfo TextureInfo = (PvrTextureInfo)PvrTexture.GetTextureInfo();
                 Console.WriteLine();
                 Console.WriteLine("Texture Type : Pvr");
                 if (PvrTexture.CompressionFormat != PvrCompressionFormat.None)
@@ -195,7 +170,7 @@ namespace VrConvert
                 Console.WriteLine();
 
                 // Decode the texture
-                try { BitmapData = PvrTexture.GetTextureAsStream(); }
+                try { BitmapData = PvrTexture.ToStream(); }
                 catch
                 {
                     Console.WriteLine("ERROR: Unable to decode texture.");
@@ -233,9 +208,9 @@ namespace VrConvert
                     case PvrDataFormat.VqMipmaps:
                         return "Vq w/ Mipmaps";
                     case PvrDataFormat.Index4:
-                        return "4-bit Indexed w/ External Clut";
+                        return "4-bit Indexed w/ External Palette";
                     case PvrDataFormat.Index8:
-                        return "8-bit Indexed w/ External Clut";
+                        return "8-bit Indexed w/ External Palette";
                     case PvrDataFormat.Rectangle:
                         return "Rectangle";
                     case PvrDataFormat.RectangleTwiddled:
@@ -255,46 +230,36 @@ namespace VrConvert
         // Svr Texture Decoder
         public class Svr : VrDecoder
         {
-            public bool DecodeTexture(byte[] VrData, string ClutFile, out MemoryStream BitmapData)
+            public bool DecodeTexture(byte[] VrData, string PaletteFile, out MemoryStream BitmapData)
             {
                 BitmapData = null; // Set the bitmap data to null for now
 
                 // Load the Svr texture
                 SvrTexture SvrTexture = new SvrTexture(VrData);
-                if (!SvrTexture.LoadSuccess())
+                if (!SvrTexture.Initalized)
                 {
                     Console.WriteLine("ERROR: Unsupported textue format or unable to load texture.");
                     return false;
                 }
 
-                // Set the external clut file
-                if (SvrTexture.NeedsExternalClut())
+                // Set the external palette file
+                if (SvrTexture.NeedsExternalPalette)
                 {
-                    if (ClutFile == null || !File.Exists(ClutFile))
+                    if (PaletteFile == null || !File.Exists(PaletteFile))
                     {
-                        Console.WriteLine("ERROR: Texture needs an external clut file.");
+                        Console.WriteLine("ERROR: Texture needs an external palette file.");
                         return false;
                     }
-                    SvpClut SvpClut = new SvpClut(ClutFile);
-                    if (!SvpClut.LoadSuccess())
+                    SvpPalette SvpPalette = new SvpPalette(PaletteFile);
+                    if (!SvpPalette.Initalized)
                     {
-                        Console.WriteLine("ERROR: Unable to load clut file.");
+                        Console.WriteLine("ERROR: Unable to load palette file.");
                         return false;
                     }
-                    SvrTexture.SetClut(SvpClut);
+                    SvrTexture.SetPalette(SvpPalette);
                 }
 
                 // Output information to the console
-                /*
-                SvrTextureInfo TextureInfo = (SvrTextureInfo)SvrTexture.GetTextureInfo();
-                Console.WriteLine();
-                Console.WriteLine("Texture Type : Svr");
-                Console.WriteLine("Dimensions   : {0}x{1}",   TextureInfo.TextureWidth, TextureInfo.TextureHeight);
-                Console.WriteLine("Pixel Format : {0} ({1})", TextureInfo.PixelFormat.ToString("X2"), GetPixelFormatAsText(TextureInfo.PixelFormat));
-                Console.WriteLine("Data Format  : {0} ({1})", TextureInfo.DataFormat.ToString("X2"),  GetDataFormatAsText(TextureInfo.DataFormat));
-                Console.WriteLine();
-                 */
-                //SvrTextureInfo TextureInfo = (SvrTextureInfo)SvrTexture.GetTextureInfo();
                 Console.WriteLine();
                 Console.WriteLine("Texture Type : Svr");
                 Console.WriteLine("Dimensions   : {0}x{1}", SvrTexture.TextureWidth, SvrTexture.TextureHeight);
@@ -303,7 +268,7 @@ namespace VrConvert
                 Console.WriteLine();
 
                 // Decode the texture
-                try { BitmapData = SvrTexture.GetTextureAsStream(); }
+                try { BitmapData = SvrTexture.ToStream(); }
                 catch
                 {
                     Console.WriteLine("ERROR: Unable to decode texture.");
@@ -332,9 +297,9 @@ namespace VrConvert
                     case SvrDataFormat.Rectangle:
                         return "Rectangle";
                     case SvrDataFormat.Index4ExtClut:
-                        return "4-bit Indexed w/ External Clut";
+                        return "4-bit Indexed w/ External Palette";
                     case SvrDataFormat.Index8ExtClut:
-                        return "8-bit Indexed w/ External Clut";
+                        return "8-bit Indexed w/ External Palette";
                     case SvrDataFormat.Index4RectRgb5a3:
                         return "4-bit Indexed Rectangle w/ Rgb5a3";
                     case SvrDataFormat.Index4SqrRgb5a3:

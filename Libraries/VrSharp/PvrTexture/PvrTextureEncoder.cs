@@ -82,7 +82,7 @@ namespace VrSharp.PvrTexture
         /// <param name="dataFormat">Data format to encode the texture to.</param>
         public PvrTextureEncoder(string file, PvrPixelFormat pixelFormat, PvrDataFormat dataFormat) : base(file)
         {
-            if (decodedData != null)
+            if (decodedBitmap != null)
             {
                 initalized = Initalize(pixelFormat, dataFormat);
             }
@@ -97,7 +97,7 @@ namespace VrSharp.PvrTexture
         public PvrTextureEncoder(byte[] source, PvrPixelFormat pixelFormat, PvrDataFormat dataFormat)
             : base(source)
         {
-            if (decodedData != null)
+            if (decodedBitmap != null)
             {
                 initalized = Initalize(pixelFormat, dataFormat);
             }
@@ -114,7 +114,7 @@ namespace VrSharp.PvrTexture
         public PvrTextureEncoder(byte[] source, int offset, int length, PvrPixelFormat pixelFormat, PvrDataFormat dataFormat)
             : base(source, offset, length)
         {
-            if (decodedData != null)
+            if (decodedBitmap != null)
             {
                 initalized = Initalize(pixelFormat, dataFormat);
             }
@@ -129,7 +129,7 @@ namespace VrSharp.PvrTexture
         public PvrTextureEncoder(Stream source, PvrPixelFormat pixelFormat, PvrDataFormat dataFormat)
             : base(source)
         {
-            if (decodedData != null)
+            if (decodedBitmap != null)
             {
                 initalized = Initalize(pixelFormat, dataFormat);
             }
@@ -145,7 +145,7 @@ namespace VrSharp.PvrTexture
         public PvrTextureEncoder(Stream source, int length, PvrPixelFormat pixelFormat, PvrDataFormat dataFormat)
             : base(source, length)
         {
-            if (decodedData != null)
+            if (decodedBitmap != null)
             {
                 initalized = Initalize(pixelFormat, dataFormat);
             }
@@ -160,7 +160,7 @@ namespace VrSharp.PvrTexture
         public PvrTextureEncoder(Bitmap source, PvrPixelFormat pixelFormat, PvrDataFormat dataFormat)
             : base(source)
         {
-            if (decodedData != null)
+            if (decodedBitmap != null)
             {
                 initalized = Initalize(pixelFormat, dataFormat);
             }
@@ -190,7 +190,7 @@ namespace VrSharp.PvrTexture
                 decodedData = BitmapToRawIndexed(decodedBitmap, dataCodec.PaletteEntries, out texturePalette);
 
                 // If this texture has an external palette file, set up the palette encoder
-                if (NeedsExternalPalette)
+                if (dataCodec.NeedsExternalPalette)
                 {
                     paletteEncoder = new PvpPaletteEncoder(texturePalette, (ushort)dataCodec.PaletteEntries, pixelFormat, pixelCodec);
                 }
