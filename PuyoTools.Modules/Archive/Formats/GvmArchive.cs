@@ -112,6 +112,16 @@ namespace PuyoTools.Modules.Archive
 
             public override ArchiveEntry GetFile(int index)
             {
+                // Some Billy Hatcher textures have an oddity where the texture length is 16 more than what it
+                // actually should be. This seems to only effect the last texture of a GVM, and only some of them
+                // are affected. In that case, we will "fix" the GVRs in question.
+                bool needToFix = (index == Files.Length - 1 && Files[index].Offset + Files[index].Length > Files[index].Stream.Length);
+
+                // If this archive does not contain any global indicies, then just return the data as is.
+                if (!containsGlobalIndex && !needToFix)
+                {
+                    return base.GetFile(index);
+                }
                 // Make sure index is not out of bounds
                 if (index < 0 || index > Files.Length)
                     throw new IndexOutOfRangeException();
@@ -120,21 +130,17 @@ namespace PuyoTools.Modules.Archive
 
                 MemoryStream data = new MemoryStream();
 
-                // Write out the GBIX header
-                data.WriteByte((byte)'G');
-                data.WriteByte((byte)'B');
-                data.WriteByte((byte)'I');
-                data.WriteByte((byte)'X');
-                PTStream.WriteInt32(data, 8);
-
+                // Write out the GBIX header, if this archive contains global indicies
                 if (containsGlobalIndex)
                 {
+                    data.WriteByte((byte)'G');
+                    data.WriteByte((byte)'B');
+                    data.WriteByte((byte)'I');
+                    data.WriteByte((byte)'X');
+                    PTStream.WriteInt32(data, 8);
+
                     Files[index].Stream.Position = 0xC + (index * tableEntryLength) + globalIndexOffset;
                     PTStream.WriteInt32BE(data, PTStream.ReadInt32BE(Files[index].Stream));
-                }
-                else
-                {
-                    data.Position += 4;
                 }
 
                 data.Position += 4;
@@ -142,6 +148,23 @@ namespace PuyoTools.Modules.Archive
                 // Now copy over the file data
                 Files[index].Stream.Position = Files[index].Offset;
                 PTStream.CopyPartTo(Files[index].Stream, data, Files[index].Length);
+
+                // Fix the texture lengths for the textures that need to be "fixed"
+                if (needToFix)
+                {
+                    if (containsGlobalIndex)
+                    {
+                        data.Position = 0x14;
+                    }
+                    else
+                    {
+                        data.Position = 0x4;
+                    }
+
+                    uint actualLength = PTStream.ReadUInt32(data);
+                    data.Position -= 4;
+                    PTStream.WriteUInt32(data, actualLength - 16);
+                }
 
                 Files[index].Stream.Position = oldPosition;
                 data.Position = 0;

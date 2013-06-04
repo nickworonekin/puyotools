@@ -391,8 +391,8 @@ namespace VrSharp
                 dataCodec.SetPalette(encodedData, paletteOffset, dataCodec.PaletteEntries);
             }
 
-            if (ContainsMipmaps) // If the texture contains mipmaps we have to get the largest texture
-                return dataCodec.DecodeMipmap(encodedData, dataOffset, 0, textureWidth, textureHeight, pixelCodec);
+            //if (ContainsMipmaps) // If the texture contains mipmaps we have to get the largest texture
+            //    return dataCodec.DecodeMipmap(encodedData, dataOffset, 0, textureWidth, textureHeight, pixelCodec);
 
             return dataCodec.Decode(encodedData, dataOffset, textureWidth, textureHeight, pixelCodec);
         }

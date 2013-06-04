@@ -63,7 +63,7 @@ namespace VrSharp
         // Returns -1 if this is not a palettized data format.
         public virtual int PaletteEntries
         {
-            get { return -1; }
+            get { return 0; }
         }
 
         // Returns if an external palette file is necessary for the texture.

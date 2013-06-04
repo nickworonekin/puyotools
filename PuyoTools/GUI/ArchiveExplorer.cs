@@ -335,7 +335,15 @@ namespace PuyoTools.GUI
 
                 if (sfd.ShowDialog() == DialogResult.OK)
                 {
-                    ArchiveEntry entry = archive.GetFile(index);
+                    ArchiveEntry entry;
+                    if (OpenedArchives.Count > 1)
+                    {
+                        entry = archive.GetFile(index - 1);
+                    }
+                    else
+                    {
+                        entry = archive.GetFile(index);
+                    }
                     entry.Stream.Position = entry.Offset;
 
                     using (FileStream outStream = File.Create(sfd.FileName))
@@ -359,7 +367,15 @@ namespace PuyoTools.GUI
                     {
                         int index = listView.SelectedIndices[i];
 
-                        ArchiveEntry entry = archive.GetFile(index);
+                        ArchiveEntry entry;
+                        if (OpenedArchives.Count > 1)
+                        {
+                            entry = archive.GetFile(index - 1);
+                        }
+                        else
+                        {
+                            entry = archive.GetFile(index);
+                        }
                         entry.Stream.Position = entry.Offset;
 
                         string fname = entry.Filename;
