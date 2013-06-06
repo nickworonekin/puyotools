@@ -18,6 +18,8 @@ namespace VrSharp
 
         protected int paletteOffset; // Offset of the palette data in the texture (-1 if there is none)
         protected int dataOffset;    // Offset of the actual data in the texture
+
+        protected int[] mipmapOffsets; // Mipmap offsets
         #endregion
 
         #region Texture Properties
@@ -166,7 +168,7 @@ namespace VrSharp
         }
         #endregion
 
-        #region Get Texture
+        #region Texture Retrieval
         /// <summary>
         /// Returns the decoded texture as an array containg raw 32-bit ARGB data.
         /// </summary>
@@ -246,67 +248,29 @@ namespace VrSharp
 
             ToBitmap().Save(destination, ImageFormat.Png);
         }
+
+        // Decodes a texture
+        private byte[] DecodeTexture()
+        {
+            if (paletteOffset != -1) // The texture contains an embedded palette
+            {
+                dataCodec.SetPalette(encodedData, paletteOffset, dataCodec.PaletteEntries);
+            }
+
+            if (HasMipmaps)
+            {
+                return dataCodec.Decode(encodedData, dataOffset + mipmapOffsets[0], textureWidth, textureHeight, pixelCodec);
+            }
+
+            return dataCodec.Decode(encodedData, dataOffset, textureWidth, textureHeight, pixelCodec);
+        }
         #endregion
 
-        #region Get Texture Mipmap
-        /*
-        /// <summary>
-        /// Get a mipmap in the texture as a byte array (clone of GetTextureMipmapAsArray).
-        /// </summary>
-        /// <param name="mipmap">Mipmap Level (0 = Largest)</param>
-        /// <returns></returns>
-        public byte[] GetTextureMipmap(int mipmap)
-        {
-            return GetTextureMipmapAsArray(mipmap);
-        }
-
-        /// <summary>
-        /// Get a mipmap in the texture as a byte array.
-        /// </summary>
-        /// <param name="mipmap">Mipmap Level (0 = Largest)</param>
-        /// <returns></returns>
-        public byte[] GetTextureMipmapAsArray(int mipmap)
-        {
-            if (!InitSuccess) return null;
-
-            int size;
-            byte[] TextureMipmap = DecodeTextureMipmap(mipmap, out size);
-            return ConvertRawToArray(TextureMipmap, size, size);
-        }
-
-        /// <summary>
-        /// Get a mipmap in the texture as a memory stream.
-        /// </summary>
-        /// <param name="mipmap">Mipmap Level (0 = Largest)</param>
-        /// <returns></returns>
-        public MemoryStream GetTextureMipmapAsStream(int mipmap)
-        {
-            if (!InitSuccess) return null;
-
-            int size;
-            byte[] TextureMipmap = DecodeTextureMipmap(mipmap, out size);
-            return ConvertRawToStream(TextureMipmap, size, size);
-        }
-
-        /// <summary>
-        /// Get a mipmap in the texture as a System.Drawing.Bitmap object.
-        /// </summary>
-        /// <param name="mipmap">Mipmap Level (0 = Largest)</param>
-        /// <returns></returns>
-        public Bitmap GetTextureMipmapAsBitmap(int mipmap)
-        {
-            if (!InitSuccess) return null;
-
-            int size;
-            byte[] TextureMipmap = DecodeTextureMipmap(mipmap, out size);
-            return ConvertRawToBitmap(TextureMipmap, size, size);
-        }*/
-
+        #region Mipmaps & Mipmap Retrieval
         /// <summary>
         /// Returns if the texture contains mipmaps.
         /// </summary>
-        /// <returns></returns>
-        public virtual bool ContainsMipmaps
+        public virtual bool HasMipmaps
         {
             get
             {
@@ -319,19 +283,108 @@ namespace VrSharp
             }
         }
 
-        /*
         /// <summary>
-        /// Returns the number of mipmaps in the texture, or 0 if there are none.
+        /// Returns the mipmaps of a texture as an array of byte arrays. The first index will contain the largest, original sized texture and the last index will contain the smallest texture.
         /// </summary>
         /// <returns></returns>
-        public int GetNumMipmaps()
+        public byte[][] MipmapsToArray()
         {
-            if (!InitSuccess)       return 0;
-            if (!ContainsMipmaps()) return 0;
+            if (!initalized)
+            {
+                throw new TextureNotInitalizedException("Cannot decode this texture as it is not initalized.");
+            }
 
-            return (int)Math.Log(TextureWidth, 2) + 1;
+            // If this texture does not contain mipmaps, just return the texture
+            if (!HasMipmaps)
+            {
+                return new byte[][] { ToArray() };
+            }
+
+            if (paletteOffset != -1) // The texture contains an embedded palette
+            {
+                dataCodec.SetPalette(encodedData, paletteOffset, dataCodec.PaletteEntries);
+            }
+
+            byte[][] mipmaps = new byte[mipmapOffsets.Length][];
+            for (int i = 0, size = textureWidth; i < mipmaps.Length; i++, size >>= 1)
+            {
+                mipmaps[i] = dataCodec.Decode(encodedData, dataOffset + mipmapOffsets[i], size, size, pixelCodec);
+            }
+
+            return mipmaps;
         }
-         */
+
+        /// <summary>
+        /// Returns the mipmaps of a texture as an array of bitmaps. The first index will contain the largest, original sized texture and the last index will contain the smallest texture.
+        /// </summary>
+        /// <returns></returns>
+        public Bitmap[] MipmapsToBitmap()
+        {
+            if (!initalized)
+            {
+                throw new TextureNotInitalizedException("Cannot decode this texture as it is not initalized.");
+            }
+
+            // If this texture does not contain mipmaps, just return the texture
+            if (!HasMipmaps)
+            {
+                return new Bitmap[] { ToBitmap() };
+            }
+
+            if (paletteOffset != -1) // The texture contains an embedded palette
+            {
+                dataCodec.SetPalette(encodedData, paletteOffset, dataCodec.PaletteEntries);
+            }
+
+            Bitmap[] mipmaps = new Bitmap[mipmapOffsets.Length];
+            for (int i = 0, size = textureWidth; i < mipmaps.Length; i++, size >>= 1)
+            {
+                byte[] data = dataCodec.Decode(encodedData, dataOffset + mipmapOffsets[i], size, size, pixelCodec);
+
+                Bitmap img = new Bitmap(TextureWidth, TextureHeight, PixelFormat.Format32bppArgb);
+                BitmapData bitmapData = img.LockBits(new Rectangle(0, 0, img.Width, img.Height), ImageLockMode.WriteOnly, img.PixelFormat);
+                Marshal.Copy(data, 0, bitmapData.Scan0, data.Length);
+                img.UnlockBits(bitmapData);
+
+                mipmaps[i] = img;
+            }
+
+            return mipmaps;
+        }
+
+        /// <summary>
+        /// Returns the mipmaps of a texture as an array of streams. The first index will contain the largest, original sized texture and the last index will contain the smallest texture.
+        /// </summary>
+        /// <returns></returns>
+        public MemoryStream[] MipmapsToStream()
+        {
+            if (!initalized)
+            {
+                throw new TextureNotInitalizedException("Cannot decode this texture as it is not initalized.");
+            }
+
+            // If this texture does not contain mipmaps, just return the texture
+            if (!HasMipmaps)
+            {
+                return new MemoryStream[] { ToStream() };
+            }
+
+            if (paletteOffset != -1) // The texture contains an embedded palette
+            {
+                dataCodec.SetPalette(encodedData, paletteOffset, dataCodec.PaletteEntries);
+            }
+
+            Bitmap[] bitmapMipmaps = MipmapsToBitmap();
+
+            MemoryStream[] mipmaps = new MemoryStream[mipmapOffsets.Length];
+            for (int i = 0; i < mipmaps.Length; i++)
+            {
+                mipmaps[i] = new MemoryStream();
+                bitmapMipmaps[i].Save(mipmaps[i], ImageFormat.Png);
+            }
+
+            return mipmaps;
+        }
         #endregion
 
         #region Palette
@@ -380,46 +433,6 @@ namespace VrSharp
                 return dataCodec.NeedsExternalPalette;
             }
         }
-        #endregion
-
-        #region Private Properties
-        // Decode a texture that does not contain mipmaps
-        private byte[] DecodeTexture()
-        {
-            if (paletteOffset != -1) // The texture contains an embedded palette
-            {
-                dataCodec.SetPalette(encodedData, paletteOffset, dataCodec.PaletteEntries);
-            }
-
-            //if (ContainsMipmaps) // If the texture contains mipmaps we have to get the largest texture
-            //    return dataCodec.DecodeMipmap(encodedData, dataOffset, 0, textureWidth, textureHeight, pixelCodec);
-
-            return dataCodec.Decode(encodedData, dataOffset, textureWidth, textureHeight, pixelCodec);
-        }
-
-        // Decode a texture that contains mipmaps
-        /*
-        private byte[] DecodeTextureMipmap(int mipmap, out int size)
-        {
-            if (!ContainsMipmaps()) // No mipmaps = no texture
-            {
-                size = 0;
-                return null;
-            }
-
-            // Get the size of the mipmap
-            size = TextureWidth;
-            for (int i = 0; i < mipmap; i++)
-                size >>= 1;
-            if (size == 0) // Mipmap > number of mipmaps
-                return null;
-
-            if (PaletteOffset != -1) // The texture contains a clut
-                DataCodec.SetClut(TextureData, PaletteOffset, PixelCodec);
-
-            return DataCodec.DecodeMipmap(TextureData, DataOffset, mipmap, size, size, PixelCodec);
-        }
-         */
         #endregion
     }
 }

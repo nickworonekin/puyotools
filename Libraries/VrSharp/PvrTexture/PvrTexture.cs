@@ -151,20 +151,20 @@ namespace VrSharp.PvrTexture
             if (dataCodec == null) return false;
             dataCodec.PixelCodec = pixelCodec;
 
-            // Set the clut and data offsets
+            // Set the palette and data offsets
             if (dataCodec.PaletteEntries == 0 || dataCodec.NeedsExternalPalette)
             {
                 paletteOffset = -1;
-                dataOffset = PvrtOffset + 0x10;
+                dataOffset = pvrtOffset + 0x10;
             }
             else
             {
-                paletteOffset = PvrtOffset + 0x10;
+                paletteOffset = pvrtOffset + 0x10;
                 dataOffset = paletteOffset + (dataCodec.PaletteEntries * (pixelCodec.Bpp >> 3));
             }
 
             // Get the compression format and determine if we need to decompress this texture
-            compressionFormat = GetCompressionFormat(encodedData, PvrtOffset, dataOffset);
+            compressionFormat = GetCompressionFormat(encodedData, pvrtOffset, dataOffset);
             compressionCodec = PvrCompressionCodec.GetCompressionCodec(compressionFormat);
 
             if (compressionFormat != PvrCompressionFormat.None && compressionCodec != null)
@@ -178,6 +178,38 @@ namespace VrSharp.PvrTexture
                     pvrtOffset -= 4;
                     if (paletteOffset != -1) paletteOffset -= 4;
                     dataOffset -= 4;
+                }
+            }
+
+            // If the texture contains mipmaps, gets the offsets of them
+            if (dataCodec.ContainsMipmaps)
+            {
+                mipmapOffsets = new int[(int)Math.Log(textureWidth, 2) + 1];
+
+                int mipmapOffset = 0;
+                for (int i = mipmapOffsets.Length - 1, size = 1; i >= 0; i--, size <<= 1)
+                {
+                    mipmapOffsets[i] = mipmapOffset;
+
+                    if (size == 1)
+                    {
+                        // How much space does the 1x1 mipmap use?
+                        if (dataFormat == PvrDataFormat.SquareTwiddledMipmaps)
+                        {
+                            // A 1x1 mipmap takes up half as much space as a 2x2 one when the data format is
+                            // square twiddled + mipmaps (the one that's 0x02, not 0x12).
+                            mipmapOffset += (2 * dataCodec.Bpp) >> 3;
+                        }
+                        else
+                        {
+                            // A 1x1 mipmap takes up as much space as a 2x2 one
+                            mipmapOffset += (4 * dataCodec.Bpp) >> 3;
+                        }
+                    }
+                    else
+                    {
+                        mipmapOffset += (size * size * dataCodec.Bpp) >> 3;
+                    }
                 }
             }
 

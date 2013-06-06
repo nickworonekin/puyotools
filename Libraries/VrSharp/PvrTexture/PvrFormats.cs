@@ -24,7 +24,7 @@ namespace VrSharp.PvrTexture
         RectangleTwiddled        = 0x0D,
         SmallVq                  = 0x10,
         SmallVqMipmaps           = 0x11,
-        SquareTwiddledMipmapsDup = 0x12,
+        SquareTwiddledMipmapsAlt = 0x12,
         Unknown                  = 0xFF,
     }
 

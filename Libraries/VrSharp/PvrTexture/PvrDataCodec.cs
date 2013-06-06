@@ -147,7 +147,7 @@ namespace VrSharp.PvrTexture
 
             public override int Bpp
             {
-                get { return 8; }
+                get { return 2; }
             }
 
             public override int PaletteEntries
@@ -161,7 +161,7 @@ namespace VrSharp.PvrTexture
                 byte[] output   = new byte[width * height * 4];
                 byte[][] clut    = palette;
 
-                TwiddledMap TwiddledMap = new TwiddledMap(width / 2, Bpp);
+                TwiddledMap TwiddledMap = new TwiddledMap(width / 2, 8);
 
                 for (int y = 0; y < height; y += 2)
                 {
@@ -205,7 +205,7 @@ namespace VrSharp.PvrTexture
 
             public override int Bpp
             {
-                get { return 8; }
+                get { return 2; }
             }
 
             public override int PaletteEntries
@@ -224,7 +224,7 @@ namespace VrSharp.PvrTexture
                 byte[] output   = new byte[width * height * 4];
                 byte[][] clut    = palette;
 
-                TwiddledMap TwiddledMap = new TwiddledMap(width / 2, Bpp);
+                TwiddledMap TwiddledMap = new TwiddledMap(width / 2, 8);
 
                 for (int y = 0; y < height; y += 2)
                 {
@@ -589,7 +589,7 @@ namespace VrSharp.PvrTexture
 
             public override int Bpp
             {
-                get { return 8; }
+                get { return 2; }
             }
 
             public override int PaletteEntries
@@ -603,7 +603,7 @@ namespace VrSharp.PvrTexture
                 byte[] output   = new byte[width * height * 4];
                 byte[][] clut    = palette;
 
-                TwiddledMap TwiddledMap = new TwiddledMap(width / 2, Bpp);
+                TwiddledMap TwiddledMap = new TwiddledMap(width / 2, 8);
 
                 for (int y = 0; y < height; y += 2)
                 {
@@ -647,7 +647,7 @@ namespace VrSharp.PvrTexture
 
             public override int Bpp
             {
-                get { return 8; }
+                get { return 2; }
             }
 
             public override int PaletteEntries
@@ -666,7 +666,7 @@ namespace VrSharp.PvrTexture
                 byte[] output   = new byte[width * height * 4];
                 byte[][] clut    = palette;
 
-                TwiddledMap TwiddledMap = new TwiddledMap(width / 2, Bpp);
+                TwiddledMap TwiddledMap = new TwiddledMap(width / 2, 8);
 
                 for (int y = 0; y < height; y += 2)
                 {
@@ -780,7 +780,7 @@ namespace VrSharp.PvrTexture
                 case PvrDataFormat.SquareTwiddled:
                     return new SquareTwiddled();
                 case PvrDataFormat.SquareTwiddledMipmaps:
-                case PvrDataFormat.SquareTwiddledMipmapsDup:
+                case PvrDataFormat.SquareTwiddledMipmapsAlt:
                     return new SquareTwiddledMipmaps();
                 case PvrDataFormat.Vq:
                     return new Vq();

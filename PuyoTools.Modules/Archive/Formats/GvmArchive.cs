@@ -141,9 +141,9 @@ namespace PuyoTools.Modules.Archive
 
                     Files[index].Stream.Position = 0xC + (index * tableEntryLength) + globalIndexOffset;
                     PTStream.WriteInt32BE(data, PTStream.ReadInt32BE(Files[index].Stream));
-                }
 
-                data.Position += 4;
+                    data.Position += 4;
+                }
 
                 // Now copy over the file data
                 Files[index].Stream.Position = Files[index].Offset;

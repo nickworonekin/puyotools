@@ -155,8 +155,10 @@ namespace VrConvert
             string OutputFile = String.Empty;
             string ClutFile   = String.Empty;
 
-            string InputPath  = (Path.GetDirectoryName(InputFile) != String.Empty ? Path.GetDirectoryName(InputFile) + Path.DirectorySeparatorChar : String.Empty);
-            string OutputPath = InputPath;
+            //string InputPath  = (Path.GetDirectoryName(InputFile) != String.Empty ? Path.GetDirectoryName(InputFile) + Path.DirectorySeparatorChar : String.Empty);
+            //string OutputPath = InputPath;
+            string InputPath = String.Empty;
+            string OutputPath = String.Empty;
 
             // Get the global index and convert it to a string
             uint GlobalIndex = 0;

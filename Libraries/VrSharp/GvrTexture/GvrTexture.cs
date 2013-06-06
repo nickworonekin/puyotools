@@ -61,6 +61,22 @@ namespace VrSharp.GvrTexture
             }
         }
         private GvrDataFormat dataFormat;
+
+        /// <summary>
+        /// Returns if the texture contains mipmaps.
+        /// </summary>
+        public override bool HasMipmaps
+        {
+            get
+            {
+                if (!initalized)
+                {
+                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
+                }
+
+                return (dataCodec.PaletteEntries == 0 && (dataFlags & GvrDataFlags.Mipmaps) != 0);
+            }
+        }
         #endregion
 
         #region Constructors & Initalizers
@@ -157,6 +173,19 @@ namespace VrSharp.GvrTexture
             {
                 paletteOffset = pvrtOffset + 0x10;
                 dataOffset = paletteOffset + (dataCodec.PaletteEntries * (pixelCodec.Bpp >> 3));
+            }
+
+            // If the texture contains mipmaps, gets the offsets of them
+            if (dataCodec.PaletteEntries == 0 && (dataFlags & GvrDataFlags.Mipmaps) != 0)
+            {
+                mipmapOffsets = new int[(int)Math.Log(textureWidth, 2)];
+
+                int mipmapOffset = 0;
+                for (int i = 0, size = textureWidth; i < mipmapOffsets.Length; i++, size >>= 1)
+                {
+                    mipmapOffsets[i] = mipmapOffset;
+                    mipmapOffset += Math.Max(size * size * (dataCodec.Bpp >> 3), dataCodec.Bpp >> 2);
+                }
             }
 
             return true;

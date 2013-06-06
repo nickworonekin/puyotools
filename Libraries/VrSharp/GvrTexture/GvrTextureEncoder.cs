@@ -243,6 +243,32 @@ namespace VrSharp.GvrTexture
             }
         }
         private GvrDataFormat dataFormat;
+
+        /// <summary>
+        /// Gets or sets if this texture has mipmaps. This only applies to non-palettized textures.
+        /// </summary>
+        public bool HasMipmaps
+        {
+            get
+            {
+                if (!initalized)
+                {
+                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
+                }
+
+                return hasMipmaps;
+            }
+            set
+            {
+                if (!initalized)
+                {
+                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
+                }
+
+                hasMipmaps = value;
+            }
+        }
+        private bool hasMipmaps;
         #endregion
 
         #region Palette

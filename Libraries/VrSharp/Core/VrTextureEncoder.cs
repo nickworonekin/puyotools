@@ -383,7 +383,7 @@ namespace VrSharp
             if (img.PixelFormat != PixelFormat.Format32bppArgb)
             {
                 Bitmap newImage = new Bitmap(img.Width, img.Height, PixelFormat.Format32bppArgb);
-                using (Graphics g = Graphics.FromImage(img))
+                using (Graphics g = Graphics.FromImage(newImage))
                 {
                     g.DrawImage(img, 0, 0, img.Width, img.Height);
                 }
@@ -408,7 +408,7 @@ namespace VrSharp
             if (img.PixelFormat != PixelFormat.Format32bppArgb)
             {
                 Bitmap newImage = new Bitmap(img.Width, img.Height, PixelFormat.Format32bppArgb);
-                using (Graphics g = Graphics.FromImage(img))
+                using (Graphics g = Graphics.FromImage(newImage))
                 {
                     g.DrawImage(img, 0, 0, img.Width, img.Height);
                 }

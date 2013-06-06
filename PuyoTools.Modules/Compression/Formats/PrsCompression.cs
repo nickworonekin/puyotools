@@ -164,7 +164,7 @@ namespace PuyoTools.Modules.Compression
         /// <returns>True if the data is in the specified format, false otherwise.</returns>
         public override bool Is(Stream source, int length, string fname)
         {
-            return (Path.GetExtension(fname) == ".prs" && length > 2 && PTStream.Contains(source, length - 2, new byte[] { 0, 0 }));
+            return (Path.GetExtension(fname).ToLower() == ".prs" && length > 2 && PTStream.Contains(source, length - 2, new byte[] { 0, 0 }));
         }
 
         private static void Copy(int offset, int size, ref byte controlByte, ref byte bitPos, MemoryStream data, Stream destination)
