@@ -545,8 +545,8 @@ namespace VrSharp.GvrTexture
         }
         #endregion
 
-        #region 4-bit Texture with Clut
-        // 4-bit Texture with Clut
+        #region 4-bit Indexed
+        // 4-bit Indexed
         public class Index4 : GvrDataCodec
         {
             public override bool CanEncode
@@ -624,8 +624,8 @@ namespace VrSharp.GvrTexture
         }
         #endregion
 
-        #region 8-bit Texture with Clut
-        // 8-bit Texture with Clut
+        #region 8-bit Indexed
+        // 8-bit Indexed
         public class Index8 : GvrDataCodec
         {
             public override bool CanEncode

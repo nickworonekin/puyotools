@@ -172,9 +172,9 @@ namespace VrSharp.PvrTexture
                 encodedData = compressionCodec.Decompress(encodedData, dataOffset, pixelCodec, dataCodec);
 
                 // Now place the offsets in the appropiate area
-                if (CompressionFormat == PvrCompressionFormat.Rle)
+                if (compressionFormat == PvrCompressionFormat.Rle)
                 {
-                    if (GbixOffset != -1) gbixOffset -= 4;
+                    if (gbixOffset != -1) gbixOffset -= 4;
                     pvrtOffset -= 4;
                     if (paletteOffset != -1) paletteOffset -= 4;
                     dataOffset -= 4;

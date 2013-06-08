@@ -178,13 +178,13 @@ namespace VrSharp.GvrTexture
             // If the texture contains mipmaps, gets the offsets of them
             if (dataCodec.PaletteEntries == 0 && (dataFlags & GvrDataFlags.Mipmaps) != 0)
             {
-                mipmapOffsets = new int[(int)Math.Log(textureWidth, 2)];
+                mipmapOffsets = new int[(int)Math.Log(textureWidth, 2) + 1];
 
                 int mipmapOffset = 0;
                 for (int i = 0, size = textureWidth; i < mipmapOffsets.Length; i++, size >>= 1)
                 {
                     mipmapOffsets[i] = mipmapOffset;
-                    mipmapOffset += Math.Max(size * size * (dataCodec.Bpp >> 3), dataCodec.Bpp >> 2);
+                    mipmapOffset += Math.Max(size * size * (dataCodec.Bpp >> 3), 32);
                 }
             }
 

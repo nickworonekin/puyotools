@@ -306,6 +306,12 @@ namespace VrSharp.GvrTexture
                 dataFlags &= ~GvrDataFlags.Palette;
             }
 
+            // Temporary! Unset the mipmap flag if it is set (as there is currently no mipmap encode support)
+            if ((dataFlags & GvrDataFlags.Mipmaps) != 0)
+            {
+                dataFlags &= ~GvrDataFlags.Mipmaps;
+            }
+
             // Calculate what the length of the texture will be
             int textureLength = 16 + (textureWidth * textureHeight * dataCodec.Bpp / 8);
             if (includeGbixHeader)

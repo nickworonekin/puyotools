@@ -300,18 +300,7 @@ namespace VrSharp
                 return new byte[][] { ToArray() };
             }
 
-            if (paletteOffset != -1) // The texture contains an embedded palette
-            {
-                dataCodec.SetPalette(encodedData, paletteOffset, dataCodec.PaletteEntries);
-            }
-
-            byte[][] mipmaps = new byte[mipmapOffsets.Length][];
-            for (int i = 0, size = textureWidth; i < mipmaps.Length; i++, size >>= 1)
-            {
-                mipmaps[i] = dataCodec.Decode(encodedData, dataOffset + mipmapOffsets[i], size, size, pixelCodec);
-            }
-
-            return mipmaps;
+            return DecodeMipmaps();
         }
 
         /// <summary>
@@ -331,25 +320,18 @@ namespace VrSharp
                 return new Bitmap[] { ToBitmap() };
             }
 
-            if (paletteOffset != -1) // The texture contains an embedded palette
+            byte[][] data = DecodeMipmaps();
+
+            Bitmap[] img = new Bitmap[data.Length];
+            for (int i = 0, size = textureWidth; i < img.Length; i++, size >>= 1)
             {
-                dataCodec.SetPalette(encodedData, paletteOffset, dataCodec.PaletteEntries);
+                img[i] = new Bitmap(size, size, PixelFormat.Format32bppArgb);
+                BitmapData bitmapData = img[i].LockBits(new Rectangle(0, 0, img[i].Width, img[i].Height), ImageLockMode.WriteOnly, img[i].PixelFormat);
+                Marshal.Copy(data[i], 0, bitmapData.Scan0, data[i].Length);
+                img[i].UnlockBits(bitmapData);
             }
 
-            Bitmap[] mipmaps = new Bitmap[mipmapOffsets.Length];
-            for (int i = 0, size = textureWidth; i < mipmaps.Length; i++, size >>= 1)
-            {
-                byte[] data = dataCodec.Decode(encodedData, dataOffset + mipmapOffsets[i], size, size, pixelCodec);
-
-                Bitmap img = new Bitmap(TextureWidth, TextureHeight, PixelFormat.Format32bppArgb);
-                BitmapData bitmapData = img.LockBits(new Rectangle(0, 0, img.Width, img.Height), ImageLockMode.WriteOnly, img.PixelFormat);
-                Marshal.Copy(data, 0, bitmapData.Scan0, data.Length);
-                img.UnlockBits(bitmapData);
-
-                mipmaps[i] = img;
-            }
-
-            return mipmaps;
+            return img;
         }
 
         /// <summary>
@@ -369,18 +351,29 @@ namespace VrSharp
                 return new MemoryStream[] { ToStream() };
             }
 
+            Bitmap[] img = MipmapsToBitmap();
+
+            MemoryStream[] destination = new MemoryStream[img.Length];
+            for (int i = 0; i < img.Length; i++)
+            {
+                img[i].Save(destination[i], ImageFormat.Png);
+            }
+
+            return destination;
+        }
+
+        // Decodes mipmaps
+        private byte[][] DecodeMipmaps()
+        {
             if (paletteOffset != -1) // The texture contains an embedded palette
             {
                 dataCodec.SetPalette(encodedData, paletteOffset, dataCodec.PaletteEntries);
             }
 
-            Bitmap[] bitmapMipmaps = MipmapsToBitmap();
-
-            MemoryStream[] mipmaps = new MemoryStream[mipmapOffsets.Length];
-            for (int i = 0; i < mipmaps.Length; i++)
+            byte[][] mipmaps = new byte[mipmapOffsets.Length][];
+            for (int i = 0, size = textureWidth; i < mipmaps.Length; i++, size >>= 1)
             {
-                mipmaps[i] = new MemoryStream();
-                bitmapMipmaps[i].Save(mipmaps[i], ImageFormat.Png);
+                mipmaps[i] = dataCodec.Decode(encodedData, dataOffset + mipmapOffsets[i], size, size, pixelCodec);
             }
 
             return mipmaps;

@@ -65,8 +65,8 @@ namespace VrSharp.SvrTexture
         }
         #endregion
 
-        #region 4-bit Texture with External Clut
-        // 4-bit Texture with External Clut
+        #region 4-bit Indexed with External Palette
+        // 4-bit Indexed with External Palette
         public class Index4ExtClut : SvrDataCodec
         {
             public override bool CanEncode
@@ -147,8 +147,8 @@ namespace VrSharp.SvrTexture
         }
         #endregion
 
-        #region 8-bit Texture with External Clut
-        // 8-bit Texture with External Clut
+        #region 8-bit Indexed with External Palette
+        // 8-bit Indexed with External Palette
         public class Index8ExtClut : SvrDataCodec
         {
             public override bool CanEncode
@@ -216,8 +216,8 @@ namespace VrSharp.SvrTexture
         }
         #endregion
 
-        #region 4-bit Texture with Clut
-        // 4-bit Texture with Clut
+        #region 4-bit Indexed
+        // 4-bit Indexed
         public class Index4 : SvrDataCodec
         {
             public override bool CanEncode
@@ -293,8 +293,8 @@ namespace VrSharp.SvrTexture
         }
         #endregion
 
-        #region 8-bit Texture with Clut
-        // 8-bit Texture with Clut
+        #region 8-bit Indexed
+        // 8-bit Indexed
         public class Index8 : SvrDataCodec
         {
             public override bool CanEncode
