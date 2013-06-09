@@ -103,7 +103,7 @@ namespace VrSharp.GvrTexture
         private bool Initalize(GvrPixelFormat pixelFormat, GvrDataFormat dataFormat)
         {
             // Set the default values
-            includeGbixHeader = true;
+            hasGlobalIndex = true;
             gbixType = GvrGbixType.Gbix;
             globalIndex = 0;
 
@@ -314,7 +314,7 @@ namespace VrSharp.GvrTexture
 
             // Calculate what the length of the texture will be
             int textureLength = 16 + (textureWidth * textureHeight * dataCodec.Bpp / 8);
-            if (includeGbixHeader)
+            if (hasGlobalIndex)
             {
                 textureLength += 16;
             }
@@ -326,7 +326,7 @@ namespace VrSharp.GvrTexture
             MemoryStream destination = new MemoryStream(textureLength);
 
             // Write out the GBIX header (if we are including one)
-            if (includeGbixHeader)
+            if (hasGlobalIndex)
             {
                 if (gbixType == GvrGbixType.Gbix)
                 {

@@ -18,36 +18,47 @@ namespace VrSharp.PvrTexture
                 get { return PixelCodec.Bpp; }
             }
 
-            public override byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)
+            public override byte[] Decode(byte[] source, int sourceIndex, int width, int height)
             {
-                byte[] output = new byte[width * height * 4];
-                int[] twiddleMap = MakeTwiddleMap(width);
+                // Destination data & index
+                byte[] destination = new byte[width * height * 4];
+                int destinationIndex = 0;
 
+                // Twiddle map
+                int[] twiddleMap = MakeTwiddleMap(width);
+                
+                // Decode texture data
                 for (int y = 0; y < height; y++)
                 {
                     for (int x = 0; x < width; x++)
                     {
-                        PixelCodec.DecodePixel(input, offset + (((twiddleMap[x] << 1) | twiddleMap[y]) << (PixelCodec.Bpp >> 4)), output, (((y * width) + x) * 4));
+                        PixelCodec.DecodePixel(source, sourceIndex + (((twiddleMap[x] << 1) | twiddleMap[y]) << (PixelCodec.Bpp >> 4)), destination, destinationIndex);
+                        destinationIndex += 4;
                     }
                 }
 
-                return output;
+                return destination;
             }
 
-            public override byte[] Encode(byte[] input, int width, int height, VrPixelCodec PixelCodec)
+            public override byte[] Encode(byte[] source, int sourceIndex, int width, int height)
             {
-                byte[] output = new byte[width * height * (PixelCodec.Bpp >> 3)];
+                // Destination data
+                byte[] destination = new byte[width * height * (PixelCodec.Bpp >> 3)];
+
+                // Twiddle map
                 int[] twiddleMap = MakeTwiddleMap(width);
 
+                // Encode texture data
                 for (int y = 0; y < height; y++)
                 {
                     for (int x = 0; x < width; x++)
                     {
-                        PixelCodec.EncodePixel(input, (((y * width) + x) * 4), output, ((twiddleMap[x] << 1) | twiddleMap[y]) << (PixelCodec.Bpp >> 4));
+                        PixelCodec.EncodePixel(source, sourceIndex, destination, ((twiddleMap[x] << 1) | twiddleMap[y]) << (PixelCodec.Bpp >> 4));
+                        sourceIndex += 4;
                     }
                 }
 
-                return output;
+                return destination;
             }
         }
         #endregion
@@ -71,36 +82,29 @@ namespace VrSharp.PvrTexture
                 get { return true; }
             }
 
-            public override byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)
+            public override byte[] Decode(byte[] source, int sourceIndex, int width, int height)
             {
-                byte[] output = new byte[width * height * 4];
+                // Destination data & index
+                byte[] destination = new byte[width * height * 4];
+                int destinationIndex = 0;
+
+                // Twiddle map
                 int[] twiddleMap = MakeTwiddleMap(width);
 
+                // Decode texture data
                 for (int y = 0; y < height; y++)
                 {
                     for (int x = 0; x < width; x++)
                     {
-                        PixelCodec.DecodePixel(input, offset + (((twiddleMap[x] << 1) | twiddleMap[y]) << (PixelCodec.Bpp >> 4)), output, (((y * width) + x) * 4));
+                        PixelCodec.DecodePixel(source, sourceIndex + (((twiddleMap[x] << 1) | twiddleMap[y]) << (PixelCodec.Bpp >> 4)), destination, destinationIndex);
+                        destinationIndex += 4;
                     }
                 }
 
-                return output;
+                return destination;
             }
 
-            public override byte[] DecodeMipmap(byte[] input, int offset, int mipmap, int width, int height, VrPixelCodec PixelCodec)
-            {
-                // Get the width of the mipmap and go to the correct offset
-                int MipmapWidth = width;
-                for (int i = 0; i < mipmap; i++)
-                    MipmapWidth >>= 1;
-
-                for (int i = 1; i < MipmapWidth; i <<= 1)
-                    offset += Math.Max(i * i * (PixelCodec.Bpp >> 3), 4);
-
-                return Decode(input, offset, MipmapWidth, MipmapWidth, PixelCodec);
-            }
-
-            public override byte[] Encode(byte[] data, int width, int height, VrPixelCodec PixelCodec)
+            public override byte[] Encode(byte[] source, int sourceIndex, int width, int height)
             {
                 return null;
             }
@@ -126,34 +130,44 @@ namespace VrSharp.PvrTexture
                 get { return 1024; }
             }
 
-            public override byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)
+            public override byte[] Decode(byte[] source, int sourceIndex, int width, int height)
             {
-                byte[] output = new byte[width * height * 4];
+                // Destination data & index
+                byte[] destination = new byte[width * height * 4];
+                int destinationIndex;
+
+                // Twiddle map
                 int[] twiddleMap = MakeTwiddleMap(width);
 
+                // Decode texture data
                 for (int x = 0; x < width; x += 2)
                 {
                     for (int y = 0; y < height; y += 2)
                     {
-                        int index = input[offset + ((twiddleMap[x >> 1] << 1) | twiddleMap[y >> 1])] << 2;
+                        int index = source[sourceIndex + ((twiddleMap[x >> 1] << 1) | twiddleMap[y >> 1])] * 4;
 
-                        for (int y2 = 0; y2 < 2; y2++)
+                        for (int x2 = 0; x2 < 2; x2++)
                         {
-                            for (int x2 = 0; x2 < 2; x2++)
+                            for (int y2 = 0; y2 < 2; y2++)
                             {
+                                destinationIndex = ((((y + y2) * width) + (x + x2)) * 4);
+
                                 for (int i = 0; i < 4; i++)
                                 {
-                                    output[((((y + y2) * width) + (x + x2)) * 4) + i] = palette[index + (x2 * 2) + y2][i];
+                                    destination[destinationIndex] = palette[index][i];
+                                    destinationIndex++;
                                 }
+
+                                index++;
                             }
                         }
                     }
                 }
 
-                return output;
+                return destination;
             }
 
-            public override byte[] Encode(byte[] data, int width, int height, VrPixelCodec PixelCodec)
+            public override byte[] Encode(byte[] source, int sourceIndex, int width, int height)
             {
                 return null;
             }
@@ -184,47 +198,44 @@ namespace VrSharp.PvrTexture
                 get { return true; }
             }
 
-            public override byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)
+            public override byte[] Decode(byte[] source, int sourceIndex, int width, int height)
             {
-                byte[] output = new byte[width * height * 4];
+                // Destination data & index
+                byte[] destination = new byte[width * height * 4];
+                int destinationIndex;
+
+                // Twiddle map
                 int[] twiddleMap = MakeTwiddleMap(width);
 
+                // Decode texture data
                 for (int x = 0; x < width; x += 2)
                 {
                     for (int y = 0; y < height; y += 2)
                     {
-                        int index = input[offset + ((twiddleMap[x >> 1] << 1) | twiddleMap[y >> 1])] << 2;
+                        int index = source[sourceIndex + ((twiddleMap[x >> 1] << 1) | twiddleMap[y >> 1])] * 4;
 
-                        for (int y2 = 0; y2 < 2; y2++)
+                        for (int x2 = 0; x2 < 2; x2++)
                         {
-                            for (int x2 = 0; x2 < 2; x2++)
+                            for (int y2 = 0; y2 < 2; y2++)
                             {
+                                destinationIndex = ((((y + y2) * width) + (x + x2)) * 4);
+
                                 for (int i = 0; i < 4; i++)
                                 {
-                                    output[((((y + y2) * width) + (x + x2)) * 4) + i] = palette[index + (x2 * 2) + y2][i];
+                                    destination[destinationIndex] = palette[index][i];
+                                    destinationIndex++;
                                 }
+
+                                index++;
                             }
                         }
                     }
                 }
 
-                return output;
+                return destination;
             }
 
-            public override byte[] DecodeMipmap(byte[] input, int offset, int mipmap, int width, int height, VrPixelCodec PixelCodec)
-            {
-                // Get the width of the mipmap and go to the correct offset
-                int MipmapWidth = width;
-                for (int i = 0; i < mipmap; i++)
-                    MipmapWidth >>= 1;
-
-                for (int i = 1; i < MipmapWidth; i <<= 1)
-                    offset += (Math.Max(i * i, 4) >> 2);
-
-                return Decode(input, offset, MipmapWidth, MipmapWidth, PixelCodec);
-            }
-
-            public override byte[] Encode(byte[] data, int width, int height, VrPixelCodec PixelCodec)
+            public override byte[] Encode(byte[] source, int sourceIndex, int width, int height)
             {
                 return null;
             }
@@ -237,7 +248,7 @@ namespace VrSharp.PvrTexture
         {
             public override bool CanEncode
             {
-                get { return false; }
+                get { return true; }
             }
 
             public override int Bpp
@@ -255,12 +266,19 @@ namespace VrSharp.PvrTexture
                 get { return true; }
             }
 
-            public override byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)
+            public override byte[] Decode(byte[] source, int sourceIndex, int width, int height)
             {
-                byte[] output = new byte[width * height * 4];
+                // Destination data & index
+                byte[] destination = new byte[width * height * 4];
+                int destinationIndex;
+
+                // Get the size of each block to process.
                 int size = Math.Min(width, height);
+
+                // Twiddle map
                 int[] twiddleMap = MakeTwiddleMap(size);
 
+                // Decode texture data
                 for (int x = 0; x < width; x += size)
                 {
                     for (int y = 0; y < height; y += size)
@@ -269,24 +287,57 @@ namespace VrSharp.PvrTexture
                         {
                             for (int x2 = 0; x2 < size; x2++)
                             {
-                                byte index = (byte)((input[offset + (((twiddleMap[x2] << 1) | twiddleMap[y2]) >> 1)] >> ((y2 & 0x1) * 4)) & 0xF);
+                                byte index = (byte)((source[sourceIndex + (((twiddleMap[x2] << 1) | twiddleMap[y2]) >> 1)] >> ((y2 & 0x1) * 4)) & 0xF);
+                                destinationIndex = ((((y + y2) * width) + (x + x2)) * 4);
+
                                 for (int i = 0; i < 4; i++)
                                 {
-                                    output[((((y + y2) * width) + (x + x2)) * 4) + i] = palette[index][i];
+                                    destination[destinationIndex] = palette[index][i];
+                                    destinationIndex++;
                                 }
                             }
                         }
 
-                        offset += (size * size) >> 1;
+                        sourceIndex += (size * size) >> 1;
                     }
                 }
 
-                return output;
+                return destination;
             }
 
-            public override byte[] Encode(byte[] input, int width, int height, VrPixelCodec PixelCodec)
+            public override byte[] Encode(byte[] source, int sourceIndex, int width, int height)
             {
-                return null;
+                // Destination data & index
+                byte[] destination = new byte[(width * height) >> 1];
+                int destinationIndex = 0;
+
+                // Get the size of each block to process.
+                int size = Math.Min(width, height);
+
+                // Twiddle map
+                int[] twiddleMap = MakeTwiddleMap(size);
+
+                // Encode texture data
+                for (int x = 0; x < width; x += size)
+                {
+                    for (int y = 0; y < height; y += size)
+                    {
+                        for (int y2 = 0; y2 < size; y2++)
+                        {
+                            for (int x2 = 0; x2 < size; x2++)
+                            {
+                                byte index = destination[destinationIndex + (((twiddleMap[x2] << 1) | twiddleMap[y2]) >> 1)];
+                                index |= (byte)((source[sourceIndex + (((y + y2) * width) + (x + x2))] & 0xF) << ((y2 & 0x1) * 4));
+
+                                destination[destinationIndex + (((twiddleMap[x2] << 1) | twiddleMap[y2]) >> 1)] = index;
+                            }
+                        }
+
+                        destinationIndex += (size * size) >> 1;
+                    }
+                }
+
+                return destination;
             }
         }
         #endregion
@@ -297,7 +348,7 @@ namespace VrSharp.PvrTexture
         {
             public override bool CanEncode
             {
-                get { return false; }
+                get { return true; }
             }
 
             public override int Bpp
@@ -315,12 +366,19 @@ namespace VrSharp.PvrTexture
                 get { return true; }
             }
 
-            public override byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)
+            public override byte[] Decode(byte[] source, int sourceIndex, int width, int height)
             {
-                byte[] output = new byte[width * height * 4];
+                // Destination data & index
+                byte[] destination = new byte[width * height * 4];
+                int destinationIndex;
+
+                // Get the size of each block to process.
                 int size = Math.Min(width, height);
+
+                // Twiddle map
                 int[] twiddleMap = MakeTwiddleMap(size);
 
+                // Decode texture data
                 for (int x = 0; x < width; x += size)
                 {
                     for (int y = 0; y < height; y += size)
@@ -329,24 +387,54 @@ namespace VrSharp.PvrTexture
                         {
                             for (int x2 = 0; x2 < size; x2++)
                             {
-                                byte index = input[offset + ((twiddleMap[x2] << 1) | twiddleMap[y2])];
+                                byte index = source[sourceIndex + ((twiddleMap[x2] << 1) | twiddleMap[y2])];
+                                destinationIndex = ((((y + y2) * width) + (x + x2)) * 4);
+
                                 for (int i = 0; i < 4; i++)
                                 {
-                                    output[((((y + y2) * width) + (x + x2)) * 4) + i] = palette[index][i];
+                                    destination[destinationIndex] = palette[index][i];
+                                    destinationIndex++;
                                 }
                             }
                         }
 
-                        offset += (size * size);
+                        sourceIndex += (size * size);
                     }
                 }
 
-                return output;
+                return destination;
             }
 
-            public override byte[] Encode(byte[] input, int width, int height, VrPixelCodec PixelCodec)
+            public override byte[] Encode(byte[] source, int sourceIndex, int width, int height)
             {
-                return null;
+                // Destination data & index
+                byte[] destination = new byte[width * height];
+                int destinationIndex = 0;
+
+                // Get the size of each block to process.
+                int size = Math.Min(width, height);
+
+                // Twiddle map
+                int[] twiddleMap = MakeTwiddleMap(size);
+
+                // Encode texture data
+                for (int x = 0; x < width; x += size)
+                {
+                    for (int y = 0; y < height; y += size)
+                    {
+                        for (int y2 = 0; y2 < size; y2++)
+                        {
+                            for (int x2 = 0; x2 < size; x2++)
+                            {
+                                destination[destinationIndex + ((twiddleMap[x2] << 1) | twiddleMap[y2])] = source[sourceIndex + (((y + y2) * width) + (x + x2))];
+                            }
+                        }
+
+                        destinationIndex += (size * size);
+                    }
+                }
+
+                return destination;
             }
         }
         #endregion
@@ -365,39 +453,47 @@ namespace VrSharp.PvrTexture
                 get { return PixelCodec.Bpp; }
             }
 
-            public override byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)
+            public override byte[] Decode(byte[] source, int sourceIndex, int width, int height)
             {
-                byte[] output = new byte[width * height * 4];
+                // Destination data & index
+                byte[] destination = new byte[width * height * 4];
+                int destinationIndex = 0;
 
-                for (int y = 0; y < height; y ++)
-                {
-                    for (int x = 0; x < width; x++)
-                    {
-                        PixelCodec.DecodePixel(input, offset, output, (((y * width) + x) * 4));
-
-                        offset += PixelCodec.Bpp >> 3;
-                    }
-                }
-
-                return output;
-            }
-
-            public override byte[] Encode(byte[] input, int width, int height, VrPixelCodec PixelCodec)
-            {
-                int offset    = 0;
-                byte[] output = new byte[width * height * (PixelCodec.Bpp >> 3)];
-
+                // Decode texture data
                 for (int y = 0; y < height; y++)
                 {
                     for (int x = 0; x < width; x++)
                     {
-                        PixelCodec.EncodePixel(input, (((y * width) + x) * 4), output, offset);
-
-                        offset += PixelCodec.Bpp >> 3;
+                        PixelCodec.DecodePixel(source, sourceIndex, destination, destinationIndex);
+                        sourceIndex += (PixelCodec.Bpp >> 3);
+                        destinationIndex += 4;
                     }
                 }
 
-                return output;
+                return destination;
+            }
+
+            public override byte[] Encode(byte[] source, int sourceIndex, int width, int height)
+            {
+                // Destination data & index
+                byte[] destination = new byte[width * height * (PixelCodec.Bpp >> 3)];
+                int destinationIndex = 0;
+
+                // Twiddle map
+                int[] twiddleMap = MakeTwiddleMap(width);
+
+                // Encode texture data
+                for (int y = 0; y < height; y++)
+                {
+                    for (int x = 0; x < width; x++)
+                    {
+                        PixelCodec.EncodePixel(source, sourceIndex, destination, destinationIndex);
+                        sourceIndex += 4;
+                        destinationIndex += (PixelCodec.Bpp >> 3);
+                    }
+                }
+
+                return destination;
             }
         }
         #endregion
@@ -416,12 +512,18 @@ namespace VrSharp.PvrTexture
                 get { return PixelCodec.Bpp; }
             }
 
-            public override byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)
+            public override byte[] Decode(byte[] source, int sourceIndex, int width, int height)
             {
-                byte[] output = new byte[width * height * 4];
+                // Destination data
+                byte[] destination = new byte[width * height * 4];
+
+                // Get the size of each block to process.
                 int size = Math.Min(width, height);
+
+                // Twiddle map
                 int[] twiddleMap = MakeTwiddleMap(size);
 
+                // Decode texture data
                 for (int x = 0; x < width; x += size)
                 {
                     for (int y = 0; y < height; y += size)
@@ -430,25 +532,30 @@ namespace VrSharp.PvrTexture
                         {
                             for (int x2 = 0; x2 < size; x2++)
                             {
-                                PixelCodec.DecodePixel(input, offset + (((twiddleMap[x2] << 1) | twiddleMap[y2]) << (PixelCodec.Bpp >> 4)), output, ((((y + y2) * width) + (x + x2)) * 4));
+                                PixelCodec.DecodePixel(source, sourceIndex + (((twiddleMap[x2] << 1) | twiddleMap[y2]) << (PixelCodec.Bpp >> 4)), destination, ((((y + y2) * width) + (x + x2)) * 4));
                             }
                         }
 
-                        offset += size * size * (PixelCodec.Bpp >> 3);
+                        sourceIndex += (size * size) * (PixelCodec.Bpp >> 3);
                     }
                 }
 
-                return output;
+                return destination;
             }
 
-            public override byte[] Encode(byte[] input, int width, int height, VrPixelCodec PixelCodec)
+            public override byte[] Encode(byte[] source, int sourceIndex, int width, int height)
             {
-                byte[] output = new byte[width * height * (PixelCodec.Bpp >> 3)];
+                // Destination data & index
+                byte[] destination = new byte[width * height * (PixelCodec.Bpp >> 3)];
+                int destinationIndex = 0;
+
+                // Get the size of each block to process.
                 int size = Math.Min(width, height);
+
+                // Twiddle map
                 int[] twiddleMap = MakeTwiddleMap(size);
 
-                int offset = 0;
-
+                // Encode texture data
                 for (int x = 0; x < width; x += size)
                 {
                     for (int y = 0; y < height; y += size)
@@ -457,15 +564,15 @@ namespace VrSharp.PvrTexture
                         {
                             for (int x2 = 0; x2 < size; x2++)
                             {
-                                PixelCodec.EncodePixel(input, ((((y + y2) * width) + (x + x2)) * 4), output, offset + (((twiddleMap[x2] << 1) | twiddleMap[y2]) << (PixelCodec.Bpp >> 4)));
+                                PixelCodec.EncodePixel(source, sourceIndex + ((((y + y2) * width) + (x + x2)) * 4), destination, destinationIndex + (((twiddleMap[x2] << 1) | twiddleMap[y2]) << (PixelCodec.Bpp >> 4)));
                             }
                         }
 
-                        offset += size * size * (PixelCodec.Bpp >> 3);
+                        destinationIndex += (size * size) * (PixelCodec.Bpp >> 3);
                     }
                 }
 
-                return output;
+                return destination;
             }
         }
         #endregion
@@ -489,34 +596,44 @@ namespace VrSharp.PvrTexture
                 get { return 512; }
             }
 
-            public override byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)
+            public override byte[] Decode(byte[] source, int sourceIndex, int width, int height)
             {
-                byte[] output = new byte[width * height * 4];
+                // Destination data & index
+                byte[] destination = new byte[width * height * 4];
+                int destinationIndex;
+
+                // Twiddle map
                 int[] twiddleMap = MakeTwiddleMap(width);
 
+                // Decode texture data
                 for (int x = 0; x < width; x += 2)
                 {
                     for (int y = 0; y < height; y += 2)
                     {
-                        int index = (input[offset + ((twiddleMap[x >> 1] << 1) | twiddleMap[y >> 1])] & 0x7F) << 2;
+                        int index = (source[sourceIndex + ((twiddleMap[x >> 1] << 1) | twiddleMap[y >> 1])] & 0x7F) * 4;
 
-                        for (int y2 = 0; y2 < 2; y2++)
+                        for (int x2 = 0; x2 < 2; x2++)
                         {
-                            for (int x2 = 0; x2 < 2; x2++)
+                            for (int y2 = 0; y2 < 2; y2++)
                             {
+                                destinationIndex = ((((y + y2) * width) + (x + x2)) * 4);
+
                                 for (int i = 0; i < 4; i++)
                                 {
-                                    output[((((y + y2) * width) + (x + x2)) * 4) + i] = palette[index + (x2 * 2) + y2][i];
+                                    destination[destinationIndex] = palette[index][i];
+                                    destinationIndex++;
                                 }
+
+                                index++;
                             }
                         }
                     }
                 }
 
-                return output;
+                return destination;
             }
 
-            public override byte[] Encode(byte[] data, int width, int height, VrPixelCodec PixelCodec)
+            public override byte[] Encode(byte[] source, int sourceIndex, int width, int height)
             {
                 return null;
             }
@@ -547,47 +664,44 @@ namespace VrSharp.PvrTexture
                 get { return true; }
             }
 
-            public override byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)
+            public override byte[] Decode(byte[] source, int sourceIndex, int width, int height)
             {
-                byte[] output = new byte[width * height * 4];
+                // Destination data & index
+                byte[] destination = new byte[width * height * 4];
+                int destinationIndex;
+
+                // Twiddle map
                 int[] twiddleMap = MakeTwiddleMap(width);
 
+                // Decode texture data
                 for (int x = 0; x < width; x += 2)
                 {
                     for (int y = 0; y < height; y += 2)
                     {
-                        int index = (input[offset + ((twiddleMap[x >> 1] << 1) | twiddleMap[y >> 1])] & 0x3F) << 2;
+                        int index = (source[sourceIndex + ((twiddleMap[x >> 1] << 1) | twiddleMap[y >> 1])] & 0x3F) * 4;
 
-                        for (int y2 = 0; y2 < 2; y2++)
+                        for (int x2 = 0; x2 < 2; x2++)
                         {
-                            for (int x2 = 0; x2 < 2; x2++)
+                            for (int y2 = 0; y2 < 2; y2++)
                             {
+                                destinationIndex = ((((y + y2) * width) + (x + x2)) * 4);
+
                                 for (int i = 0; i < 4; i++)
                                 {
-                                    output[((((y + y2) * width) + (x + x2)) * 4) + i] = palette[index + (x2 * 2) + y2][i];
+                                    destination[destinationIndex] = palette[index][i];
+                                    destinationIndex++;
                                 }
+
+                                index++;
                             }
                         }
                     }
                 }
 
-                return output;
+                return destination;
             }
 
-            public override byte[] DecodeMipmap(byte[] input, int offset, int mipmap, int width, int height, VrPixelCodec PixelCodec)
-            {
-                // Get the width of the mipmap and go to the correct offset
-                int MipmapWidth = width;
-                for (int i = 0; i < mipmap; i++)
-                    MipmapWidth >>= 1;
-
-                for (int i = 1; i < MipmapWidth; i <<= 1)
-                    offset += (Math.Max(i * i, 4) >> 2);
-
-                return Decode(input, offset, MipmapWidth, MipmapWidth, PixelCodec);
-            }
-
-            public override byte[] Encode(byte[] data, int width, int height, VrPixelCodec PixelCodec)
+            public override byte[] Encode(byte[] source, int sourceIndex, int width, int height)
             {
                 return null;
             }

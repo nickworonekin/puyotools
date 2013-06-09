@@ -9,7 +9,7 @@ namespace VrConvert
 {
     public static class VrConvert
     {
-        private const string Version = "1.1.0";
+        private const string Version = "2.0.0";
 
         public static void Main(string[] args)
         {
@@ -70,7 +70,7 @@ namespace VrConvert
                 return;
             }
             byte[] VrData = new byte[0];
-            using (BufferedStream stream = new BufferedStream(new FileStream(args[1], FileMode.Open, FileAccess.Read)))
+            using (FileStream stream = new FileStream(args[1], FileMode.Open, FileAccess.Read))
             {
                 VrData = new byte[stream.Length];
                 stream.Read(VrData, 0x00, VrData.Length);
@@ -124,13 +124,12 @@ namespace VrConvert
             {
                 try
                 {
-                    using (BufferedStream stream = new BufferedStream(new FileStream(OutputPath + OutputFile, FileMode.Create, FileAccess.Write)))
+                    using (FileStream stream = new FileStream(OutputPath + OutputFile, FileMode.Create, FileAccess.Write))
                         BitmapData.WriteTo(stream);
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("ERROR: Unable to output texture.");
-                    Console.WriteLine(e.ToString());
+                    Console.WriteLine("ERROR: Unable to write the texture. The error returned was:\n{0}", e.Message);
                 }
 
                 timer.Stop();
@@ -161,8 +160,10 @@ namespace VrConvert
             string OutputPath = String.Empty;
 
             // Get the global index and convert it to a string
+            bool hasGlobalIndex = Array.IndexOf(args, "-nogbix") == -1;
+
             uint GlobalIndex = 0;
-            if (GlobalIndexArgIndex != -1 && args.Length > GlobalIndexArgIndex + 1)
+            if (hasGlobalIndex && GlobalIndexArgIndex != -1 && args.Length > GlobalIndexArgIndex + 1)
             {
                 if (!uint.TryParse(args[GlobalIndexArgIndex + 1], out GlobalIndex))
                     GlobalIndex = 0;
@@ -187,7 +188,7 @@ namespace VrConvert
                 return;
             }
             byte[] BitmapData = new byte[0];
-            using (BufferedStream stream = new BufferedStream(new FileStream(args[1], FileMode.Open, FileAccess.Read)))
+            using (FileStream stream = new FileStream(args[1], FileMode.Open, FileAccess.Read))
             {
                 BitmapData = new byte[stream.Length];
                 stream.Read(BitmapData, 0x00, BitmapData.Length);
@@ -211,12 +212,14 @@ namespace VrConvert
                 OutputFile = (OutFileArgIndex != -1 && OutFileArgIndex < args.Length ? args[OutFileArgIndex + 1] : Path.ChangeExtension(InputFile, ".gvr"));
                 ClutFile = (ClutArgIndex != -1 && ClutArgIndex < args.Length ? args[ClutArgIndex + 1] : Path.ChangeExtension(OutputFile, ".gvp"));
 
-                EncodeSuccess = new VrEncoder.Gvr().EncodeTexture(BitmapData, PixelFormat, DataFormat, true, GlobalIndex, out TextureData, out ClutData);
+                bool gcix = Array.IndexOf(args, "-gcix") != -1;
+
+                EncodeSuccess = new VrEncoder.Gvr().EncodeTexture(BitmapData, PixelFormat, DataFormat, hasGlobalIndex, GlobalIndex, gcix, out TextureData, out ClutData);
             }
             if (VrFormat == "pvr")
             {
                 // Pvr Unique Args
-                int CompressionArgIndex  = Array.IndexOf(args, "-cmp");
+                int CompressionArgIndex  = Array.IndexOf(args, "-compression");
                 string CompressionFormat = (CompressionArgIndex != -1 && args.Length > CompressionArgIndex + 1 ? args[CompressionArgIndex + 1] : null);
 
                 // Convert to a pvr
@@ -225,7 +228,7 @@ namespace VrConvert
                 OutputFile = (OutFileArgIndex != -1 && OutFileArgIndex < args.Length ? args[OutFileArgIndex + 1] : Path.ChangeExtension(InputFile, ".pvr"));
                 ClutFile = (ClutArgIndex != -1 && ClutArgIndex < args.Length ? args[ClutArgIndex + 1] : Path.ChangeExtension(OutputFile, ".pvp"));
 
-                EncodeSuccess = new VrEncoder.Pvr().EncodeTexture(BitmapData, PixelFormat, DataFormat, CompressionFormat, true, GlobalIndex, out TextureData, out ClutData);
+                EncodeSuccess = new VrEncoder.Pvr().EncodeTexture(BitmapData, PixelFormat, DataFormat, CompressionFormat, hasGlobalIndex, GlobalIndex, out TextureData, out ClutData);
             }
             else if (VrFormat == "svr")
             {
@@ -235,7 +238,7 @@ namespace VrConvert
                 OutputFile = (OutFileArgIndex != -1 && OutFileArgIndex < args.Length ? args[OutFileArgIndex + 1] : Path.ChangeExtension(InputFile, ".svr"));
                 ClutFile = (ClutArgIndex != -1 && ClutArgIndex < args.Length ? args[ClutArgIndex + 1] : Path.ChangeExtension(OutputFile, ".svp"));
 
-                EncodeSuccess = new VrEncoder.Svr().EncodeTexture(BitmapData, PixelFormat, DataFormat, true, GlobalIndex, out TextureData, out ClutData);
+                EncodeSuccess = new VrEncoder.Svr().EncodeTexture(BitmapData, PixelFormat, DataFormat, hasGlobalIndex, GlobalIndex, out TextureData, out ClutData);
             }
 
             // Was the data encoded successfully?
@@ -243,13 +246,12 @@ namespace VrConvert
             {
                 try
                 {
-                    using (BufferedStream stream = new BufferedStream(new FileStream(OutputPath + OutputFile, FileMode.Create, FileAccess.Write)))
+                    using (FileStream stream = new FileStream(OutputPath + OutputFile, FileMode.Create, FileAccess.Write))
                         TextureData.WriteTo(stream);
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("ERROR: Unable to output texture.");
-                    Console.WriteLine(e.ToString());
+                    Console.WriteLine("ERROR: Unable to write the texture. The error returned was:\n{0}", e.Message);
                 }
             }
             else if (EncodeSuccess && TextureData == null)
@@ -260,13 +262,12 @@ namespace VrConvert
             {
                 try
                 {
-                    using (BufferedStream stream = new BufferedStream(new FileStream(OutputPath + ClutFile, FileMode.Create, FileAccess.Write)))
+                    using (FileStream stream = new FileStream(OutputPath + ClutFile, FileMode.Create, FileAccess.Write))
                         ClutData.WriteTo(stream);
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("ERROR: Unable to output texture.");
-                    Console.WriteLine(e.ToString());
+                    Console.WriteLine("ERROR: Unable to write the palette. The error returned was:\n{0}", e.Message);
                 }
             }
 
@@ -284,7 +285,6 @@ namespace VrConvert
             Console.WriteLine(
                 "\t-o <output>  : Set output filename (default is <input>.png)\n" +
                 "\t-p <palette> : Sets the palette filename\n");
-                //"\t-ac         : Auto find clut file using <input> filename.");
         }
 
         private static void EncodingHelp(string format)
@@ -293,14 +293,14 @@ namespace VrConvert
             {
                 Console.WriteLine();
                 Console.WriteLine(
-                    "<pixelfmt> Pixel Formats:\n" +
+                    "<pixelfmt> Pixel Formats:\n\n" +
                     "\tia8    : Intensity 8-bit with Alpha\n" +
                     "\trgb565 : Rgb565\n" +
                     "\trgb5a3 : Rgb5a3\n" +
-                    "\tnone   : Use if data format is not 4/8-bit Clut");
+                    "\tnone   : Use if data format is not index4 or index8");
                 Console.WriteLine();
                 Console.WriteLine(
-                    "<datafmt> Data Formats:\n" +
+                    "<datafmt> Data Formats:\n\n" +
                     "\ti4       : Intensity 4-bit\n" +
                     "\ti8       : Intensity 8-bit\n" +
                     "\tia4      : Intensity 4-bit with Alpha\n" +
@@ -309,77 +309,69 @@ namespace VrConvert
                     "\trgb5a3   : Rgb5a3\n" +
                     "\targb8888 : Argb8888\n" +
                     "\tindex4   : 4-bit Palettized (set pixel format)\n" +
-                    "\tindex8   : 8-bit Palettized (set pixel format)\n");
-                    //"\tcmp      : S3tc/Dxtn1 Compression");
+                    "\tindex8   : 8-bit Palettized (set pixel format)\n" +
+                    "\tdxt1     : S3TC/DXT1 Compressed");
                 Console.WriteLine();
                 Console.WriteLine(
-                    "[options] Options:\n" +
-                    "\t-o <output>  : Set output filename (default is <input>.gvr)\n" +
+                    "[options] Options:\n\n" +
+                    "\t-o <output>  : Set output filename\n" +
                     "\t-p <palette> : Sets the palette filename\n" +
-                    //"\t-gbix        : Include Gbix Header (Gamecube)\n" +
-                    //"\t-gcix        : Include Gcix Header (Wii)\n" +
-                    //"\t-nogbix      : Don't include Gbix/Gcix Header\n" +
-                    "\t-gi <gindex> : Sets the Global Index (default is 0)\n");
+                    "\t-gi <value>  : Set the global index value\n" +
+                    "\t-gcix        : Use a GCIX header instead of a GBIX header\n" +
+                    "\t-nogbix      : Do not include a GBIX/GCIX header\n");
             }
 
             else if (format.ToLower() == "pvr")
             {
                 Console.WriteLine();
                 Console.WriteLine(
-                    "<pixelfmt> Pixel Formats:\n" +
+                    "<pixelfmt> Pixel Formats:\n\n" +
                     "\targb1555 : Argb1555\n" +
                     "\trgb565   : Rgb565\n" +
                     "\targb4444 : Argb4444");
                 Console.WriteLine();
                 Console.WriteLine(
-                    "<datafmt> Data Formats:\n" +
-                    "\tsqr         : Square Twiddled\n" +
-                    //"\tsqrmips     : Square Twiddled with Mipmaps\n" +
-                    //"\tvq          : Vq\n" +
-                    //"\tvqmips      : Vq w/ Mipmaps\n" +
-                    "\tindex4      : 4-bit Palettized with External Clut\n" +
-                    "\tindex8      : 8-bit Palettized with External Clut\n" +
-                    "\trect        : Rectangle\n" +
-                    "\trecttwidled : Rectangle Twiddled\n");
-                    //"\tsmallvq     : Small Vq\n" +
-                //"\tsmallvqmips : Small Vq with Mipmaps\n");
+                    "<datafmt> Data Formats:\n\n" +
+                    "\tsquare            : Square Twiddled\n" +
+                    "\tindex4            : 4-bit Palettized with External Palette\n" +
+                    "\tindex8            : 8-bit Palettized with External Palette\n" +
+                    "\trectangle         : Rectangle\n" +
+                    "\trectangletwiddled : Rectangle Twiddled\n");
                 Console.WriteLine();
                 Console.WriteLine(
-                    "[options] Options:\n" +
-                    "\t-o <output>  : Set output filename (default is <input>.pvr)\n" +
-                    "\t-p <palette> : Sets the palette filename\n" +
-                    //"\t-gbix        : Include Gbix Header\n" +
-                    //"\t-nogbix      : Don't include Gbix Header\n" +
-                    "\t-gi <gindex> : Sets the Global Index (default is 0)\n" +
-                    "\t-cmp <fmt>   : Sets the compression format\n" +
-                    "\t               none (default), rle");
+                    "[options] Options:\n\n" +
+                    "\t-o <output>        : Set output filename\n" +
+                    "\t-p <palette>       : Sets the palette filename\n" +
+                    "\t-gi <value>        : Set the global index value\n" +
+                    "\t-nogbix            : Do not include a GBIX header\n" +
+                    "\t-compression <fmt> : Sets the compression format:\n" +
+                    "\t                     none (default), rle");
             }
 
             else if (format.ToLower() == "svr")
             {
                 Console.WriteLine();
                 Console.WriteLine(
-                    "<pixelfmt> Pixel Formats:\n" +
+                    "<pixelfmt> Pixel Formats:\n\n" +
                     "\trgb5a3   : Rgb5a3\n" +
                     "\targb8888 : Argb8888");
                 Console.WriteLine();
                 Console.WriteLine(
-                    "<datafmt> Data Formats:\n" +
-                    "\trect     : Rectangle\n" +
-                    "\tindex4ec : 4-bit Palettized with External Clut\n" +
-                    "\tindex8ec : 8-bit Palettized with External Clut\n" +
-                    "\tindex4   : 4-bit Palettized (will set proper format based on\n" +
-                    "\t           pixel format and texture dimensions.)\n" +
-                    "\tindex8   : 8-bit Palettized (will set proper format based on\n" +
-                    "\t           pixel format and texture dimensions.)");
+                    "<datafmt> Data Formats:\n\n" +
+                    "\trectangle  : Rectangle\n" +
+                    "\tindex4ep   : 4-bit Palettized with External Palette\n" +
+                    "\tindex8ep   : 8-bit Palettized with External Palette\n" +
+                    "\tindex4     : 4-bit Palettized (will set proper format based on\n" +
+                    "\t             pixel format and texture dimensions.)\n" +
+                    "\tindex8     : 8-bit Palettized (will set proper format based on\n" +
+                    "\t             pixel format and texture dimensions.)");
                 Console.WriteLine();
                 Console.WriteLine(
-                    "[options] Options:\n" +
-                    "\t-o <output>  : Set output filename (default is <input>.svr)\n" +
+                    "[options] Options:\n\n" +
+                    "\t-o <output>  : Set output filename\n" +
                     "\t-p <palette> : Sets the palette filename\n" +
-                    //"\t-gbix        : Include Gbix Header\n" +
-                    //"\t-nogbix      : Don't include Gbix Header\n" +
-                    "\t-gi <gindex> : Sets the Global Index (default is 0)\n");
+                    "\t-gi <value>  : Set the global index value\n" +
+                    "\t-nogbix      : Do not include a GBIX header\n");
             }
         }
     }

@@ -169,7 +169,7 @@ namespace VrSharp.PvrTexture
         private bool Initalize(PvrPixelFormat pixelFormat, PvrDataFormat dataFormat)
         {
             // Set the default values
-            includeGbixHeader = true;
+            hasGlobalIndex = true;
             globalIndex = 0;
             compressionFormat = PvrCompressionFormat.None;
 
@@ -183,6 +183,7 @@ namespace VrSharp.PvrTexture
             // Make sure the pixel and data codecs exists and we can encode to it
             if (pixelCodec == null || !pixelCodec.CanEncode) return false;
             if (dataCodec == null || !dataCodec.CanEncode) return false;
+            dataCodec.PixelCodec = pixelCodec;
 
             if (dataCodec.PaletteEntries != 0)
             {
@@ -210,7 +211,7 @@ namespace VrSharp.PvrTexture
         {
             // Calculate what the length of the texture will be
             int textureLength = 16 + (textureWidth * textureHeight * dataCodec.Bpp / 8);
-            if (includeGbixHeader)
+            if (hasGlobalIndex)
             {
                 textureLength += 16;
             }
@@ -222,7 +223,7 @@ namespace VrSharp.PvrTexture
             MemoryStream destination = new MemoryStream(textureLength);
 
             // Write out the GBIX header (if we are including one)
-            if (includeGbixHeader)
+            if (hasGlobalIndex)
             {
                 destination.WriteByte((byte)'G');
                 destination.WriteByte((byte)'B');
@@ -269,7 +270,7 @@ namespace VrSharp.PvrTexture
                 {
                     // Ok, we need to convert the current stream to an array, compress it, then write it back to a new stream
                     byte[] buffer = destination.ToArray();
-                    buffer = compressionCodec.Compress(buffer, (includeGbixHeader ? 0x10 : 0), pixelCodec, dataCodec);
+                    buffer = compressionCodec.Compress(buffer, (hasGlobalIndex ? 0x20 : 0x10), pixelCodec, dataCodec);
 
                     destination = new MemoryStream();
                     destination.Write(buffer, 0, buffer.Length);

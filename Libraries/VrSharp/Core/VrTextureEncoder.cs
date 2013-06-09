@@ -212,7 +212,7 @@ namespace VrSharp
         // Returns if the texture dimensuons are valid
         private bool HasValidDimensions(int width, int height)
         {
-            if (width < 4 || height < 4 || width > 1024 || height > 1024)
+            if (width < 8 || height < 8 || width > 1024 || height > 1024)
                 return false;
 
             if ((width & (width - 1)) != 0 || (height & (height - 1)) != 0)
@@ -287,9 +287,9 @@ namespace VrSharp
 
         #region Texture Properties
         /// <summary>
-        /// Indicates whether or not to include the GBIX header in the texture. The default value is true.
+        /// Indicates whether or not this texture has a global index. If false, the texture will not include a GBIX header. The default value is true.
         /// </summary>
-        public bool IncludeGbixHeader
+        public bool HasGlobalIndex
         {
             get
             {
@@ -298,7 +298,7 @@ namespace VrSharp
                     throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
                 }
 
-                return includeGbixHeader;
+                return hasGlobalIndex;
             }
             set
             {
@@ -307,13 +307,13 @@ namespace VrSharp
                     throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
                 }
 
-                includeGbixHeader = value;
+                hasGlobalIndex = value;
             }
         }
-        protected bool includeGbixHeader;
+        protected bool hasGlobalIndex;
 
         /// <summary>
-        /// Sets the texture's global index. This only matters if IncludeGbixHeader is true. The default value is 0.
+        /// Sets the texture's global index. This only matters if HasGlobalIndex is true. The default value is 0.
         /// </summary>
         public uint GlobalIndex
         {

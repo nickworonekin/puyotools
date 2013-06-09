@@ -56,9 +56,9 @@ namespace VrConvert
 
                 // Decode the texture
                 try { BitmapData = GvrTexture.ToStream(); }
-                catch
+                catch (Exception e)
                 {
-                    Console.WriteLine("ERROR: Unable to decode texture.");
+                    Console.WriteLine("ERROR: Unable to decode texture. The error returned was:\n{0}", e.Message);
                     return false;
                 }
 
@@ -102,7 +102,7 @@ namespace VrConvert
                     case GvrDataFormat.Index8:
                         return "8-bit Indexed";
                     case GvrDataFormat.Dxt1:
-                        return "Dxt1 Compressed";
+                        return "S3TC/DXT1 Compressed";
                 }
 
                 return String.Empty;
@@ -171,9 +171,9 @@ namespace VrConvert
 
                 // Decode the texture
                 try { BitmapData = PvrTexture.ToStream(); }
-                catch
+                catch (Exception e)
                 {
-                    Console.WriteLine("ERROR: Unable to decode texture.");
+                    Console.WriteLine("ERROR: Unable to decode texture. The error returned was:\n{0}", e.Message);
                     return false;
                 }
 
@@ -201,12 +201,12 @@ namespace VrConvert
                     case PvrDataFormat.SquareTwiddled:
                         return "Square Twiddled";
                     case PvrDataFormat.SquareTwiddledMipmaps:
-                    case PvrDataFormat.SquareTwiddledMipmapsDup:
+                    case PvrDataFormat.SquareTwiddledMipmapsAlt:
                         return "Square Twiddled w/ Mipmaps";
                     case PvrDataFormat.Vq:
-                        return "Vq";
+                        return "VQ";
                     case PvrDataFormat.VqMipmaps:
-                        return "Vq w/ Mipmaps";
+                        return "VQ w/ Mipmaps";
                     case PvrDataFormat.Index4:
                         return "4-bit Indexed w/ External Palette";
                     case PvrDataFormat.Index8:
@@ -216,9 +216,9 @@ namespace VrConvert
                     case PvrDataFormat.RectangleTwiddled:
                         return "Rectangle Twiddled";
                     case PvrDataFormat.SmallVq:
-                        return "Small Vq";
+                        return "Small VQ";
                     case PvrDataFormat.SmallVqMipmaps:
-                        return "Small Vq w/ Mipmaps";
+                        return "Small VQ w/ Mipmaps";
                 }
 
                 return String.Empty;
@@ -278,9 +278,9 @@ namespace VrConvert
 
                 // Decode the texture
                 try { BitmapData = SvrTexture.ToStream(); }
-                catch
+                catch (Exception e)
                 {
-                    Console.WriteLine("ERROR: Unable to decode texture.");
+                    Console.WriteLine("ERROR: Unable to decode texture. The error returned was:\n{0}", e.Message);
                     return false;
                 }
 

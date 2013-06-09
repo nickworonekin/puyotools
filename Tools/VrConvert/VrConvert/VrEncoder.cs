@@ -15,7 +15,7 @@ namespace VrConvert
         // Gvr Texture Encoder
         public class Gvr : VrEncoder
         {
-            public bool EncodeTexture(byte[] BitmapData, string PixelFormatText, string DataFormatText, bool IncludeGI, uint GlobalIndex, out MemoryStream TextureData, out MemoryStream PaletteData)
+            public bool EncodeTexture(byte[] BitmapData, string PixelFormatText, string DataFormatText, bool IncludeGI, uint GlobalIndex, bool gcix, out MemoryStream TextureData, out MemoryStream PaletteData)
             {
                 TextureData = null; // Set texture data to null
                 PaletteData    = null; // Set external palette data to null
@@ -28,8 +28,8 @@ namespace VrConvert
                     Console.WriteLine("ERROR: Unknown pixel or data format.");
                     return false;
                 }
-                if (PixelFormat == GvrPixelFormat.Unknown && DataFormat != GvrDataFormat.Index4 && DataFormat != GvrDataFormat.Index8)
-                    PixelFormat = GvrPixelFormat.IntensityA8; // Just so it gets set to 00.
+                //if (PixelFormat == GvrPixelFormat.Unknown && DataFormat != GvrDataFormat.Index4 && DataFormat != GvrDataFormat.Index8)
+                //    PixelFormat = GvrPixelFormat.IntensityA8; // Just so it gets set to 00.
 
                 // Load the bitmap
                 GvrTextureEncoder GvrTextureEncoder = new GvrTextureEncoder(BitmapData, (GvrPixelFormat)PixelFormat, (GvrDataFormat)DataFormat);
@@ -40,6 +40,17 @@ namespace VrConvert
                     return false;
                 }
                 //GvrTextureEncoder.WriteGbix(GlobalIndex);
+
+                GvrTextureEncoder.HasGlobalIndex = IncludeGI;
+                if (IncludeGI)
+                {
+                    GvrTextureEncoder.GlobalIndex = GlobalIndex;
+
+                    if (gcix)
+                    {
+                        GvrTextureEncoder.GbixType = GvrGbixType.Gcix;
+                    }
+                }
 
                 // Output information to the console
                 Console.WriteLine();
@@ -54,9 +65,9 @@ namespace VrConvert
 
                 // Encode the texture
                 try { TextureData = GvrTextureEncoder.ToStream(); }
-                catch
+                catch (Exception e)
                 {
-                    Console.WriteLine("ERROR: Unable to encode texture.");
+                    Console.WriteLine("ERROR: Unable to encode texture. The error returned was:\n{0}", e.Message);
                     return false;
                 }
 
@@ -64,9 +75,9 @@ namespace VrConvert
                 if (GvrTextureEncoder.NeedsExternalPalette)
                 {
                     try { PaletteData = GvrTextureEncoder.PaletteEncoder.ToStream(); }
-                    catch
+                    catch (Exception e)
                     {
-                        Console.WriteLine("ERROR: Unable to encode palette.");
+                        Console.WriteLine("ERROR: Unable to encode palette. The error returned was:\n{0}", e.Message);
                         return false;
                     }
                 }
@@ -111,7 +122,7 @@ namespace VrConvert
                     case GvrDataFormat.Index8:
                         return "8-bit Indexed";
                     case GvrDataFormat.Dxt1:
-                        return "Dxt1 Compressed";
+                        return "S3TC/DXT1 Compressed";
                 }
 
                 return String.Empty;
@@ -170,7 +181,7 @@ namespace VrConvert
                         return GvrDataFormat.Index4;
                     case "index8": case "09":
                         return GvrDataFormat.Index8;
-                    case "cmp": case "0E":
+                    case "dxt1": case "0E":
                         return GvrDataFormat.Dxt1;
                 }
 
@@ -207,6 +218,13 @@ namespace VrConvert
                     return false;
                 }
                 //PvrTextureEncoder.WriteGbix(GlobalIndex);
+
+                PvrTextureEncoder.HasGlobalIndex = IncludeGI;
+                if (IncludeGI)
+                {
+                    PvrTextureEncoder.GlobalIndex = GlobalIndex;
+                }
+
                 if (CompressionFormat != PvrCompressionFormat.None)
                     PvrTextureEncoder.CompressionFormat = CompressionFormat;
                     //PvrTextureEncoder.SetCompressionFormat(CompressionFormat);
@@ -223,9 +241,9 @@ namespace VrConvert
 
                 // Encode the texture
                 try { TextureData = PvrTextureEncoder.ToStream(); }
-                catch
+                catch (Exception e)
                 {
-                    Console.WriteLine("ERROR: Unable to encode texture.");
+                    Console.WriteLine("ERROR: Unable to encode texture. The error returned was:\n{0}", e.Message);
                     return false;
                 }
 
@@ -233,9 +251,9 @@ namespace VrConvert
                 if (PvrTextureEncoder.NeedsExternalPalette)
                 {
                     try { PaletteData = PvrTextureEncoder.PaletteEncoder.ToStream(); }
-                    catch
+                    catch (Exception e)
                     {
-                        Console.WriteLine("ERROR: Unable to encode palette.");
+                        Console.WriteLine("ERROR: Unable to encode palette. The error returned was:\n{0}", e.Message);
                         return false;
                     }
                 }
@@ -264,12 +282,12 @@ namespace VrConvert
                     case PvrDataFormat.SquareTwiddled:
                         return "Square Twiddled";
                     case PvrDataFormat.SquareTwiddledMipmaps:
-                    case PvrDataFormat.SquareTwiddledMipmapsDup:
+                    case PvrDataFormat.SquareTwiddledMipmapsAlt:
                         return "Square Twiddled w/ Mipmaps";
                     case PvrDataFormat.Vq:
-                        return "Vq";
+                        return "VQ";
                     case PvrDataFormat.VqMipmaps:
-                        return "Vq w/ Mipmaps";
+                        return "VQ w/ Mipmaps";
                     case PvrDataFormat.Index4:
                         return "4-bit Indexed w/ External Palette";
                     case PvrDataFormat.Index8:
@@ -279,9 +297,9 @@ namespace VrConvert
                     case PvrDataFormat.RectangleTwiddled:
                         return "Rectangle Twiddled";
                     case PvrDataFormat.SmallVq:
-                        return "Small Vq";
+                        return "Small VQ";
                     case PvrDataFormat.SmallVqMipmaps:
-                        return "Small Vq w/ Mipmaps";
+                        return "Small VQ w/ Mipmaps";
                 }
 
                 return String.Empty;
@@ -315,15 +333,15 @@ namespace VrConvert
             {
                 switch (format.ToLower())
                 {
-                    case "sqr": case "01":
+                    case "square": case "01":
                         return PvrDataFormat.SquareTwiddled;
                     case "index4": case "05":
                         return PvrDataFormat.Index4;
                     case "index8": case "07":
                         return PvrDataFormat.Index8;
-                    case "rect": case "09":
+                    case "rectangle": case "09":
                         return PvrDataFormat.Rectangle;
-                    case "recttwiddled": case "0d":
+                    case "rectangletwiddled": case "0d":
                         return PvrDataFormat.RectangleTwiddled;
                 }
 
@@ -385,6 +403,12 @@ namespace VrConvert
                 }
                 //SvrTextureEncoder.WriteGbix(GlobalIndex);
 
+                SvrTextureEncoder.HasGlobalIndex = IncludeGI;
+                if (IncludeGI)
+                {
+                    SvrTextureEncoder.GlobalIndex = GlobalIndex;
+                }
+
                 // Output information to the console
                 Console.WriteLine();
                 Console.WriteLine("Texture Type : SVR");
@@ -395,9 +419,9 @@ namespace VrConvert
 
                 // Encode the texture
                 try { TextureData = SvrTextureEncoder.ToStream(); }
-                catch
+                catch (Exception e)
                 {
-                    Console.WriteLine("ERROR: Unable to encode texture.");
+                    Console.WriteLine("ERROR: Unable to encode texture. The error returned was:\n{0}", e.Message);
                     return false;
                 }
 
@@ -405,9 +429,9 @@ namespace VrConvert
                 if (SvrTextureEncoder.NeedsExternalPalette)
                 {
                     try { PaletteData = SvrTextureEncoder.PaletteEncoder.ToStream(); }
-                    catch
+                    catch (Exception e)
                     {
-                        Console.WriteLine("ERROR: Unable to encode palette.");
+                        Console.WriteLine("ERROR: Unable to encode palette. The error returned was:\n{0}", e.Message);
                         return false;
                     }
                 }
@@ -475,13 +499,21 @@ namespace VrConvert
             {
                 switch (format.ToLower())
                 {
-                    case "rect": case "60":
+                    case "rectangle": case "60":
                         return SvrDataFormat.Rectangle;
-                    case "index4ec": case "62":
+                    case "index4ep": case "62":
                         return SvrDataFormat.Index4ExternalPalette;
-                    case "index8ec": case "64":
+                    case "index8ep": case "64":
                         return SvrDataFormat.Index8ExternalPalette;
                     case "index4":
+                    case "66":
+                    case "67":
+                    case "68":
+                    case "69":
+                        // Just pass in any of the Index4 family.
+                        // VrSharp will pick the correct one
+                        return SvrDataFormat.Index4Rgb5a3Rectangle;
+                        /*
                         if (PixelFormat == SvrPixelFormat.Rgb5a3)
                         {
                             if (width == height) return SvrDataFormat.Index4Rgb5a3Square;
@@ -492,9 +524,16 @@ namespace VrConvert
                             if (width == height) return SvrDataFormat.Index4Argb8Square;
                             else return SvrDataFormat.Index4Argb8Rectangle;
                         }
-
-                        break;
+                        break;*/
                     case "index8":
+                    case "6a":
+                    case "6b":
+                    case "6c":
+                    case "6d":
+                        // Just pass in any of the Index4 family.
+                        // VrSharp will pick the correct one
+                        return SvrDataFormat.Index8Rgb5a3Rectangle;
+                        /*
                         if (PixelFormat == SvrPixelFormat.Rgb5a3)
                         {
                             if (width == height) return SvrDataFormat.Index8Rgb5a3Square;
@@ -505,8 +544,8 @@ namespace VrConvert
                             if (width == height) return SvrDataFormat.Index8Argb8Square;
                             else return SvrDataFormat.Index8Argb8Rectangle;
                         }
-
-                        break;
+                        break;*/
+                        /*
                     case "66": return SvrDataFormat.Index4Rgb5a3Rectangle;
                     case "67": return SvrDataFormat.Index4Rgb5a3Square;
                     case "68": return SvrDataFormat.Index4Argb8Rectangle;
@@ -514,7 +553,7 @@ namespace VrConvert
                     case "6a": return SvrDataFormat.Index8Rgb5a3Rectangle;
                     case "6b": return SvrDataFormat.Index8Rgb5a3Square;
                     case "6c": return SvrDataFormat.Index8Argb8Rectangle;
-                    case "6d": return SvrDataFormat.Index8Argb8Square;
+                    case "6d": return SvrDataFormat.Index8Argb8Square;*/
                 }
 
                 return SvrDataFormat.Unknown; // Unknown format
