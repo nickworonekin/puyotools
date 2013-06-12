@@ -60,7 +60,7 @@ namespace VrSharp.GvrTexture
                         {
                             for (int x2 = 0; x2 < 8; x2++)
                             {
-                                int loc    = ((y + y2) * width) + (x + x2);
+                                int loc    = (((y + y2) * width) + (x + x2)) * 4;
                                 byte entry = (byte)(((0.30 * input[loc + 2]) + (0.59 * input[loc + 1]) + (0.11 * input[loc + 0])) * 0x0F / 0xFF);
                                 entry      = (byte)((output[offset] & (0x0F << (x2 & 0x01) * 4)) | (entry << ((~x2 & 0x01) * 4)));
 
@@ -374,7 +374,7 @@ namespace VrSharp.GvrTexture
 
             public override int Bpp
             {
-                get { return 8; }
+                get { return 16; }
             }
 
             public override byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)

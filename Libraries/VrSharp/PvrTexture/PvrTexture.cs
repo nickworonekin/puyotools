@@ -187,29 +187,24 @@ namespace VrSharp.PvrTexture
                 mipmapOffsets = new int[(int)Math.Log(textureWidth, 2) + 1];
 
                 int mipmapOffset = 0;
+                
+                // Calculate the padding for the first mipmap offset
+                if (dataFormat == PvrDataFormat.SquareTwiddledMipmaps)
+                {
+                    // A 1x1 mipmap takes up as much space as a 2x1 mipmap
+                    mipmapOffset = (dataCodec.Bpp) >> 3;
+                }
+                if (dataFormat == PvrDataFormat.SquareTwiddledMipmapsAlt)
+                {
+                    // A 1x1 mipmap takes up as much space as a 2x2 mipmap
+                    mipmapOffset = (3 * dataCodec.Bpp) >> 3;
+                }
+
                 for (int i = mipmapOffsets.Length - 1, size = 1; i >= 0; i--, size <<= 1)
                 {
                     mipmapOffsets[i] = mipmapOffset;
 
-                    if (size == 1)
-                    {
-                        // How much space does the 1x1 mipmap use?
-                        if (dataFormat == PvrDataFormat.SquareTwiddledMipmaps)
-                        {
-                            // A 1x1 mipmap takes up half as much space as a 2x2 one when the data format is
-                            // square twiddled + mipmaps (the one that's 0x02, not 0x12).
-                            mipmapOffset += (2 * dataCodec.Bpp) >> 3;
-                        }
-                        else
-                        {
-                            // A 1x1 mipmap takes up as much space as a 2x2 one
-                            mipmapOffset += (4 * dataCodec.Bpp) >> 3;
-                        }
-                    }
-                    else
-                    {
-                        mipmapOffset += (size * size * dataCodec.Bpp) >> 3;
-                    }
+                    mipmapOffset += Math.Max((size * size * dataCodec.Bpp) >> 3, 1);
                 }
             }
 

@@ -220,6 +220,30 @@ namespace VrSharp.PvrTexture
                 textureLength += (dataCodec.PaletteEntries * pixelCodec.Bpp / 8);
             }
 
+            // Calculate the mipmap padding (if the texture contains mipmaps)
+            int mipmapPadding = 0;
+
+            if (dataCodec.ContainsMipmaps)
+            {
+                if (dataFormat == PvrDataFormat.SquareTwiddledMipmaps)
+                {
+                    // A 1x1 mipmap takes up as much space as a 2x1 mipmap
+                    mipmapPadding = (dataCodec.Bpp) >> 3;
+                }
+                else if (dataFormat == PvrDataFormat.SquareTwiddledMipmapsAlt)
+                {
+                    // A 1x1 mipmap takes up as much space as a 2x2 mipmap
+                    mipmapPadding = (3 * dataCodec.Bpp) >> 3;
+                }
+
+                textureLength += mipmapPadding;
+
+                for (int size = 1; size < textureWidth; size <<= 1)
+                {
+                    textureLength += Math.Max((size * size * dataCodec.Bpp) >> 3, 1);
+                }
+            }
+
             MemoryStream destination = new MemoryStream(textureLength);
 
             // Write out the GBIX header (if we are including one)
@@ -241,7 +265,14 @@ namespace VrSharp.PvrTexture
             destination.WriteByte((byte)'R');
             destination.WriteByte((byte)'T');
 
-            PTStream.WriteInt32(destination, textureLength - 24);
+            if (hasGlobalIndex)
+            {
+                PTStream.WriteInt32(destination, textureLength - 24);
+            }
+            else
+            {
+                PTStream.WriteInt32(destination, textureLength - 8);
+            }
 
             destination.WriteByte((byte)pixelFormat);
             destination.WriteByte((byte)dataFormat);
@@ -255,6 +286,23 @@ namespace VrSharp.PvrTexture
             {
                 byte[] palette = pixelCodec.EncodePalette(texturePalette, dataCodec.PaletteEntries);
                 destination.Write(palette, 0, palette.Length);
+            }
+
+            // Write out any mipmaps
+            if (dataCodec.ContainsMipmaps)
+            {
+                // Write out any padding bytes before the 1x1 mipmap
+                for (int i = 0; i < mipmapPadding; i++)
+                {
+                    destination.WriteByte(0);
+                }
+
+                for (int size = 1; size < textureWidth; size <<= 1)
+                {
+                    byte[] mipmapDecodedData = BitmapToRawResized(decodedBitmap, size, 1);
+                    byte[] mipmapTextureData = dataCodec.Encode(mipmapDecodedData, 0, size, size);
+                    destination.Write(mipmapTextureData, 0, mipmapTextureData.Length);
+                }
             }
 
             // Write the texture data

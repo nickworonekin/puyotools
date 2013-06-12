@@ -2,6 +2,7 @@
 using System.IO;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Drawing.Drawing2D;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
 
@@ -388,6 +389,31 @@ namespace VrSharp
                     g.DrawImage(img, 0, 0, img.Width, img.Height);
                 }
                 img = newImage;
+            }
+
+            // Copy over the data to the destination. It's ok to do it without utilizing Stride
+            // since each pixel takes up 4 bytes (aka Stride will always be equal to Width)
+            BitmapData bitmapData = img.LockBits(new Rectangle(0, 0, img.Width, img.Height), ImageLockMode.ReadOnly, img.PixelFormat);
+            Marshal.Copy(bitmapData.Scan0, destination, 0, destination.Length);
+            img.UnlockBits(bitmapData);
+
+            return destination;
+        }
+
+        // Since this method is only used for mipmaps, and mipmaps are square, we can assume that width = height
+        protected byte[] BitmapToRawResized(Bitmap source, int size, int minSize)
+        {
+            if (size > minSize)
+                minSize = size;
+
+            byte[] destination = new byte[minSize * minSize * 4];
+
+            // Resize the image
+            Bitmap img = new Bitmap(minSize, minSize, PixelFormat.Format32bppArgb);
+            using (Graphics g = Graphics.FromImage(img))
+            {
+                g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                g.DrawImage(source, 0, 0, size, size);
             }
 
             // Copy over the data to the destination. It's ok to do it without utilizing Stride

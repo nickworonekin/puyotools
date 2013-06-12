@@ -307,10 +307,10 @@ namespace VrSharp.GvrTexture
             }
 
             // Temporary! Unset the mipmap flag if it is set (as there is currently no mipmap encode support)
-            if ((dataFlags & GvrDataFlags.Mipmaps) != 0)
-            {
-                dataFlags &= ~GvrDataFlags.Mipmaps;
-            }
+            //if ((dataFlags & GvrDataFlags.Mipmaps) != 0)
+            //{
+            //    dataFlags &= ~GvrDataFlags.Mipmaps;
+            //}
 
             // Calculate what the length of the texture will be
             int textureLength = 16 + (textureWidth * textureHeight * dataCodec.Bpp / 8);
@@ -321,6 +321,13 @@ namespace VrSharp.GvrTexture
             if ((dataFlags & GvrDataFlags.InternalPalette) != 0)
             {
                 textureLength += (dataCodec.PaletteEntries * pixelCodec.Bpp / 8);
+            }
+            if ((dataFlags & GvrDataFlags.Mipmaps) != 0)
+            {
+                for (int size = 1; size < textureWidth; size <<= 1)
+                {
+                    textureLength += Math.Max((size * size * dataCodec.Bpp) >> 3, 32);
+                }
             }
 
             MemoryStream destination = new MemoryStream(textureLength);
@@ -354,7 +361,14 @@ namespace VrSharp.GvrTexture
             destination.WriteByte((byte)'R');
             destination.WriteByte((byte)'T');
 
-            PTStream.WriteInt32(destination, textureLength - 24);
+            if (hasGlobalIndex)
+            {
+                PTStream.WriteInt32(destination, textureLength - 24);
+            }
+            else
+            {
+                PTStream.WriteInt32(destination, textureLength - 8);
+            }
 
             PTStream.WriteUInt16(destination, 0);
             if (PixelFormat != GvrPixelFormat.Unknown)
@@ -380,6 +394,30 @@ namespace VrSharp.GvrTexture
             // Write the texture data
             byte[] textureData = dataCodec.Encode(decodedData, textureWidth, textureHeight, null);
             destination.Write(textureData, 0, textureData.Length);
+
+            // Write out any mipmaps
+            if ((dataFlags & GvrDataFlags.Mipmaps) != 0)
+            {
+                // Calculate the minimum size for each mipmap
+                int minSize = 0;
+                if (dataCodec.Bpp == 4)
+                {
+                    // 8x8 blocks
+                    minSize = 8;
+                }
+                else if (dataCodec.Bpp == 16)
+                {
+                    // 4x4 blocks
+                    minSize = 4;
+                }
+
+                for (int size = textureWidth >> 1; size > 0; size >>= 1)
+                {
+                    byte[] mipmapDecodedData = BitmapToRawResized(decodedBitmap, size, minSize);
+                    byte[] mipmapTextureData = dataCodec.Encode(mipmapDecodedData, 0, Math.Max(size, minSize), Math.Max(size, minSize));
+                    destination.Write(mipmapTextureData, 0, mipmapTextureData.Length);
+                }
+            }
 
             return destination;
         }

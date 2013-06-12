@@ -18,49 +18,41 @@ namespace VrSharp.SvrTexture
                 get { return PixelCodec.Bpp; }
             }
 
-            public override byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)
+            public override byte[] Decode(byte[] source, int sourceIndex, int width, int height)
             {
-                byte[] output   = new byte[width * height * 4];
-                int StartOffset = offset;
+                // Destination data & index
+                byte[] destination = new byte[width * height * 4];
+                int destinationIndex = 0;
 
+                // Decode texture data
                 for (int y = 0; y < height; y++)
                 {
                     for (int x = 0; x < width; x++)
                     {
-                        /*
-                        byte[] palette = PixelCodec.GetPixelPalette(input, StartOffset + GetSwizzledOffset(x, y, width, height, GetBpp(PixelCodec)));
-
-                        output[(((y * width) + x) * 4) + 3] = palette[3];
-                        output[(((y * width) + x) * 4) + 2] = palette[2];
-                        output[(((y * width) + x) * 4) + 1] = palette[1];
-                        output[(((y * width) + x) * 4) + 0] = palette[0];
-
-                        offset += (GetBpp(PixelCodec) / 8);
-                        */
-
-                        PixelCodec.DecodePixel(input, StartOffset + GetSwizzledOffset(x, y, width, height, Bpp), output, (((y * width) + x) * 4));
+                        PixelCodec.DecodePixel(source, sourceIndex + GetSwizzledOffset(x, y, width, height, PixelCodec.Bpp), destination, destinationIndex);
+                        destinationIndex += 4;
                     }
                 }
 
-                return output;
+                return destination;
             }
 
-            public override byte[] Encode(byte[] input, int width, int height, VrPixelCodec PixelCodec)
+            public override byte[] Encode(byte[] source, int sourceIndex, int width, int height)
             {
-                byte[] output = new byte[width * height * (Bpp >> 3)];
+                // Destination data
+                byte[] destination = new byte[width * height * (PixelCodec.Bpp >> 3)];
 
+                // Encode texture data
                 for (int y = 0; y < height; y++)
                 {
                     for (int x = 0; x < width; x++)
                     {
-                        //byte[] palette = PixelCodec.CreatePixelPalette(input, (((y * width) + x) * 4));
-                        //palette.CopyTo(output, GetSwizzledOffset(x, y, width, height, GetBpp(PixelCodec)));
-
-                        PixelCodec.EncodePixel(input, (((y * width) + x) * 4), output, GetSwizzledOffset(x, y, width, height, Bpp));
+                        PixelCodec.EncodePixel(source, sourceIndex, destination, GetSwizzledOffset(x, y, width, height, PixelCodec.Bpp));
+                        sourceIndex += 4;
                     }
                 }
 
-                return output;
+                return destination;
             }
         }
         #endregion

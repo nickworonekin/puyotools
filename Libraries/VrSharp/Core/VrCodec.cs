@@ -86,8 +86,14 @@ namespace VrSharp
         }
 
         // Decode & Encode texture data
-        public virtual byte[] Decode(byte[] source, int sourceIndex, int width, int height) { return null; }
-        public virtual byte[] Encode(byte[] source, int sourceIndex, int width, int height) { return null; }
+        public virtual byte[] Decode(byte[] source, int sourceIndex, int width, int height)
+        {
+            return Decode(source, sourceIndex, width, height, null);
+        }
+        public virtual byte[] Encode(byte[] source, int sourceIndex, int width, int height)
+        {
+            return Encode(source, width, height, null);
+        }
 
         // Decode texture data
         public virtual byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)

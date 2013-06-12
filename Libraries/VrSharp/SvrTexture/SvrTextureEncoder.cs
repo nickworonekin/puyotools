@@ -264,7 +264,14 @@ namespace VrSharp.SvrTexture
             destination.WriteByte((byte)'R');
             destination.WriteByte((byte)'T');
 
-            PTStream.WriteInt32(destination, textureLength - 24);
+            if (hasGlobalIndex)
+            {
+                PTStream.WriteInt32(destination, textureLength - 24);
+            }
+            else
+            {
+                PTStream.WriteInt32(destination, textureLength - 8);
+            }
 
             destination.WriteByte((byte)pixelFormat);
             destination.WriteByte((byte)dataFormat);

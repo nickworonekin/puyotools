@@ -213,8 +213,10 @@ namespace VrConvert
                 ClutFile = (ClutArgIndex != -1 && ClutArgIndex < args.Length ? args[ClutArgIndex + 1] : Path.ChangeExtension(OutputFile, ".gvp"));
 
                 bool gcix = Array.IndexOf(args, "-gcix") != -1;
+                bool hasMipmaps = Array.IndexOf(args, "-mipmaps") != -1;
+                bool hasExternalPalette = Array.IndexOf(args, "-ep") != -1;
 
-                EncodeSuccess = new VrEncoder.Gvr().EncodeTexture(BitmapData, PixelFormat, DataFormat, hasGlobalIndex, GlobalIndex, gcix, out TextureData, out ClutData);
+                EncodeSuccess = new VrEncoder.Gvr().EncodeTexture(BitmapData, PixelFormat, DataFormat, hasGlobalIndex, GlobalIndex, gcix, hasMipmaps, hasExternalPalette, out TextureData, out ClutData);
             }
             if (VrFormat == "pvr")
             {
@@ -318,7 +320,9 @@ namespace VrConvert
                     "\t-p <palette> : Sets the palette filename\n" +
                     "\t-gi <value>  : Set the global index value\n" +
                     "\t-gcix        : Use a GCIX header instead of a GBIX header\n" +
-                    "\t-nogbix      : Do not include a GBIX/GCIX header\n");
+                    "\t-nogbix      : Do not include a GBIX/GCIX header\n" +
+                    "\t-mipmaps     : Texture has mipmaps\n" +
+                    "\t-ep          : Texture has an external palette\n");
             }
 
             else if (format.ToLower() == "pvr")
@@ -333,10 +337,12 @@ namespace VrConvert
                 Console.WriteLine(
                     "<datafmt> Data Formats:\n\n" +
                     "\tsquare            : Square Twiddled\n" +
+                    "\tsquaremipmaps     : Square Twiddled with Mipmaps\n" +
                     "\tindex4            : 4-bit Palettized with External Palette\n" +
                     "\tindex8            : 8-bit Palettized with External Palette\n" +
                     "\trectangle         : Rectangle\n" +
-                    "\trectangletwiddled : Rectangle Twiddled\n");
+                    "\trectangletwiddled : Rectangle Twiddled\n" +
+                    "\tsquaremipmapsalt  : Square Twiddled with Mipmaps (Alternate)");
                 Console.WriteLine();
                 Console.WriteLine(
                     "[options] Options:\n\n" +

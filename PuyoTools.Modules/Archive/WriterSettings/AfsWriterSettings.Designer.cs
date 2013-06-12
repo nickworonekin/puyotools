@@ -61,11 +61,11 @@
             // flowLayoutPanel1
             // 
             this.flowLayoutPanel1.AutoSize = true;
-            this.flowLayoutPanel1.Controls.Add(this.label2);
             this.flowLayoutPanel1.Controls.Add(this.AfsVersion1Radio);
             this.flowLayoutPanel1.Controls.Add(this.AfsVersion2Radio);
             this.flowLayoutPanel1.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
-            this.flowLayoutPanel1.Location = new System.Drawing.Point(8, 32);
+            this.flowLayoutPanel1.Location = new System.Drawing.Point(8, 51);
+            this.flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(0, 3, 3, 3);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
             this.flowLayoutPanel1.Size = new System.Drawing.Size(95, 59);
             this.flowLayoutPanel1.TabIndex = 2;
@@ -73,7 +73,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(3, 0);
+            this.label2.Location = new System.Drawing.Point(5, 35);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(65, 13);
             this.label2.TabIndex = 0;
@@ -83,7 +83,7 @@
             // 
             this.AfsVersion1Radio.AutoSize = true;
             this.AfsVersion1Radio.Checked = true;
-            this.AfsVersion1Radio.Location = new System.Drawing.Point(3, 16);
+            this.AfsVersion1Radio.Location = new System.Drawing.Point(3, 3);
             this.AfsVersion1Radio.Name = "AfsVersion1Radio";
             this.AfsVersion1Radio.Padding = new System.Windows.Forms.Padding(20, 0, 0, 0);
             this.AfsVersion1Radio.Size = new System.Drawing.Size(89, 17);
@@ -95,7 +95,7 @@
             // AfsVersion2Radio
             // 
             this.AfsVersion2Radio.AutoSize = true;
-            this.AfsVersion2Radio.Location = new System.Drawing.Point(3, 39);
+            this.AfsVersion2Radio.Location = new System.Drawing.Point(3, 26);
             this.AfsVersion2Radio.Name = "AfsVersion2Radio";
             this.AfsVersion2Radio.Padding = new System.Windows.Forms.Padding(20, 0, 0, 0);
             this.AfsVersion2Radio.Size = new System.Drawing.Size(89, 17);
@@ -108,11 +108,12 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
+            this.Controls.Add(this.label2);
             this.Controls.Add(this.flowLayoutPanel1);
             this.Controls.Add(this.BlockSizeBox);
             this.Controls.Add(this.label1);
             this.Name = "AfsWriterSettings";
-            this.Size = new System.Drawing.Size(192, 94);
+            this.Size = new System.Drawing.Size(192, 113);
             this.flowLayoutPanel1.ResumeLayout(false);
             this.flowLayoutPanel1.PerformLayout();
             this.ResumeLayout(false);

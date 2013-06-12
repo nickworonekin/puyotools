@@ -69,7 +69,7 @@ namespace VrSharp.PvrTexture
         {
             public override bool CanEncode
             {
-                get { return false; }
+                get { return true; }
             }
 
             public override int Bpp
@@ -106,7 +106,23 @@ namespace VrSharp.PvrTexture
 
             public override byte[] Encode(byte[] source, int sourceIndex, int width, int height)
             {
-                return null;
+                // Destination data
+                byte[] destination = new byte[width * height * (PixelCodec.Bpp >> 3)];
+
+                // Twiddle map
+                int[] twiddleMap = MakeTwiddleMap(width);
+
+                // Encode texture data
+                for (int y = 0; y < height; y++)
+                {
+                    for (int x = 0; x < width; x++)
+                    {
+                        PixelCodec.EncodePixel(source, sourceIndex, destination, ((twiddleMap[x] << 1) | twiddleMap[y]) << (PixelCodec.Bpp >> 4));
+                        sourceIndex += 4;
+                    }
+                }
+
+                return destination;
             }
         }
         #endregion
@@ -203,6 +219,23 @@ namespace VrSharp.PvrTexture
                 // Destination data & index
                 byte[] destination = new byte[width * height * 4];
                 int destinationIndex;
+
+                // Decode a 1x1 texture (for mipmaps)
+                // No need to make use of a twiddle map in this case
+                if (width == 1 && height == 1)
+                {
+                    int index = source[sourceIndex] * 4;
+
+                    destinationIndex = 0;
+
+                    for (int i = 0; i < 4; i++)
+                    {
+                        destination[destinationIndex] = palette[index][i];
+                        destinationIndex++;
+                    }
+
+                    return destination;
+                }
 
                 // Twiddle map
                 int[] twiddleMap = MakeTwiddleMap(width);
@@ -669,6 +702,23 @@ namespace VrSharp.PvrTexture
                 // Destination data & index
                 byte[] destination = new byte[width * height * 4];
                 int destinationIndex;
+
+                // Decode a 1x1 texture (for mipmaps)
+                // No need to make use of a twiddle map in this case
+                if (width == 1 && height == 1)
+                {
+                    int index = source[sourceIndex] * 4;
+
+                    destinationIndex = 0;
+
+                    for (int i = 0; i < 4; i++)
+                    {
+                        destination[destinationIndex] = palette[index][i];
+                        destinationIndex++;
+                    }
+
+                    return destination;
+                }
 
                 // Twiddle map
                 int[] twiddleMap = MakeTwiddleMap(width);

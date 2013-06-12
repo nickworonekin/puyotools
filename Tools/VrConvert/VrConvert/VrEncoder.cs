@@ -15,7 +15,7 @@ namespace VrConvert
         // Gvr Texture Encoder
         public class Gvr : VrEncoder
         {
-            public bool EncodeTexture(byte[] BitmapData, string PixelFormatText, string DataFormatText, bool IncludeGI, uint GlobalIndex, bool gcix, out MemoryStream TextureData, out MemoryStream PaletteData)
+            public bool EncodeTexture(byte[] BitmapData, string PixelFormatText, string DataFormatText, bool IncludeGI, uint GlobalIndex, bool gcix, bool hasMipmaps, bool hasExternalPalette, out MemoryStream TextureData, out MemoryStream PaletteData)
             {
                 TextureData = null; // Set texture data to null
                 PaletteData    = null; // Set external palette data to null
@@ -50,6 +50,14 @@ namespace VrConvert
                     {
                         GvrTextureEncoder.GbixType = GvrGbixType.Gcix;
                     }
+                }
+                if (hasMipmaps)
+                {
+                    GvrTextureEncoder.DataFlags |= GvrDataFlags.Mipmaps;
+                }
+                if (hasExternalPalette)
+                {
+                    GvrTextureEncoder.DataFlags |= GvrDataFlags.ExternalPalette;
                 }
 
                 // Output information to the console
@@ -282,7 +290,6 @@ namespace VrConvert
                     case PvrDataFormat.SquareTwiddled:
                         return "Square Twiddled";
                     case PvrDataFormat.SquareTwiddledMipmaps:
-                    case PvrDataFormat.SquareTwiddledMipmapsAlt:
                         return "Square Twiddled w/ Mipmaps";
                     case PvrDataFormat.Vq:
                         return "VQ";
@@ -300,6 +307,8 @@ namespace VrConvert
                         return "Small VQ";
                     case PvrDataFormat.SmallVqMipmaps:
                         return "Small VQ w/ Mipmaps";
+                    case PvrDataFormat.SquareTwiddledMipmapsAlt:
+                        return "Square Twiddled w/ Mipmaps (Alternate)";
                 }
 
                 return String.Empty;
@@ -335,6 +344,8 @@ namespace VrConvert
                 {
                     case "square": case "01":
                         return PvrDataFormat.SquareTwiddled;
+                    case "squaremipmaps": case "02":
+                        return PvrDataFormat.SquareTwiddledMipmaps;
                     case "index4": case "05":
                         return PvrDataFormat.Index4;
                     case "index8": case "07":
@@ -343,6 +354,8 @@ namespace VrConvert
                         return PvrDataFormat.Rectangle;
                     case "rectangletwiddled": case "0d":
                         return PvrDataFormat.RectangleTwiddled;
+                    case "squaremipmapsalt": case "12":
+                        return PvrDataFormat.SquareTwiddledMipmapsAlt;
                 }
 
                 return PvrDataFormat.Unknown; // Unknown format
