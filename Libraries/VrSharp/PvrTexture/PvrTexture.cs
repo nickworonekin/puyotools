@@ -182,7 +182,7 @@ namespace VrSharp.PvrTexture
             }
 
             // If the texture contains mipmaps, gets the offsets of them
-            if (dataCodec.ContainsMipmaps)
+            if (dataCodec.HasMipmaps)
             {
                 mipmapOffsets = new int[(int)Math.Log(textureWidth, 2) + 1];
 

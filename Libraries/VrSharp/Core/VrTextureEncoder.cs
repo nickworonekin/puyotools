@@ -87,6 +87,24 @@ namespace VrSharp
         }
         #endregion
 
+        #region Mipmaps & Mipmap Retrieval
+        /// <summary>
+        /// Returns if the texture has mipmaps.
+        /// </summary>
+        public virtual bool HasMipmaps
+        {
+            get
+            {
+                if (!initalized)
+                {
+                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
+                }
+
+                return dataCodec.HasMipmaps;
+            }
+        }
+        #endregion
+
         #region Palette
         /// <summary>
         /// Returns if the texture needs an external palette file.
@@ -168,10 +186,10 @@ namespace VrSharp
         }*/
 
         // Returns if the texture contains mipmaps
-        protected virtual bool ContainsMipmaps()
-        {
-            return dataCodec.ContainsMipmaps;
-        }
+        //protected virtual bool ContainsMipmaps()
+        //{
+        //    return dataCodec.HasMipmaps;
+        //}
         /*
         // Converts a bitmap to a raw Argb8888 array
         private byte[] ConvertBitmapToRaw(Bitmap bitmap)

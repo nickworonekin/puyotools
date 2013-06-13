@@ -268,7 +268,7 @@ namespace VrSharp
 
         #region Mipmaps & Mipmap Retrieval
         /// <summary>
-        /// Returns if the texture contains mipmaps.
+        /// Returns if the texture has mipmaps.
         /// </summary>
         public virtual bool HasMipmaps
         {
@@ -279,7 +279,7 @@ namespace VrSharp
                     throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
                 }
 
-                return dataCodec.ContainsMipmaps;
+                return dataCodec.HasMipmaps;
             }
         }
 

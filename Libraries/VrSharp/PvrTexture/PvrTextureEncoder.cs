@@ -223,7 +223,7 @@ namespace VrSharp.PvrTexture
             // Calculate the mipmap padding (if the texture contains mipmaps)
             int mipmapPadding = 0;
 
-            if (dataCodec.ContainsMipmaps)
+            if (dataCodec.HasMipmaps)
             {
                 if (dataFormat == PvrDataFormat.SquareTwiddledMipmaps)
                 {
@@ -289,7 +289,7 @@ namespace VrSharp.PvrTexture
             }
 
             // Write out any mipmaps
-            if (dataCodec.ContainsMipmaps)
+            if (dataCodec.HasMipmaps)
             {
                 // Write out any padding bytes before the 1x1 mipmap
                 for (int i = 0; i < mipmapPadding; i++)

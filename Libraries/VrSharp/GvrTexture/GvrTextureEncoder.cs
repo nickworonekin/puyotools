@@ -103,6 +103,7 @@ namespace VrSharp.GvrTexture
         private bool Initalize(GvrPixelFormat pixelFormat, GvrDataFormat dataFormat)
         {
             // Set the default values
+            dataFlags = GvrDataFlags.None;
             hasGlobalIndex = true;
             gbixType = GvrGbixType.Gbix;
             globalIndex = 0;
@@ -125,7 +126,7 @@ namespace VrSharp.GvrTexture
 
                 dataCodec.PixelCodec = pixelCodec;
 
-                dataFlags = GvrDataFlags.InternalPalette;
+                dataFlags |= GvrDataFlags.InternalPalette;
 
                 // Convert the bitmap to an array containing indicies.
                 decodedData = BitmapToRawIndexed(decodedBitmap, dataCodec.PaletteEntries, out texturePalette);
@@ -134,8 +135,6 @@ namespace VrSharp.GvrTexture
             {
                 this.pixelFormat = GvrPixelFormat.Unknown;
                 pixelCodec = null;
-
-                dataFlags = GvrDataFlags.None;
 
                 // Convert the bitmap to an array
                 decodedData = BitmapToRaw(decodedBitmap);
@@ -173,8 +172,10 @@ namespace VrSharp.GvrTexture
         protected GvrGbixType gbixType;
 
         /// <summary>
-        /// The texture's data flags. The default value is GvrDataDlags.InternalPalette if the data format is GvrDataFormat.Index4 or GvrDataFormat.Index8; GvrDataFlags.None otherwise.
-        /// If both GvrDataFlags.InternalPalette and GvrDataFlags.ExternalPalette are set, GvrDataFlags.ExternalPalette will take precedence.
+        /// The texture's data flags. Can contain one or more of the following:
+        /// <para>- GvrDataFlags.Mipmaps</para>
+        /// <para>- GvrDataFlags.ExternalPalette</para>
+        /// <para>- GvrDataFlags.InternalPalette</para>
         /// </summary>
         public GvrDataFlags DataFlags
         {
@@ -186,26 +187,6 @@ namespace VrSharp.GvrTexture
                 }
 
                 return dataFlags;
-            }
-            set
-            {
-                if (!initalized)
-                {
-                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
-                }
-
-                dataFlags = value;
-
-                // If GvrDataFlags.ExternalPalette is set, set up the palette encoder.
-                // Remove the palette encoder if the opposite is done.
-                if (paletteEncoder == null && (dataFlags & GvrDataFlags.ExternalPalette) != 0)
-                {
-                    paletteEncoder = new GvpPaletteEncoder(texturePalette, (ushort)dataCodec.PaletteEntries, pixelFormat, pixelCodec);
-                }
-                else if (paletteEncoder != null && (dataFlags & GvrDataFlags.ExternalPalette) == 0)
-                {
-                    paletteEncoder = null;
-                }
             }
         }
         protected GvrDataFlags dataFlags;
@@ -245,9 +226,9 @@ namespace VrSharp.GvrTexture
         private GvrDataFormat dataFormat;
 
         /// <summary>
-        /// Gets or sets if this texture has mipmaps. This only applies to non-palettized textures.
+        /// Gets or sets if this texture has mipmaps. This only applies to 4-bit or 16-bit non-palettized textures.
         /// </summary>
-        public bool HasMipmaps
+        public new bool HasMipmaps
         {
             get
             {
@@ -256,7 +237,7 @@ namespace VrSharp.GvrTexture
                     throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
                 }
 
-                return hasMipmaps;
+                return ((dataFlags & GvrDataFlags.Mipmaps) != 0);
             }
             set
             {
@@ -265,18 +246,30 @@ namespace VrSharp.GvrTexture
                     throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
                 }
 
-                hasMipmaps = value;
+                // Mipmaps can only be used on a 4-bit or 16-bit non-palettized texture
+                if (dataCodec.PaletteEntries != 0 || (dataCodec.Bpp != 4 && dataCodec.Bpp != 16))
+                    return;
+
+                if (value)
+                {
+                    // Set mipmaps to true
+                    dataFlags |= GvrDataFlags.Mipmaps;
+                }
+                else
+                {
+                    // Set mipmaps to false
+                    dataFlags &= ~GvrDataFlags.Mipmaps;
+                }
             }
         }
-        private bool hasMipmaps;
         #endregion
 
         #region Palette
         /// <summary>
-        /// Returns if the texture needs an external palette file.
+        /// Gets or sets if the texture needs an external palette file. This only applies to palettized textures.
         /// </summary>
         /// <returns></returns>
-        public override bool NeedsExternalPalette
+        public new bool NeedsExternalPalette
         {
             get
             {
@@ -287,31 +280,48 @@ namespace VrSharp.GvrTexture
 
                 return ((dataFlags & GvrDataFlags.ExternalPalette) != 0);
             }
+            set
+            {
+                if (!initalized)
+                {
+                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
+                }
+
+                // If this is a non-palettized texture, don't set anything
+                if (dataCodec.PaletteEntries == 0)
+                    return;
+
+                if (value)
+                {
+                    // Set external palette to true
+                    dataFlags &= ~GvrDataFlags.InternalPalette;
+                    dataFlags |= GvrDataFlags.ExternalPalette;
+
+                    // Initalize the palette encoder
+                    if (paletteEncoder == null)
+                    {
+                        paletteEncoder = new GvpPaletteEncoder(texturePalette, (ushort)dataCodec.PaletteEntries, pixelFormat, pixelCodec);
+                    }
+                }
+                else
+                {
+                    // Set external palette to false
+                    dataFlags &= ~GvrDataFlags.ExternalPalette;
+                    dataFlags |= GvrDataFlags.InternalPalette;
+
+                    // Uninitalize the palette encoder
+                    if (paletteEncoder != null)
+                    {
+                        paletteEncoder = null;
+                    }
+                }
+            }
         }
         #endregion
 
         #region Encode Texture
         protected override MemoryStream EncodeTexture()
         {
-            // Before we write anything, let's make sure the data flags are set properly
-            if ((dataFlags & GvrDataFlags.InternalPalette) != 0 && (dataFlags & GvrDataFlags.ExternalPalette) != 0)
-            {
-                // If both InternalPalette and ExternalPalette is set, default to ExternalPalette.
-                dataFlags &= ~GvrDataFlags.InternalPalette;
-            }
-
-            if ((dataFlags & GvrDataFlags.Palette) != 0 && dataCodec.PaletteEntries == 0)
-            {
-                // If this texture has no palette, then don't set any palette flags.
-                dataFlags &= ~GvrDataFlags.Palette;
-            }
-
-            // Temporary! Unset the mipmap flag if it is set (as there is currently no mipmap encode support)
-            //if ((dataFlags & GvrDataFlags.Mipmaps) != 0)
-            //{
-            //    dataFlags &= ~GvrDataFlags.Mipmaps;
-            //}
-
             // Calculate what the length of the texture will be
             int textureLength = 16 + (textureWidth * textureHeight * dataCodec.Bpp / 8);
             if (hasGlobalIndex)
@@ -335,17 +345,17 @@ namespace VrSharp.GvrTexture
             // Write out the GBIX header (if we are including one)
             if (hasGlobalIndex)
             {
-                if (gbixType == GvrGbixType.Gbix)
+                if (gbixType == GvrGbixType.Gcix)
                 {
                     destination.WriteByte((byte)'G');
-                    destination.WriteByte((byte)'B');
+                    destination.WriteByte((byte)'C');
                     destination.WriteByte((byte)'I');
                     destination.WriteByte((byte)'X');
                 }
                 else
                 {
                     destination.WriteByte((byte)'G');
-                    destination.WriteByte((byte)'C');
+                    destination.WriteByte((byte)'B');
                     destination.WriteByte((byte)'I');
                     destination.WriteByte((byte)'X');
                 }

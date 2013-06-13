@@ -77,7 +77,7 @@ namespace VrSharp.PvrTexture
                 get { return PixelCodec.Bpp; }
             }
 
-            public override bool ContainsMipmaps
+            public override bool HasMipmaps
             {
                 get { return true; }
             }
@@ -209,7 +209,7 @@ namespace VrSharp.PvrTexture
                 get { return 1024; }
             }
 
-            public override bool ContainsMipmaps
+            public override bool HasMipmaps
             {
                 get { return true; }
             }
@@ -692,7 +692,7 @@ namespace VrSharp.PvrTexture
                 get { return 256; }
             }
 
-            public override bool ContainsMipmaps
+            public override bool HasMipmaps
             {
                 get { return true; }
             }

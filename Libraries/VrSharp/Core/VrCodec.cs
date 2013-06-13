@@ -73,7 +73,7 @@ namespace VrSharp
         }
 
         // Returns if the texture has mipmaps.
-        public virtual bool ContainsMipmaps
+        public virtual bool HasMipmaps
         {
             get { return false; }
         }

@@ -53,11 +53,11 @@ namespace VrConvert
                 }
                 if (hasMipmaps)
                 {
-                    GvrTextureEncoder.DataFlags |= GvrDataFlags.Mipmaps;
+                    GvrTextureEncoder.HasMipmaps = true;
                 }
                 if (hasExternalPalette)
                 {
-                    GvrTextureEncoder.DataFlags |= GvrDataFlags.ExternalPalette;
+                    GvrTextureEncoder.NeedsExternalPalette = true;
                 }
 
                 // Output information to the console
