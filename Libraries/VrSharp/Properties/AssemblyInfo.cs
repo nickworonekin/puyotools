@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Vr Sharp")]
-[assembly: AssemblyDescription(".NET library for decoding and encoding Gvr/Pvr/Svr textures.")]
+[assembly: AssemblyTitle("VrSharp")]
+[assembly: AssemblyDescription("A library for decoding and encoding GVR, PVR, and SVR textures.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Puyo Tools Team")]
+[assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("VrSharp.Properties")]
-[assembly: AssemblyCopyright("Copyright © Puyo Tools Team 2009")]
+[assembly: AssemblyCopyright("Copyright © Nick Woronekin")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -29,5 +29,5 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("2.0.0.0")]
+[assembly: AssemblyFileVersion("2.0.0.0")]

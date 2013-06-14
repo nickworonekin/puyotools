@@ -15,6 +15,8 @@ namespace PuyoTools.GUI
 {
     public partial class TextureViewer : Form
     {
+        private Stream textureStream;
+
         public TextureViewer()
         {
             InitializeComponent();
@@ -102,22 +104,27 @@ namespace PuyoTools.GUI
             DialogResult result = ofd.ShowDialog();
             if (result == DialogResult.OK)
             {
-                Stream data = File.OpenRead(ofd.FileName);
+                if (textureStream != null)
+                {
+                    textureStream.Close();
+                }
+
+                textureStream = File.OpenRead(ofd.FileName);
 
                 // Let's determine first if it is a texture
                 TextureFormat textureFormat;
 
-                textureFormat = Texture.GetFormat(data, (int)data.Length, ofd.SafeFileName);
+                textureFormat = Texture.GetFormat(textureStream, (int)textureStream.Length, ofd.SafeFileName);
 
                 if (textureFormat == TextureFormat.Unknown)
                 {
                     // It's not a texture. Maybe it's compressed?
-                    CompressionFormat compressionFormat = Compression.GetFormat(data, (int)data.Length, ofd.SafeFileName);
+                    CompressionFormat compressionFormat = Compression.GetFormat(textureStream, (int)textureStream.Length, ofd.SafeFileName);
                     if (compressionFormat != CompressionFormat.Unknown)
                     {
                         // The file is compressed! Let's decompress it and then try to determine if it is a texture
                         MemoryStream decompressedData = new MemoryStream();
-                        Compression.Decompress(data, decompressedData, (int)data.Length, compressionFormat);
+                        Compression.Decompress(textureStream, decompressedData, (int)textureStream.Length, compressionFormat);
                         decompressedData.Position = 0;
 
                         // Now with this decompressed data, let's determine if it is a texture
@@ -126,7 +133,7 @@ namespace PuyoTools.GUI
                         if (textureFormat != TextureFormat.Unknown)
                         {
                             // It appears to be a texture. Set data to the decompressed data
-                            data = decompressedData;
+                            textureStream = decompressedData;
                         }
                         else
                         {
@@ -144,7 +151,7 @@ namespace PuyoTools.GUI
                 // This is a texture. Let's open it.
                 try
                 {
-                    OpenTexture(data, (int)data.Length, ofd.SafeFileName, textureFormat);
+                    OpenTexture(textureStream, (int)textureStream.Length, ofd.SafeFileName, textureFormat);
                 }
                 catch (TextureNeedsPaletteException)
                 {
@@ -154,14 +161,14 @@ namespace PuyoTools.GUI
                     if (File.Exists(paletteName))
                     {
                         // Looks like the palette file exists. Let's load that with the texture
-                        data.Position = 0;
+                        textureStream.Position = 0;
                         using (FileStream paletteData = File.OpenRead(paletteName))
                         {
                             TextureReaderSettings textureSettings = new TextureReaderSettings();
                             textureSettings.PaletteStream = paletteData;
                             textureSettings.PaletteLength = (int)paletteData.Length;
 
-                            OpenTexture(data, (int)data.Length, ofd.SafeFileName, textureSettings, textureFormat);
+                            OpenTexture(textureStream, (int)textureStream.Length, ofd.SafeFileName, textureSettings, textureFormat);
                         }
                     }
                 }

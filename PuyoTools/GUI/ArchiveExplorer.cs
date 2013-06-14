@@ -18,8 +18,10 @@ namespace PuyoTools.GUI
 {
     public partial class ArchiveExplorer : Form
     {
-        private Stack<ArchiveInfo> OpenedArchives;
-        private List<string> OpenedArchiveNames;
+        private Stream archiveStream;
+
+        private Stack<ArchiveInfo> openedArchives;
+        private List<string> openedArchiveNames;
 
         public ArchiveExplorer()
         {
@@ -40,8 +42,8 @@ namespace PuyoTools.GUI
             ArchiveExplorer_ClientSizeChanged(null, null);
 
             // Create the OpenedArchives stack and the name list
-            OpenedArchives = new Stack<ArchiveInfo>();
-            OpenedArchiveNames = new List<string>();
+            openedArchives = new Stack<ArchiveInfo>();
+            openedArchiveNames = new List<string>();
         }
 
         private void OpenArchive(Stream data, int length, string fname, ArchiveFormat format)
@@ -53,8 +55,8 @@ namespace PuyoTools.GUI
             info.Format = format;
             info.Archive = archive;
 
-            OpenedArchives.Push(info);
-            OpenedArchiveNames.Add((fname == String.Empty ? "Unnamed" : fname));
+            openedArchives.Push(info);
+            openedArchiveNames.Add((fname == String.Empty ? "Unnamed" : fname));
 
             Populate(info);
         }
@@ -72,7 +74,7 @@ namespace PuyoTools.GUI
             }
             catch (TextureNeedsPaletteException)
             {
-                ArchiveInfo info = OpenedArchives.Peek();
+                ArchiveInfo info = openedArchives.Peek();
 
                 // Seems like we need a palette for this texture. Let's try to find one.
                 string textureName = Path.GetFileNameWithoutExtension(fname) + Texture.Formats[format].PaletteFileExtension;
@@ -127,7 +129,7 @@ namespace PuyoTools.GUI
             listView.Items.Clear();
 
             // Add a blank row if this is not the top archive
-            if (OpenedArchives.Count > 1) // Remember, we just added an entry
+            if (openedArchives.Count > 1) // Remember, we just added an entry
             {
                 listView.Items.Add(new ListViewItem(new string[] {
                     "..",
@@ -151,9 +153,9 @@ namespace PuyoTools.GUI
             numFilesLabel.Text = info.Archive.Files.Length.ToString();
             archiveFormatLabel.Text = Archive.Formats[info.Format].Name;
 
-            archiveNameLabel.Text = OpenedArchiveNames[0];
-            for (int i = 1; i < OpenedArchiveNames.Count; i++)
-                archiveNameLabel.Text += " / " + OpenedArchiveNames[i];
+            archiveNameLabel.Text = openedArchiveNames[0];
+            for (int i = 1; i < openedArchiveNames.Count; i++)
+                archiveNameLabel.Text += " / " + openedArchiveNames[i];
         }
 
         private string FormatFileLength(long bytes)
@@ -188,31 +190,36 @@ namespace PuyoTools.GUI
             DialogResult result = ofd.ShowDialog();
             if (result == DialogResult.OK)
             {
-                FileStream data = File.OpenRead(ofd.FileName);
+                if (archiveStream != null)
+                {
+                    archiveStream.Close();
+                }
+
+                archiveStream = File.OpenRead(ofd.FileName);
 
                 // Let's determine first if it is an archive
                 ArchiveFormat archiveFormat;
 
-                archiveFormat = Archive.GetFormat(data, (int)data.Length, ofd.SafeFileName);
+                archiveFormat = Archive.GetFormat(archiveStream, (int)archiveStream.Length, ofd.SafeFileName);
                 if (archiveFormat != ArchiveFormat.Unknown)
                 {
                     // This is an archive. Let's open it.
-                    OpenedArchives.Clear();
-                    OpenedArchiveNames.Clear();
+                    openedArchives.Clear();
+                    openedArchiveNames.Clear();
 
-                    OpenArchive(data, (int)data.Length, ofd.SafeFileName, archiveFormat);
+                    OpenArchive(archiveStream, (int)archiveStream.Length, ofd.SafeFileName, archiveFormat);
 
                     archiveInfoPanel.Visible = true;
                     return;
                 }
 
                 // It's not an archive. Maybe it's compressed?
-                CompressionFormat compressionFormat = Compression.GetFormat(data, (int)data.Length, ofd.SafeFileName);
+                CompressionFormat compressionFormat = Compression.GetFormat(archiveStream, (int)archiveStream.Length, ofd.SafeFileName);
                 if (compressionFormat != CompressionFormat.Unknown)
                 {
                     // The file is compressed! Let's decompress it and then try to determine if it is an archive
                     MemoryStream decompressedData = new MemoryStream();
-                    Compression.Decompress(data, decompressedData, (int)data.Length, compressionFormat);
+                    Compression.Decompress(archiveStream, decompressedData, (int)archiveStream.Length, compressionFormat);
                     decompressedData.Position = 0;
 
                     // Now with this decompressed data, let's determine if it is an archive
@@ -220,8 +227,8 @@ namespace PuyoTools.GUI
                     if (archiveFormat != ArchiveFormat.Unknown)
                     {
                         // This is an archive. Let's open it.
-                        OpenedArchives.Clear();
-                        OpenedArchiveNames.Clear();
+                        openedArchives.Clear();
+                        openedArchiveNames.Clear();
 
                         OpenArchive(decompressedData, (int)decompressedData.Length, ofd.SafeFileName, archiveFormat);
 
@@ -236,15 +243,15 @@ namespace PuyoTools.GUI
         {
             int index = listView.SelectedIndices[0];
 
-            if (OpenedArchives.Count > 1)
+            if (openedArchives.Count > 1)
             {
                 // Do we want to go to the parent archive?
                 if (index == 0)
                 {
-                    OpenedArchives.Pop();
-                    OpenedArchiveNames.RemoveAt(OpenedArchiveNames.Count - 1);
+                    openedArchives.Pop();
+                    openedArchiveNames.RemoveAt(openedArchiveNames.Count - 1);
 
-                    Populate(OpenedArchives.Peek());
+                    Populate(openedArchives.Peek());
 
                     return;
                 }
@@ -255,7 +262,7 @@ namespace PuyoTools.GUI
                 }
             }
 
-            ArchiveEntry entry = OpenedArchives.Peek().Archive.GetFile(index);
+            ArchiveEntry entry = openedArchives.Peek().Archive.GetFile(index);
             entry.Stream.Position = entry.Offset;
 
             // Let's determine first if it is an archive or a texture
@@ -325,7 +332,7 @@ namespace PuyoTools.GUI
             // One entry select
             else if (listView.SelectedIndices.Count == 1)
             {
-                ArchiveReader archive = OpenedArchives.Peek().Archive;
+                ArchiveReader archive = openedArchives.Peek().Archive;
                 int index = listView.SelectedIndices[0];
 
                 SaveFileDialog sfd = new SaveFileDialog();
@@ -336,7 +343,7 @@ namespace PuyoTools.GUI
                 if (sfd.ShowDialog() == DialogResult.OK)
                 {
                     ArchiveEntry entry;
-                    if (OpenedArchives.Count > 1)
+                    if (openedArchives.Count > 1)
                     {
                         entry = archive.GetFile(index - 1);
                     }
@@ -362,13 +369,13 @@ namespace PuyoTools.GUI
 
                 if (fbd.ShowDialog() == DialogResult.OK)
                 {
-                    ArchiveReader archive = OpenedArchives.Peek().Archive;
+                    ArchiveReader archive = openedArchives.Peek().Archive;
                     for (int i = 0; i < listView.SelectedIndices.Count; i++)
                     {
                         int index = listView.SelectedIndices[i];
 
                         ArchiveEntry entry;
-                        if (OpenedArchives.Count > 1)
+                        if (openedArchives.Count > 1)
                         {
                             entry = archive.GetFile(index - 1);
                         }
@@ -398,7 +405,7 @@ namespace PuyoTools.GUI
 
         private void extractAllToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            ArchiveReader archive = OpenedArchives.Peek().Archive;
+            ArchiveReader archive = openedArchives.Peek().Archive;
 
             // No files in the archive
             if (archive.Files.Length == 0)

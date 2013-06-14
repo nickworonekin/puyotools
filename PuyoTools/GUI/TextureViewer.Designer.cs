@@ -17,6 +17,10 @@
             {
                 components.Dispose();
             }
+            if (disposing && (textureStream != null))
+            {
+                textureStream.Dispose();
+            }
             base.Dispose(disposing);
         }
 

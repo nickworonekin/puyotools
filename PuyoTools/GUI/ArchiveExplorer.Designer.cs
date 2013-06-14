@@ -17,6 +17,10 @@
             {
                 components.Dispose();
             }
+            if (disposing && (archiveStream != null))
+            {
+                archiveStream.Dispose();
+            }
             base.Dispose(disposing);
         }
 

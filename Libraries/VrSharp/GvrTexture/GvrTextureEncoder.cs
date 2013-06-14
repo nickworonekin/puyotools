@@ -1,12 +1,131 @@
 ﻿using System;
-using System.IO;
-using System.Text;
 using System.Drawing;
+using System.IO;
 
 namespace VrSharp.GvrTexture
 {
     public class GvrTextureEncoder : VrTextureEncoder
     {
+        #region Texture Properties
+        /// <summary>
+        /// Indicates the magic code used for the GBIX header. This only matters if IncludeGbixHeader is true. The default value is GvrGbixType.Gbix.
+        /// </summary>
+        public GvrGbixType GbixType
+        {
+            get
+            {
+                if (!initalized)
+                {
+                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
+                }
+
+                return gbixType;
+            }
+            set
+            {
+                if (!initalized)
+                {
+                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
+                }
+
+                gbixType = value;
+            }
+        }
+        protected GvrGbixType gbixType;
+
+        /// <summary>
+        /// The texture's data flags. Can contain one or more of the following:
+        /// <para>- GvrDataFlags.Mipmaps</para>
+        /// <para>- GvrDataFlags.ExternalPalette</para>
+        /// <para>- GvrDataFlags.InternalPalette</para>
+        /// </summary>
+        public GvrDataFlags DataFlags
+        {
+            get
+            {
+                if (!initalized)
+                {
+                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
+                }
+
+                return dataFlags;
+            }
+        }
+        protected GvrDataFlags dataFlags;
+
+        /// <summary>
+        /// The texture's pixel format. This only applies to palettized textures.
+        /// </summary>
+        public GvrPixelFormat PixelFormat
+        {
+            get
+            {
+                if (!initalized)
+                {
+                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
+                }
+
+                return pixelFormat;
+            }
+        }
+        private GvrPixelFormat pixelFormat;
+
+        /// <summary>
+        /// The texture's data format.
+        /// </summary>
+        public GvrDataFormat DataFormat
+        {
+            get
+            {
+                if (!initalized)
+                {
+                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
+                }
+
+                return dataFormat;
+            }
+        }
+        private GvrDataFormat dataFormat;
+
+        /// <summary>
+        /// Gets or sets if this texture has mipmaps. This only applies to 4-bit or 16-bit non-palettized textures.
+        /// </summary>
+        public new bool HasMipmaps
+        {
+            get
+            {
+                if (!initalized)
+                {
+                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
+                }
+
+                return ((dataFlags & GvrDataFlags.Mipmaps) != 0);
+            }
+            set
+            {
+                if (!initalized)
+                {
+                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
+                }
+
+                // Mipmaps can only be used on 4-bit or 16-bit non-palettized textures
+                if (dataCodec.PaletteEntries != 0 || (dataCodec.Bpp != 4 && dataCodec.Bpp != 16))
+                    return;
+
+                if (value)
+                {
+                    // Set mipmaps to true
+                    dataFlags |= GvrDataFlags.Mipmaps;
+                }
+                else
+                {
+                    // Set mipmaps to false
+                    dataFlags &= ~GvrDataFlags.Mipmaps;
+                }
+            }
+        }
+        #endregion
+
         #region Constructors & Initalizers
         /// <summary>
         /// Opens a texture to encode from a file.
@@ -141,126 +260,6 @@ namespace VrSharp.GvrTexture
             }
 
             return true;
-        }
-        #endregion
-
-        #region Texture Properties
-        /// <summary>
-        /// Indicates the magic code used for the GBIX header. This only matters if IncludeGbixHeader is true. The default value is GvrGbixType.Gbix.
-        /// </summary>
-        public GvrGbixType GbixType
-        {
-            get
-            {
-                if (!initalized)
-                {
-                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
-                }
-
-                return gbixType;
-            }
-            set
-            {
-                if (!initalized)
-                {
-                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
-                }
-
-                gbixType = value;
-            }
-        }
-        protected GvrGbixType gbixType;
-
-        /// <summary>
-        /// The texture's data flags. Can contain one or more of the following:
-        /// <para>- GvrDataFlags.Mipmaps</para>
-        /// <para>- GvrDataFlags.ExternalPalette</para>
-        /// <para>- GvrDataFlags.InternalPalette</para>
-        /// </summary>
-        public GvrDataFlags DataFlags
-        {
-            get
-            {
-                if (!initalized)
-                {
-                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
-                }
-
-                return dataFlags;
-            }
-        }
-        protected GvrDataFlags dataFlags;
-
-        /// <summary>
-        /// The texture's pixel format. This only applies to palettized textures.
-        /// </summary>
-        public GvrPixelFormat PixelFormat
-        {
-            get
-            {
-                if (!initalized)
-                {
-                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
-                }
-
-                return pixelFormat;
-            }
-        }
-        private GvrPixelFormat pixelFormat;
-
-        /// <summary>
-        /// The texture's data format.
-        /// </summary>
-        public GvrDataFormat DataFormat
-        {
-            get
-            {
-                if (!initalized)
-                {
-                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
-                }
-
-                return dataFormat;
-            }
-        }
-        private GvrDataFormat dataFormat;
-
-        /// <summary>
-        /// Gets or sets if this texture has mipmaps. This only applies to 4-bit or 16-bit non-palettized textures.
-        /// </summary>
-        public new bool HasMipmaps
-        {
-            get
-            {
-                if (!initalized)
-                {
-                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
-                }
-
-                return ((dataFlags & GvrDataFlags.Mipmaps) != 0);
-            }
-            set
-            {
-                if (!initalized)
-                {
-                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
-                }
-
-                // Mipmaps can only be used on a 4-bit or 16-bit non-palettized texture
-                if (dataCodec.PaletteEntries != 0 || (dataCodec.Bpp != 4 && dataCodec.Bpp != 16))
-                    return;
-
-                if (value)
-                {
-                    // Set mipmaps to true
-                    dataFlags |= GvrDataFlags.Mipmaps;
-                }
-                else
-                {
-                    // Set mipmaps to false
-                    dataFlags &= ~GvrDataFlags.Mipmaps;
-                }
-            }
         }
         #endregion
 
