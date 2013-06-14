@@ -229,6 +229,7 @@ namespace VrSharp
             using (FileStream destination = File.Create(path))
             {
                 MemoryStream textureStream = EncodeTexture();
+                textureStream.Position = 0;
                 PTStream.CopyTo(textureStream, destination);
             }
         }
@@ -245,6 +246,7 @@ namespace VrSharp
             }
 
             MemoryStream textureStream = EncodeTexture();
+            textureStream.Position = 0;
             PTStream.CopyTo(textureStream, destination);
         }
 

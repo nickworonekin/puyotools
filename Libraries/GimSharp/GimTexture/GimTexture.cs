@@ -91,91 +91,6 @@ namespace GimSharp
             }
         }
         private GimDataFormat dataFormat;
-
-        /// <summary>
-        /// Returns if the texture has metadata.
-        /// </summary>
-        public bool HasMetadata
-        {
-            get
-            {
-                if (!initalized)
-                {
-                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
-                }
-
-                return hasMetadata;
-            }
-        }
-        private bool hasMetadata;
-
-        /// <summary>
-        /// Returns the original filename in the metadata.
-        /// </summary>
-        public string MetadataOriginalFilename
-        {
-            get
-            {
-                if (!initalized)
-                {
-                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
-                }
-
-                return metadataOriginalFilename;
-            }
-        }
-        private string metadataOriginalFilename;
-
-        /// <summary>
-        /// Returns the user in the metadata.
-        /// </summary>
-        public string MetadataUser
-        {
-            get
-            {
-                if (!initalized)
-                {
-                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
-                }
-
-                return metadataUser;
-            }
-        }
-        private string metadataUser;
-
-        /// <summary>
-        /// Returns the timestamp in the metadata.
-        /// </summary>
-        public DateTime MetadataTimestamp
-        {
-            get
-            {
-                if (!initalized)
-                {
-                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
-                }
-
-                return DateTime.Parse(metadataTimestamp);
-            }
-        }
-        private string metadataTimestamp;
-
-        /// <summary>
-        /// Returns the program in the metadata.
-        /// </summary>
-        public string MetadataProgram
-        {
-            get
-            {
-                if (!initalized)
-                {
-                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
-                }
-
-                return metadataProgram;
-            }
-        }
-        private string metadataProgram;
         #endregion
 
         #region Constructors & Initalizers
@@ -247,7 +162,7 @@ namespace GimSharp
 
         private bool Initalize()
         {
-            // Check to see if what we are dealing with is a PVR texture
+            // Check to see if what we are dealing with is a GIM texture
             if (!Is(encodedData))
                 return false;
 
@@ -256,12 +171,7 @@ namespace GimSharp
             paletteOffset = -1;
             dataOffset = -1;
 
-            // Set the default values for metadata
             hasMetadata = false;
-            metadataOriginalFilename = String.Empty;
-            metadataUser = String.Empty;
-            metadataTimestamp = "";
-            metadataProgram = String.Empty;
 
             // A GIM is constructed of different chunks. They do not necessarily have to be in order.
             int eofOffset = -1;
@@ -341,7 +251,25 @@ namespace GimSharp
                 // Metadata chunk
                 else if (encodedData[offset] == 0xFF)
                 {
-                    // Skip this chunk. It's not necessary for decoding this texture.
+                    // Read in some metadata
+                    hasMetadata = true;
+                    metadata = new GimMetadata();
+
+                    int metadataOffset = 0x10;
+
+                    metadata.OriginalFilename = PTMethods.StringFromBytes(encodedData, offset + metadataOffset);
+                    metadataOffset += metadata.OriginalFilename.Length + 1;
+
+                    metadata.User = PTMethods.StringFromBytes(encodedData, offset + metadataOffset);
+                    metadataOffset += metadata.User.Length + 1;
+
+                    metadata.Timestamp = PTMethods.StringFromBytes(encodedData, offset + metadataOffset);
+                    metadataOffset += metadata.Timestamp.Length + 1;
+
+                    metadata.Program = PTMethods.StringFromBytes(encodedData, offset + metadataOffset);
+                    metadataOffset += metadata.Program.Length + 1;
+
+                    // Go to the next chunk
                     offset += BitConverter.ToInt32(encodedData, offset + 0x08);
                 }
 
@@ -388,6 +316,65 @@ namespace GimSharp
         public bool Initalized
         {
             get { return initalized; }
+        }
+        #endregion
+
+        #region Metadata
+        /// <summary>
+        /// Returns if the texture has metadata.
+        /// </summary>
+        public bool HasMetadata
+        {
+            get
+            {
+                if (!initalized)
+                {
+                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
+                }
+
+                return hasMetadata;
+            }
+        }
+        private bool hasMetadata;
+
+        /// <summary>
+        /// Returns the metadata of the texture. If the texture has no metadata, this will return null.
+        /// </summary>
+        public GimMetadata Metadata
+        {
+            get
+            {
+                if (!initalized)
+                {
+                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
+                }
+
+                return metadata;
+            }
+        }
+        private GimMetadata metadata;
+
+        public class GimMetadata
+        {
+            /// <summary>
+            /// Returns the original filename of the texture specified in the metadata.
+            /// </summary>
+            public string OriginalFilename { get; internal set; }
+
+            /// <summary>
+            /// Returns the user that created this texture as specified in the metadata.
+            /// </summary>
+            public string User { get; internal set; }
+
+            /// <summary>
+            /// Returns the timestamp in the metadata. The timestamp is in the format of "ddd MMM d HH:mm:ss yyyy".
+            /// </summary>
+            public string Timestamp { get; internal set; }
+
+            /// <summary>
+            /// Returns the program used to create this texture as specified in the metadata.
+            /// </summary>
+            public string Program { get; internal set; }
         }
         #endregion
 

@@ -316,6 +316,16 @@ namespace GimSharp
         /// </summary>
         /// <param name="source">The stream to write to.</param>
         /// <param name="str">The string to write.</param>
+        public static void WriteCString(Stream source, string str)
+        {
+            WriteCString(source, str, str.Length + 1, Encoding.ASCII);
+        }
+
+        /// <summary>
+        /// Writes an ASCII encoded null terminated C string to a stream.
+        /// </summary>
+        /// <param name="source">The stream to write to.</param>
+        /// <param name="str">The string to write.</param>
         /// <param name="length">Number of bytes to write, including the null terminator and any null bytes.</param>
         public static void WriteCString(Stream source, string str, int length)
         {

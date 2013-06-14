@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace GimSharp
 {
@@ -52,6 +53,22 @@ namespace GimSharp
         public static byte[] GetBytesBE(ushort value)
         {
             return new byte[] { (byte)(value >> 8), (byte)(value & 0xFF) };
+        }
+
+        public static string StringFromBytes(byte[] source, int index)
+        {
+            int length = 0;
+            while (source[index + length] != 0)
+            {
+                length++;
+            }
+
+            if (length == 0)
+            {
+                return String.Empty;
+            }
+
+            return Encoding.ASCII.GetString(source, index, length);
         }
     }
 }
