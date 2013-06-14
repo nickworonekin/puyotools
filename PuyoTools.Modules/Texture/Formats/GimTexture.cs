@@ -3,8 +3,8 @@ using System.IO;
 using System.Drawing;
 using System.Drawing.Imaging;
 
-using GimSharp;
-using ImgSharp;
+//using GimSharp;
+//using ImgSharp;
 
 namespace PuyoTools.Modules.Texture
 {
@@ -39,15 +39,10 @@ namespace PuyoTools.Modules.Texture
         /// <param name="settings">Settings to use when decoding.</param>
         public override void Read(Stream source, Stream destination, int length, TextureReaderSettings settings)
         {
-            // Temporary until the GimSharp rewrite is done and complete.
-            byte[] buffer = new byte[length];
-            source.Read(buffer, 0, length);
+            // Reading GIM textures is done through GimSharp, so just pass it to that
+            GimSharp.GimTexture texture = new GimSharp.GimTexture(source, length);
 
-            GimFile textureInput = new GimFile(buffer);
-            ImgFile textureOutput = new ImgFile(textureInput.GetDecompressedData(), textureInput.GetWidth(), textureInput.GetHeight(), ImageFormat.Png);
-
-            buffer = textureOutput.GetCompressedData();
-            destination.Write(buffer, 0, buffer.Length);
+            texture.Save(destination);
         }
 
         public override void Write(byte[] source, long offset, Stream destination, int length, string fname)
@@ -57,7 +52,7 @@ namespace PuyoTools.Modules.Texture
 
         public override bool Is(Stream source, int length, string fname)
         {
-            return (length > 12 && PTStream.Contains(source, 0, new byte[] { (byte)'M', (byte)'I', (byte)'G', (byte)'.', (byte)'0', (byte)'0', (byte)'.', (byte)'1', (byte)'P', (byte)'S', (byte)'P', 0 }));
+            return (length > 24 && GimSharp.GimTexture.Is(source, length));
         }
     }
 }

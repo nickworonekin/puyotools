@@ -196,7 +196,7 @@ namespace VrSharp
 
             byte[] data = DecodeTexture();
 
-            Bitmap img = new Bitmap(TextureWidth, TextureHeight, PixelFormat.Format32bppArgb);
+            Bitmap img = new Bitmap(textureWidth, textureHeight, PixelFormat.Format32bppArgb);
             BitmapData bitmapData = img.LockBits(new Rectangle(0, 0, img.Width, img.Height), ImageLockMode.WriteOnly, img.PixelFormat);
             Marshal.Copy(data, 0, bitmapData.Scan0, data.Length);
             img.UnlockBits(bitmapData);

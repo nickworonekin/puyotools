@@ -53,14 +53,24 @@
     <Reference Include="System.Drawing" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GimCodec.cs" />
-    <Compile Include="GimDataDecoder.cs" />
-    <Compile Include="GimExceptions.cs" />
-    <Compile Include="GimFile.cs" />
-    <Compile Include="GimFormats.cs" />
-    <Compile Include="GimPaletteDecoder.cs" />
-    <Compile Include="GimSwizzle.cs" />
-    <Compile Include="ImageConverter.cs" />
-    <Compile Include="ImgFile.cs" />
+    <Compile Include="GimTexture\GimDataCodec.cs" />
+    <Compile Include="GimTexture\GimExceptions.cs" />
+    <Compile Include="GimTexture\GimFormats.cs" />
+    <Compile Include="GimTexture\GimPixelCodec.cs" />
+    <Compile Include="GimTexture\GimTexture.cs" />
+    <Compile Include="GimTexture\GimTextureEncoder.cs" />
+    <Compile Include="Core\PTMethods.cs" />
+    <Compile Include="Core\PTStream.cs" />
+    <Compile Include="WuQuantizer\Box.cs" />
+    <Compile Include="WuQuantizer\ColorData.cs" />
+    <Compile Include="WuQuantizer\CubeCut.cs" />
+    <Compile Include="WuQuantizer\IWuQuantizer.cs" />
+    <Compile Include="WuQuantizer\Lookup.cs" />
+    <Compile Include="WuQuantizer\LookupData.cs" />
+    <Compile Include="WuQuantizer\Pixel.cs" />
+    <Compile Include="WuQuantizer\QuantizationException.cs" />
+    <Compile Include="WuQuantizer\QuantizedPalette.cs" />
+    <Compile Include="WuQuantizer\WuQuantizer.cs" />
+    <Compile Include="WuQuantizer\WuQuantizerBase.cs" />
   </ItemGroup>
 </Project>
