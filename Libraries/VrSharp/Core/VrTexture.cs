@@ -24,6 +24,22 @@ namespace VrSharp
 
         #region Texture Properties
         /// <summary>
+        /// Returns if this texture has a global index.
+        /// </summary>
+        public bool HasGlobalIndex
+        {
+            get
+            {
+                if (!initalized)
+                {
+                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
+                }
+
+                return gbixOffset != -1;
+            }
+        }
+
+        /// <summary>
         /// The texture's global index, or 0 if this texture does not have a global index defined.
         /// </summary>
         public uint GlobalIndex

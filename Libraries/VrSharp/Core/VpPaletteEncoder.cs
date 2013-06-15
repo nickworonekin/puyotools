@@ -22,7 +22,7 @@ namespace VrSharp
         }
         #endregion
 
-        #region Get Texture
+        #region Palette Retrieval
         /// <summary>
         /// Returns the encoded palette as a byte array.
         /// </summary>
@@ -49,8 +49,9 @@ namespace VrSharp
         {
             using (FileStream destination = File.Create(path))
             {
-                MemoryStream textureStream = EncodePalette();
-                PTStream.CopyTo(textureStream, destination);
+                MemoryStream paletteStream = EncodePalette();
+                paletteStream.Position = 0;
+                PTStream.CopyTo(paletteStream, destination);
             }
         }
 
@@ -60,8 +61,9 @@ namespace VrSharp
         /// <param name="destination">The stream to save the texture to.</param>
         public void Save(Stream destination)
         {
-            MemoryStream textureStream = EncodePalette();
-            PTStream.CopyTo(textureStream, destination);
+            MemoryStream paletteStream = EncodePalette();
+            paletteStream.Position = 0;
+            PTStream.CopyTo(paletteStream, destination);
         }
         #endregion
 

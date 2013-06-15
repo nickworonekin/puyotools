@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Drawing;
 
 using GimSharp;
 
@@ -70,8 +69,10 @@ namespace GimConvert
                 // Get arguments
                 for (int i = 2; i < args.Length; i++)
                 {
+                    string arg = args[i].ToLower();
+
                     // Change the output path
-                    if (args[i] == "-o" && args.Length > i + 1)
+                    if (arg == "-o" && args.Length > i + 1)
                     {
                         outPath = args[i + 1];
                         i++;
@@ -83,7 +84,7 @@ namespace GimConvert
                 // Was this texture initalized successfully
                 if (!texture.Initalized)
                 {
-                    Console.WriteLine("Error: This is either not a valid GIM texture, or it is an unsupported one.");
+                    Console.WriteLine("Error: This is not a valid GIM texture, or it is an unsupported one.");
                     return;
                 }
 
@@ -123,57 +124,6 @@ namespace GimConvert
 
                 string outPath = Path.ChangeExtension(args[1], ".gim");
 
-                bool hasMetadata = true;
-                string metadataOriginalFilename = Path.GetFileName(args[1]);
-                string metadataUser = Environment.UserName;
-                string metadataTimestamp = null;
-                string metadataProgram = null;
-
-                // Get arguments
-                for (int i = 4; i < args.Length; i++)
-                {
-                    // Change the output path
-                    if (args[i] == "-o" && args.Length > i + 1)
-                    {
-                        outPath = args[i + 1];
-                        i++;
-                    }
-
-                    // No metadata
-                    if (args[i] == "-nometa")
-                    {
-                        hasMetadata = false;
-                    }
-
-                    // Metadata original filename
-                    if (args[i] == "-metafile" && args.Length > i + 1)
-                    {
-                        metadataOriginalFilename = args[i + 1];
-                        i++;
-                    }
-
-                    // Metadata user
-                    if (args[i] == "-metauser" && args.Length > i + 1)
-                    {
-                        metadataUser = args[i + 1];
-                        i++;
-                    }
-
-                    // Metadata timestamp
-                    if (args[i] == "-metatimestamp" && args.Length > i + 1)
-                    {
-                        metadataTimestamp = args[i + 1];
-                        i++;
-                    }
-
-                    // Metadata program
-                    if (args[i] == "-metaprogram" && args.Length > i + 1)
-                    {
-                        metadataProgram = args[i + 1];
-                        i++;
-                    }
-                }
-
                 GimTextureEncoder texture = new GimTextureEncoder(args[1], StringToPaletteFormat(args[2]), StringToDataFormat(args[3]));
 
                 // Was this texture initalized successfully
@@ -183,17 +133,55 @@ namespace GimConvert
                     return;
                 }
 
-                // Set metadata
-                texture.HasMetadata = hasMetadata;
-                texture.Metadata.OriginalFilename = metadataOriginalFilename;
-                texture.Metadata.User = metadataUser;
-                if (metadataTimestamp != null)
+                texture.Metadata.OriginalFilename = Path.GetFileName(args[1]);
+                texture.Metadata.User = Environment.UserName;
+                texture.Metadata.Program = "GimConvert " + Version;
+
+                // Get arguments
+                for (int i = 4; i < args.Length; i++)
                 {
-                    texture.Metadata.Timestamp = metadataTimestamp;
-                }
-                if (metadataProgram != null)
-                {
-                    texture.Metadata.Program = metadataProgram;
+                    string arg = args[i].ToLower();
+
+                    // Change the output path
+                    if (args[i] == "-o" && args.Length > i + 1)
+                    {
+                        outPath = args[i + 1];
+                        i++;
+                    }
+
+                    // No metadata
+                    if (arg == "-nometa")
+                    {
+                        texture.HasMetadata = false;
+                    }
+
+                    // Metadata original filename
+                    if (arg == "-metafile" && args.Length > i + 1)
+                    {
+                        texture.Metadata.OriginalFilename = args[i + 1];
+                        i++;
+                    }
+
+                    // Metadata user
+                    if (arg == "-metauser" && args.Length > i + 1)
+                    {
+                        texture.Metadata.User = args[i + 1];
+                        i++;
+                    }
+
+                    // Metadata timestamp
+                    if (arg == "-metatimestamp" && args.Length > i + 1)
+                    {
+                        texture.Metadata.Timestamp = args[i + 1];
+                        i++;
+                    }
+
+                    // Metadata program
+                    if (arg == "-metaprogram" && args.Length > i + 1)
+                    {
+                        texture.Metadata.Program = args[i + 1];
+                        i++;
+                    }
                 }
 
                 Console.WriteLine("Texture Information");

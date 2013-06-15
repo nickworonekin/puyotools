@@ -162,6 +162,10 @@ namespace VrSharp.GvrTexture
 
                 dataCodec.PixelCodec = pixelCodec;
             }
+            else
+            {
+                pixelFormat = GvrPixelFormat.Unknown;
+            }
 
             // Set the palette and data offsets
             if (dataCodec.PaletteEntries == 0 || (dataCodec.PaletteEntries != 0 && (dataFlags & GvrDataFlags.ExternalPalette) != 0))

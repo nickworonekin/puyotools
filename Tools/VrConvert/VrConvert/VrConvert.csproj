@@ -52,12 +52,11 @@
     <Reference Include="System.Drawing" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GvrTexture.cs" />
+    <Compile Include="GvrConvert.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SvrTexture.cs" />
+    <Compile Include="PvrConvert.cs" />
+    <Compile Include="SvrConvert.cs" />
     <Compile Include="VrConvert.cs" />
-    <Compile Include="VrDecoder.cs" />
-    <Compile Include="VrEncoder.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\Libraries\VrSharp\VrSharp.csproj">
