@@ -199,7 +199,7 @@ namespace GimSharp
             public override byte[] Encode(byte[] source, int sourceIndex, int width, int height)
             {
                 // Destination data & index
-                byte[] destination = new byte[width * height * (PixelCodec.Bpp >> 3)];
+                byte[] destination = new byte[(width * height) >> 1];
                 int destinationIndex = 0;
 
                 // Encode texture data
@@ -273,7 +273,7 @@ namespace GimSharp
             public override byte[] Encode(byte[] source, int sourceIndex, int width, int height)
             {
                 // Destination data & index
-                byte[] destination = new byte[width * height * (PixelCodec.Bpp >> 3)];
+                byte[] destination = new byte[width * height];
                 int destinationIndex = 0;
 
                 // Encode texture data

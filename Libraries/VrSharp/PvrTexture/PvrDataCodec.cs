@@ -156,9 +156,9 @@ namespace VrSharp.PvrTexture
                 int[] twiddleMap = MakeTwiddleMap(width);
 
                 // Decode texture data
-                for (int x = 0; x < width; x += 2)
+                for (int y = 0; y < height; y += 2)
                 {
-                    for (int y = 0; y < height; y += 2)
+                    for (int x = 0; x < width; x += 2)
                     {
                         int index = source[sourceIndex + ((twiddleMap[x >> 1] << 1) | twiddleMap[y >> 1])] * 4;
 
@@ -241,9 +241,9 @@ namespace VrSharp.PvrTexture
                 int[] twiddleMap = MakeTwiddleMap(width);
 
                 // Decode texture data
-                for (int x = 0; x < width; x += 2)
+                for (int y = 0; y < height; y += 2)
                 {
-                    for (int y = 0; y < height; y += 2)
+                    for (int x = 0; x < width; x += 2)
                     {
                         int index = source[sourceIndex + ((twiddleMap[x >> 1] << 1) | twiddleMap[y >> 1])] * 4;
 
@@ -312,9 +312,9 @@ namespace VrSharp.PvrTexture
                 int[] twiddleMap = MakeTwiddleMap(size);
 
                 // Decode texture data
-                for (int x = 0; x < width; x += size)
+                for (int y = 0; y < height; y += size)
                 {
-                    for (int y = 0; y < height; y += size)
+                    for (int x = 0; x < width; x += size)
                     {
                         for (int y2 = 0; y2 < size; y2++)
                         {
@@ -351,9 +351,9 @@ namespace VrSharp.PvrTexture
                 int[] twiddleMap = MakeTwiddleMap(size);
 
                 // Encode texture data
-                for (int x = 0; x < width; x += size)
+                for (int y = 0; y < height; y += size)
                 {
-                    for (int y = 0; y < height; y += size)
+                    for (int x = 0; x < width; x += size)
                     {
                         for (int y2 = 0; y2 < size; y2++)
                         {
@@ -412,9 +412,9 @@ namespace VrSharp.PvrTexture
                 int[] twiddleMap = MakeTwiddleMap(size);
 
                 // Decode texture data
-                for (int x = 0; x < width; x += size)
+                for (int y = 0; y < height; y += size)
                 {
-                    for (int y = 0; y < height; y += size)
+                    for (int x = 0; x < width; x += size)
                     {
                         for (int y2 = 0; y2 < size; y2++)
                         {
@@ -557,9 +557,9 @@ namespace VrSharp.PvrTexture
                 int[] twiddleMap = MakeTwiddleMap(size);
 
                 // Decode texture data
-                for (int x = 0; x < width; x += size)
+                for (int y = 0; y < height; y += size)
                 {
-                    for (int y = 0; y < height; y += size)
+                    for (int x = 0; x < width; x += size)
                     {
                         for (int y2 = 0; y2 < size; y2++)
                         {
@@ -589,9 +589,9 @@ namespace VrSharp.PvrTexture
                 int[] twiddleMap = MakeTwiddleMap(size);
 
                 // Encode texture data
-                for (int x = 0; x < width; x += size)
+                for (int y = 0; y < height; y += size)
                 {
-                    for (int y = 0; y < height; y += size)
+                    for (int x = 0; x < width; x += size)
                     {
                         for (int y2 = 0; y2 < size; y2++)
                         {
@@ -639,9 +639,9 @@ namespace VrSharp.PvrTexture
                 int[] twiddleMap = MakeTwiddleMap(width);
 
                 // Decode texture data
-                for (int x = 0; x < width; x += 2)
+                for (int y = 0; y < height; y += 2)
                 {
-                    for (int y = 0; y < height; y += 2)
+                    for (int x = 0; x < width; x += 2)
                     {
                         int index = (source[sourceIndex + ((twiddleMap[x >> 1] << 1) | twiddleMap[y >> 1])] & 0x7F) * 4;
 
@@ -724,9 +724,9 @@ namespace VrSharp.PvrTexture
                 int[] twiddleMap = MakeTwiddleMap(width);
 
                 // Decode texture data
-                for (int x = 0; x < width; x += 2)
+                for (int y = 0; y < height; y += 2)
                 {
-                    for (int y = 0; y < height; y += 2)
+                    for (int x = 0; x < width; x += 2)
                     {
                         int index = (source[sourceIndex + ((twiddleMap[x >> 1] << 1) | twiddleMap[y >> 1])] & 0x3F) * 4;
 

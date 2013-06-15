@@ -167,6 +167,9 @@ namespace GimSharp
                 return false;
 
             // Initalize some things
+            paletteFormat = GimPaletteFormat.Unknown;
+            dataFormat = GimDataFormat.Unknown;
+
             paletteEntries = 0;
             paletteOffset = -1;
             dataOffset = -1;
@@ -290,6 +293,16 @@ namespace GimSharp
 
             // If all went well, offset should be equal to eofOffset
             if (offset != eofOffset)
+            {
+                return false;
+            }
+
+            // Make sure we have a data codec, and if this is a palettized format, a pixel codec
+            if (dataCodec == null)
+            {
+                return false;
+            }
+            if (dataCodec.PaletteEntries != 0 && pixelCodec == null)
             {
                 return false;
             }
