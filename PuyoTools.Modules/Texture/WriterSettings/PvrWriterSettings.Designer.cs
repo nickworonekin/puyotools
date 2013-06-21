@@ -89,7 +89,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(2, 60);
+            this.label3.Location = new System.Drawing.Point(3, 60);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(66, 13);
             this.label3.TabIndex = 4;
@@ -100,7 +100,7 @@
             this.HasGlobalIndexCheckBox.AutoSize = true;
             this.HasGlobalIndexCheckBox.Checked = true;
             this.HasGlobalIndexCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.HasGlobalIndexCheckBox.Location = new System.Drawing.Point(309, 60);
+            this.HasGlobalIndexCheckBox.Location = new System.Drawing.Point(309, 59);
             this.HasGlobalIndexCheckBox.Name = "HasGlobalIndexCheckBox";
             this.HasGlobalIndexCheckBox.Size = new System.Drawing.Size(15, 14);
             this.HasGlobalIndexCheckBox.TabIndex = 5;

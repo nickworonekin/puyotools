@@ -82,13 +82,20 @@ namespace PuyoTools.GUI
                 // But, we're going to do this in a try catch in case any errors happen.
                 try
                 {
-                    // Set the output path
-                    string outPath = Path.Combine(Path.GetDirectoryName(file), "Encoded Textures");
+                    // Set the output path and filename
+                    string outPath;
+                    if (settings.OutputToSourceDirectory)
+                    {
+                        outPath = Path.GetDirectoryName(file);
+                    }
+                    else
+                    {
+                        outPath = Path.Combine(Path.GetDirectoryName(file), "Encoded Textures");
+                    }
                     string outFname = Path.ChangeExtension(Path.GetFileName(file), Texture.Formats[settings.TextureFormat].FileExtension);
 
-                    // Set some things before we create the texture.
-                    settings.TextureSettings.DestinationDirectory = outPath;
-                    settings.TextureSettings.DestinationFileName = outFname;
+                    // Set the source path (really only used for GIM textures at the current moment).
+                    settings.TextureSettings.SourcePath = file;
 
                     MemoryStream buffer = new MemoryStream();
 
@@ -104,12 +111,12 @@ namespace PuyoTools.GUI
                         MemoryStream tempBuffer = new MemoryStream();
                         buffer.Position = 0;
 
-                        Compression.Compress(buffer, tempBuffer, (int)buffer.Length, settings.TextureSettings.DestinationFileName, settings.CompressionFormat);
+                        Compression.Compress(buffer, tempBuffer, (int)buffer.Length, outFname, settings.CompressionFormat);
 
                         buffer = tempBuffer;
                     }
 
-                    // Create the output path if it does not exist.
+                    // Create the output path it if it does not exist.
                     if (!Directory.Exists(outPath))
                     {
                         Directory.CreateDirectory(outPath);
@@ -119,6 +126,21 @@ namespace PuyoTools.GUI
                     using (FileStream destination = File.Create(Path.Combine(outPath, outFname)))
                     {
                         buffer.WriteTo(destination);
+                    }
+
+                    // Write out the palette file (if one was created along with the texture).
+                    if (settings.TextureSettings.PaletteStream != null)
+                    {
+                        using (FileStream destination = File.Create(Path.Combine(outPath, Path.ChangeExtension(outFname, Texture.Formats[settings.TextureFormat].PaletteFileExtension))))
+                        {
+                            settings.TextureSettings.PaletteStream.WriteTo(destination);
+                        }
+                    }
+
+                    // Delete the source if the user chose to
+                    if (settings.DeleteSource)
+                    {
+                        File.Delete(file);
                     }
                 }
                 catch
@@ -157,6 +179,8 @@ namespace PuyoTools.GUI
             // Set the settings for the tool
             Settings settings = new Settings();
             settings.TextureFormat = textureFormat;
+            settings.OutputToSourceDirectory = outputToSourceDirButton.Checked;
+            settings.DeleteSource = deleteSourceButton.Checked;
 
             if (compressionFormatBox.SelectedIndex != 0)
             {
@@ -181,6 +205,9 @@ namespace PuyoTools.GUI
             public TextureFormat TextureFormat;
             public CompressionFormat CompressionFormat;
             public TextureWriterSettings TextureSettings;
+
+            public bool OutputToSourceDirectory;
+            public bool DeleteSource;
         }
     }
 }

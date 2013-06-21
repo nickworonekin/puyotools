@@ -58,7 +58,7 @@ namespace PuyoTools.Modules.Texture
             texture.HasMetadata = writerSettings.HasMetadata;
             if (texture.HasMetadata)
             {
-                texture.Metadata.OriginalFilename = writerSettings.DestinationFileName;
+                texture.Metadata.OriginalFilename = Path.GetFileName(writerSettings.SourcePath);
                 texture.Metadata.User = Environment.UserName;
                 texture.Metadata.Program = "Puyo Tools";
             }

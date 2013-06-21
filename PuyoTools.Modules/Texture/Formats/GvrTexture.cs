@@ -90,13 +90,8 @@ namespace PuyoTools.Modules.Texture
             // If we have an external palette file, save it
             if (texture.NeedsExternalPalette)
             {
-                // Make sure the destination directory exists
-                if (!Directory.Exists(writerSettings.DestinationDirectory))
-                {
-                    Directory.CreateDirectory(writerSettings.DestinationDirectory);
-                }
-
-                texture.PaletteEncoder.Save(Path.Combine(writerSettings.DestinationDirectory, Path.ChangeExtension(writerSettings.DestinationFileName, PaletteFileExtension)));
+                settings.PaletteStream = new MemoryStream();
+                texture.PaletteEncoder.Save(settings.PaletteStream);
             }
 
             texture.Save(destination);

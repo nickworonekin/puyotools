@@ -42,7 +42,7 @@
             // 
             // GlobalIndexTextBox
             // 
-            this.GlobalIndexTextBox.Location = new System.Drawing.Point(84, 57);
+            this.GlobalIndexTextBox.Location = new System.Drawing.Point(84, 58);
             this.GlobalIndexTextBox.Name = "GlobalIndexTextBox";
             this.GlobalIndexTextBox.Size = new System.Drawing.Size(123, 20);
             this.GlobalIndexTextBox.TabIndex = 20;
@@ -53,7 +53,7 @@
             this.HasGlobalIndexCheckBox.AutoSize = true;
             this.HasGlobalIndexCheckBox.Checked = true;
             this.HasGlobalIndexCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.HasGlobalIndexCheckBox.Location = new System.Drawing.Point(319, 60);
+            this.HasGlobalIndexCheckBox.Location = new System.Drawing.Point(319, 61);
             this.HasGlobalIndexCheckBox.Name = "HasGlobalIndexCheckBox";
             this.HasGlobalIndexCheckBox.Size = new System.Drawing.Size(15, 14);
             this.HasGlobalIndexCheckBox.TabIndex = 19;
@@ -63,7 +63,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(2, 60);
+            this.label3.Location = new System.Drawing.Point(3, 61);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(66, 13);
             this.label3.TabIndex = 18;
@@ -124,7 +124,7 @@
             // HasMipmapsCheckBox
             // 
             this.HasMipmapsCheckBox.AutoSize = true;
-            this.HasMipmapsCheckBox.Location = new System.Drawing.Point(5, 83);
+            this.HasMipmapsCheckBox.Location = new System.Drawing.Point(6, 84);
             this.HasMipmapsCheckBox.Name = "HasMipmapsCheckBox";
             this.HasMipmapsCheckBox.Size = new System.Drawing.Size(90, 17);
             this.HasMipmapsCheckBox.TabIndex = 21;
@@ -134,7 +134,7 @@
             // HasExternalPaletteCheckBox
             // 
             this.HasExternalPaletteCheckBox.AutoSize = true;
-            this.HasExternalPaletteCheckBox.Location = new System.Drawing.Point(5, 106);
+            this.HasExternalPaletteCheckBox.Location = new System.Drawing.Point(6, 107);
             this.HasExternalPaletteCheckBox.Name = "HasExternalPaletteCheckBox";
             this.HasExternalPaletteCheckBox.Size = new System.Drawing.Size(122, 17);
             this.HasExternalPaletteCheckBox.TabIndex = 22;
@@ -148,7 +148,7 @@
             this.GbixTypeBox.Items.AddRange(new object[] {
             "GBIX",
             "GCIX"});
-            this.GbixTypeBox.Location = new System.Drawing.Point(213, 57);
+            this.GbixTypeBox.Location = new System.Drawing.Point(213, 58);
             this.GbixTypeBox.Name = "GbixTypeBox";
             this.GbixTypeBox.Size = new System.Drawing.Size(100, 21);
             this.GbixTypeBox.TabIndex = 23;
@@ -169,7 +169,7 @@
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Name = "GvrWriterSettings";
-            this.Size = new System.Drawing.Size(337, 126);
+            this.Size = new System.Drawing.Size(337, 127);
             this.ResumeLayout(false);
             this.PerformLayout();
 

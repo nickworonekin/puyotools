@@ -40,7 +40,6 @@
             this.deleteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.archiveSettingsPanel = new System.Windows.Forms.Panel();
-            this.AFSsettingsPanel = new System.Windows.Forms.Panel();
             this.compressionFormatBox = new System.Windows.Forms.ComboBox();
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
@@ -50,7 +49,6 @@
             this.tabPage1.SuspendLayout();
             this.itemContextMenu.SuspendLayout();
             this.tabPage2.SuspendLayout();
-            this.archiveSettingsPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // settingsPanel
@@ -160,6 +158,7 @@
             // 
             // tabPage2
             // 
+            this.tabPage2.AutoScroll = true;
             this.tabPage2.Controls.Add(this.archiveSettingsPanel);
             this.tabPage2.Controls.Add(this.compressionFormatBox);
             this.tabPage2.Controls.Add(this.label2);
@@ -173,21 +172,14 @@
             // 
             // archiveSettingsPanel
             // 
-            this.archiveSettingsPanel.Controls.Add(this.AFSsettingsPanel);
+            this.archiveSettingsPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.archiveSettingsPanel.Location = new System.Drawing.Point(0, 30);
             this.archiveSettingsPanel.Margin = new System.Windows.Forms.Padding(0);
             this.archiveSettingsPanel.Name = "archiveSettingsPanel";
             this.archiveSettingsPanel.Size = new System.Drawing.Size(556, 258);
             this.archiveSettingsPanel.TabIndex = 4;
-            // 
-            // AFSsettingsPanel
-            // 
-            this.AFSsettingsPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.AFSsettingsPanel.Location = new System.Drawing.Point(0, 0);
-            this.AFSsettingsPanel.Name = "AFSsettingsPanel";
-            this.AFSsettingsPanel.Size = new System.Drawing.Size(556, 258);
-            this.AFSsettingsPanel.TabIndex = 0;
-            this.AFSsettingsPanel.Visible = false;
             // 
             // compressionFormatBox
             // 
@@ -244,7 +236,6 @@
             this.itemContextMenu.ResumeLayout(false);
             this.tabPage2.ResumeLayout(false);
             this.tabPage2.PerformLayout();
-            this.archiveSettingsPanel.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -266,6 +257,5 @@
         private System.Windows.Forms.ComboBox compressionFormatBox;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Panel archiveSettingsPanel;
-        private System.Windows.Forms.Panel AFSsettingsPanel;
     }
 }

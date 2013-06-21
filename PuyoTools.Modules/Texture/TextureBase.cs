@@ -1,7 +1,8 @@
 ﻿using System;
-using System.IO;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.IO;
+using System.Windows.Forms;
 
 namespace PuyoTools.Modules.Texture
 {
@@ -234,12 +235,12 @@ namespace PuyoTools.Modules.Texture
         public int PaletteLength = -1;
     }
 
-    public class TextureWriterSettings : ModuleWriterSettings
+    public abstract class TextureWriterSettings : ModuleWriterSettings
     {
-        public string DestinationDirectory = String.Empty;
-        public string DestinationFileName = String.Empty;
+        public string SourcePath = String.Empty;
+        public MemoryStream PaletteStream = null;
 
-        public override void SetPanelContent(System.Windows.Forms.Panel panel) { }
+        public override void SetPanelContent(Panel panel) { }
         public override void SetSettings() { }
     }
 
