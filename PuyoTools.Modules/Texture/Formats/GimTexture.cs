@@ -1,10 +1,8 @@
 ﻿using System;
 using System.IO;
-using System.Drawing;
-using System.Drawing.Imaging;
+using System.Windows.Forms;
 
-//using GimSharp;
-//using ImgSharp;
+using GimSharp;
 
 namespace PuyoTools.Modules.Texture
 {
@@ -27,7 +25,7 @@ namespace PuyoTools.Modules.Texture
 
         public override bool CanWrite
         {
-            get { return false; }
+            get { return true; }
         }
 
         /// <summary>
@@ -45,14 +43,89 @@ namespace PuyoTools.Modules.Texture
             texture.Save(destination);
         }
 
-        public override void Write(byte[] source, long offset, Stream destination, int length, string fname)
+        public override void Write(Stream source, Stream destination, int length, TextureWriterSettings settings)
         {
-            throw new NotImplementedException();
+            WriterSettings writerSettings = (settings as WriterSettings) ?? new WriterSettings();
+
+            // Writing GIM textures is done through GimSharp, so just pass it to that
+            GimTextureEncoder texture = new GimTextureEncoder(source, length, writerSettings.PaletteFormat, writerSettings.DataFormat);
+
+            if (!texture.Initalized)
+            {
+                throw new TextureNotInitalizedException("Unable to initalize texture.");
+            }
+
+            texture.HasMetadata = writerSettings.HasMetadata;
+            if (texture.HasMetadata)
+            {
+                texture.Metadata.OriginalFilename = writerSettings.DestinationFileName;
+                texture.Metadata.User = Environment.UserName;
+                texture.Metadata.Program = "Puyo Tools";
+            }
+
+            texture.Save(destination);
+        }
+
+        public override ModuleWriterSettings WriterSettingsObject()
+        {
+            return new WriterSettings();
         }
 
         public override bool Is(Stream source, int length, string fname)
         {
             return (length > 24 && GimSharp.GimTexture.Is(source, length));
+        }
+
+        public class WriterSettings : TextureWriterSettings
+        {
+            private GimWriterSettings writerSettingsPanel;
+
+            public GimPaletteFormat PaletteFormat = GimPaletteFormat.Unknown;
+            public GimDataFormat DataFormat = GimDataFormat.Rgb565;
+
+            public bool HasMetadata = true;
+
+            public override void SetPanelContent(Panel panel)
+            {
+                writerSettingsPanel = new GimWriterSettings();
+                panel.Controls.Add(writerSettingsPanel);
+            }
+
+            public override void SetSettings()
+            {
+                bool hasPaletteFormat = (writerSettingsPanel.DataFormatBox.SelectedIndex == 4
+                    || writerSettingsPanel.DataFormatBox.SelectedIndex == 5);
+
+                // Set the palette format
+                if (hasPaletteFormat)
+                {
+                    switch (writerSettingsPanel.PaletteFormatBox.SelectedIndex)
+                    {
+                        case 0: PaletteFormat = GimPaletteFormat.Rgb565; break;
+                        case 1: PaletteFormat = GimPaletteFormat.Argb1555; break;
+                        case 2: PaletteFormat = GimPaletteFormat.Argb4444; break;
+                        case 3: PaletteFormat = GimPaletteFormat.Argb8888; break;
+                    }
+                }
+                else
+                {
+                    PaletteFormat = GimPaletteFormat.Unknown;
+                }
+
+                // Set the data format
+                switch (writerSettingsPanel.DataFormatBox.SelectedIndex)
+                {
+                    case 0: DataFormat = GimDataFormat.Rgb565; break;
+                    case 1: DataFormat = GimDataFormat.Argb1555; break;
+                    case 2: DataFormat = GimDataFormat.Argb4444; break;
+                    case 3: DataFormat = GimDataFormat.Argb8888; break;
+                    case 4: DataFormat = GimDataFormat.Index4; break;
+                    case 5: DataFormat = GimDataFormat.Index8; break;
+                }
+
+                // Has metadata?
+                HasMetadata = writerSettingsPanel.HasMetadataCheckBox.Checked;
+            }
         }
     }
 }

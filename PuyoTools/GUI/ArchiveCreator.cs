@@ -56,6 +56,7 @@ namespace PuyoTools.GUI
                     if (writerSettings != null)
                     {
                         Panel panel = new Panel();
+                        panel.AutoSize = true;
                         writerSettings.SetPanelContent(panel);
                         writerSettingsPanel.Add(panel);
                     }

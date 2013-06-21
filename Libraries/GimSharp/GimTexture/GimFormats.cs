@@ -21,8 +21,6 @@ namespace GimSharp
         Argb8888 = 0x03,
         Index4   = 0x04,
         Index8   = 0x05,
-        Index16  = 0x06,
-        Index32  = 0x07,
         Unknown  = 0xFF,
     }
 }

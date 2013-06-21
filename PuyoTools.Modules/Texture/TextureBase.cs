@@ -10,7 +10,8 @@ namespace PuyoTools.Modules.Texture
         public abstract string FileExtension { get; }
         public abstract string PaletteFileExtension { get; }
 
-        public abstract void Write(byte[] source, long offset, Stream destination, int length, string fname);
+        //public abstract void Write(byte[] source, long offset, Stream destination, int length, string fname);
+        public abstract void Write(Stream source, Stream destination, int length, TextureWriterSettings settings);
 
         #region Read Methods
         /// <summary>
@@ -233,10 +234,13 @@ namespace PuyoTools.Modules.Texture
         public int PaletteLength = -1;
     }
 
-    public class TextureWriterSettings
+    public class TextureWriterSettings : ModuleWriterSettings
     {
         public string DestinationDirectory = String.Empty;
         public string DestinationFileName = String.Empty;
+
+        public override void SetPanelContent(System.Windows.Forms.Panel panel) { }
+        public override void SetSettings() { }
     }
 
     public class TextureNeedsPaletteException : Exception { }

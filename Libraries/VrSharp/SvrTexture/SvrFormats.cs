@@ -24,6 +24,8 @@ namespace VrSharp.SvrTexture
         Index8Rgb5a3Square    = 0x6B,
         Index8Argb8Rectangle  = 0x6C,
         Index8Argb8Square     = 0x6D,
+        Index4                = Index4Rgb5a3Rectangle,
+        Index8                = Index8Rgb5a3Rectangle,
         Unknown               = 0xFF,
     }
 }

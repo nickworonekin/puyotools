@@ -97,6 +97,30 @@
     <Compile Include="Texture\Formats\PvrTexture.cs" />
     <Compile Include="Texture\Formats\SvrTexture.cs" />
     <Compile Include="Texture\TextureBase.cs" />
+    <Compile Include="Texture\WriterSettings\GimWriterSettings.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Texture\WriterSettings\GimWriterSettings.Designer.cs">
+      <DependentUpon>GimWriterSettings.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Texture\WriterSettings\GvrWriterSettings.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Texture\WriterSettings\GvrWriterSettings.Designer.cs">
+      <DependentUpon>GvrWriterSettings.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Texture\WriterSettings\PvrWriterSettings.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Texture\WriterSettings\PvrWriterSettings.Designer.cs">
+      <DependentUpon>PvrWriterSettings.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Texture\WriterSettings\SvrWriterSettings.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Texture\WriterSettings\SvrWriterSettings.Designer.cs">
+      <DependentUpon>SvrWriterSettings.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
@@ -108,6 +132,18 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Archive\WriterSettings\SntWriterSettings.resx">
       <DependentUpon>SntWriterSettings.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Texture\WriterSettings\GimWriterSettings.resx">
+      <DependentUpon>GimWriterSettings.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Texture\WriterSettings\GvrWriterSettings.resx">
+      <DependentUpon>GvrWriterSettings.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Texture\WriterSettings\PvrWriterSettings.resx">
+      <DependentUpon>PvrWriterSettings.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Texture\WriterSettings\SvrWriterSettings.resx">
+      <DependentUpon>SvrWriterSettings.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

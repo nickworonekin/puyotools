@@ -76,9 +76,9 @@ namespace PuyoTools
             Formats[format].ReadWithPalette(source, palette, out destination, length, paletteLength);
         }
         */
-        public static void Write(Stream source, Stream destination, string fname, TextureFormat format)
+        public static void Write(Stream source, Stream destination, int length, TextureWriterSettings settings, TextureFormat format)
         {
-            return;
+            Formats[format].Write(source, destination, length, settings);
         }
 
         public static TextureFormat GetFormat(Stream source, int length, string fname)

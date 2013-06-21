@@ -30,7 +30,7 @@ namespace GimConvert
                 // Was this texture initalized successfully
                 if (!texture.Initalized)
                 {
-                    Console.WriteLine("Error: This is either not a valid GIM texture, or it is an unsupported one.");
+                    Console.WriteLine("Error: This is not a valid GIM texture, or it is an unsupported one.");
                     return;
                 }
 
@@ -272,7 +272,7 @@ namespace GimConvert
         }
         private static GimPaletteFormat StringToPaletteFormat(string format)
         {
-            switch (format)
+            switch (format.ToLower())
             {
                 case "rgb565":   return GimPaletteFormat.Rgb565;
                 case "argb1555": return GimPaletteFormat.Argb1555;
@@ -299,7 +299,7 @@ namespace GimConvert
         }
         private static GimDataFormat StringToDataFormat(string format)
         {
-            switch (format)
+            switch (format.ToLower())
             {
                 case "rgb565":   return GimDataFormat.Rgb565;
                 case "argb1555": return GimDataFormat.Argb1555;

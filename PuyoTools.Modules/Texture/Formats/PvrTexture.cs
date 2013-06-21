@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
-using System.Drawing;
+using System.Windows.Forms;
+
+using VrSharp;
 using VrSharp.PvrTexture;
 
 namespace PuyoTools.Modules.Texture
@@ -24,7 +26,7 @@ namespace PuyoTools.Modules.Texture
 
         public override bool CanWrite
         {
-            get { return false; }
+            get { return true; }
         }
 
         /// <summary>
@@ -63,14 +65,104 @@ namespace PuyoTools.Modules.Texture
             texture.Save(destination);
         }
 
-        public override void Write(byte[] source, long offset, Stream destination, int length, string fname)
+        public override void Write(Stream source, Stream destination, int length, TextureWriterSettings settings)
         {
-            throw new NotImplementedException();
+            WriterSettings writerSettings = (settings as WriterSettings) ?? new WriterSettings();
+
+            // Writing PVR textures is done through VrSharp, so just pass it to that
+            PvrTextureEncoder texture = new PvrTextureEncoder(source, length, writerSettings.PixelFormat, writerSettings.DataFormat);
+
+            if (!texture.Initalized)
+            {
+                throw new TextureNotInitalizedException("Unable to initalize texture.");
+            }
+
+            texture.HasGlobalIndex = writerSettings.HasGlobalIndex;
+            if (texture.HasGlobalIndex)
+            {
+                texture.GlobalIndex = writerSettings.GlobalIndex;
+            }
+
+            // If we have an external palette file, save it
+            if (texture.NeedsExternalPalette)
+            {
+                // Make sure the destination directory exists
+                if (!Directory.Exists(writerSettings.DestinationDirectory))
+                {
+                    Directory.CreateDirectory(writerSettings.DestinationDirectory);
+                }
+
+                texture.PaletteEncoder.Save(Path.Combine(writerSettings.DestinationDirectory, Path.ChangeExtension(writerSettings.DestinationFileName, PaletteFileExtension)));
+            }
+
+            texture.Save(destination);
+        }
+
+        public override ModuleWriterSettings WriterSettingsObject()
+        {
+            return new WriterSettings();
         }
 
         public override bool Is(Stream source, int length, string fname)
         {
             return (length > 16 && VrSharp.PvrTexture.PvrTexture.Is(source, length));
+        }
+
+        public class WriterSettings : TextureWriterSettings
+        {
+            private PvrWriterSettings writerSettingsPanel;
+
+            public PvrPixelFormat PixelFormat = PvrPixelFormat.Argb1555;
+            public PvrDataFormat DataFormat = PvrDataFormat.SquareTwiddled;
+            public PvrCompressionFormat CompressionFormat = PvrCompressionFormat.None;
+
+            public bool HasGlobalIndex = true;
+            public uint GlobalIndex = 0;
+
+            public override void SetPanelContent(Panel panel)
+            {
+                writerSettingsPanel = new PvrWriterSettings();
+                panel.Controls.Add(writerSettingsPanel);
+            }
+
+            public override void SetSettings()
+            {
+                // Set the pixel format
+                switch (writerSettingsPanel.PixelFormatBox.SelectedIndex)
+                {
+                    case 0: PixelFormat = PvrPixelFormat.Argb1555; break;
+                    case 1: PixelFormat = PvrPixelFormat.Rgb565; break;
+                    case 2: PixelFormat = PvrPixelFormat.Argb4444; break;
+                }
+
+                // Set the data format
+                switch (writerSettingsPanel.DataFormatBox.SelectedIndex)
+                {
+                    case 0: DataFormat = PvrDataFormat.SquareTwiddled; break;
+                    case 1: DataFormat = PvrDataFormat.SquareTwiddledMipmaps; break;
+                    case 2: DataFormat = PvrDataFormat.Index4; break;
+                    case 3: DataFormat = PvrDataFormat.Index8; break;
+                    case 4: DataFormat = PvrDataFormat.Rectangle; break;
+                    case 5: DataFormat = PvrDataFormat.RectangleTwiddled; break;
+                    case 6: DataFormat = PvrDataFormat.SquareTwiddledMipmapsAlt; break;
+                }
+
+                // Set the global index stuff
+                HasGlobalIndex = writerSettingsPanel.HasGlobalIndexCheckBox.Checked;
+                if (HasGlobalIndex)
+                {
+                    if (!uint.TryParse(writerSettingsPanel.GlobalIndexTextBox.Text, out GlobalIndex))
+                    {
+                        GlobalIndex = 0;
+                    }
+                }
+
+                // RLE compressed?
+                if (writerSettingsPanel.RleCompressionCheckBox.Checked)
+                {
+                    CompressionFormat = PvrCompressionFormat.Rle;
+                }
+            }
         }
     }
 }

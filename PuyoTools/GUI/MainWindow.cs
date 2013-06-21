@@ -118,5 +118,10 @@ namespace PuyoTools.GUI
         {
             (new FileCompressor()).Show();
         }
+
+        private void encodeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            (new TextureEncoder()).Show();
+        }
     }
 }
