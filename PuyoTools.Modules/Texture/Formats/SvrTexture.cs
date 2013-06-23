@@ -105,7 +105,7 @@ namespace PuyoTools.Modules.Texture
 
         public class WriterSettings : TextureWriterSettings
         {
-            private SvrWriterSettings writerSettingsPanel;
+            private SvrWriterSettings writerSettingsControls;
 
             public SvrPixelFormat PixelFormat = SvrPixelFormat.Rgb5a3;
             public SvrDataFormat DataFormat = SvrDataFormat.Rectangle;
@@ -113,23 +113,23 @@ namespace PuyoTools.Modules.Texture
             public bool HasGlobalIndex = true;
             public uint GlobalIndex = 0;
 
-            public override void SetPanelContent(Panel panel)
+            public override Control Content()
             {
-                writerSettingsPanel = new SvrWriterSettings();
-                panel.Controls.Add(writerSettingsPanel);
+                writerSettingsControls = new SvrWriterSettings();
+                return writerSettingsControls;
             }
 
             public override void SetSettings()
             {
                 // Set the pixel format
-                switch (writerSettingsPanel.PixelFormatBox.SelectedIndex)
+                switch (writerSettingsControls.PixelFormatBox.SelectedIndex)
                 {
                     case 0: PixelFormat = SvrPixelFormat.Rgb5a3; break;
                     case 1: PixelFormat = SvrPixelFormat.Argb8888; break;
                 }
 
                 // Set the data format
-                switch (writerSettingsPanel.DataFormatBox.SelectedIndex)
+                switch (writerSettingsControls.DataFormatBox.SelectedIndex)
                 {
                     case 0: DataFormat = SvrDataFormat.Rectangle; break;
                     case 1: DataFormat = SvrDataFormat.Index4ExternalPalette; break;
@@ -139,10 +139,10 @@ namespace PuyoTools.Modules.Texture
                 }
 
                 // Set the global index stuff
-                HasGlobalIndex = writerSettingsPanel.HasGlobalIndexCheckBox.Checked;
+                HasGlobalIndex = writerSettingsControls.HasGlobalIndexCheckBox.Checked;
                 if (HasGlobalIndex)
                 {
-                    if (!uint.TryParse(writerSettingsPanel.GlobalIndexTextBox.Text, out GlobalIndex))
+                    if (!uint.TryParse(writerSettingsControls.GlobalIndexTextBox.Text, out GlobalIndex))
                     {
                         GlobalIndex = 0;
                     }

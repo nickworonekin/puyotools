@@ -1,15 +1,18 @@
 ﻿using System;
-using System.IO;
-using System.Drawing;
 using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
+
 using PuyoTools.Modules.Texture;
 
 namespace PuyoTools
 {
     public static class Texture
     {
+        // Texture format dictionary
         public static Dictionary<TextureFormat, TextureBase> Formats;
 
+        // Initalize the texture format dictionary
         public static void Initalize()
         {
             Formats = new Dictionary<TextureFormat, TextureBase>();
@@ -20,33 +23,7 @@ namespace PuyoTools
             Formats.Add(TextureFormat.Svr, new SvrTexture());
         }
 
-        public static TextureFormat Read(Stream source, Stream destination, int length, string fname)
-        {
-            TextureFormat format = GetFormat(source, length, fname);
-
-            if (format == TextureFormat.Unknown)
-                return format;
-
-            Formats[format].Read(source, destination, length);
-
-            return format;
-        }
-
-        public static TextureFormat Read(Stream source, out Bitmap destination, int length, string fname)
-        {
-            TextureFormat format = GetFormat(source, length, fname);
-
-            if (format == TextureFormat.Unknown)
-            {
-                destination = null;
-                return format;
-            }
-
-            Formats[format].Read(source, out destination, length);
-
-            return format;
-        }
-
+        // Reads a texture with the specified texture format
         public static void Read(Stream source, Stream destination, int length, TextureFormat format)
         {
             Formats[format].Read(source, destination, length);
@@ -56,31 +33,25 @@ namespace PuyoTools
         {
             Formats[format].Read(source, out destination, length);
         }
+
+        // Reads a texture with the specified texture format and texture reader settings
         public static void Read(Stream source, Stream destination, int length, TextureReaderSettings settings, TextureFormat format)
         {
             Formats[format].Read(source, destination, length, settings);
         }
-
+        
         public static void Read(Stream source, out Bitmap destination, int length, TextureReaderSettings settings, TextureFormat format)
         {
             Formats[format].Read(source, out destination, length, settings);
         }
-        /*
-        public static void ReadWithPalette(Stream source, Stream palette, Stream destination, int length, int paletteLength, TextureFormat format)
-        {
-            Formats[format].ReadWithPalette(source, palette, destination, length, paletteLength);
-        }
 
-        public static void ReadWithPalette(Stream source, Stream palette, out Bitmap destination, int length, int paletteLength, TextureFormat format)
-        {
-            Formats[format].ReadWithPalette(source, palette, out destination, length, paletteLength);
-        }
-        */
+        // Writes a texture to the specified texture format and texture writer settings
         public static void Write(Stream source, Stream destination, int length, TextureWriterSettings settings, TextureFormat format)
         {
             Formats[format].Write(source, destination, length, settings);
         }
 
+        // Returns the format used by the source texture.
         public static TextureFormat GetFormat(Stream source, int length, string fname)
         {
             foreach (KeyValuePair<TextureFormat, TextureBase> format in Formats)
@@ -93,6 +64,7 @@ namespace PuyoTools
         }
     }
 
+    // List of texture formats
     public enum TextureFormat
     {
         Unknown,

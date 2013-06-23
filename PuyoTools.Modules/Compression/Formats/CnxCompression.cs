@@ -26,25 +26,24 @@ namespace PuyoTools.Modules.Compression
         /// <param name="source">The stream to read from.</param>
         /// <param name="destination">The stream to write to.</param>
         /// <param name="length">Number of bytes to read.</param>
-        public override void Decompress(Stream source2, Stream destination, int length)
+        public override void Decompress(Stream source, Stream destination, int length)
         {
-            byte[] source = new byte[length];
-            source2.Read(source, 0, length);
-            long offset = 0;
+            byte[] sourceBuffer = new byte[length];
+            source.Read(sourceBuffer, 0, length);
 
             // Set up information for decompression
             int sourcePointer = 0x10;
             int destPointer   = 0x0;
 
-            int sourceLength = (int)(PTMethods.ToUInt32BE(source, (int)offset + 0x8) + 16);
-            int destLength   = (int)(PTMethods.ToUInt32BE(source, (int)offset + 0xC));
+            int sourceLength = PTMethods.ToInt32BE(sourceBuffer, 0x8) + 16;
+            int destLength   = PTMethods.ToInt32BE(sourceBuffer, 0xC);
 
             byte[] destBuffer = new byte[destLength];
 
             // Start Decompression
             while (sourcePointer < length && destPointer < destLength)
             {
-                byte flag = source[offset + sourcePointer]; // Compression Flag
+                byte flag = sourceBuffer[sourcePointer]; // Compression Flag
                 sourcePointer++;
 
                 for (int i = 0; i < 4; i++)
@@ -58,21 +57,21 @@ namespace PuyoTools.Modules.Compression
                         // a 0x800 cutoff, there usually is a padding command at the end to skip
                         // a few bytes (to the next 0x800 chunk, i.e. 0x4800, 0x7000, etc.)
                         case 0:
-                            sourcePointer += (source[offset + sourcePointer] + 1);
+                            sourcePointer += (sourceBuffer[sourcePointer] + 1);
                             i = 3;
                             break;
 
                         // Data is not compressed
                         // Single byte copy mode
                         case 1:
-                            destBuffer[destPointer] = source[offset + sourcePointer];
+                            destBuffer[destPointer] = sourceBuffer[sourcePointer];
                             sourcePointer++;
                             destPointer++;
                             break;
 
                         // Data is compressed
                         case 2:
-                            value = PTMethods.ToUInt16BE(source, sourcePointer);
+                            value = PTMethods.ToUInt16BE(sourceBuffer, sourcePointer);
                             sourcePointer += 2;
 
                             distance = (value >> 5) + 1;
@@ -90,13 +89,13 @@ namespace PuyoTools.Modules.Compression
                         // Data is not compressed
                         // Block copy mode
                         case 3:
-                            amount = source[sourcePointer];
+                            amount = sourceBuffer[sourcePointer];
                             sourcePointer++;
 
                             // Copy the data
                             for (int j = 0; j < amount; j++)
                             {
-                                destBuffer[destPointer] = source[sourcePointer];
+                                destBuffer[destPointer] = sourceBuffer[sourcePointer];
                                 sourcePointer++;
                                 destPointer++;
                             }
@@ -139,16 +138,10 @@ namespace PuyoTools.Modules.Compression
             if (length > 16 && PTStream.Contains(source, 0, new byte[] { (byte)'C', (byte)'N', (byte)'X', 0x2 }))
             {
                 source.Position += 8;
-
-                byte[] buffer = new byte[4];
-                source.Read(buffer, 0, 4);
-
+                int value = PTStream.ReadInt32BE(source) + 16;
                 source.Position -= 12;
 
-                if ((int)PTMethods.ToUInt32BE(buffer, 0) + 16 == length)
-                {
-                    return true;
-                }
+                return (value == length);
             }
 
             return false;

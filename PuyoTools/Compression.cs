@@ -1,14 +1,17 @@
 ﻿using System;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
+
 using PuyoTools.Modules.Compression;
 
 namespace PuyoTools
 {
     public static class Compression
     {
+        // Compression format dictionary
         public static Dictionary<CompressionFormat, CompressionBase> Formats;
 
+        // Initalize the compression format dictionary
         public static void Initalize()
         {
             Formats = new Dictionary<CompressionFormat, CompressionBase>();
@@ -22,6 +25,7 @@ namespace PuyoTools
             Formats.Add(CompressionFormat.Prs,  new PrsCompression());
         }
 
+        // Decompress a file when the compression format is not known.
         public static CompressionFormat Decompress(Stream source, Stream destination, int length, string fname)
         {
             CompressionFormat format = GetFormat(source, length, fname);
@@ -34,17 +38,20 @@ namespace PuyoTools
             return format;
         }
 
+        // Decompress a file with the specified compression format
         public static void Decompress(Stream source, Stream destination, int length, CompressionFormat format)
         {
             Formats[format].Decompress(source, destination, length);
         }
 
+        // Compress a file with the specified compression format
         public static void Compress(Stream source, Stream destination, int length, string fname, CompressionFormat format)
         {
             //Formats[format].Compress(source, destination, length, fname);
             Formats[format].Compress(source, destination, length);
         }
 
+        // Returns the compression format used by the source file.
         public static CompressionFormat GetFormat(Stream source, int length, string fname)
         {
             foreach (KeyValuePair<CompressionFormat, CompressionBase> format in Formats)
@@ -57,6 +64,7 @@ namespace PuyoTools
         }
     }
 
+    // List of compression formats
     public enum CompressionFormat
     {
         Unknown,

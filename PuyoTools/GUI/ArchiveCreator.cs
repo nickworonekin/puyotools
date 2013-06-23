@@ -18,7 +18,7 @@ namespace PuyoTools.GUI
     public partial class ArchiveCreator : ToolForm
     {
         List<ModuleWriterSettings> formatWriterSettings;
-        List<Panel> writerSettingsPanel;
+        List<Control> writerSettingsControls;
         List<ArchiveFormat> archiveFormats;
         List<CompressionFormat> compressionFormats;
 
@@ -40,7 +40,7 @@ namespace PuyoTools.GUI
 
             // Set up the writer settings panel and format writer settings
             formatWriterSettings = new List<ModuleWriterSettings>();
-            writerSettingsPanel = new List<Panel>();
+            writerSettingsControls = new List<Control>();
 
             // Fill the archive format box
             archiveFormatBox.SelectedIndex = 0;
@@ -55,14 +55,11 @@ namespace PuyoTools.GUI
                     ModuleWriterSettings writerSettings = format.Value.WriterSettingsObject();
                     if (writerSettings != null)
                     {
-                        Panel panel = new Panel();
-                        panel.AutoSize = true;
-                        writerSettings.SetPanelContent(panel);
-                        writerSettingsPanel.Add(panel);
+                        writerSettingsControls.Add(writerSettings.Content());
                     }
                     else
                     {
-                        writerSettingsPanel.Add(null);
+                        writerSettingsControls.Add(null);
                     }
 
                     formatWriterSettings.Add(writerSettings);
@@ -231,9 +228,9 @@ namespace PuyoTools.GUI
 
             if (archiveFormatBox.SelectedIndex != 0)
             {
-                if (writerSettingsPanel[archiveFormatBox.SelectedIndex - 1] != null)
+                if (writerSettingsControls[archiveFormatBox.SelectedIndex - 1] != null)
                 {
-                    archiveSettingsPanel.Controls.Add(writerSettingsPanel[archiveFormatBox.SelectedIndex - 1]);
+                    archiveSettingsPanel.Controls.Add(writerSettingsControls[archiveFormatBox.SelectedIndex - 1]);
                 }
             }
 

@@ -78,28 +78,28 @@ namespace PuyoTools.Modules.Texture
 
         public class WriterSettings : TextureWriterSettings
         {
-            private GimWriterSettings writerSettingsPanel;
+            private GimWriterSettings writerSettingsControls;
 
             public GimPaletteFormat PaletteFormat = GimPaletteFormat.Unknown;
             public GimDataFormat DataFormat = GimDataFormat.Rgb565;
 
             public bool HasMetadata = true;
 
-            public override void SetPanelContent(Panel panel)
+            public override Control Content()
             {
-                writerSettingsPanel = new GimWriterSettings();
-                panel.Controls.Add(writerSettingsPanel);
+                writerSettingsControls = new GimWriterSettings();
+                return writerSettingsControls;
             }
 
             public override void SetSettings()
             {
-                bool hasPaletteFormat = (writerSettingsPanel.DataFormatBox.SelectedIndex == 4
-                    || writerSettingsPanel.DataFormatBox.SelectedIndex == 5);
+                bool hasPaletteFormat = (writerSettingsControls.DataFormatBox.SelectedIndex == 4
+                    || writerSettingsControls.DataFormatBox.SelectedIndex == 5);
 
                 // Set the palette format
                 if (hasPaletteFormat)
                 {
-                    switch (writerSettingsPanel.PaletteFormatBox.SelectedIndex)
+                    switch (writerSettingsControls.PaletteFormatBox.SelectedIndex)
                     {
                         case 0: PaletteFormat = GimPaletteFormat.Rgb565; break;
                         case 1: PaletteFormat = GimPaletteFormat.Argb1555; break;
@@ -113,7 +113,7 @@ namespace PuyoTools.Modules.Texture
                 }
 
                 // Set the data format
-                switch (writerSettingsPanel.DataFormatBox.SelectedIndex)
+                switch (writerSettingsControls.DataFormatBox.SelectedIndex)
                 {
                     case 0: DataFormat = GimDataFormat.Rgb565; break;
                     case 1: DataFormat = GimDataFormat.Argb1555; break;
@@ -124,7 +124,7 @@ namespace PuyoTools.Modules.Texture
                 }
 
                 // Has metadata?
-                HasMetadata = writerSettingsPanel.HasMetadataCheckBox.Checked;
+                HasMetadata = writerSettingsControls.HasMetadataCheckBox.Checked;
             }
         }
     }

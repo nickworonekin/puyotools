@@ -1,9 +1,9 @@
 ﻿using System;
-using System.Windows.Forms;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
 using System.Reflection;
+using System.Windows.Forms;
 
 namespace PuyoTools
 {

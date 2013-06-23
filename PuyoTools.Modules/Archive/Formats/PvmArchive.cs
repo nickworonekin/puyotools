@@ -271,25 +271,25 @@ namespace PuyoTools.Modules.Archive
 
         public class WriterSettings : ModuleWriterSettings
         {
-            private PvmWriterSettings writerSettingsPanel;
+            private PvmWriterSettings writerSettingsControls;
 
             public bool Filename = true;
             public bool GlobalIndex = true;
             public bool Formats = true;
             public bool Dimensions = true;
 
-            public override void SetPanelContent(Panel panel)
+            public override Control Content()
             {
-                writerSettingsPanel = new PvmWriterSettings();
-                panel.Controls.Add(writerSettingsPanel);
+                writerSettingsControls = new PvmWriterSettings();
+                return writerSettingsControls;
             }
 
             public override void SetSettings()
             {
-                Filename = writerSettingsPanel.FilenameCheckbox.Checked;
-                GlobalIndex = writerSettingsPanel.GlobalIndexCheckbox.Checked;
-                Formats = writerSettingsPanel.FormatCheckbox.Checked;
-                Dimensions = writerSettingsPanel.DimensionsCheckbox.Checked;
+                Filename = writerSettingsControls.FilenameCheckbox.Checked;
+                GlobalIndex = writerSettingsControls.GlobalIndexCheckbox.Checked;
+                Formats = writerSettingsControls.FormatCheckbox.Checked;
+                Dimensions = writerSettingsControls.DimensionsCheckbox.Checked;
             }
         }
     }

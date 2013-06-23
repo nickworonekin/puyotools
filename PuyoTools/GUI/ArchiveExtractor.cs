@@ -12,8 +12,6 @@ using PuyoTools.Modules;
 using PuyoTools.Modules.Archive;
 using PuyoTools.Modules.Texture;
 
-using Ookii.Dialogs;
-
 namespace PuyoTools.GUI
 {
     public partial class ArchiveExtractor : ToolForm
@@ -28,15 +26,18 @@ namespace PuyoTools.GUI
             for (int i = 0; i < fileList.Count; i++)
             {
                 string file = fileList[i];
+                string description;
 
                 if (fileList.Count == 1)
                 {
-                    dialog.ReportProgress(i * 100 / fileList.Count, dialog.Text, "Processing " + Path.GetFileName(file));
+                    description = String.Format("Processing {0}", Path.GetFileName(file));
                 }
                 else
                 {
-                    dialog.ReportProgress(i * 100 / fileList.Count, dialog.Text, "Processing " + Path.GetFileName(file) + " (" + (i + 1) + " of " + fileList.Count + ")");
+                    description = String.Format("Processing {0} ({1:N0} of {2:N0})", Path.GetFileName(file), i + 1, fileList.Count);
                 }
+
+                dialog.ReportProgress(i * 100 / fileList.Count, description);
 
                 // Let's open the file.
                 // But, we're going to do this in a try catch in case any errors happen.
@@ -110,6 +111,18 @@ namespace PuyoTools.GUI
                         // Now we can start extracting the files
                         for (int j = 0; j < archive.Files.Length; j++)
                         {
+                            if (fileList.Count == 1)
+                            {
+                                // If there is just one file in the file list, then the progress will be
+                                // based on how many files are being extracted from the archive, not
+                                // how many archives we are extracting.
+                                dialog.ReportProgress(j * 100 / archive.Files.Length, description + "\n\n" + String.Format("{0:N0} of {1:N0} extracted", j + 1, archive.Files.Length));
+                            }
+                            else
+                            {
+                                dialog.Description = description + "\n\n" + String.Format("{0:N0} of {1:N0} extracted", j + 1, archive.Files.Length);
+                            }
+
                             ArchiveEntry entry = archive.GetFile(j);
 
                             // Get the output name for this file
@@ -164,7 +177,7 @@ namespace PuyoTools.GUI
                                     try
                                     {
                                         MemoryStream textureData = new MemoryStream();
-                                        Texture.Read(entry.Stream, textureData, entry.Length, entry.Filename);
+                                        Texture.Read(entry.Stream, textureData, entry.Length, textureFormat);
 
                                         // If no exception was thrown, then we are all good doing what we need to do
                                         entry.Stream = textureData;
@@ -222,7 +235,8 @@ namespace PuyoTools.GUI
                                     {
                                         // If there was one archive in the file list, and now there is more,
                                         // adjust the progress bar and the description
-                                        dialog.ReportProgress(i * 100 / fileList.Count, dialog.Text, "Processing " + Path.GetFileName(file) + " (" + (i + 1) + " of " + fileList.Count + ")");
+                                        description = String.Format("Processing {0} ({1:N0} of {2:N0})", Path.GetFileName(file), i + 1, fileList.Count);
+                                        dialog.ReportProgress(i * 100 / fileList.Count, description + "\n\n" + String.Format("{0:N0} of {1:N0} extracted", j + 1, archive.Files.Length));
                                     }
                                 }
                             }
@@ -308,19 +322,10 @@ namespace PuyoTools.GUI
                 {
                     // Meh, just ignore the error.
                 }
-
-                if (i == fileList.Count - 1)
-                {
-                    dialog.ReportProgress((i + 1) * 100 / fileList.Count, dialog.Text, "Complete");
-                }
-                else
-                {
-                    dialog.ReportProgress((i + 1) * 100 / fileList.Count);
-                }
             }
 
             // The tool is finished doing what it needs to do. We can close it now.
-            this.Close();
+            //this.Close();
         }
 
         private struct Settings
@@ -364,13 +369,16 @@ namespace PuyoTools.GUI
             // Run the tool
             ProgressDialog dialog = new ProgressDialog();
             dialog.WindowTitle = "Processing";
-            dialog.Text = "Extracting Files";
-            dialog.ShowCancelButton = false;
+            dialog.Title = "Extracting Files";
             dialog.DoWork += delegate(object sender2, DoWorkEventArgs e2)
             {
                 Run(settings, dialog);
             };
-            dialog.Show();
+            dialog.RunWorkerCompleted += delegate(object sender2, RunWorkerCompletedEventArgs e2)
+            {
+                this.Close();
+            };
+            dialog.RunWorkerAsync();
         }
     }
 }

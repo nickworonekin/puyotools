@@ -21,33 +21,32 @@ namespace PuyoTools.Modules.Compression
         /// <param name="source">The stream to read from.</param>
         /// <param name="destination">The stream to write to.</param>
         /// <param name="length">Number of bytes to read.</param>
-        public override void Decompress(Stream source2, Stream destination, int length)
+        public override void Decompress(Stream source, Stream destination, int length)
         {
-            byte[] source = new byte[length];
-            source2.Read(source, 0, length);
-            long offset = 0;
+            byte[] sourceBuffer = new byte[length];
+            source.Read(sourceBuffer, 0, length);
 
             // Set up information for decompression
             int sourcePointer = 0x10;
             int destPointer   = 0x0;
             int bufferPointer = 0xFEE;
 
-            int sourceLength = (int)(BitConverter.ToUInt32(source, (int)offset + 0x4));
-            int destLength   = (int)(BitConverter.ToUInt32(source, (int)offset + 0x8));
+            int sourceLength = BitConverter.ToInt32(sourceBuffer, 0x4);
+            int destLength   = BitConverter.ToInt32(sourceBuffer, 0x8);
 
             byte[] buffer = new byte[0x1000];
 
             // Start Decompression
             while (sourcePointer < sourceLength && destPointer < destLength)
             {
-                byte flag = source[offset + sourcePointer]; // Compression Flag
+                byte flag = sourceBuffer[sourcePointer]; // Compression Flag
                 sourcePointer++;
 
                 for (int i = 0; i < 8; i++)
                 {
                     if ((flag & 0x1) != 0) // Data is not compressed
                     {
-                        buffer[bufferPointer] = source[offset + sourcePointer];
+                        buffer[bufferPointer] = sourceBuffer[sourcePointer];
                         destination.WriteByte(buffer[bufferPointer]);
                         sourcePointer++;
                         destPointer++;
@@ -55,8 +54,8 @@ namespace PuyoTools.Modules.Compression
                     }
                     else // Data is compressed
                     {
-                        int bufferOffset = source[offset + sourcePointer] | ((source[offset + sourcePointer + 1] & 0xF0) << 4);
-                        int amount = (source[offset + sourcePointer + 1] & 0xF) + 3;
+                        int bufferOffset = sourceBuffer[sourcePointer] | ((sourceBuffer[sourcePointer + 1] & 0xF0) << 4);
+                        int amount = (sourceBuffer[sourcePointer + 1] & 0xF) + 3;
                         sourcePointer += 2;
 
                         // Copy the data
@@ -103,16 +102,10 @@ namespace PuyoTools.Modules.Compression
             if (length > 16 && PTStream.Contains(source, 0, new byte[] { (byte)'L', (byte)'Z', (byte)'0', (byte)'1' }))
             {
                 source.Position += 4;
-
-                byte[] buffer = new byte[4];
-                source.Read(buffer, 0, 4);
-
+                int value = PTStream.ReadInt32(source);
                 source.Position -= 8;
 
-                if ((int)BitConverter.ToUInt32(buffer, 0) == length)
-                {
-                    return true;
-                }
+                return (value == length);
             }
 
             return false;

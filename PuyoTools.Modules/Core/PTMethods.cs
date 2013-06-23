@@ -74,5 +74,15 @@ namespace PuyoTools.Modules
         {
             return (uint)(value[startIndex] << 24 | value[startIndex + 1] << 16 | value[startIndex + 2] << 8 | value[startIndex + 3]);
         }
+
+        public static short ToInt16BE(byte[] value, int startIndex)
+        {
+            return (short)(value[startIndex] << 8 | value[startIndex + 1]);
+        }
+
+        public static int ToInt32BE(byte[] value, int startIndex)
+        {
+            return (value[startIndex] << 24 | value[startIndex + 1] << 16 | value[startIndex + 2] << 8 | value[startIndex + 3]);
+        }
     }
 }

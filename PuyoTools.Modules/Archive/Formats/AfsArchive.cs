@@ -196,7 +196,7 @@ namespace PuyoTools.Modules.Archive
 
         public class WriterSettings : ModuleWriterSettings
         {
-            private AfsWriterSettings writerSettingsPanel;
+            private AfsWriterSettings writerSettingsControls;
 
             public int BlockSize = 2048;
             public AfsVersion Version = AfsVersion.Version1;
@@ -207,16 +207,16 @@ namespace PuyoTools.Modules.Archive
                 Version2, // Post Dreamcast (PS2, GC, Xbox and after)
             }
 
-            public override void SetPanelContent(Panel panel)
+            public override Control Content()
             {
-                writerSettingsPanel = new AfsWriterSettings();
-                panel.Controls.Add(writerSettingsPanel);
+                writerSettingsControls = new AfsWriterSettings();
+                return writerSettingsControls;
             }
 
             public override void SetSettings()
             {
-                BlockSize = int.Parse(writerSettingsPanel.BlockSizeBox.GetItemText(writerSettingsPanel.BlockSizeBox.SelectedItem));
-                Version = (writerSettingsPanel.AfsVersion1Radio.Checked ? AfsVersion.Version1 : AfsVersion.Version2);
+                BlockSize = int.Parse(writerSettingsControls.BlockSizeBox.GetItemText(writerSettingsControls.BlockSizeBox.SelectedItem));
+                Version = (writerSettingsControls.AfsVersion1Radio.Checked ? AfsVersion.Version1 : AfsVersion.Version2);
             }
         }
     }

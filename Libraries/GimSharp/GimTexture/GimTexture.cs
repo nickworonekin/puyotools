@@ -21,6 +21,8 @@ namespace GimSharp
         private int dataOffset;    // Offset of the actual data in the texture
 
         private ushort paletteEntries; // Number of entries in the palette
+
+        private bool swizzled; // Is the texture data swizzled?
         #endregion
 
         #region Texture Properties
@@ -208,6 +210,9 @@ namespace GimSharp
                     // Get the data codec and make sure we can decode using it
                     dataCodec = GimDataCodec.GetDataCodec(dataFormat);
                     if (dataCodec == null) return false;
+
+                    // Check to see if the texture data is swizzled
+                    swizzled = (BitConverter.ToUInt16(encodedData, offset + 0x16) == 1);
 
                     // Get the texture's width and height
                     textureWidth  = BitConverter.ToUInt16(encodedData, offset + 0x18);
@@ -480,7 +485,12 @@ namespace GimSharp
                 dataCodec.SetPalette(encodedData, paletteOffset, paletteEntries);
             }
 
-            return dataCodec.Decode(GimDataCodec.UnSwizzle(encodedData, dataOffset, textureWidth, textureHeight, dataCodec.Bpp), 0, textureWidth, textureHeight);
+            if (swizzled)
+            {
+                return dataCodec.Decode(GimDataCodec.UnSwizzle(encodedData, dataOffset, textureWidth, textureHeight, dataCodec.Bpp), 0, textureWidth, textureHeight);
+            }
+
+            return dataCodec.Decode(encodedData, dataOffset, textureWidth, textureHeight);
         }
         #endregion
 

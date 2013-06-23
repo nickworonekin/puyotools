@@ -95,20 +95,14 @@ namespace PuyoTools.Modules
     public abstract class ModuleWriterSettings
     {
         /// <summary>
-        /// Set panel content.
+        /// Returns the control containing the writer settings.
         /// </summary>
-        /// <param name="panel">The panel to add the controls to.</param>
-        public abstract void SetPanelContent(Panel panel);
+        /// <returns></returns>
+        public abstract Control Content();
 
         /// <summary>
         /// Set the settings from the controls in the panel.
         /// </summary>
         public abstract void SetSettings();
-
-        /// <summary>
-        /// Parse command line argumentes for this format.
-        /// </summary>
-        /// <param name="args">The arguments.</param>
-        //public abstract void ParseCommandLineArguments(Dictionary<string, string> args);
     }
 }

@@ -109,7 +109,7 @@ namespace PuyoTools.Modules.Texture
 
         public class WriterSettings : TextureWriterSettings
         {
-            private GvrWriterSettings writerSettingsPanel;
+            private GvrWriterSettings writerSettingsControls;
 
             public GvrPixelFormat PaletteFormat = GvrPixelFormat.Unknown;
             public GvrDataFormat DataFormat = GvrDataFormat.Rgb5a3;
@@ -121,25 +121,25 @@ namespace PuyoTools.Modules.Texture
             public bool HasMipmaps = false;
             public bool HasExternalPalette = false;
 
-            public override void SetPanelContent(Panel panel)
+            public override Control Content()
             {
-                writerSettingsPanel = new GvrWriterSettings();
-                panel.Controls.Add(writerSettingsPanel);
+                writerSettingsControls = new GvrWriterSettings();
+                return writerSettingsControls;
             }
 
             public override void SetSettings()
             {
-                bool hasPaletteFormat = (writerSettingsPanel.DataFormatBox.SelectedIndex == 7 ||
-                    writerSettingsPanel.DataFormatBox.SelectedIndex == 8);
+                bool hasPaletteFormat = (writerSettingsControls.DataFormatBox.SelectedIndex == 7 ||
+                    writerSettingsControls.DataFormatBox.SelectedIndex == 8);
 
-                bool canHaveMipmaps = (writerSettingsPanel.DataFormatBox.SelectedIndex == 4 ||
-                    writerSettingsPanel.DataFormatBox.SelectedIndex == 5 ||
-                    writerSettingsPanel.DataFormatBox.SelectedIndex == 9);
+                bool canHaveMipmaps = (writerSettingsControls.DataFormatBox.SelectedIndex == 4 ||
+                    writerSettingsControls.DataFormatBox.SelectedIndex == 5 ||
+                    writerSettingsControls.DataFormatBox.SelectedIndex == 9);
 
                 // Set the palette format
-                if (writerSettingsPanel.PaletteFormatBox.Enabled)
+                if (writerSettingsControls.PaletteFormatBox.Enabled)
                 {
-                    switch (writerSettingsPanel.PaletteFormatBox.SelectedIndex)
+                    switch (writerSettingsControls.PaletteFormatBox.SelectedIndex)
                     {
                         case 0: PaletteFormat = GvrPixelFormat.IntensityA8; break;
                         case 1: PaletteFormat = GvrPixelFormat.Rgb565; break;
@@ -152,7 +152,7 @@ namespace PuyoTools.Modules.Texture
                 }
 
                 // Set the data format
-                switch (writerSettingsPanel.DataFormatBox.SelectedIndex)
+                switch (writerSettingsControls.DataFormatBox.SelectedIndex)
                 {
                     case 0: DataFormat = GvrDataFormat.Intensity4; break;
                     case 1: DataFormat = GvrDataFormat.Intensity8; break;
@@ -167,15 +167,15 @@ namespace PuyoTools.Modules.Texture
                 }
 
                 // Set the global index stuff
-                HasGlobalIndex = writerSettingsPanel.HasGlobalIndexCheckBox.Checked;
+                HasGlobalIndex = writerSettingsControls.HasGlobalIndexCheckBox.Checked;
                 if (HasGlobalIndex)
                 {
-                    if (!uint.TryParse(writerSettingsPanel.GlobalIndexTextBox.Text, out GlobalIndex))
+                    if (!uint.TryParse(writerSettingsControls.GlobalIndexTextBox.Text, out GlobalIndex))
                     {
                         GlobalIndex = 0;
                     }
 
-                    switch (writerSettingsPanel.GbixTypeBox.SelectedIndex)
+                    switch (writerSettingsControls.GbixTypeBox.SelectedIndex)
                     {
                         case 0: GbixType = GvrGbixType.Gbix; break;
                         case 1: GbixType = GvrGbixType.Gcix; break;
@@ -183,10 +183,10 @@ namespace PuyoTools.Modules.Texture
                 }
 
                 // Has mipmaps?
-                HasMipmaps = (canHaveMipmaps && writerSettingsPanel.HasMipmapsCheckBox.Checked);
+                HasMipmaps = (canHaveMipmaps && writerSettingsControls.HasMipmapsCheckBox.Checked);
 
                 // Has external palette?
-                HasExternalPalette = (hasPaletteFormat && writerSettingsPanel.HasExternalPaletteCheckBox.Checked);
+                HasExternalPalette = (hasPaletteFormat && writerSettingsControls.HasExternalPaletteCheckBox.Checked);
             }
         }
     }

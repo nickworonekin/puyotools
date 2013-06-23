@@ -246,7 +246,7 @@ namespace PuyoTools.Modules.Archive
 
         public class WriterSettings : ModuleWriterSettings
         {
-            private SntWriterSettings writerSettingsPanel;
+            private SntWriterSettings writerSettingsControls;
 
             public SntType Type = SntType.Ps2;
 
@@ -256,15 +256,15 @@ namespace PuyoTools.Modules.Archive
                 Psp, // PlayStation Portable
             }
 
-            public override void SetPanelContent(Panel panel)
+            public override Control Content()
             {
-                writerSettingsPanel = new SntWriterSettings();
-                panel.Controls.Add(writerSettingsPanel);
+                writerSettingsControls = new SntWriterSettings();
+                return writerSettingsControls;
             }
 
             public override void SetSettings()
             {
-                Type = (writerSettingsPanel.TypePs2Radio.Checked ? SntType.Ps2 : SntType.Psp);
+                Type = (writerSettingsControls.TypePs2Radio.Checked ? SntType.Ps2 : SntType.Psp);
             }
         }
     }

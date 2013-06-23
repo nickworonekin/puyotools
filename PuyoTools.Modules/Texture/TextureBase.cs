@@ -240,8 +240,9 @@ namespace PuyoTools.Modules.Texture
         public string SourcePath = String.Empty;
         public MemoryStream PaletteStream = null;
 
-        public override void SetPanelContent(Panel panel) { }
-        public override void SetSettings() { }
+        //public override void SetPanelContent(Panel panel) { }
+        //public override 
+        //public override void SetSettings() { }
     }
 
     public class TextureNeedsPaletteException : Exception { }

@@ -105,7 +105,7 @@ namespace PuyoTools.Modules.Texture
 
         public class WriterSettings : TextureWriterSettings
         {
-            private PvrWriterSettings writerSettingsPanel;
+            private PvrWriterSettings writerSettingsControls;
 
             public PvrPixelFormat PixelFormat = PvrPixelFormat.Argb1555;
             public PvrDataFormat DataFormat = PvrDataFormat.SquareTwiddled;
@@ -114,16 +114,16 @@ namespace PuyoTools.Modules.Texture
             public bool HasGlobalIndex = true;
             public uint GlobalIndex = 0;
 
-            public override void SetPanelContent(Panel panel)
+            public override Control Content()
             {
-                writerSettingsPanel = new PvrWriterSettings();
-                panel.Controls.Add(writerSettingsPanel);
+                writerSettingsControls = new PvrWriterSettings();
+                return writerSettingsControls;
             }
 
             public override void SetSettings()
             {
                 // Set the pixel format
-                switch (writerSettingsPanel.PixelFormatBox.SelectedIndex)
+                switch (writerSettingsControls.PixelFormatBox.SelectedIndex)
                 {
                     case 0: PixelFormat = PvrPixelFormat.Argb1555; break;
                     case 1: PixelFormat = PvrPixelFormat.Rgb565; break;
@@ -131,7 +131,7 @@ namespace PuyoTools.Modules.Texture
                 }
 
                 // Set the data format
-                switch (writerSettingsPanel.DataFormatBox.SelectedIndex)
+                switch (writerSettingsControls.DataFormatBox.SelectedIndex)
                 {
                     case 0: DataFormat = PvrDataFormat.SquareTwiddled; break;
                     case 1: DataFormat = PvrDataFormat.SquareTwiddledMipmaps; break;
@@ -143,17 +143,17 @@ namespace PuyoTools.Modules.Texture
                 }
 
                 // Set the global index stuff
-                HasGlobalIndex = writerSettingsPanel.HasGlobalIndexCheckBox.Checked;
+                HasGlobalIndex = writerSettingsControls.HasGlobalIndexCheckBox.Checked;
                 if (HasGlobalIndex)
                 {
-                    if (!uint.TryParse(writerSettingsPanel.GlobalIndexTextBox.Text, out GlobalIndex))
+                    if (!uint.TryParse(writerSettingsControls.GlobalIndexTextBox.Text, out GlobalIndex))
                     {
                         GlobalIndex = 0;
                     }
                 }
 
                 // RLE compressed?
-                if (writerSettingsPanel.RleCompressionCheckBox.Checked)
+                if (writerSettingsControls.RleCompressionCheckBox.Checked)
                 {
                     CompressionFormat = PvrCompressionFormat.Rle;
                 }

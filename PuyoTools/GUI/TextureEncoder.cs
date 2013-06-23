@@ -16,7 +16,7 @@ namespace PuyoTools.GUI
     public partial class TextureEncoder : ToolForm
     {
         List<TextureWriterSettings> formatWriterSettings;
-        List<Panel> writerSettingsPanel;
+        List<Control> writerSettingsControls;
         List<TextureFormat> textureFormats;
         List<CompressionFormat> compressionFormats;
 
@@ -26,7 +26,7 @@ namespace PuyoTools.GUI
 
             // Set up the writer settings panel and format writer settings
             formatWriterSettings = new List<TextureWriterSettings>();
-            writerSettingsPanel = new List<Panel>();
+            writerSettingsControls = new List<Control>();
 
             // Fill the texture format box
             textureFormatBox.SelectedIndex = 0;
@@ -41,14 +41,11 @@ namespace PuyoTools.GUI
                     TextureWriterSettings writerSettings = (TextureWriterSettings)format.Value.WriterSettingsObject();
                     if (writerSettings != null)
                     {
-                        Panel panel = new Panel();
-                        panel.AutoSize = true;
-                        writerSettings.SetPanelContent(panel);
-                        writerSettingsPanel.Add(panel);
+                        writerSettingsControls.Add(writerSettings.Content());
                     }
                     else
                     {
-                        writerSettingsPanel.Add(null);
+                        writerSettingsControls.Add(null);
                     }
 
                     formatWriterSettings.Add(writerSettings);
@@ -68,16 +65,27 @@ namespace PuyoTools.GUI
             }
         }
 
-
         private void EnableRunButton()
         {
             runButton.Enabled = (fileList.Count > 0 && textureFormatBox.SelectedIndex > 0);
         }
 
-        private void Run(Settings settings)
+        private void Run(Settings settings, ProgressDialog dialog)
         {
-            foreach (string file in fileList)
+            //foreach (string file in fileList)
+            for (int i = 0; i < fileList.Count; i++)
             {
+                string file = fileList[i];
+
+                if (fileList.Count == 1)
+                {
+                    dialog.ReportProgress(i * 100 / fileList.Count, String.Format("Encoding {0}", Path.GetFileName(file)));
+                }
+                else
+                {
+                    dialog.ReportProgress(i * 100 / fileList.Count, String.Format("Encoding {0} ({1:N0} of {2:N0})", Path.GetFileName(file), i + 1, fileList.Count));
+                }
+
                 // Let's open the file.
                 // But, we're going to do this in a try catch in case any errors happen.
                 try
@@ -150,7 +158,7 @@ namespace PuyoTools.GUI
             }
 
             // The tool is finished doing what it needs to do. We can close it now.
-            this.Close();
+            //this.Close();
         }
 
         private void textureFormatBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -159,9 +167,9 @@ namespace PuyoTools.GUI
 
             if (textureFormatBox.SelectedIndex != 0)
             {
-                if (writerSettingsPanel[textureFormatBox.SelectedIndex - 1] != null)
+                if (writerSettingsControls[textureFormatBox.SelectedIndex - 1] != null)
                 {
-                    textureSettingsPanel.Controls.Add(writerSettingsPanel[textureFormatBox.SelectedIndex - 1]);
+                    textureSettingsPanel.Controls.Add(writerSettingsControls[textureFormatBox.SelectedIndex - 1]);
                 }
             }
 
@@ -197,7 +205,18 @@ namespace PuyoTools.GUI
                 settings.TextureSettings.SetSettings();
             }
 
-            Run(settings);
+            ProgressDialog dialog = new ProgressDialog();
+            dialog.WindowTitle = "Encoding Texture";
+            dialog.Title = "Encoding Texture";
+            dialog.DoWork += delegate(object sender2, DoWorkEventArgs e2)
+            {
+                Run(settings, dialog);
+            };
+            dialog.RunWorkerCompleted += delegate(object sender2, RunWorkerCompletedEventArgs e2)
+            {
+                this.Close();
+            };
+            dialog.RunWorkerAsync();
         }
 
         private struct Settings
