@@ -265,6 +265,9 @@ namespace PuyoTools.Modules.Archive
 
                     entryOffset = destination.Position;
                     destination.Position = oldPosition;
+
+                    // Call the file added event
+                    OnFileAdded(EventArgs.Empty);
                 }
             }
         }

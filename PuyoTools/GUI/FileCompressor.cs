@@ -41,10 +41,22 @@ namespace PuyoTools.GUI
             runButton.Enabled = (fileList.Count > 0 && compressionFormatBox.SelectedIndex > 0);
         }
 
-        private void Run(Settings settings)
+        private void Run(Settings settings, ProgressDialog dialog)
         {
-            foreach (string file in fileList)
+            for (int i = 0; i < fileList.Count; i++)
             {
+                string file = fileList[i];
+
+                // Report progress. If we only have one file to process, no need to display (x of n).
+                if (fileList.Count == 1)
+                {
+                    dialog.ReportProgress(i * 100 / fileList.Count, String.Format("Processing {0}", Path.GetFileName(file)));
+                }
+                else
+                {
+                    dialog.ReportProgress(i * 100 / fileList.Count, String.Format("Processing {0} ({1:N0} of {2:N0})", Path.GetFileName(file), i + 1, fileList.Count));
+                }
+
                 // Let's open the file.
                 // But, we're going to do this in a try catch in case any errors happen.
                 try
@@ -94,9 +106,6 @@ namespace PuyoTools.GUI
                     // Meh, just ignore the error.
                 }
             }
-
-            // The tool is finished doing what it needs to do. We can close it now.
-            this.Close();
         }
 
         private struct Settings
@@ -117,8 +126,20 @@ namespace PuyoTools.GUI
             settings.OverwriteSourceFile = overwriteSourceFileCheckbox.Checked;
             settings.DeleteSourceFile = deleteSourceFileCheckbox.Checked;
 
-            // Run the tool
-            Run(settings);
+            // Set up the process dialog and then run the tool
+            ProgressDialog dialog = new ProgressDialog();
+            dialog.WindowTitle = "Processing";
+            dialog.Title = "Compressing Files";
+            dialog.DoWork += delegate(object sender2, DoWorkEventArgs e2)
+            {
+                Run(settings, dialog);
+            };
+            dialog.RunWorkerCompleted += delegate(object sender2, RunWorkerCompletedEventArgs e2)
+            {
+                // The tool is finished doing what it needs to do. We can close it now.
+                this.Close();
+            };
+            dialog.RunWorkerAsync();
         }
     }
 }

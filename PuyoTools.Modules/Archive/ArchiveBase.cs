@@ -119,6 +119,11 @@ namespace PuyoTools.Modules.Archive
         protected Stream destination;
         protected List<ArchiveEntry> files;
 
+        public int NumberOfFiles
+        {
+            get { return files.Count; }
+        }
+
         public abstract void Flush();
 
         protected void Initalize(Stream destination)
@@ -149,6 +154,18 @@ namespace PuyoTools.Modules.Archive
             // All we're going to do is add the file to the entry list
             // The magic happens once Flush is called.
             files.Add(new ArchiveEntry(source, source.Position, length, fname, sourceFile));
+        }
+
+        // File added event
+        public delegate void FileAddedHandler(object sender, EventArgs e);
+        public event EventHandler FileAdded;
+        protected virtual void OnFileAdded(EventArgs e)
+        {
+            EventHandler handler = FileAdded;
+            if (handler != null)
+            {
+                FileAdded(this, e);
+            }
         }
     }
 

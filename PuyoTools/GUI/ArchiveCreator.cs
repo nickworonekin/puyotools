@@ -105,8 +105,14 @@ namespace PuyoTools.GUI
             runButton.Enabled = (listView.Items.Count > 0 && archiveFormatBox.SelectedIndex > 0);
         }
 
-        private void Run(Settings settings)
+        private void Run(Settings settings, ProgressDialog dialog)
         {
+            // Setup some stuff for the progress dialog
+            int numFilesAdded = 0;
+            string description = String.Format("Processing {0}", Path.GetFileName(settings.OutFilename));
+
+            dialog.ReportProgress(0, description);
+
             // For some archives, the file needs to be a specific format. As such,
             // they may be rejected when trying to add them. We'll store such files in
             // this list to let the user know they could not be added.
@@ -128,12 +134,28 @@ namespace PuyoTools.GUI
             // Create the archive
             ArchiveWriter archive = Archive.Create(destination, settings.ArchiveFormat, settings.ArchiveSettings);
 
+            // Add the file added event handler the archive
+            archive.FileAdded += delegate(object sender, EventArgs e)
+            {
+                numFilesAdded++;
+
+                if (numFilesAdded == archive.NumberOfFiles)
+                {
+                    dialog.ReportProgress(100, "Finishing up");
+                }
+                else
+                {
+                    dialog.ReportProgress(numFilesAdded * 100 / archive.NumberOfFiles, description + "\n\n" + String.Format("Adding {0} ({1:N0} of {2:N0})", Path.GetFileName(settings.FileEntries[numFilesAdded].SourceFile), numFilesAdded + 1, archive.NumberOfFiles));
+                }
+            };
+
             // Add the files to the archive. We're going to do this in a try catch since
             // sometimes an exception may be thrown (namely if the archive cannot contain
             // the file the user is trying to add)
-            foreach (ListViewItem item in listView.Items)
+            //foreach (ListViewItem item in listView.Items)
+            foreach (FileEntry entry in settings.FileEntries)
             {
-                FileEntry entry = (FileEntry)item.Tag;
+                //FileEntry entry = (FileEntry)item.Tag;
 
                 try
                 {
@@ -152,7 +174,15 @@ namespace PuyoTools.GUI
                 // ...
             }
 
-            // Finish writing the archive
+            if (archive.NumberOfFiles == 1)
+            {
+                dialog.Description = description + "\n\n" + String.Format("Adding {0}", Path.GetFileName(settings.FileEntries[numFilesAdded].SourceFile));
+            }
+            else
+            {
+                dialog.Description = description + "\n\n" + String.Format("Adding {0} ({1:N0} of {2:N0})", Path.GetFileName(settings.FileEntries[numFilesAdded].SourceFile), numFilesAdded + 1, archive.NumberOfFiles);
+            }
+
             archive.Flush();
 
             // Do we want to compress this archive?
@@ -167,9 +197,6 @@ namespace PuyoTools.GUI
             }
 
             destination.Close();
-
-            // The tool is finished doing what it needs to do. We can close it now.
-            this.Close();
         }
 
         private struct FileEntry
@@ -322,7 +349,33 @@ namespace PuyoTools.GUI
                     settings.ArchiveSettings.SetSettings();
                 }
 
-                Run(settings);
+                settings.FileEntries = new List<FileEntry>();
+                foreach (ListViewItem item in listView.Items)
+                {
+                    FileEntry listViewEntry = (FileEntry)item.Tag;
+                    FileEntry entry = new FileEntry();
+
+                    entry.Filename = listViewEntry.Filename;
+                    entry.FilenameInArchive = listViewEntry.FilenameInArchive;
+                    entry.SourceFile = listViewEntry.SourceFile;
+
+                    settings.FileEntries.Add(entry);
+                }
+
+                // Set up the process dialog and then run the tool
+                ProgressDialog dialog = new ProgressDialog();
+                dialog.WindowTitle = "Processing";
+                dialog.Title = "Creating Archive";
+                dialog.DoWork += delegate(object sender2, DoWorkEventArgs e2)
+                {
+                    Run(settings, dialog);
+                };
+                dialog.RunWorkerCompleted += delegate(object sender2, RunWorkerCompletedEventArgs e2)
+                {
+                    // The tool is finished doing what it needs to do. We can close it now.
+                    this.Close();
+                };
+                dialog.RunWorkerAsync();
             }
         }
 
@@ -332,6 +385,7 @@ namespace PuyoTools.GUI
             public CompressionFormat CompressionFormat;
             public string OutFilename;
             public ModuleWriterSettings ArchiveSettings;
+            public List<FileEntry> FileEntries;
         }
     }
 }

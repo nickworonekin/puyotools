@@ -103,6 +103,9 @@ namespace PuyoTools.Modules.Archive
                 for (int i = 0; i < files.Count; i++)
                 {
                     PTStream.CopyPartToPadded(files[i].Stream, destination, files[i].Length, 4, 0);
+
+                    // Call the file added event
+                    OnFileAdded(EventArgs.Empty);
                 }
             }
         }

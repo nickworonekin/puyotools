@@ -323,9 +323,6 @@ namespace PuyoTools.GUI
                     // Meh, just ignore the error.
                 }
             }
-
-            // The tool is finished doing what it needs to do. We can close it now.
-            //this.Close();
         }
 
         private struct Settings
@@ -366,7 +363,7 @@ namespace PuyoTools.GUI
             settings.ExtractExtractedArchives = extractExtractedArchivesCheckbox.Checked;
             settings.ConvertExtractedTextures = convertExtractedTexturesCheckbox.Checked;
 
-            // Run the tool
+            // Set up the process dialog and then run the tool
             ProgressDialog dialog = new ProgressDialog();
             dialog.WindowTitle = "Processing";
             dialog.Title = "Extracting Files";
@@ -376,6 +373,7 @@ namespace PuyoTools.GUI
             };
             dialog.RunWorkerCompleted += delegate(object sender2, RunWorkerCompletedEventArgs e2)
             {
+                // The tool is finished doing what it needs to do. We can close it now.
                 this.Close();
             };
             dialog.RunWorkerAsync();
