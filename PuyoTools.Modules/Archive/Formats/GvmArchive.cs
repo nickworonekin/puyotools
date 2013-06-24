@@ -185,7 +185,7 @@ namespace PuyoTools.Modules.Archive
                 this.settings = settings;
             }
 
-            public override void AddFile(Stream source, int length, string fname)
+            public override void AddFile(Stream source, int length, string fname, string sourceFile)
             {
                 // Only GVR textures can be added to a GVM archive.
                 // If this is not a GVR texture, throw an exception
@@ -194,7 +194,7 @@ namespace PuyoTools.Modules.Archive
                     throw new CannotAddFileToArchiveException();
                 }
 
-                base.AddFile(source, length, fname);
+                base.AddFile(source, length, fname, sourceFile);
             }
 
             public override void Flush()

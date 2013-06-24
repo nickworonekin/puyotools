@@ -142,14 +142,12 @@ namespace PuyoTools.Modules.Archive
             AddFile(source, (int)(source.Length - source.Position), fname, sourceFile);
         }
 
-        public virtual void AddFile(Stream source, int length, string fname)
+        public void AddFile(Stream source, int length, string fname)
         {
-            // All we're going to do is add the file to the entry list
-            // The magic happens once Flush is called.
-            files.Add(new ArchiveEntry(source, source.Position, length, fname));
+            AddFile(source, length, fname, String.Empty);
         }
 
-        public void AddFile(Stream source, int length, string fname, string sourceFile)
+        public virtual void AddFile(Stream source, int length, string fname, string sourceFile)
         {
             // All we're going to do is add the file to the entry list
             // The magic happens once Flush is called.

@@ -112,6 +112,12 @@
     <Compile Include="GUI\FileListForm.Designer.cs">
       <DependentUpon>FileListForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="GUI\FilesNotAddedDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUI\FilesNotAddedDialog.Designer.cs">
+      <DependentUpon>FilesNotAddedDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="GUI\MainWindow.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -195,6 +201,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="GUI\FileListForm.resx">
       <DependentUpon>FileListForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUI\FilesNotAddedDialog.resx">
+      <DependentUpon>FilesNotAddedDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GUI\MainWindow.resx">
       <DependentUpon>MainWindow.cs</DependentUpon>

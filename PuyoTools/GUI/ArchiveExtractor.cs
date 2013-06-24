@@ -366,7 +366,7 @@ namespace PuyoTools.GUI
             // Set up the process dialog and then run the tool
             ProgressDialog dialog = new ProgressDialog();
             dialog.WindowTitle = "Processing";
-            dialog.Title = "Extracting Files";
+            dialog.Title = "Extracting Archives";
             dialog.DoWork += delegate(object sender2, DoWorkEventArgs e2)
             {
                 Run(settings, dialog);

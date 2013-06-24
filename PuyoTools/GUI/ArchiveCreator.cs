@@ -116,7 +116,7 @@ namespace PuyoTools.GUI
             // For some archives, the file needs to be a specific format. As such,
             // they may be rejected when trying to add them. We'll store such files in
             // this list to let the user know they could not be added.
-            List<FileEntry> FilesNotAdded = new List<FileEntry>();
+            List<string> FilesNotAdded = new List<string>();
 
             // Create the stream we are going to write the archive to
             Stream destination;
@@ -163,7 +163,7 @@ namespace PuyoTools.GUI
                 }
                 catch (CannotAddFileToArchiveException)
                 {
-                    FilesNotAdded.Add(entry);
+                    FilesNotAdded.Add(entry.SourceFile);
                 }
             }
 
@@ -171,7 +171,11 @@ namespace PuyoTools.GUI
             // and ask them if they want to continue
             if (FilesNotAdded.Count > 0)
             {
-                // ...
+                if (new FilesNotAddedDialog(FilesNotAdded).ShowDialog() != DialogResult.Yes)
+                {
+                    destination.Close();
+                    return;
+                }
             }
 
             if (archive.NumberOfFiles == 1)
