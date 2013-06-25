@@ -27,58 +27,65 @@ namespace PuyoTools.Modules.Compression
         /// <param name="length">Number of bytes to read.</param>
         public override void Decompress(Stream source, Stream destination, int length)
         {
-            byte[] sourceBuffer = new byte[length];
-            source.Read(sourceBuffer, 0, length);
+            source.Position += 4;
 
-            // Set up information for decompression
-            int sourcePointer = 0x40;
-            int destPointer   = 0x0;
-            int bufferPointer = 0xFEE;
+            // Get the source length, destination length, and encryption key
+            int sourceLength = PTStream.ReadInt32(source);
 
-            int sourceLength = BitConverter.ToInt32(sourceBuffer, 0x4);
-            int destLength   = BitConverter.ToInt32(sourceBuffer, 0x30);
+            source.Position += 40;
 
-            uint key = BitConverter.ToUInt32(sourceBuffer,  0x34);
+            int destinationLength = PTStream.ReadInt32(source);
+            uint key = PTStream.ReadUInt32(source);
 
+            source.Position += 8;
+
+            // Set the source, destination, and buffer pointers
+            int sourcePointer      = 0x40;
+            int destinationPointer = 0x0;
+            int bufferPointer      = 0xFEE;
+
+            // Initalize the buffer
             byte[] buffer = new byte[0x1000];
 
-            // Start Decompression
-            while (sourcePointer < sourceLength && destPointer < destLength)
+            // Start decompression
+            while (sourcePointer < sourceLength && destinationPointer < destinationLength)
             {
-                byte flag = Get(sourceBuffer[sourcePointer], ref key); // Compression Flag
+                byte flag = ReadByte(source, ref key);
                 sourcePointer++;
 
                 for (int i = 0; i < 8; i++)
                 {
-                    if ((flag & 0x1) != 0) // Data is not compressed
+                    if ((flag & 0x1) != 0) // Not compressed
                     {
-                        buffer[bufferPointer] = Get(sourceBuffer[sourcePointer], ref key);
-                        destination.WriteByte(buffer[bufferPointer]);
+                        byte value = ReadByte(source, ref key);
                         sourcePointer++;
-                        destPointer++;
+
+                        destination.WriteByte(value);
+                        destinationPointer++;
+
+                        buffer[bufferPointer] = value;
                         bufferPointer = (bufferPointer + 1) & 0xFFF;
                     }
-                    else // Data is compressed
+                    else // Compressed
                     {
-                        byte b1 = Get(sourceBuffer[sourcePointer], ref key), b2 = Get(sourceBuffer[sourcePointer + 1], ref key);
-
-                        int bufferOffset = b1 | ((b2 & 0xF0) << 4);
-                        int amount = (b2 & 0xF) + 3;
+                        byte b1 = ReadByte(source, ref key), b2 = ReadByte(source, ref key);
                         sourcePointer += 2;
 
-                        // Copy the data
-                        for (int j = 0; j < amount; j++)
+                        int matchOffset = (((b2 >> 4) & 0xF) << 8) | b1;
+                        int matchLength = (b2 & 0xF) + 3;
+
+                        for (int j = 0; j < matchLength; j++)
                         {
-                            buffer[bufferPointer] = buffer[bufferOffset];
-                            destination.WriteByte(buffer[bufferPointer]);
-                            destPointer++;
+                            destination.WriteByte(buffer[(matchOffset + j) & 0xFFF]);
+                            destinationPointer++;
+
+                            buffer[bufferPointer] = buffer[(matchOffset + j) & 0xFFF];
                             bufferPointer = (bufferPointer + 1) & 0xFFF;
-                            bufferOffset = (bufferOffset + 1) & 0xFFF;
                         }
                     }
 
-                    // Check for out of range
-                    if (sourcePointer >= length || destPointer >= destLength)
+                    // Check to see if we reached the end of the file
+                    if (sourcePointer >= sourceLength || destinationPointer >= destinationLength)
                         break;
 
                     flag >>= 1;
@@ -119,7 +126,17 @@ namespace PuyoTools.Modules.Compression
             return false;
         }
 
-        private static byte Get(byte value, ref uint key)
+        private byte ReadByte(Stream source, ref uint key)
+        {
+            return Get(PTStream.ReadByte(source), ref key);
+        }
+
+        private void WriteByte(Stream destination, byte value, ref uint key)
+        {
+            destination.WriteByte(Get(value, ref key));
+        }
+
+        private byte Get(byte value, ref uint key)
         {
             // Generate a new key
             uint x = (((((((key << 1) + key) << 5) - key) << 5) + key) << 7) - key;

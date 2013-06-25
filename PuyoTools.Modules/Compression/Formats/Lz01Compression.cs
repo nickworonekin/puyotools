@@ -23,54 +23,61 @@ namespace PuyoTools.Modules.Compression
         /// <param name="length">Number of bytes to read.</param>
         public override void Decompress(Stream source, Stream destination, int length)
         {
-            byte[] sourceBuffer = new byte[length];
-            source.Read(sourceBuffer, 0, length);
+            source.Position += 4;
 
-            // Set up information for decompression
-            int sourcePointer = 0x10;
-            int destPointer   = 0x0;
-            int bufferPointer = 0xFEE;
+            // Get the source length and the destination length
+            int sourceLength      = PTStream.ReadInt32(source);
+            int destinationLength = PTStream.ReadInt32(source);
 
-            int sourceLength = BitConverter.ToInt32(sourceBuffer, 0x4);
-            int destLength   = BitConverter.ToInt32(sourceBuffer, 0x8);
+            source.Position += 4;
 
+            // Set the source, destination, and buffer pointers
+            int sourcePointer      = 0x10;
+            int destinationPointer = 0x0;
+            int bufferPointer      = 0xFEE;
+
+            // Initalize the buffer
             byte[] buffer = new byte[0x1000];
 
-            // Start Decompression
-            while (sourcePointer < sourceLength && destPointer < destLength)
+            // Start decompression
+            while (sourcePointer < sourceLength && destinationPointer < destinationLength)
             {
-                byte flag = sourceBuffer[sourcePointer]; // Compression Flag
+                byte flag = PTStream.ReadByte(source);
                 sourcePointer++;
 
                 for (int i = 0; i < 8; i++)
                 {
-                    if ((flag & 0x1) != 0) // Data is not compressed
+                    if ((flag & 0x1) != 0) // Not compressed
                     {
-                        buffer[bufferPointer] = sourceBuffer[sourcePointer];
-                        destination.WriteByte(buffer[bufferPointer]);
+                        byte value = PTStream.ReadByte(source);
                         sourcePointer++;
-                        destPointer++;
+
+                        destination.WriteByte(value);
+                        destinationPointer++;
+
+                        buffer[bufferPointer] = value;
                         bufferPointer = (bufferPointer + 1) & 0xFFF;
                     }
-                    else // Data is compressed
+                    else // Compressed
                     {
-                        int bufferOffset = sourceBuffer[sourcePointer] | ((sourceBuffer[sourcePointer + 1] & 0xF0) << 4);
-                        int amount = (sourceBuffer[sourcePointer + 1] & 0xF) + 3;
+                        byte b1 = PTStream.ReadByte(source), b2 = PTStream.ReadByte(source);
                         sourcePointer += 2;
 
-                        // Copy the data
-                        for (int j = 0; j < amount; j++)
+                        int matchOffset = (((b2 >> 4) & 0xF) << 8) | b1;
+                        int matchLength = (b2 & 0xF) + 3;
+
+                        for (int j = 0; j < matchLength; j++)
                         {
-                            buffer[bufferPointer] = buffer[bufferOffset];
-                            destination.WriteByte(buffer[bufferPointer]);
-                            destPointer++;
+                            destination.WriteByte(buffer[(matchOffset + j) & 0xFFF]);
+                            destinationPointer++;
+
+                            buffer[bufferPointer] = buffer[(matchOffset + j) & 0xFFF];
                             bufferPointer = (bufferPointer + 1) & 0xFFF;
-                            bufferOffset = (bufferOffset + 1) & 0xFFF;
                         }
                     }
 
-                    // Check for out of range
-                    if (sourcePointer >= length || destPointer >= destLength)
+                    // Check to see if we reached the end of the file
+                    if (sourcePointer >= sourceLength || destinationPointer >= destinationLength)
                         break;
 
                     flag >>= 1;
