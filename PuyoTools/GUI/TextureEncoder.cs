@@ -15,8 +15,7 @@ namespace PuyoTools.GUI
 {
     public partial class TextureEncoder : ToolForm
     {
-        List<TextureWriterSettings> formatWriterSettings;
-        List<Control> writerSettingsControls;
+        List<ModuleSettingsControl> writerSettingsControls;
         List<TextureFormat> textureFormats;
         List<CompressionFormat> compressionFormats;
 
@@ -25,8 +24,7 @@ namespace PuyoTools.GUI
             InitializeComponent();
 
             // Set up the writer settings panel and format writer settings
-            formatWriterSettings = new List<TextureWriterSettings>();
-            writerSettingsControls = new List<Control>();
+            writerSettingsControls = new List<ModuleSettingsControl>();
 
             // Fill the texture format box
             textureFormatBox.SelectedIndex = 0;
@@ -38,17 +36,7 @@ namespace PuyoTools.GUI
                     textureFormatBox.Items.Add(format.Value.Name);
                     textureFormats.Add(format.Key);
 
-                    TextureWriterSettings writerSettings = (TextureWriterSettings)format.Value.WriterSettingsObject();
-                    if (writerSettings != null)
-                    {
-                        writerSettingsControls.Add(writerSettings.Content());
-                    }
-                    else
-                    {
-                        writerSettingsControls.Add(null);
-                    }
-
-                    formatWriterSettings.Add(writerSettings);
+                    writerSettingsControls.Add(format.Value.GetModuleSettingsControl());
                 }
             }
 
@@ -102,15 +90,23 @@ namespace PuyoTools.GUI
                     }
                     string outFname = Path.ChangeExtension(Path.GetFileName(file), Texture.Formats[settings.TextureFormat].FileExtension);
 
-                    // Set the source path (really only used for GIM textures at the current moment).
-                    settings.TextureSettings.SourcePath = file;
-
                     MemoryStream buffer = new MemoryStream();
+
+                    // Run it through the texture encoder.
+                    TextureBase texture = Texture.Formats[settings.TextureFormat];
 
                     using (FileStream source = File.OpenRead(file))
                     {
-                        // Run it through the texture encoder.
-                        Texture.Write(source, buffer, (int)source.Length, settings.TextureSettings, settings.TextureFormat);
+                        // Set the source path (really only used for GIM textures at the current moment).
+                        texture.SourcePath = file;
+
+                        // Set texture settings
+                        if (settings.WriterSettingsControl != null)
+                        {
+                            settings.WriterSettingsControl.SetModuleSettings(texture);
+                        }
+
+                        texture.Write(source, buffer, (int)source.Length);
                     }
 
                     // Do we want to compress this texture?
@@ -137,11 +133,13 @@ namespace PuyoTools.GUI
                     }
 
                     // Write out the palette file (if one was created along with the texture).
-                    if (settings.TextureSettings.PaletteStream != null)
+                    if (texture.PaletteStream != null)
                     {
                         using (FileStream destination = File.Create(Path.Combine(outPath, Path.ChangeExtension(outFname, Texture.Formats[settings.TextureFormat].PaletteFileExtension))))
                         {
-                            settings.TextureSettings.PaletteStream.WriteTo(destination);
+                            texture.PaletteStream.Position = 0;
+                            PTStream.CopyTo(texture.PaletteStream, destination);
+                            //texture.PaletteStream.WriteTo(destination);
                         }
                     }
 
@@ -196,11 +194,7 @@ namespace PuyoTools.GUI
                 settings.CompressionFormat = CompressionFormat.Unknown;
             }
 
-            settings.TextureSettings = formatWriterSettings[textureFormatBox.SelectedIndex - 1];
-            if (settings.TextureSettings != null)
-            {
-                settings.TextureSettings.SetSettings();
-            }
+            settings.WriterSettingsControl = writerSettingsControls[textureFormatBox.SelectedIndex - 1];
 
             // Set up the process dialog and then run the tool
             ProgressDialog dialog = new ProgressDialog();
@@ -222,7 +216,7 @@ namespace PuyoTools.GUI
         {
             public TextureFormat TextureFormat;
             public CompressionFormat CompressionFormat;
-            public TextureWriterSettings TextureSettings;
+            public ModuleSettingsControl WriterSettingsControl;
 
             public bool OutputToSourceDirectory;
             public bool DeleteSource;

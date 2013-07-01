@@ -29,14 +29,14 @@ namespace PuyoTools.Modules.Archive
             return new Reader(source, length);
         }
 
-        public override ArchiveWriter Create(Stream destination, ModuleWriterSettings settings)
+        public override ArchiveWriter Create(Stream destination)
         {
-            return new Writer(destination, (settings as WriterSettings) ?? new WriterSettings());
+            return new Writer(destination);
         }
 
-        public override ModuleWriterSettings WriterSettingsObject()
+        public override ModuleSettingsControl GetModuleSettingsControl()
         {
-            return new WriterSettings();
+            return new SntWriterSettings();
         }
 
         public override bool Is(Stream source, int length, string fname)
@@ -45,7 +45,8 @@ namespace PuyoTools.Modules.Archive
                 && (PTStream.Contains(source, 0, new byte[] { (byte)'N', (byte)'U', (byte)'I', (byte)'F' })
                 && PTStream.Contains(source, 32, new byte[] { (byte)'N', (byte)'U', (byte)'T', (byte)'L' }))
                 || (PTStream.Contains(source, 0, new byte[] { (byte)'N', (byte)'S', (byte)'I', (byte)'F' })
-                && PTStream.Contains(source, 32, new byte[] { (byte)'N', (byte)'S', (byte)'T', (byte)'L' })));
+                && PTStream.Contains(source, 32, new byte[] { (byte)'N', (byte)'S', (byte)'T', (byte)'L' }))
+                && PTStream.ReadInt32At(source, source.Position + 8) == 1);
         }
 
         public class Reader : ArchiveReader
@@ -109,14 +110,38 @@ namespace PuyoTools.Modules.Archive
 
         public class Writer : ArchiveWriter
         {
-            WriterSettings settings;
+            #region Settings
+            /// <summary>
+            /// The platform this archive is to be used on. The default value is WriterSettings.SntType.Ps2
+            /// </summary>
+            public SntPlatform Platform
+            {
+                get { return platform; }
+                set
+                {
+                    if (value != SntPlatform.Ps2 && value != SntPlatform.Psp)
+                    {
+                        throw new ArgumentOutOfRangeException("Platform");
+                    }
 
-            public Writer(Stream destination) : this(destination, new WriterSettings()) { }
+                    platform = value;
+                }
+            }
+            private SntPlatform platform;
 
-            public Writer(Stream destination, WriterSettings settings)
+            public enum SntPlatform
+            {
+                Ps2, // PlayStation 2
+                Psp, // PlayStation Portable
+            }
+            #endregion
+
+            public Writer(Stream destination)
             {
                 Initalize(destination);
-                this.settings = settings;
+
+                // Set default settings
+                platform = SntPlatform.Ps2;
             }
 
             public override void Flush()
@@ -125,7 +150,7 @@ namespace PuyoTools.Modules.Archive
                 long offset = destination.Position;
 
                 // Magic code "NSIF/NUTL"
-                if (settings.Type == WriterSettings.SntType.Ps2)
+                if (platform == SntPlatform.Ps2)
                 {
                     destination.WriteByte((byte)'N');
                     destination.WriteByte((byte)'S');
@@ -157,7 +182,7 @@ namespace PuyoTools.Modules.Archive
                 PTStream.WriteInt32(destination, 1);
 
                 // NSTL/NUIL chunk
-                if (settings.Type == WriterSettings.SntType.Ps2)
+                if (platform == SntPlatform.Ps2)
                 {
                     destination.WriteByte((byte)'N');
                     destination.WriteByte((byte)'S');
@@ -244,30 +269,6 @@ namespace PuyoTools.Modules.Archive
 
                 while ((destination.Position - offset) % 16 != 0)
                     destination.WriteByte(0);
-            }
-        }
-
-        public class WriterSettings : ModuleWriterSettings
-        {
-            private SntWriterSettings writerSettingsControls;
-
-            public SntType Type = SntType.Ps2;
-
-            public enum SntType
-            {
-                Ps2, // PlayStation 2
-                Psp, // PlayStation Portable
-            }
-
-            public override Control Content()
-            {
-                writerSettingsControls = new SntWriterSettings();
-                return writerSettingsControls;
-            }
-
-            public override void SetSettings()
-            {
-                Type = (writerSettingsControls.TypePs2Radio.Checked ? SntType.Ps2 : SntType.Psp);
             }
         }
     }

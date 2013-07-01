@@ -37,7 +37,7 @@ namespace PuyoTools.Modules.Compression
         /// <param name="destination">The stream to write to.</param>
         /// <param name="length">Number of bytes to read.</param>
         /// <param name="settings">Settings to use when compressing.</param>
-        public override void Compress(Stream source, Stream destination, int length, ModuleWriterSettings settings)
+        public override void Compress(Stream source, Stream destination, int length)
         {
             // The CXLZ format is identical to LZ10 with the exception of "CXLZ" at the beginning of the file
             // As such, we'll just write "CXLZ" to the destination then pass it off to the LZ10 compressor
@@ -47,7 +47,7 @@ namespace PuyoTools.Modules.Compression
             destination.WriteByte((byte)'L');
             destination.WriteByte((byte)'Z');
 
-            (new Lz10Compression()).Compress(source, destination, length, settings);
+            (new Lz10Compression()).Compress(source, destination, length);
         }
 
         /// <summary>

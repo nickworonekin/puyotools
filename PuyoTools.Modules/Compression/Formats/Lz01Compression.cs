@@ -92,7 +92,7 @@ namespace PuyoTools.Modules.Compression
         /// <param name="destination">The stream to write to.</param>
         /// <param name="length">Number of bytes to read.</param>
         /// <param name="settings">Settings to use when compressing.</param>
-        public override void Compress(Stream source, Stream destination, int length, ModuleWriterSettings settings)
+        public override void Compress(Stream source, Stream destination, int length)
         {
             throw new NotImplementedException();
         }
@@ -106,16 +106,9 @@ namespace PuyoTools.Modules.Compression
         /// <returns>True if the data is in the specified format, false otherwise.</returns>
         public override bool Is(Stream source, int length, string fname)
         {
-            if (length > 16 && PTStream.Contains(source, 0, new byte[] { (byte)'L', (byte)'Z', (byte)'0', (byte)'1' }))
-            {
-                source.Position += 4;
-                int value = PTStream.ReadInt32(source);
-                source.Position -= 8;
-
-                return (value == length);
-            }
-
-            return false;
+            return (length > 16 &&
+                PTStream.Contains(source, 0, new byte[] { (byte)'L', (byte)'Z', (byte)'0', (byte)'1' }) &&
+                PTStream.ReadInt32At(source, source.Position + 4) == length);
         }
     }
 }

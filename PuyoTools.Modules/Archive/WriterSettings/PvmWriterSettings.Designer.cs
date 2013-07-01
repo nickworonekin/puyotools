@@ -29,82 +29,81 @@
         private void InitializeComponent()
         {
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
-            this.FilenameCheckbox = new System.Windows.Forms.CheckBox();
-            this.GlobalIndexCheckbox = new System.Windows.Forms.CheckBox();
-            this.FormatCheckbox = new System.Windows.Forms.CheckBox();
-            this.DimensionsCheckbox = new System.Windows.Forms.CheckBox();
+            this.hasFilenamesCheckbox = new System.Windows.Forms.CheckBox();
+            this.hasGlobalIndexesCheckbox = new System.Windows.Forms.CheckBox();
+            this.hasFormatsCheckbox = new System.Windows.Forms.CheckBox();
+            this.hasDimensionsCheckbox = new System.Windows.Forms.CheckBox();
             this.flowLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // flowLayoutPanel1
             // 
             this.flowLayoutPanel1.AutoSize = true;
-            this.flowLayoutPanel1.Controls.Add(this.FilenameCheckbox);
-            this.flowLayoutPanel1.Controls.Add(this.GlobalIndexCheckbox);
-            this.flowLayoutPanel1.Controls.Add(this.FormatCheckbox);
-            this.flowLayoutPanel1.Controls.Add(this.DimensionsCheckbox);
+            this.flowLayoutPanel1.Controls.Add(this.hasFilenamesCheckbox);
+            this.flowLayoutPanel1.Controls.Add(this.hasGlobalIndexesCheckbox);
+            this.flowLayoutPanel1.Controls.Add(this.hasFormatsCheckbox);
+            this.flowLayoutPanel1.Controls.Add(this.hasDimensionsCheckbox);
             this.flowLayoutPanel1.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
             this.flowLayoutPanel1.Location = new System.Drawing.Point(3, 3);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(153, 92);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(147, 92);
             this.flowLayoutPanel1.TabIndex = 0;
             // 
-            // FilenameCheckbox
+            // hasFilenamesCheckbox
             // 
-            this.FilenameCheckbox.AutoSize = true;
-            this.FilenameCheckbox.Checked = true;
-            this.FilenameCheckbox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.FilenameCheckbox.Location = new System.Drawing.Point(3, 3);
-            this.FilenameCheckbox.Name = "FilenameCheckbox";
-            this.FilenameCheckbox.Size = new System.Drawing.Size(101, 17);
-            this.FilenameCheckbox.TabIndex = 0;
-            this.FilenameCheckbox.Text = "Store Filenames";
-            this.FilenameCheckbox.UseVisualStyleBackColor = true;
+            this.hasFilenamesCheckbox.AutoSize = true;
+            this.hasFilenamesCheckbox.Checked = true;
+            this.hasFilenamesCheckbox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.hasFilenamesCheckbox.Location = new System.Drawing.Point(3, 3);
+            this.hasFilenamesCheckbox.Name = "hasFilenamesCheckbox";
+            this.hasFilenamesCheckbox.Size = new System.Drawing.Size(95, 17);
+            this.hasFilenamesCheckbox.TabIndex = 0;
+            this.hasFilenamesCheckbox.Text = "Has Filenames";
+            this.hasFilenamesCheckbox.UseVisualStyleBackColor = true;
             // 
-            // GlobalIndexCheckbox
+            // hasGlobalIndexesCheckbox
             // 
-            this.GlobalIndexCheckbox.AutoSize = true;
-            this.GlobalIndexCheckbox.Checked = true;
-            this.GlobalIndexCheckbox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.GlobalIndexCheckbox.Location = new System.Drawing.Point(3, 26);
-            this.GlobalIndexCheckbox.Name = "GlobalIndexCheckbox";
-            this.GlobalIndexCheckbox.Size = new System.Drawing.Size(123, 17);
-            this.GlobalIndexCheckbox.TabIndex = 1;
-            this.GlobalIndexCheckbox.Text = "Store Global Indicies";
-            this.GlobalIndexCheckbox.UseVisualStyleBackColor = true;
+            this.hasGlobalIndexesCheckbox.AutoSize = true;
+            this.hasGlobalIndexesCheckbox.Checked = true;
+            this.hasGlobalIndexesCheckbox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.hasGlobalIndexesCheckbox.Location = new System.Drawing.Point(3, 26);
+            this.hasGlobalIndexesCheckbox.Name = "hasGlobalIndexesCheckbox";
+            this.hasGlobalIndexesCheckbox.Size = new System.Drawing.Size(118, 17);
+            this.hasGlobalIndexesCheckbox.TabIndex = 1;
+            this.hasGlobalIndexesCheckbox.Text = "Has Global Indexes";
+            this.hasGlobalIndexesCheckbox.UseVisualStyleBackColor = true;
             // 
-            // FormatCheckbox
+            // hasFormatsCheckbox
             // 
-            this.FormatCheckbox.AutoSize = true;
-            this.FormatCheckbox.Checked = true;
-            this.FormatCheckbox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.FormatCheckbox.Location = new System.Drawing.Point(3, 49);
-            this.FormatCheckbox.Name = "FormatCheckbox";
-            this.FormatCheckbox.Size = new System.Drawing.Size(125, 17);
-            this.FormatCheckbox.TabIndex = 2;
-            this.FormatCheckbox.Text = "Store Texture Format";
-            this.FormatCheckbox.UseVisualStyleBackColor = true;
+            this.hasFormatsCheckbox.AutoSize = true;
+            this.hasFormatsCheckbox.Checked = true;
+            this.hasFormatsCheckbox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.hasFormatsCheckbox.Location = new System.Drawing.Point(3, 49);
+            this.hasFormatsCheckbox.Name = "hasFormatsCheckbox";
+            this.hasFormatsCheckbox.Size = new System.Drawing.Size(124, 17);
+            this.hasFormatsCheckbox.TabIndex = 2;
+            this.hasFormatsCheckbox.Text = "Has Texture Formats";
+            this.hasFormatsCheckbox.UseVisualStyleBackColor = true;
             // 
-            // DimensionsCheckbox
+            // hasDimensionsCheckbox
             // 
-            this.DimensionsCheckbox.AutoSize = true;
-            this.DimensionsCheckbox.Checked = true;
-            this.DimensionsCheckbox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.DimensionsCheckbox.Location = new System.Drawing.Point(3, 72);
-            this.DimensionsCheckbox.Name = "DimensionsCheckbox";
-            this.DimensionsCheckbox.Size = new System.Drawing.Size(147, 17);
-            this.DimensionsCheckbox.TabIndex = 3;
-            this.DimensionsCheckbox.Text = "Store Texture Dimensions";
-            this.DimensionsCheckbox.UseVisualStyleBackColor = true;
+            this.hasDimensionsCheckbox.AutoSize = true;
+            this.hasDimensionsCheckbox.Checked = true;
+            this.hasDimensionsCheckbox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.hasDimensionsCheckbox.Location = new System.Drawing.Point(3, 72);
+            this.hasDimensionsCheckbox.Name = "hasDimensionsCheckbox";
+            this.hasDimensionsCheckbox.Size = new System.Drawing.Size(141, 17);
+            this.hasDimensionsCheckbox.TabIndex = 3;
+            this.hasDimensionsCheckbox.Text = "Has Texture Dimensions";
+            this.hasDimensionsCheckbox.UseVisualStyleBackColor = true;
             // 
             // PvmWriterSettings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.AutoSize = true;
             this.Controls.Add(this.flowLayoutPanel1);
             this.Name = "PvmWriterSettings";
-            this.Size = new System.Drawing.Size(159, 98);
+            this.Size = new System.Drawing.Size(153, 98);
             this.flowLayoutPanel1.ResumeLayout(false);
             this.flowLayoutPanel1.PerformLayout();
             this.ResumeLayout(false);
@@ -115,9 +114,9 @@
         #endregion
 
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
-        public System.Windows.Forms.CheckBox FilenameCheckbox;
-        public System.Windows.Forms.CheckBox GlobalIndexCheckbox;
-        public System.Windows.Forms.CheckBox FormatCheckbox;
-        public System.Windows.Forms.CheckBox DimensionsCheckbox;
+        private System.Windows.Forms.CheckBox hasFilenamesCheckbox;
+        private System.Windows.Forms.CheckBox hasGlobalIndexesCheckbox;
+        private System.Windows.Forms.CheckBox hasFormatsCheckbox;
+        private System.Windows.Forms.CheckBox hasDimensionsCheckbox;
     }
 }

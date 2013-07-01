@@ -288,6 +288,36 @@ namespace PuyoTools.Modules
             destination.WriteByte((byte)(value & 0xFF));
         }
 
+        public static int ReadInt32At(Stream source, long offset)
+        {
+            long oldPosition = source.Position;
+            source.Position = offset;
+            int value = ReadInt32(source);
+            source.Position = oldPosition;
+
+            return value;
+        }
+
+        public static int ReadInt32BEAt(Stream source, long offset)
+        {
+            long oldPosition = source.Position;
+            source.Position = offset;
+            int value = ReadInt32BE(source);
+            source.Position = oldPosition;
+
+            return value;
+        }
+
+        public static uint ReadUInt32At(Stream source, long offset)
+        {
+            long oldPosition = source.Position;
+            source.Position = offset;
+            uint value = ReadUInt32(source);
+            source.Position = oldPosition;
+
+            return value;
+        }
+
         /// <summary>
         /// Reads an ASCII encoded null terminated C string from a stream.
         /// The stream is read until a null byte is reached.

@@ -1,6 +1,6 @@
 ﻿using System;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
 using System.Windows.Forms;
 
 namespace PuyoTools.Modules.Archive
@@ -27,14 +27,14 @@ namespace PuyoTools.Modules.Archive
             return new Reader(source, length);
         }
 
-        public override ArchiveWriter Create(Stream destination, ModuleWriterSettings settings)
+        public override ArchiveWriter Create(Stream destination)
         {
-            return new Writer(destination, (settings as WriterSettings) ?? new WriterSettings());
+            return new Writer(destination);
         }
 
-        public override ModuleWriterSettings WriterSettingsObject()
+        public override ModuleSettingsControl GetModuleSettingsControl()
         {
-            return new WriterSettings();
+            return new AfsWriterSettings();
         }
 
         public override bool Is(Stream source, int length, string fname)
@@ -89,22 +89,70 @@ namespace PuyoTools.Modules.Archive
 
         public class Writer : ArchiveWriter
         {
-            WriterSettings settings;
+            #region Settings
+            /// <summary>
+            /// The block size for this archive. The default value is 2048.
+            /// </summary>
+            public int BlockSize
+            {
+                get { return blockSize; }
+                set
+                {
+                    if (value < 0)
+                    {
+                        throw new ArgumentOutOfRangeException("BlockSize");
+                    }
 
-            public Writer(Stream destination) : this(destination, new WriterSettings()) { }
+                    blockSize = value;
+                }
+            }
+            private int blockSize;
 
-            public Writer(Stream destination, WriterSettings settings)
+            /// <summary>
+            /// The version of this archive to use. Use Version 1 for Dreamcast games and Version 2 for PS2, GCN, Xbox, and beyond.
+            /// The default value is WriterSettings.AfsVersion.Version1.
+            /// </summary>
+            public AfsVersion Version
+            {
+                get { return version; }
+                set
+                {
+                    if (value != AfsVersion.Version1 && value != AfsVersion.Version2)
+                    {
+                        throw new ArgumentOutOfRangeException("Version");
+                    }
+
+                    version = value;
+                }
+            }
+            private AfsVersion version;
+
+            public enum AfsVersion
+            {
+                Version1, // Dreamcast
+                Version2, // Post Dreamcast (PS2, GC, Xbox and after)
+            }
+
+            /// <summary>
+            /// Sets if each file should include a timestamp. The default value is true.
+            /// </summary>
+            public bool HasTimestamp { get; set; }
+            #endregion
+
+            public Writer(Stream destination)
             {
                 Initalize(destination);
-                this.settings = settings;
+
+                // Set default settings
+                blockSize = 2048;
+                version = AfsVersion.Version1;
+                HasTimestamp = true;
             }
 
             public override void Flush()
             {
                 // The start of the archive
                 long offset = destination.Position;
-                int blockSize = settings.BlockSize;
-                WriterSettings.AfsVersion version = settings.Version;
 
                 // Magic code "AFS\0"
                 destination.WriteByte((byte)'A');
@@ -128,7 +176,7 @@ namespace PuyoTools.Modules.Archive
 
                 // If this is AFS v1, then the metadata offset is stored at 8 bytes before
                 // the first entry offset.
-                if (version == WriterSettings.AfsVersion.Version1)
+                if (version == AfsVersion.Version1)
                 {
                     destination.Position = offset + firstEntryOffset - 8;
                 }
@@ -181,7 +229,7 @@ namespace PuyoTools.Modules.Archive
                     long oldPosition = destination.Position;
                     byte[] buffer = new byte[4];
 
-                    if (version == WriterSettings.AfsVersion.Version1)
+                    if (version == AfsVersion.Version1)
                         destination.Position = offset + 8 + (i * 8);
                     else
                         destination.Position = offset + 4 + (i * 4);
@@ -194,32 +242,6 @@ namespace PuyoTools.Modules.Archive
                 // Finish padding out the archive
                 while ((destination.Position - offset) % blockSize != 0)
                     destination.WriteByte(0);
-            }
-        }
-
-        public class WriterSettings : ModuleWriterSettings
-        {
-            private AfsWriterSettings writerSettingsControls;
-
-            public int BlockSize = 2048;
-            public AfsVersion Version = AfsVersion.Version1;
-
-            public enum AfsVersion
-            {
-                Version1, // Dreamcast
-                Version2, // Post Dreamcast (PS2, GC, Xbox and after)
-            }
-
-            public override Control Content()
-            {
-                writerSettingsControls = new AfsWriterSettings();
-                return writerSettingsControls;
-            }
-
-            public override void SetSettings()
-            {
-                BlockSize = int.Parse(writerSettingsControls.BlockSizeBox.GetItemText(writerSettingsControls.BlockSizeBox.SelectedItem));
-                Version = (writerSettingsControls.AfsVersion1Radio.Checked ? AfsVersion.Version1 : AfsVersion.Version2);
             }
         }
     }

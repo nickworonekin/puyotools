@@ -6,6 +6,9 @@ namespace PuyoTools.Modules.Archive
 {
     public abstract class ArchiveBase : ModuleBase
     {
+        /// <summary>
+        /// Returns the primary file extension for this archive format.
+        /// </summary>
         public abstract string FileExtension { get; }
 
         #region Open Methods
@@ -74,23 +77,12 @@ namespace PuyoTools.Modules.Archive
         /// Create an archive.
         /// </summary>
         /// <param name="destination">The stream to write to.</param>
-        /// <param name="settings">Settings to use for the archive.</param>
         /// <returns>An ArchiveWriter object.</returns>
-        public abstract ArchiveWriter Create(Stream destination, ModuleWriterSettings settings);
-
-        /// <summary>
-        /// Create an archive.
-        /// </summary>
-        /// <param name="destination">The stream to write to.</param>
-        /// <returns>An ArchiveWriter object.</returns>
-        public ArchiveWriter Create(Stream destination)
-        {
-            return Create(destination, null);
-        }
+        public abstract ArchiveWriter Create(Stream destination);
         #endregion
     }
 
-    public abstract class ArchiveReader
+    public abstract class ArchiveReader : IModule
     {
         public ArchiveEntry[] Files;
         protected long archiveOffset;
@@ -114,7 +106,7 @@ namespace PuyoTools.Modules.Archive
         }
     }
 
-    public abstract class ArchiveWriter
+    public abstract class ArchiveWriter : IModule
     {
         protected Stream destination;
         protected List<ArchiveEntry> files;
@@ -193,8 +185,6 @@ namespace PuyoTools.Modules.Archive
             SourceFile = sourceFile;
         }
     }
-
-    public abstract class ArchiveWriterSettings : ModuleWriterSettings { }
 
     public class CannotAddFileToArchiveException : Exception { }
 }

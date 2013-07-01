@@ -58,6 +58,8 @@
     <Compile Include="Archive\Formats\GntArchive.cs" />
     <Compile Include="Archive\Formats\GvmArchive.cs" />
     <Compile Include="Archive\Formats\MrgArchive.cs" />
+    <Compile Include="Archive\Formats\NarcArchive.cs" />
+    <Compile Include="Archive\Formats\OneUnleashedArchive.cs" />
     <Compile Include="Archive\Formats\PvmArchive.cs" />
     <Compile Include="Archive\Formats\SntArchive.cs" />
     <Compile Include="Archive\Formats\SpkArchive.cs" />
@@ -90,8 +92,15 @@
     <Compile Include="Compression\Formats\PrsCompression.cs" />
     <Compile Include="Compression\Formats\Lz00Compression.cs" />
     <Compile Include="Core\ModuleBase.cs" />
+    <Compile Include="Core\ModuleSettingsControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Core\ModuleSettingsControl.Designer.cs">
+      <DependentUpon>ModuleSettingsControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="Core\PTMethods.cs" />
     <Compile Include="Core\PTStream.cs" />
+    <Compile Include="Core\StreamView.cs" />
     <Compile Include="Texture\Formats\GimTexture.cs" />
     <Compile Include="Texture\Formats\GvrTexture.cs" />
     <Compile Include="Texture\Formats\PvrTexture.cs" />
@@ -132,6 +141,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Archive\WriterSettings\SntWriterSettings.resx">
       <DependentUpon>SntWriterSettings.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\ModuleSettingsControl.resx">
+      <DependentUpon>ModuleSettingsControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Texture\WriterSettings\GimWriterSettings.resx">
       <DependentUpon>GimWriterSettings.cs</DependentUpon>

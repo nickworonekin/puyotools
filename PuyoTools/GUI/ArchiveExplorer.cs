@@ -95,30 +95,39 @@ namespace PuyoTools.GUI
                 {
                     ArchiveEntry paletteEntry = info.Archive.GetFile(paletteFileIndex);
 
-                    TextureReaderSettings textureSettings = new TextureReaderSettings();
+                    //TextureReaderSettings textureSettings = new TextureReaderSettings();
+                    Stream paletteData;
+                    int paletteLength;
 
                     // Get the palette data (we may need to copy over the data to another stream)
                     if (data == paletteEntry.Stream)
                     {
                         paletteEntry.Stream.Position = paletteEntry.Offset;
 
-                        textureSettings.PaletteStream = new MemoryStream();
-                        PTStream.CopyPartTo(paletteEntry.Stream, textureSettings.PaletteStream, paletteEntry.Length);
+                        //textureSettings.PaletteStream = new MemoryStream();
+                        //PTStream.CopyPartTo(paletteEntry.Stream, textureSettings.PaletteStream, paletteEntry.Length);
 
-                        textureSettings.PaletteStream.Position = 0;
+                        //textureSettings.PaletteStream.Position = 0;
+
+                        paletteData = new MemoryStream();
+                        PTStream.CopyPartTo(paletteEntry.Stream, paletteData, paletteEntry.Length);
+
+                        paletteData.Position = 0;
                     }
                     else
                     {
-                        textureSettings.PaletteStream = paletteEntry.Stream;
-                        textureSettings.PaletteStream.Position = paletteEntry.Offset;
+                        paletteData = paletteEntry.Stream;
+                        paletteData.Position = paletteEntry.Offset;
                     }
 
-                    textureSettings.PaletteLength = paletteEntry.Length;
+                    //textureSettings.PaletteLength = paletteEntry.Length;
+                    paletteLength = paletteEntry.Length;
 
                     // Now open the texture
                     data.Position = oldPosition;
                     //viewer.OpenTexture(data, paletteData, length, paletteEntry.Length, fname, format);
-                    viewer.OpenTexture(data, length, fname, textureSettings, format);
+                    //viewer.OpenTexture(data, length, fname, textureSettings, format);
+                    viewer.OpenTexture(data, length, fname, paletteData, paletteLength, format);
                     viewer.Show();
                 }
             }
@@ -334,6 +343,10 @@ namespace PuyoTools.GUI
             {
                 ArchiveReader archive = openedArchives.Peek().Archive;
                 int index = listView.SelectedIndices[0];
+                if (openedArchives.Count > 1)
+                {
+                    index--;
+                }
 
                 SaveFileDialog sfd = new SaveFileDialog();
                 sfd.FileName = archive.Files[index].Filename;
@@ -342,15 +355,7 @@ namespace PuyoTools.GUI
 
                 if (sfd.ShowDialog() == DialogResult.OK)
                 {
-                    ArchiveEntry entry;
-                    if (openedArchives.Count > 1)
-                    {
-                        entry = archive.GetFile(index - 1);
-                    }
-                    else
-                    {
-                        entry = archive.GetFile(index);
-                    }
+                    ArchiveEntry entry = archive.GetFile(index);
                     entry.Stream.Position = entry.Offset;
 
                     using (FileStream outStream = File.Create(sfd.FileName))
@@ -373,16 +378,12 @@ namespace PuyoTools.GUI
                     for (int i = 0; i < listView.SelectedIndices.Count; i++)
                     {
                         int index = listView.SelectedIndices[i];
-
-                        ArchiveEntry entry;
                         if (openedArchives.Count > 1)
                         {
-                            entry = archive.GetFile(index - 1);
+                            index--;
                         }
-                        else
-                        {
-                            entry = archive.GetFile(index);
-                        }
+
+                        ArchiveEntry entry = archive.GetFile(index);
                         entry.Stream.Position = entry.Offset;
 
                         string fname = entry.Filename;

@@ -27,7 +27,7 @@ namespace PuyoTools.Modules.Archive
             return new Reader(source, length);
         }
 
-        public override ArchiveWriter Create(Stream destination, ModuleWriterSettings settings)
+        public override ArchiveWriter Create(Stream destination)
         {
             return new Writer(destination);
         }
@@ -78,8 +78,6 @@ namespace PuyoTools.Modules.Archive
             {
                 Initalize(destination);
             }
-
-            public Writer(Stream destination, ArchiveWriterSettings settings) : this(destination) { }
 
             public override void Flush()
             {

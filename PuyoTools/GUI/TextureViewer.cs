@@ -44,10 +44,14 @@ namespace PuyoTools.GUI
             DisplayTexture(textureBitmap, fname, format);
         }
 
-        public void OpenTexture(Stream data, int length, string fname, TextureReaderSettings settings, TextureFormat format)
+        public void OpenTexture(Stream data, int length, string fname, Stream paletteData, int paletteLength, TextureFormat format)
         {
             Bitmap textureBitmap;
-            Texture.Read(data, out textureBitmap, length, settings, format);
+            //Texture.Read(data, out textureBitmap, length, settings, format);
+            TextureBase texture = Texture.Formats[format];
+            texture.PaletteStream = paletteData;
+            texture.PaletteLength = paletteLength;
+            texture.Read(data, out textureBitmap, length);
 
             DisplayTexture(textureBitmap, fname, format);
         }
@@ -164,11 +168,13 @@ namespace PuyoTools.GUI
                         textureStream.Position = 0;
                         using (FileStream paletteData = File.OpenRead(paletteName))
                         {
-                            TextureReaderSettings textureSettings = new TextureReaderSettings();
-                            textureSettings.PaletteStream = paletteData;
-                            textureSettings.PaletteLength = (int)paletteData.Length;
+                            //TextureReaderSettings textureSettings = new TextureReaderSettings();
+                            //textureSettings.PaletteStream = paletteData;
+                            //textureSettings.PaletteLength = (int)paletteData.Length;
 
-                            OpenTexture(textureStream, (int)textureStream.Length, ofd.SafeFileName, textureSettings, textureFormat);
+                            OpenTexture(textureStream, (int)textureStream.Length, ofd.SafeFileName, paletteData, (int)paletteData.Length, textureFormat);
+
+                            //OpenTexture(textureStream, (int)textureStream.Length, ofd.SafeFileName, textureSettings, textureFormat);
                         }
                     }
                 }

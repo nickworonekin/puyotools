@@ -90,7 +90,7 @@ namespace PuyoTools.Modules.Compression
         /// <param name="destination">The stream to write to.</param>
         /// <param name="length">Number of bytes to read.</param>
         /// <param name="settings">Settings to use when compressing.</param>
-        public override void Compress(Stream source, Stream destination, int length, ModuleWriterSettings settings)
+        public override void Compress(Stream source, Stream destination, int length)
         {
             byte[] sourceBuffer = new byte[length];
             source.Read(sourceBuffer, 0, length);

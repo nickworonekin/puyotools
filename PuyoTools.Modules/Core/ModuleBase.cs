@@ -5,7 +5,9 @@ using System.Windows.Forms;
 
 namespace PuyoTools.Modules
 {
-    public abstract class ModuleBase
+    public interface IModule { }
+
+    public abstract class ModuleBase : IModule
     {
         /// <summary>
         /// Name of the format.
@@ -18,10 +20,20 @@ namespace PuyoTools.Modules
         public abstract bool CanWrite { get; }
 
         /// <summary>
-        /// Returns a new writer settings object for this format.
+        /// The source path of the file.
         /// </summary>
-        /// <returns>A new ModuleWriterSettings object.</returns>
-        public virtual ModuleWriterSettings WriterSettingsObject()
+        public string SourcePath = String.Empty;
+
+        /// <summary>
+        /// The destination path of the file.
+        /// </summary>
+        public string DestinationPath = String.Empty;
+
+        /// <summary>
+        /// Returns the ModuleSettingsControl associated with this format.
+        /// </summary>
+        /// <returns></returns>
+        public virtual ModuleSettingsControl GetModuleSettingsControl()
         {
             return null;
         }
@@ -90,19 +102,5 @@ namespace PuyoTools.Modules
             }
         }
         #endregion
-    }
-
-    public abstract class ModuleWriterSettings
-    {
-        /// <summary>
-        /// Returns the control containing the writer settings.
-        /// </summary>
-        /// <returns></returns>
-        public abstract Control Content();
-
-        /// <summary>
-        /// Set the settings from the controls in the panel.
-        /// </summary>
-        public abstract void SetSettings();
     }
 }

@@ -24,6 +24,8 @@ namespace PuyoTools
             Formats.Add(ArchiveFormat.Gnt, new GntArchive());
             Formats.Add(ArchiveFormat.Gvm, new GvmArchive());
             Formats.Add(ArchiveFormat.Mrg, new MrgArchive());
+            Formats.Add(ArchiveFormat.Narc, new NarcArchive());
+            Formats.Add(ArchiveFormat.OneUnleashed, new OneUnleashedArchive());
             Formats.Add(ArchiveFormat.Pvm, new PvmArchive());
             Formats.Add(ArchiveFormat.Snt, new SntArchive());
             Formats.Add(ArchiveFormat.Spk, new SpkArchive());
@@ -38,9 +40,9 @@ namespace PuyoTools
         }
 
         // Creates an archive with the specified archive format and writer settings.
-        public static ArchiveWriter Create(Stream source, ArchiveFormat format, ModuleWriterSettings settings)
+        public static ArchiveWriter Create(Stream source, ArchiveFormat format)
         {
-            return Formats[format].Create(source, settings);
+            return Formats[format].Create(source);
         }
 
         // Returns the archive format used by the source archive.
@@ -65,6 +67,8 @@ namespace PuyoTools
         Gnt,
         Gvm,
         Mrg,
+        Narc,
+        OneUnleashed,
         Pvm,
         Snt,
         Spk,

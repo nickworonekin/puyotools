@@ -29,14 +29,14 @@ namespace PuyoTools.Modules.Archive
             return new Reader(source, length);
         }
 
-        public override ArchiveWriter Create(Stream destination, ModuleWriterSettings settings)
+        public override ArchiveWriter Create(Stream destination)
         {
-            return new Writer(destination, (settings as WriterSettings) ?? new WriterSettings());
+            return new Writer(destination);
         }
 
-        public override ModuleWriterSettings WriterSettingsObject()
+        public override ModuleSettingsControl GetModuleSettingsControl()
         {
-            return new WriterSettings();
+            return new PvmWriterSettings();
         }
 
         public override bool Is(Stream source, int length, string fname)
@@ -175,14 +175,37 @@ namespace PuyoTools.Modules.Archive
 
         public class Writer : ArchiveWriter
         {
-            WriterSettings settings;
+            #region Settings
+            /// <summary>
+            /// Sets if filenames should be stored in the archive. The default value is true.
+            /// </summary>
+            public bool HasFilenames { get; set; }
 
-            public Writer(Stream destination) : this(destination, new WriterSettings()) { }
+            /// <summary>
+            /// Sets if global indexes should be stored in the archive. The default value is true.
+            /// </summary>
+            public bool HasGlobalIndexes { get; set; }
 
-            public Writer(Stream destination, WriterSettings settings)
+            /// <summary>
+            /// Sets if texture formats should be stored in the archive. The default value is true.
+            /// </summary>
+            public bool HasFormats { get; set; }
+
+            /// <summary>
+            /// Sets if texture dimensions should be stored in the archive. The default value is true.
+            /// </summary>
+            public bool HasDimensions { get; set; }
+            #endregion
+
+            public Writer(Stream destination)
             {
                 Initalize(destination);
-                this.settings = settings;
+                
+                // Set default settings
+                HasFilenames = true;
+                HasGlobalIndexes = true;
+                HasFormats = true;
+                HasDimensions = true;
             }
 
             public override void AddFile(Stream source, int length, string fname, string sourceFile)
@@ -204,22 +227,22 @@ namespace PuyoTools.Modules.Archive
                 int entryLength = 2;
                 ushort flags = 0;
 
-                if (settings.Filename)
+                if (HasFilenames)
                 {
                     entryLength += 28;
                     flags |= 0x8;
                 }
-                if (settings.Formats)
+                if (HasFormats)
                 {
                     entryLength += 2;
                     flags |= 0x4;
                 }
-                if (settings.Dimensions)
+                if (HasDimensions)
                 {
                     entryLength += 2;
                     flags |= 0x2;
                 }
-                if (settings.GlobalIndex)
+                if (HasGlobalIndexes)
                 {
                     entryLength += 4;
                     flags |= 0x1;
@@ -259,23 +282,23 @@ namespace PuyoTools.Modules.Archive
                     PTStream.WriteUInt16BE(destination, (ushort)i);
 
                     // Write the information for this entry in the header
-                    if (settings.Filename)
+                    if (HasFilenames)
                     {
                         PTStream.WriteCString(destination, Path.GetFileNameWithoutExtension(files[i].Filename), 28);
                     }
-                    if (settings.Formats)
+                    if (HasFormats)
                     {
                         destination.WriteByte((byte)(((byte)texture.PixelFormat << 4) | ((byte)texture.DataFlags & 0xF)));
                         destination.WriteByte((byte)texture.DataFormat);
                     }
-                    if (settings.Dimensions)
+                    if (HasDimensions)
                     {
                         ushort dimensions = 0;
                         dimensions |= (ushort)(((byte)Math.Log(texture.TextureWidth, 2) - 2) & 0xF);
                         dimensions |= (ushort)((((byte)Math.Log(texture.TextureHeight, 2) - 2) & 0xF) << 4);
                         PTStream.WriteUInt16BE(destination, dimensions);
                     }
-                    if (settings.GlobalIndex)
+                    if (HasGlobalIndexes)
                     {
                         PTStream.WriteUInt32BE(destination, texture.GlobalIndex);
                     }
@@ -293,30 +316,6 @@ namespace PuyoTools.Modules.Archive
                     // Call the file added event
                     OnFileAdded(EventArgs.Empty);
                 }
-            }
-        }
-
-        public class WriterSettings : ModuleWriterSettings
-        {
-            private PvmWriterSettings writerSettingsControls;
-
-            public bool Filename = true;
-            public bool GlobalIndex = true;
-            public bool Formats = true;
-            public bool Dimensions = true;
-
-            public override Control Content()
-            {
-                writerSettingsControls = new PvmWriterSettings();
-                return writerSettingsControls;
-            }
-
-            public override void SetSettings()
-            {
-                Filename = writerSettingsControls.FilenameCheckbox.Checked;
-                GlobalIndex = writerSettingsControls.GlobalIndexCheckbox.Checked;
-                Formats = writerSettingsControls.FormatCheckbox.Checked;
-                Dimensions = writerSettingsControls.DimensionsCheckbox.Checked;
             }
         }
     }

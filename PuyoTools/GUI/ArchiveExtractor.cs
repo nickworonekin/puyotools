@@ -285,12 +285,17 @@ namespace PuyoTools.GUI
                                         using (FileStream inPaletteStream = File.OpenRead(paletteName),
                                         outTextureStream = File.Create(textureOutName))
                                         {
-                                            TextureReaderSettings textureSettings = new TextureReaderSettings();
-                                            textureSettings.PaletteStream = inPaletteStream;
-                                            textureSettings.PaletteLength = (int)inPaletteStream.Length;
+                                            //TextureReaderSettings textureSettings = new TextureReaderSettings();
+                                            //textureSettings.PaletteStream = inPaletteStream;
+                                            //textureSettings.PaletteLength = (int)inPaletteStream.Length;
 
-                                            Texture.Read(inTextureStream, outTextureStream, (int)inTextureStream.Length, textureSettings, textureEntry.Format);
+                                            //Texture.Read(inTextureStream, outTextureStream, (int)inTextureStream.Length, textureSettings, textureEntry.Format);
                                             //Texture.ReadWithPalette(inTextureStream, inPaletteStream, outTextureStream, (int)inTextureStream.Length, (int)inPaletteStream.Length, textureEntry.Format);
+
+                                            TextureBase texture = Texture.Formats[textureEntry.Format];
+                                            texture.PaletteStream = inPaletteStream;
+                                            texture.PaletteLength = (int)inPaletteStream.Length;
+                                            texture.Read(inTextureStream, outTextureStream, (int)inTextureStream.Length);
                                         }
                                     }
 

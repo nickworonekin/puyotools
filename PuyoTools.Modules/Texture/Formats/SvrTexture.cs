@@ -29,14 +29,23 @@ namespace PuyoTools.Modules.Texture
             get { return true; }
         }
 
+        public SvrTexture()
+        {
+            // Set default values
+            HasGlobalIndex = true;
+            GlobalIndex = 0;
+
+            PixelFormat = SvrPixelFormat.Rgb5a3;
+            DataFormat = SvrDataFormat.Rectangle;
+        }
+
         /// <summary>
         /// Decodes a texture from a stream.
         /// </summary>
         /// <param name="source">The stream to read from.</param>
         /// <param name="destination">The stream to write to.</param>
         /// <param name="length">Number of bytes to read.</param>
-        /// <param name="settings">Settings to use when decoding.</param>
-        public override void Read(Stream source, Stream destination, int length, TextureReaderSettings settings)
+        public override void Read(Stream source, Stream destination, int length)
         {
             // Reading SVR textures is done through VrSharp, so just pass it to that
             VrSharp.SvrTexture.SvrTexture texture = new VrSharp.SvrTexture.SvrTexture(source, length);
@@ -45,16 +54,19 @@ namespace PuyoTools.Modules.Texture
             // if we do not have one defined
             if (texture.NeedsExternalPalette)
             {
-                if (settings != null && settings.PaletteStream != null)
+                if (PaletteStream != null)
                 {
-                    if (settings.PaletteLength == -1)
+                    if (PaletteLength == -1)
                     {
-                        texture.SetPalette(new SvpPalette(settings.PaletteStream));
+                        texture.SetPalette(new SvpPalette(PaletteStream));
                     }
                     else
                     {
-                        texture.SetPalette(new SvpPalette(settings.PaletteStream, settings.PaletteLength));
+                        texture.SetPalette(new SvpPalette(PaletteStream, PaletteLength));
                     }
+
+                    PaletteStream = null;
+                    PaletteLength = -1;
                 }
                 else
                 {
@@ -65,89 +77,68 @@ namespace PuyoTools.Modules.Texture
             texture.Save(destination);
         }
 
-        public override void Write(Stream source, Stream destination, int length, TextureWriterSettings settings)
-        {
-            WriterSettings writerSettings = (settings as WriterSettings) ?? new WriterSettings();
+        #region Writer Settings
+        /// <summary>
+        /// Sets whether or not this texture has a global index when encoding. If false, the texture will not include a GBIX header. The default value is true.
+        /// </summary>
+        public bool HasGlobalIndex { get; set; }
 
+        /// <summary>
+        /// Sets the texture's global index when encoding. This only matters if HasGlobalIndex is true. The default value is 0.
+        /// </summary>
+        public uint GlobalIndex { get; set; }
+
+        /// <summary>
+        /// Sets the texture's pixel format for encoding. The default value is SvrPixelFormat.Rgb5a3.
+        /// </summary>
+        public SvrPixelFormat PixelFormat { get; set; }
+
+        /// <summary>
+        /// Sets the texture's data format for encoding. The default value is SvrDataFormat.Rectangle.
+        /// </summary>
+        public SvrDataFormat DataFormat { get; set; }
+        #endregion
+
+        public override void Write(Stream source, Stream destination, int length)
+        {
             // Writing SVR textures is done through VrSharp, so just pass it to that
-            SvrTextureEncoder texture = new SvrTextureEncoder(source, length, writerSettings.PixelFormat, writerSettings.DataFormat);
+            SvrTextureEncoder texture = new SvrTextureEncoder(source, length, PixelFormat, DataFormat);
 
             if (!texture.Initalized)
             {
                 throw new TextureNotInitalizedException("Unable to initalize texture.");
             }
 
-            texture.HasGlobalIndex = writerSettings.HasGlobalIndex;
+            texture.HasGlobalIndex = HasGlobalIndex;
             if (texture.HasGlobalIndex)
             {
-                texture.GlobalIndex = writerSettings.GlobalIndex;
+                texture.GlobalIndex = GlobalIndex;
             }
 
             // If we have an external palette file, save it
             if (texture.NeedsExternalPalette)
             {
-                settings.PaletteStream = new MemoryStream();
-                texture.PaletteEncoder.Save(settings.PaletteStream);
+                needsExternalPalette = true;
+
+                PaletteStream = new MemoryStream();
+                texture.PaletteEncoder.Save(PaletteStream);
+            }
+            else
+            {
+                needsExternalPalette = false;
             }
 
             texture.Save(destination);
         }
 
-        public override ModuleWriterSettings WriterSettingsObject()
+        public override ModuleSettingsControl GetModuleSettingsControl()
         {
-            return new WriterSettings();
+            return new SvrWriterSettings();
         }
 
         public override bool Is(Stream source, int length, string fname)
         {
             return (length > 16 && VrSharp.SvrTexture.SvrTexture.Is(source, length));
-        }
-
-        public class WriterSettings : TextureWriterSettings
-        {
-            private SvrWriterSettings writerSettingsControls;
-
-            public SvrPixelFormat PixelFormat = SvrPixelFormat.Rgb5a3;
-            public SvrDataFormat DataFormat = SvrDataFormat.Rectangle;
-
-            public bool HasGlobalIndex = true;
-            public uint GlobalIndex = 0;
-
-            public override Control Content()
-            {
-                writerSettingsControls = new SvrWriterSettings();
-                return writerSettingsControls;
-            }
-
-            public override void SetSettings()
-            {
-                // Set the pixel format
-                switch (writerSettingsControls.PixelFormatBox.SelectedIndex)
-                {
-                    case 0: PixelFormat = SvrPixelFormat.Rgb5a3; break;
-                    case 1: PixelFormat = SvrPixelFormat.Argb8888; break;
-                }
-
-                // Set the data format
-                switch (writerSettingsControls.DataFormatBox.SelectedIndex)
-                {
-                    case 0: DataFormat = SvrDataFormat.Rectangle; break;
-                    case 1: DataFormat = SvrDataFormat.Index4ExternalPalette; break;
-                    case 2: DataFormat = SvrDataFormat.Index8ExternalPalette; break;
-                    case 3: DataFormat = SvrDataFormat.Index4; break;
-                    case 4: DataFormat = SvrDataFormat.Index8; break;
-                }
-
-                // Set the global index stuff
-                HasGlobalIndex = writerSettingsControls.HasGlobalIndexCheckBox.Checked;
-                if (HasGlobalIndex)
-                {
-                    if (!uint.TryParse(writerSettingsControls.GlobalIndexTextBox.Text, out GlobalIndex))
-                    {
-                        GlobalIndex = 0;
-                    }
-                }
-            }
         }
     }
 }

@@ -17,8 +17,7 @@ namespace PuyoTools.GUI
 {
     public partial class ArchiveCreator : ToolForm
     {
-        List<ModuleWriterSettings> formatWriterSettings;
-        List<Control> writerSettingsControls;
+        List<ModuleSettingsControl> writerSettingsControls;
         List<ArchiveFormat> archiveFormats;
         List<CompressionFormat> compressionFormats;
 
@@ -38,9 +37,8 @@ namespace PuyoTools.GUI
             // Resize the column widths
             listView_ClientSizeChanged(null, null);
 
-            // Set up the writer settings panel and format writer settings
-            formatWriterSettings = new List<ModuleWriterSettings>();
-            writerSettingsControls = new List<Control>();
+            // Set up the writer settings controls
+            writerSettingsControls = new List<ModuleSettingsControl>();
 
             // Fill the archive format box
             archiveFormatBox.SelectedIndex = 0;
@@ -52,17 +50,7 @@ namespace PuyoTools.GUI
                     archiveFormatBox.Items.Add(format.Value.Name);
                     archiveFormats.Add(format.Key);
 
-                    ModuleWriterSettings writerSettings = format.Value.WriterSettingsObject();
-                    if (writerSettings != null)
-                    {
-                        writerSettingsControls.Add(writerSettings.Content());
-                    }
-                    else
-                    {
-                        writerSettingsControls.Add(null);
-                    }
-
-                    formatWriterSettings.Add(writerSettings);
+                    writerSettingsControls.Add(format.Value.GetModuleSettingsControl());
                 }
             }
 
@@ -132,7 +120,13 @@ namespace PuyoTools.GUI
             }
 
             // Create the archive
-            ArchiveWriter archive = Archive.Create(destination, settings.ArchiveFormat, settings.ArchiveSettings);
+            ArchiveWriter archive = Archive.Create(destination, settings.ArchiveFormat);
+
+            // Set archive settings
+            if (settings.WriterSettingsControl != null)
+            {
+                settings.WriterSettingsControl.SetModuleSettings(archive);
+            }
 
             // Add the file added event handler the archive
             archive.FileAdded += delegate(object sender, EventArgs e)
@@ -347,11 +341,15 @@ namespace PuyoTools.GUI
                     settings.CompressionFormat = CompressionFormat.Unknown;
                 }
 
+                /*
                 settings.ArchiveSettings = formatWriterSettings[archiveFormatBox.SelectedIndex - 1];
                 if (settings.ArchiveSettings != null)
                 {
                     settings.ArchiveSettings.SetSettings();
                 }
+                 */
+
+                settings.WriterSettingsControl = writerSettingsControls[archiveFormatBox.SelectedIndex - 1];
 
                 settings.FileEntries = new List<FileEntry>();
                 foreach (ListViewItem item in listView.Items)
@@ -388,8 +386,8 @@ namespace PuyoTools.GUI
             public ArchiveFormat ArchiveFormat;
             public CompressionFormat CompressionFormat;
             public string OutFilename;
-            public ModuleWriterSettings ArchiveSettings;
             public List<FileEntry> FileEntries;
+            public ModuleSettingsControl WriterSettingsControl;
         }
     }
 }

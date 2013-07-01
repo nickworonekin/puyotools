@@ -78,9 +78,11 @@ namespace PuyoTools.GUI
                         }
 
                         // Alright, let's decode the texture now
+                        TextureBase texture = Texture.Formats[format];
                         try
                         {
-                            Texture.Read(source, textureData, (int)source.Length, format);
+                            texture.Read(source, textureData, (int)source.Length);
+                            //Texture.Read(source, textureData, (int)source.Length, format);
                         }
                         catch (TextureNeedsPaletteException)
                         {
@@ -98,11 +100,15 @@ namespace PuyoTools.GUI
                             textureData = new MemoryStream(); // Just incase some data was written
                             using (FileStream paletteData = File.OpenRead(paletteName))
                             {
-                                TextureReaderSettings textureSettings = new TextureReaderSettings();
-                                textureSettings.PaletteStream = paletteData;
-                                textureSettings.PaletteLength = (int)paletteData.Length;
+                                //TextureReaderSettings textureSettings = new TextureReaderSettings();
+                                //textureSettings.PaletteStream = paletteData;
+                                //textureSettings.PaletteLength = (int)paletteData.Length;
 
-                                Texture.Read(source, textureData, (int)source.Length, textureSettings, format);
+                                //Texture.Read(source, textureData, (int)source.Length, textureSettings, format);
+
+                                texture.PaletteStream = paletteData;
+                                texture.PaletteLength = (int)paletteData.Length;
+                                texture.Read(source, textureData, (int)source.Length);
                             }
 
                             // Delete the palette file if the user chose to delete the source texture
