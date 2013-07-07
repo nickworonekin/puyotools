@@ -109,21 +109,21 @@ namespace PuyoTools.GUI
                         }
 
                         // Now we can start extracting the files
-                        for (int j = 0; j < archive.Files.Length; j++)
+                        for (int j = 0; j < archive.Entries.Count; j++)
                         {
                             if (fileList.Count == 1)
                             {
                                 // If there is just one file in the file list, then the progress will be
                                 // based on how many files are being extracted from the archive, not
                                 // how many archives we are extracting.
-                                dialog.ReportProgress(j * 100 / archive.Files.Length, description + "\n\n" + String.Format("{0:N0} of {1:N0} extracted", j + 1, archive.Files.Length));
+                                dialog.ReportProgress(j * 100 / archive.Entries.Count, description + "\n\n" + String.Format("{0:N0} of {1:N0} extracted", j + 1, archive.Entries.Count));
                             }
                             else
                             {
-                                dialog.Description = description + "\n\n" + String.Format("{0:N0} of {1:N0} extracted", j + 1, archive.Files.Length);
+                                dialog.Description = description + "\n\n" + String.Format("{0:N0} of {1:N0} extracted", j + 1, archive.Entries.Count);
                             }
 
-                            ArchiveEntry entry = archive.GetFile(j);
+                            /*ArchiveEntry entry = archive.GetFile(j);
 
                             // Get the output name for this file
                             if (settings.FileNumberAsFilename || entry.Filename == String.Empty)
@@ -247,6 +247,118 @@ namespace PuyoTools.GUI
                                 // based on how many files are being extracted from the archive, not
                                 // how many archives we are extracting.
                                 dialog.ReportProgress((j + 1) * 100 / archive.Files.Length);
+                            }*/
+
+                            ArchiveEntry entry = archive.Entries[j];
+                            Stream entryData = entry.Open();
+
+                            // Get the output name for this file
+                            if (settings.FileNumberAsFilename || entry.Name == String.Empty)
+                            {
+                                // Use the file number as its filename
+                                outName = j.ToString("D" + archive.Entries.Count.ToString().Length) + Path.GetExtension(entry.Name);
+                            }
+                            else if (settings.AppendFileNumber)
+                            {
+                                // Append the file number to its filename
+                                outName = Path.GetFileNameWithoutExtension(entry.Name) + j.ToString("D" + archive.Entries.Count.ToString().Length) + Path.GetExtension(entry.Name);
+                            }
+                            else
+                            {
+                                // Just use the filename as defined in the archive
+                                outName = entry.Name;
+                            }
+
+                            // What we're going to do here may seem a tiny bit hackish, but it'll make my job much simplier.
+                            // First, let's check to see if the file is compressed, and if we want to decompress it.
+                            if (settings.DecompressExtractedFiles)
+                            {
+                                // Get the compression format, if it is compressed that is.
+                                CompressionFormat compressionFormat = Compression.GetFormat(entryData, (int)entryData.Length, entry.Name);
+                                if (compressionFormat != CompressionFormat.Unknown)
+                                {
+                                    // Ok, it appears to be compressed. Let's decompress it, and then edit the entry
+                                    MemoryStream decompressedData = new MemoryStream();
+                                    Compression.Decompress(entryData, decompressedData, (int)entryData.Length, compressionFormat);
+
+                                    entryData = decompressedData;
+                                    entryData.Position = 0;
+                                }
+                            }
+
+                            // Check to see if this file is a texture. If so, let's convert it to a PNG and then edit the entry
+                            if (settings.ConvertExtractedTextures)
+                            {
+                                // Get the texture format, if it is a texture that is.
+                                TextureFormat textureFormat = Texture.GetFormat(entryData, (int)entryData.Length, entry.Name);
+                                if (textureFormat != TextureFormat.Unknown)
+                                {
+                                    // Ok, it appears to be a texture. We're going to attempt to convert it here.
+                                    // If we get a TextureNeedsPalette exception, we'll wait until after we extract
+                                    // all the files in this archive before we process it.
+                                    try
+                                    {
+                                        MemoryStream textureData = new MemoryStream();
+                                        Texture.Read(entryData, textureData, (int)entryData.Length, textureFormat);
+
+                                        // If no exception was thrown, then we are all good doing what we need to do
+                                        entryData = textureData;
+                                        entryData.Position = 0;
+
+                                        outName = Path.GetFileNameWithoutExtension(outName) + ".png";
+                                    }
+                                    catch (TextureNeedsPaletteException)
+                                    {
+                                        // Uh oh, looks like we need a palette.
+                                        // What we are going to do is add it to textureFileQueue, then convert it
+                                        // after we extract all of the files.
+                                        if (textureFileQueue == null)
+                                        {
+                                            textureFileQueue = new Queue<TextureEntry>();
+                                        }
+
+                                        TextureEntry textureEntry = new TextureEntry();
+                                        textureEntry.Format = textureFormat;
+                                        textureEntry.Filename = Path.Combine(outPath, outName);
+
+                                        textureFileQueue.Enqueue(textureEntry);
+                                    }
+                                }
+                            }
+
+                            // Time to write out the file
+                            using (FileStream destination = File.Create(Path.Combine(outPath, outName)))
+                            {
+                                PTStream.CopyTo(entryData, destination, (int)entryData.Length);
+                            }
+
+                            // Let's check to see if this is an archive. If it is an archive, add it to the file list.
+                            entryData.Position = 0;
+                            if (settings.ExtractExtractedArchives)
+                            {
+                                ArchiveFormat archiveFormat = Archive.GetFormat(entryData, (int)entryData.Length, entry.Name);
+                                if (archiveFormat != ArchiveFormat.Unknown)
+                                {
+                                    // It appears to be an archive. Let's add it to the file list
+                                    if (settings.ExtractToSameNameDirectory)
+                                    {
+                                        // If we're adding to a directory of the same name, the outPath will be different.
+                                        // We should remember that.
+                                        fileList.Add(Path.Combine(file, outName));
+                                    }
+                                    else
+                                    {
+                                        fileList.Add(Path.Combine(outPath, outName));
+                                    }
+
+                                    if (fileList.Count == 2)
+                                    {
+                                        // If there was one archive in the file list, and now there is more,
+                                        // adjust the progress bar and the description
+                                        description = String.Format("Processing {0} ({1:N0} of {2:N0})", Path.GetFileName(file), i + 1, fileList.Count);
+                                        dialog.ReportProgress(i * 100 / fileList.Count, description + "\n\n" + String.Format("{0:N0} of {1:N0} extracted", j + 1, archive.Entries.Count));
+                                    }
+                                }
                             }
                         }
                     }

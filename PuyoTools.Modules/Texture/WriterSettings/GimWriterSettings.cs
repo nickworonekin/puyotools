@@ -17,8 +17,8 @@ namespace PuyoTools.Modules.Texture
         {
             InitializeComponent();
 
-            PaletteFormatBox.SelectedIndex = 0;
-            DataFormatBox.SelectedIndex = 0;
+            paletteFormatBox.SelectedIndex = 0;
+            dataFormatBox.SelectedIndex = 0;
 
             DataFormatBox_SelectedIndexChanged(null, null);
         }
@@ -27,12 +27,12 @@ namespace PuyoTools.Modules.Texture
         {
             GimTexture texture = (GimTexture)module;
 
-            bool hasPaletteFormat = (DataFormatBox.SelectedIndex == 4 || DataFormatBox.SelectedIndex == 5);
+            bool hasPaletteFormat = (dataFormatBox.SelectedIndex == 4 || dataFormatBox.SelectedIndex == 5);
 
             // Set the palette format
             if (hasPaletteFormat)
             {
-                switch (PaletteFormatBox.SelectedIndex)
+                switch (paletteFormatBox.SelectedIndex)
                 {
                     case 0: texture.PaletteFormat = GimPaletteFormat.Rgb565; break;
                     case 1: texture.PaletteFormat = GimPaletteFormat.Argb1555; break;
@@ -46,7 +46,7 @@ namespace PuyoTools.Modules.Texture
             }
 
             // Set the data format
-            switch (DataFormatBox.SelectedIndex)
+            switch (dataFormatBox.SelectedIndex)
             {
                 case 0: texture.DataFormat = GimDataFormat.Rgb565; break;
                 case 1: texture.DataFormat = GimDataFormat.Argb1555; break;
@@ -57,14 +57,14 @@ namespace PuyoTools.Modules.Texture
             }
 
             // Has metadata?
-            texture.HasMetadata = HasMetadataCheckBox.Checked;
+            texture.HasMetadata = hasMetadataCheckBox.Checked;
         }
 
         private void DataFormatBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             // The palette format box and has should only be enabled
             // if the data format is 4-bit Indexed or 8-bit Indexed
-            PaletteFormatBox.Enabled = (DataFormatBox.SelectedIndex == 4 || DataFormatBox.SelectedIndex == 5);
+            paletteFormatBox.Enabled = (dataFormatBox.SelectedIndex == 4 || dataFormatBox.SelectedIndex == 5);
         }
     }
 }

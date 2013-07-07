@@ -39,20 +39,17 @@ namespace PuyoTools.Modules.Archive
 
         public class Reader : ArchiveReader
         {
-            public Reader(Stream source, int length)
+            public Reader(Stream source, int length) : base(source)
             {
-                // The start of the archive
-                archiveOffset = source.Position;
-
                 // Get the number of files in the archive
                 source.Position += 4;
-                int numFiles = PTStream.ReadInt32(source);
-                Files = new ArchiveEntry[numFiles];
+                int numEntries = PTStream.ReadInt32(source);
+                entries = new ArchiveEntryCollection(this, numEntries);
 
                 source.Position += 8;
 
-                // Read in all the file entries
-                for (int i = 0; i < numFiles; i++)
+                // Read in all the entries
+                for (int i = 0; i < numEntries; i++)
                 {
                     // Read in the entry filename extension, offset, length, and filename without the extension
                     string entryFileExtension = PTStream.ReadCString(source, 4, Encoding.GetEncoding("Shift_JIS"));
@@ -63,8 +60,8 @@ namespace PuyoTools.Modules.Archive
                     if (entryFileExtension != String.Empty)
                         entryFileExtension = "." + entryFileExtension;
 
-                    // Add this entry to the file list
-                    Files[i] = new ArchiveEntry(source, archiveOffset + entryOffset, entryLength, entryFilename + entryFileExtension);
+                    // Add this entry to the collection
+                    entries.Add(archiveOffset + entryOffset, entryLength, entryFilename + entryFileExtension);
                 }
 
                 // Set the position of the stream to the end of the file
@@ -74,10 +71,7 @@ namespace PuyoTools.Modules.Archive
 
         public class Writer : ArchiveWriter
         {
-            public Writer(Stream destination)
-            {
-                Initalize(destination);
-            }
+            public Writer(Stream destination) : base(destination) { }
 
             public override void Flush()
             {
@@ -90,18 +84,18 @@ namespace PuyoTools.Modules.Archive
                 destination.WriteByte((byte)'D');
                 destination.WriteByte((byte)'0');
 
-                // Number of files in the archive
-                PTStream.WriteInt32(destination, files.Count);
+                // Number of entries in the archive
+                PTStream.WriteInt32(destination, entries.Count);
 
                 destination.Position += 8;
 
                 // Write out the header for the archive
-                int entryOffset = 16 + (files.Count * 32);
+                int entryOffset = 16 + (entries.Count * 32);
 
-                for (int i = 0; i < files.Count; i++)
+                for (int i = 0; i < entries.Count; i++)
                 {
                     // Write out the file extension
-                    string fileExtension = Path.GetExtension(files[i].Filename);
+                    string fileExtension = Path.GetExtension(entries[i].Name);
                     if (fileExtension != String.Empty)
                         fileExtension = fileExtension.Substring(1);
 
@@ -109,16 +103,16 @@ namespace PuyoTools.Modules.Archive
 
                     // Write out the offset, length, and filename (without the extension)
                     PTStream.WriteInt32(destination, entryOffset);
-                    PTStream.WriteInt32(destination, files[i].Length);
-                    PTStream.WriteCString(destination, Path.GetFileNameWithoutExtension(files[i].Filename), 20, Encoding.GetEncoding("Shift_JIS"));
+                    PTStream.WriteInt32(destination, entries[i].Length);
+                    PTStream.WriteCString(destination, Path.GetFileNameWithoutExtension(entries[i].Name), 20, Encoding.GetEncoding("Shift_JIS"));
 
-                    entryOffset += PTMethods.RoundUp(files[i].Length, 16);
+                    entryOffset += PTMethods.RoundUp(entries[i].Length, 16);
                 }
 
-                // Write out the file data for each file
-                for (int i = 0; i < files.Count; i++)
+                // Write out the file data for each entry
+                for (int i = 0; i < entries.Count; i++)
                 {
-                    PTStream.CopyPartToPadded(files[i].Stream, destination, files[i].Length, 16, 0);
+                    PTStream.CopyToPadded(entries[i].Open(), destination, 16, 0);
 
                     // Call the file added event
                     OnFileAdded(EventArgs.Empty);

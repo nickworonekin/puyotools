@@ -28,34 +28,34 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.GlobalIndexTextBox = new System.Windows.Forms.TextBox();
-            this.HasGlobalIndexCheckBox = new System.Windows.Forms.CheckBox();
+            this.globalIndexTextBox = new System.Windows.Forms.TextBox();
+            this.hasGlobalIndexCheckBox = new System.Windows.Forms.CheckBox();
             this.label3 = new System.Windows.Forms.Label();
-            this.DataFormatBox = new System.Windows.Forms.ComboBox();
-            this.PixelFormatBox = new System.Windows.Forms.ComboBox();
+            this.dataFormatBox = new System.Windows.Forms.ComboBox();
+            this.pixelFormatBox = new System.Windows.Forms.ComboBox();
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
-            // GlobalIndexTextBox
+            // globalIndexTextBox
             // 
-            this.GlobalIndexTextBox.Location = new System.Drawing.Point(74, 57);
-            this.GlobalIndexTextBox.Name = "GlobalIndexTextBox";
-            this.GlobalIndexTextBox.Size = new System.Drawing.Size(229, 20);
-            this.GlobalIndexTextBox.TabIndex = 13;
-            this.GlobalIndexTextBox.Text = "0";
+            this.globalIndexTextBox.Location = new System.Drawing.Point(74, 57);
+            this.globalIndexTextBox.Name = "globalIndexTextBox";
+            this.globalIndexTextBox.Size = new System.Drawing.Size(229, 20);
+            this.globalIndexTextBox.TabIndex = 13;
+            this.globalIndexTextBox.Text = "0";
             // 
-            // HasGlobalIndexCheckBox
+            // hasGlobalIndexCheckBox
             // 
-            this.HasGlobalIndexCheckBox.AutoSize = true;
-            this.HasGlobalIndexCheckBox.Checked = true;
-            this.HasGlobalIndexCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.HasGlobalIndexCheckBox.Location = new System.Drawing.Point(309, 60);
-            this.HasGlobalIndexCheckBox.Name = "HasGlobalIndexCheckBox";
-            this.HasGlobalIndexCheckBox.Size = new System.Drawing.Size(15, 14);
-            this.HasGlobalIndexCheckBox.TabIndex = 12;
-            this.HasGlobalIndexCheckBox.UseVisualStyleBackColor = true;
-            this.HasGlobalIndexCheckBox.CheckStateChanged += new System.EventHandler(this.hasGlobalIndexCheckBox_CheckedChanged);
+            this.hasGlobalIndexCheckBox.AutoSize = true;
+            this.hasGlobalIndexCheckBox.Checked = true;
+            this.hasGlobalIndexCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.hasGlobalIndexCheckBox.Location = new System.Drawing.Point(309, 60);
+            this.hasGlobalIndexCheckBox.Name = "hasGlobalIndexCheckBox";
+            this.hasGlobalIndexCheckBox.Size = new System.Drawing.Size(15, 14);
+            this.hasGlobalIndexCheckBox.TabIndex = 12;
+            this.hasGlobalIndexCheckBox.UseVisualStyleBackColor = true;
+            this.hasGlobalIndexCheckBox.CheckStateChanged += new System.EventHandler(this.hasGlobalIndexCheckBox_CheckedChanged);
             // 
             // label3
             // 
@@ -66,32 +66,32 @@
             this.label3.TabIndex = 11;
             this.label3.Text = "Global Index";
             // 
-            // DataFormatBox
+            // dataFormatBox
             // 
-            this.DataFormatBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.DataFormatBox.FormattingEnabled = true;
-            this.DataFormatBox.Items.AddRange(new object[] {
+            this.dataFormatBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.dataFormatBox.FormattingEnabled = true;
+            this.dataFormatBox.Items.AddRange(new object[] {
             "Rectangle",
             "4-bit Indexed with External Palette",
             "8-bit Indexed with External Palette",
             "4-bit Indexed",
             "8-bit Indexed"});
-            this.DataFormatBox.Location = new System.Drawing.Point(74, 30);
-            this.DataFormatBox.Name = "DataFormatBox";
-            this.DataFormatBox.Size = new System.Drawing.Size(250, 21);
-            this.DataFormatBox.TabIndex = 10;
+            this.dataFormatBox.Location = new System.Drawing.Point(74, 30);
+            this.dataFormatBox.Name = "dataFormatBox";
+            this.dataFormatBox.Size = new System.Drawing.Size(250, 21);
+            this.dataFormatBox.TabIndex = 10;
             // 
-            // PixelFormatBox
+            // pixelFormatBox
             // 
-            this.PixelFormatBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.PixelFormatBox.FormattingEnabled = true;
-            this.PixelFormatBox.Items.AddRange(new object[] {
+            this.pixelFormatBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.pixelFormatBox.FormattingEnabled = true;
+            this.pixelFormatBox.Items.AddRange(new object[] {
             "RGB5A3",
             "ARGB8888"});
-            this.PixelFormatBox.Location = new System.Drawing.Point(74, 3);
-            this.PixelFormatBox.Name = "PixelFormatBox";
-            this.PixelFormatBox.Size = new System.Drawing.Size(250, 21);
-            this.PixelFormatBox.TabIndex = 9;
+            this.pixelFormatBox.Location = new System.Drawing.Point(74, 3);
+            this.pixelFormatBox.Name = "pixelFormatBox";
+            this.pixelFormatBox.Size = new System.Drawing.Size(250, 21);
+            this.pixelFormatBox.TabIndex = 9;
             // 
             // label2
             // 
@@ -115,12 +115,11 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.AutoSize = true;
-            this.Controls.Add(this.GlobalIndexTextBox);
-            this.Controls.Add(this.HasGlobalIndexCheckBox);
+            this.Controls.Add(this.globalIndexTextBox);
+            this.Controls.Add(this.hasGlobalIndexCheckBox);
             this.Controls.Add(this.label3);
-            this.Controls.Add(this.DataFormatBox);
-            this.Controls.Add(this.PixelFormatBox);
+            this.Controls.Add(this.dataFormatBox);
+            this.Controls.Add(this.pixelFormatBox);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Name = "SvrWriterSettings";
@@ -132,12 +131,12 @@
 
         #endregion
 
-        public System.Windows.Forms.TextBox GlobalIndexTextBox;
-        public System.Windows.Forms.CheckBox HasGlobalIndexCheckBox;
         private System.Windows.Forms.Label label3;
-        public System.Windows.Forms.ComboBox DataFormatBox;
-        public System.Windows.Forms.ComboBox PixelFormatBox;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.ComboBox pixelFormatBox;
+        private System.Windows.Forms.ComboBox dataFormatBox;
+        private System.Windows.Forms.TextBox globalIndexTextBox;
+        private System.Windows.Forms.CheckBox hasGlobalIndexCheckBox;
     }
 }

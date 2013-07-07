@@ -53,6 +53,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Archive\ArchiveBase.cs" />
+    <Compile Include="Archive\ArchiveEntry.cs" />
     <Compile Include="Archive\Formats\AcxArchive.cs" />
     <Compile Include="Archive\Formats\AfsArchive.cs" />
     <Compile Include="Archive\Formats\GntArchive.cs" />

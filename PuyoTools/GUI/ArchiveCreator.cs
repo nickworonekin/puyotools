@@ -133,13 +133,15 @@ namespace PuyoTools.GUI
             {
                 numFilesAdded++;
 
-                if (numFilesAdded == archive.NumberOfFiles)
+                //if (numFilesAdded == archive.NumberOfFiles)
+                if (numFilesAdded == archive.Entries.Count)
                 {
                     dialog.ReportProgress(100, "Finishing up");
                 }
                 else
                 {
-                    dialog.ReportProgress(numFilesAdded * 100 / archive.NumberOfFiles, description + "\n\n" + String.Format("Adding {0} ({1:N0} of {2:N0})", Path.GetFileName(settings.FileEntries[numFilesAdded].SourceFile), numFilesAdded + 1, archive.NumberOfFiles));
+                    //dialog.ReportProgress(numFilesAdded * 100 / archive.NumberOfFiles, description + "\n\n" + String.Format("Adding {0} ({1:N0} of {2:N0})", Path.GetFileName(settings.FileEntries[numFilesAdded].SourceFile), numFilesAdded + 1, archive.NumberOfFiles));
+                    dialog.ReportProgress(numFilesAdded * 100 / archive.Entries.Count, description + "\n\n" + String.Format("Adding {0} ({1:N0} of {2:N0})", Path.GetFileName(settings.FileEntries[numFilesAdded].SourceFile), numFilesAdded + 1, archive.Entries.Count));
                 }
             };
 
@@ -153,7 +155,8 @@ namespace PuyoTools.GUI
 
                 try
                 {
-                    archive.AddFile(File.OpenRead(entry.SourceFile), entry.FilenameInArchive, entry.SourceFile);
+                    //archive.AddFile(File.OpenRead(entry.SourceFile), entry.FilenameInArchive, entry.SourceFile);
+                    archive.CreateEntryFromFile(entry.SourceFile, entry.FilenameInArchive);
                 }
                 catch (CannotAddFileToArchiveException)
                 {
@@ -172,13 +175,13 @@ namespace PuyoTools.GUI
                 }
             }
 
-            if (archive.NumberOfFiles == 1)
+            if (archive.Entries.Count == 1)
             {
                 dialog.Description = description + "\n\n" + String.Format("Adding {0}", Path.GetFileName(settings.FileEntries[numFilesAdded].SourceFile));
             }
             else
             {
-                dialog.Description = description + "\n\n" + String.Format("Adding {0} ({1:N0} of {2:N0})", Path.GetFileName(settings.FileEntries[numFilesAdded].SourceFile), numFilesAdded + 1, archive.NumberOfFiles);
+                dialog.Description = description + "\n\n" + String.Format("Adding {0} ({1:N0} of {2:N0})", Path.GetFileName(settings.FileEntries[numFilesAdded].SourceFile), numFilesAdded + 1, archive.Entries.Count);
             }
 
             archive.Flush();

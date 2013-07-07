@@ -38,11 +38,8 @@ namespace PuyoTools.Modules.Archive
 
         public class Reader : ArchiveReader
         {
-            public Reader(Stream source, int length)
+            public Reader(Stream source, int length) : base(source)
             {
-                // The start of the archive
-                archiveOffset = source.Position;
-
                 // Read the archive header
                 source.Position += 4;
                 uint rootNodeOffset = PTStream.ReadUInt32BE(source);
@@ -57,12 +54,10 @@ namespace PuyoTools.Modules.Archive
                 rootNode.DataOffset = PTStream.ReadUInt32BE(source);
                 rootNode.Length = PTStream.ReadUInt32BE(source);
 
-                Files = new ArchiveEntry[rootNode.Length - 1];
+                entries = new ArchiveEntryCollection(this, (int)rootNode.Length - 1);
                 uint stringTableOffset = rootNodeOffset + (rootNode.Length * 12);
 
-                // rootNode.Length is essentially how many files are contained in the archive, so we'll
-                // do just that
-                int shift = 0;
+                // rootNode.Length is essentially how many files are contained in the archive, so we'll do just that
                 for (int i = 0; i < rootNode.Length - 1; i++)
                 {
                     // Read in this node
@@ -73,14 +68,15 @@ namespace PuyoTools.Modules.Archive
                     node.Length = PTStream.ReadUInt32BE(source);
 
                     // Create the archive entry, then check what type of node it is
-                    ArchiveEntry entry = new ArchiveEntry();
-                    entry.Stream = source;
+                    long entryOffset = 0;
+                    int entryLength = 0;
+                    string entryFilename;
 
                     // A file node
                     if (node.Type == 0)
                     {
-                        entry.Offset = archiveOffset + node.DataOffset;
-                        entry.Length = (int)node.Length;
+                        entryOffset = archiveOffset + node.DataOffset;
+                        entryLength = (int)node.Length;
                     }
 
                     // A directory node
@@ -88,24 +84,17 @@ namespace PuyoTools.Modules.Archive
                     // In the meantime, we'll just skip it
                     else if (node.Type == 1)
                     {
-                        shift++;
                         continue;
                     }
 
                     // Get the filename for the entry
                     long oldPosition = source.Position;
                     source.Position = archiveOffset + stringTableOffset + node.NameOffset;
-                    entry.Filename = PTStream.ReadCString(source);
+                    entryFilename = PTStream.ReadCString(source);
                     source.Position = oldPosition;
 
-                    // Add this entry to the file list
-                    Files[i - shift] = entry;
-                }
-
-                // Resize the array if there were directory entries
-                if (shift != 0)
-                {
-                    Array.Resize<ArchiveEntry>(ref Files, Files.Length - shift);
+                    // Add this entry to the collection
+                    entries.Add(archiveOffset + entryOffset, entryLength, entryFilename);
                 }
 
                 // Set the position of the stream to the end of the file
@@ -123,10 +112,7 @@ namespace PuyoTools.Modules.Archive
 
         public class Writer : ArchiveWriter
         {
-            public Writer(Stream destination)
-            {
-                Initalize(destination);
-            }
+            public Writer(Stream destination) : base(destination) { }
 
             public override void Flush()
             {
@@ -137,10 +123,10 @@ namespace PuyoTools.Modules.Archive
                 // It's just very difficult to do with the way Puyo Tools is structured.
 
                 // First things first, let's get the header size
-                int headerSize = ((files.Count + 1) * 12) + 1;
-                for (int i = 0; i < files.Count; i++)
+                int headerSize = ((entries.Count + 1) * 12) + 1;
+                for (int i = 0; i < entries.Count; i++)
                 {
-                    headerSize += files[i].Filename.Length + 1;
+                    headerSize += entries[i].Name.Length + 1;
                 }
 
                 // Get the name and data offset
@@ -166,28 +152,28 @@ namespace PuyoTools.Modules.Archive
                 destination.WriteByte((byte)(nameOffset >> 16));
                 PTStream.WriteUInt16BE(destination, (ushort)(nameOffset & 0xFFFF));
                 PTStream.WriteInt32BE(destination, 0);
-                PTStream.WriteInt32BE(destination, files.Count + 1);
+                PTStream.WriteInt32BE(destination, entries.Count + 1);
 
                 nameOffset++;
 
                 // Write out the file nodes
-                for (int i = 0; i < files.Count; i++)
+                for (int i = 0; i < entries.Count; i++)
                 {
                     destination.WriteByte(0);
                     destination.WriteByte((byte)(nameOffset >> 16));
                     PTStream.WriteUInt16BE(destination, (ushort)(nameOffset & 0xFFFF));
                     PTStream.WriteInt32BE(destination, dataOffset);
-                    PTStream.WriteInt32BE(destination, files[i].Length);
+                    PTStream.WriteInt32BE(destination, entries[i].Length);
 
-                    nameOffset += files[i].Filename.Length + 1;
-                    dataOffset += PTMethods.RoundUp(files[i].Length, 32);
+                    nameOffset += entries[i].Name.Length + 1;
+                    dataOffset += PTMethods.RoundUp(entries[i].Length, 32);
                 }
 
                 // Write out the filename table
                 PTStream.WriteCString(destination, String.Empty, 1);
-                for (int i = 0; i < files.Count; i++)
+                for (int i = 0; i < entries.Count; i++)
                 {
-                    PTStream.WriteCString(destination, files[i].Filename, files[i].Filename.Length + 1);
+                    PTStream.WriteCString(destination, entries[i].Name, entries[i].Name.Length + 1);
                 }
 
                 // Pad
@@ -195,9 +181,9 @@ namespace PuyoTools.Modules.Archive
                     destination.WriteByte(0);
 
                 // Write the file data
-                for (int i = 0; i < files.Count; i++)
+                for (int i = 0; i < entries.Count; i++)
                 {
-                    PTStream.CopyPartToPadded(files[i].Stream, destination, files[i].Length, 32, 0);
+                    PTStream.CopyToPadded(entries[i].Open(), destination, 32, 0);
 
                     // Call the file added event
                     OnFileAdded(EventArgs.Empty);

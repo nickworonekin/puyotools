@@ -28,37 +28,37 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.GlobalIndexTextBox = new System.Windows.Forms.TextBox();
-            this.HasGlobalIndexCheckBox = new System.Windows.Forms.CheckBox();
+            this.globalIndexTextBox = new System.Windows.Forms.TextBox();
+            this.hasGlobalIndexCheckBox = new System.Windows.Forms.CheckBox();
             this.label3 = new System.Windows.Forms.Label();
-            this.DataFormatBox = new System.Windows.Forms.ComboBox();
-            this.PaletteFormatBox = new System.Windows.Forms.ComboBox();
+            this.dataFormatBox = new System.Windows.Forms.ComboBox();
+            this.paletteFormatBox = new System.Windows.Forms.ComboBox();
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
-            this.HasMipmapsCheckBox = new System.Windows.Forms.CheckBox();
-            this.HasExternalPaletteCheckBox = new System.Windows.Forms.CheckBox();
-            this.GbixTypeBox = new System.Windows.Forms.ComboBox();
+            this.hasMipmapsCheckBox = new System.Windows.Forms.CheckBox();
+            this.hasExternalPaletteCheckBox = new System.Windows.Forms.CheckBox();
+            this.gbixTypeBox = new System.Windows.Forms.ComboBox();
             this.SuspendLayout();
             // 
-            // GlobalIndexTextBox
+            // globalIndexTextBox
             // 
-            this.GlobalIndexTextBox.Location = new System.Drawing.Point(84, 58);
-            this.GlobalIndexTextBox.Name = "GlobalIndexTextBox";
-            this.GlobalIndexTextBox.Size = new System.Drawing.Size(123, 20);
-            this.GlobalIndexTextBox.TabIndex = 20;
-            this.GlobalIndexTextBox.Text = "0";
+            this.globalIndexTextBox.Location = new System.Drawing.Point(84, 58);
+            this.globalIndexTextBox.Name = "globalIndexTextBox";
+            this.globalIndexTextBox.Size = new System.Drawing.Size(123, 20);
+            this.globalIndexTextBox.TabIndex = 20;
+            this.globalIndexTextBox.Text = "0";
             // 
-            // HasGlobalIndexCheckBox
+            // hasGlobalIndexCheckBox
             // 
-            this.HasGlobalIndexCheckBox.AutoSize = true;
-            this.HasGlobalIndexCheckBox.Checked = true;
-            this.HasGlobalIndexCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.HasGlobalIndexCheckBox.Location = new System.Drawing.Point(319, 61);
-            this.HasGlobalIndexCheckBox.Name = "HasGlobalIndexCheckBox";
-            this.HasGlobalIndexCheckBox.Size = new System.Drawing.Size(15, 14);
-            this.HasGlobalIndexCheckBox.TabIndex = 19;
-            this.HasGlobalIndexCheckBox.UseVisualStyleBackColor = true;
-            this.HasGlobalIndexCheckBox.CheckedChanged += new System.EventHandler(this.hasGlobalIndexCheckBox_CheckedChanged);
+            this.hasGlobalIndexCheckBox.AutoSize = true;
+            this.hasGlobalIndexCheckBox.Checked = true;
+            this.hasGlobalIndexCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.hasGlobalIndexCheckBox.Location = new System.Drawing.Point(319, 61);
+            this.hasGlobalIndexCheckBox.Name = "hasGlobalIndexCheckBox";
+            this.hasGlobalIndexCheckBox.Size = new System.Drawing.Size(15, 14);
+            this.hasGlobalIndexCheckBox.TabIndex = 19;
+            this.hasGlobalIndexCheckBox.UseVisualStyleBackColor = true;
+            this.hasGlobalIndexCheckBox.CheckedChanged += new System.EventHandler(this.hasGlobalIndexCheckBox_CheckedChanged);
             // 
             // label3
             // 
@@ -69,11 +69,11 @@
             this.label3.TabIndex = 18;
             this.label3.Text = "Global Index";
             // 
-            // DataFormatBox
+            // dataFormatBox
             // 
-            this.DataFormatBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.DataFormatBox.FormattingEnabled = true;
-            this.DataFormatBox.Items.AddRange(new object[] {
+            this.dataFormatBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.dataFormatBox.FormattingEnabled = true;
+            this.dataFormatBox.Items.AddRange(new object[] {
             "4-bit Intensity",
             "8-bit Intensity",
             "4-bit Intensity with Alpha",
@@ -84,24 +84,24 @@
             "4-bit Indexed",
             "8-bit Indexed",
             "DXT1 Compressed"});
-            this.DataFormatBox.Location = new System.Drawing.Point(84, 30);
-            this.DataFormatBox.Name = "DataFormatBox";
-            this.DataFormatBox.Size = new System.Drawing.Size(250, 21);
-            this.DataFormatBox.TabIndex = 17;
-            this.DataFormatBox.SelectedIndexChanged += new System.EventHandler(this.DataFormatBox_SelectedIndexChanged);
+            this.dataFormatBox.Location = new System.Drawing.Point(84, 30);
+            this.dataFormatBox.Name = "dataFormatBox";
+            this.dataFormatBox.Size = new System.Drawing.Size(250, 21);
+            this.dataFormatBox.TabIndex = 17;
+            this.dataFormatBox.SelectedIndexChanged += new System.EventHandler(this.DataFormatBox_SelectedIndexChanged);
             // 
-            // PaletteFormatBox
+            // paletteFormatBox
             // 
-            this.PaletteFormatBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.PaletteFormatBox.FormattingEnabled = true;
-            this.PaletteFormatBox.Items.AddRange(new object[] {
+            this.paletteFormatBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.paletteFormatBox.FormattingEnabled = true;
+            this.paletteFormatBox.Items.AddRange(new object[] {
             "8-bit Intensity with Alpha",
             "RGB565",
             "RGB5A3"});
-            this.PaletteFormatBox.Location = new System.Drawing.Point(84, 3);
-            this.PaletteFormatBox.Name = "PaletteFormatBox";
-            this.PaletteFormatBox.Size = new System.Drawing.Size(250, 21);
-            this.PaletteFormatBox.TabIndex = 16;
+            this.paletteFormatBox.Location = new System.Drawing.Point(84, 3);
+            this.paletteFormatBox.Name = "paletteFormatBox";
+            this.paletteFormatBox.Size = new System.Drawing.Size(250, 21);
+            this.paletteFormatBox.TabIndex = 16;
             // 
             // label2
             // 
@@ -121,51 +121,50 @@
             this.label1.TabIndex = 14;
             this.label1.Text = "Palette Format";
             // 
-            // HasMipmapsCheckBox
+            // hasMipmapsCheckBox
             // 
-            this.HasMipmapsCheckBox.AutoSize = true;
-            this.HasMipmapsCheckBox.Location = new System.Drawing.Point(6, 84);
-            this.HasMipmapsCheckBox.Name = "HasMipmapsCheckBox";
-            this.HasMipmapsCheckBox.Size = new System.Drawing.Size(90, 17);
-            this.HasMipmapsCheckBox.TabIndex = 21;
-            this.HasMipmapsCheckBox.Text = "Has Mipmaps";
-            this.HasMipmapsCheckBox.UseVisualStyleBackColor = true;
+            this.hasMipmapsCheckBox.AutoSize = true;
+            this.hasMipmapsCheckBox.Location = new System.Drawing.Point(6, 84);
+            this.hasMipmapsCheckBox.Name = "hasMipmapsCheckBox";
+            this.hasMipmapsCheckBox.Size = new System.Drawing.Size(90, 17);
+            this.hasMipmapsCheckBox.TabIndex = 21;
+            this.hasMipmapsCheckBox.Text = "Has Mipmaps";
+            this.hasMipmapsCheckBox.UseVisualStyleBackColor = true;
             // 
-            // HasExternalPaletteCheckBox
+            // hasExternalPaletteCheckBox
             // 
-            this.HasExternalPaletteCheckBox.AutoSize = true;
-            this.HasExternalPaletteCheckBox.Location = new System.Drawing.Point(6, 107);
-            this.HasExternalPaletteCheckBox.Name = "HasExternalPaletteCheckBox";
-            this.HasExternalPaletteCheckBox.Size = new System.Drawing.Size(122, 17);
-            this.HasExternalPaletteCheckBox.TabIndex = 22;
-            this.HasExternalPaletteCheckBox.Text = "Has External Palette";
-            this.HasExternalPaletteCheckBox.UseVisualStyleBackColor = true;
+            this.hasExternalPaletteCheckBox.AutoSize = true;
+            this.hasExternalPaletteCheckBox.Location = new System.Drawing.Point(6, 107);
+            this.hasExternalPaletteCheckBox.Name = "hasExternalPaletteCheckBox";
+            this.hasExternalPaletteCheckBox.Size = new System.Drawing.Size(122, 17);
+            this.hasExternalPaletteCheckBox.TabIndex = 22;
+            this.hasExternalPaletteCheckBox.Text = "Has External Palette";
+            this.hasExternalPaletteCheckBox.UseVisualStyleBackColor = true;
             // 
-            // GbixTypeBox
+            // gbixTypeBox
             // 
-            this.GbixTypeBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.GbixTypeBox.FormattingEnabled = true;
-            this.GbixTypeBox.Items.AddRange(new object[] {
+            this.gbixTypeBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.gbixTypeBox.FormattingEnabled = true;
+            this.gbixTypeBox.Items.AddRange(new object[] {
             "GBIX",
             "GCIX"});
-            this.GbixTypeBox.Location = new System.Drawing.Point(213, 58);
-            this.GbixTypeBox.Name = "GbixTypeBox";
-            this.GbixTypeBox.Size = new System.Drawing.Size(100, 21);
-            this.GbixTypeBox.TabIndex = 23;
+            this.gbixTypeBox.Location = new System.Drawing.Point(213, 58);
+            this.gbixTypeBox.Name = "gbixTypeBox";
+            this.gbixTypeBox.Size = new System.Drawing.Size(100, 21);
+            this.gbixTypeBox.TabIndex = 23;
             // 
             // GvrWriterSettings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.AutoSize = true;
-            this.Controls.Add(this.GbixTypeBox);
-            this.Controls.Add(this.HasExternalPaletteCheckBox);
-            this.Controls.Add(this.HasMipmapsCheckBox);
-            this.Controls.Add(this.GlobalIndexTextBox);
-            this.Controls.Add(this.HasGlobalIndexCheckBox);
+            this.Controls.Add(this.gbixTypeBox);
+            this.Controls.Add(this.hasExternalPaletteCheckBox);
+            this.Controls.Add(this.hasMipmapsCheckBox);
+            this.Controls.Add(this.globalIndexTextBox);
+            this.Controls.Add(this.hasGlobalIndexCheckBox);
             this.Controls.Add(this.label3);
-            this.Controls.Add(this.DataFormatBox);
-            this.Controls.Add(this.PaletteFormatBox);
+            this.Controls.Add(this.dataFormatBox);
+            this.Controls.Add(this.paletteFormatBox);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Name = "GvrWriterSettings";
@@ -177,15 +176,15 @@
 
         #endregion
 
-        public System.Windows.Forms.TextBox GlobalIndexTextBox;
-        public System.Windows.Forms.CheckBox HasGlobalIndexCheckBox;
         private System.Windows.Forms.Label label3;
-        public System.Windows.Forms.ComboBox DataFormatBox;
-        public System.Windows.Forms.ComboBox PaletteFormatBox;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label1;
-        public System.Windows.Forms.CheckBox HasMipmapsCheckBox;
-        public System.Windows.Forms.CheckBox HasExternalPaletteCheckBox;
-        public System.Windows.Forms.ComboBox GbixTypeBox;
+        private System.Windows.Forms.ComboBox dataFormatBox;
+        private System.Windows.Forms.ComboBox paletteFormatBox;
+        private System.Windows.Forms.TextBox globalIndexTextBox;
+        private System.Windows.Forms.ComboBox gbixTypeBox;
+        private System.Windows.Forms.CheckBox hasGlobalIndexCheckBox;
+        private System.Windows.Forms.CheckBox hasMipmapsCheckBox;
+        private System.Windows.Forms.CheckBox hasExternalPaletteCheckBox;
     }
 }

@@ -46,45 +46,42 @@ namespace PuyoTools.Modules.Archive
 
         public class Reader : ArchiveReader
         {
-            bool containsFilename, containsPixelFormat, containsDimensions, containsGlobalIndex;
+            bool hasFilenames, hasFormats, hasDimensions, hasGlobalIndexes;
             int tableEntryLength, globalIndexOffset;
 
-            public Reader(Stream source, int length)
+            public Reader(Stream source, int length) : base(source)
             {
-                // The start of the archive
-                archiveOffset = source.Position;
-
                 // The offset of the first entry
                 source.Position += 4;
                 int entryOffset = PTStream.ReadInt32(source) + 8;
                 int headerOffset = 0xC;
 
                 // Read what properties this archive stores for each texture
-                byte properties = PTStream.ReadByte(source);
-                containsFilename    = (properties & (1 << 3)) > 0;
-                containsPixelFormat = (properties & (1 << 2)) > 0;
-                containsDimensions  = (properties & (1 << 1)) > 0;
-                containsGlobalIndex = (properties & (1 << 0)) > 0;
+                byte properties  = PTStream.ReadByte(source);
+                hasFilenames     = (properties & (1 << 3)) > 0;
+                hasFormats       = (properties & (1 << 2)) > 0;
+                hasDimensions    = (properties & (1 << 1)) > 0;
+                hasGlobalIndexes = (properties & (1 << 0)) > 0;
                 source.Position++;
 
-                // Determine the size of each entry in the file table
+                // Determine the size of each entry in the entry table
                 tableEntryLength = 2;
-                if (containsFilename) tableEntryLength += 28;
-                if (containsPixelFormat) tableEntryLength += 2;
-                if (containsDimensions) tableEntryLength += 2;
+                if (hasFilenames)  tableEntryLength += 28;
+                if (hasFormats)    tableEntryLength += 2;
+                if (hasDimensions) tableEntryLength += 2;
 
-                if (containsGlobalIndex)
+                if (hasGlobalIndexes)
                 {
                     globalIndexOffset = tableEntryLength;
                     tableEntryLength += 4;
                 }
 
-                // Get the number of files in the archive
-                ushort numFiles = PTStream.ReadUInt16(source);
-                Files = new ArchiveEntry[numFiles];
+                // Get the number of entries in the archive
+                ushort numEntries = PTStream.ReadUInt16(source);
+                entries = new ArchiveEntryCollection(this, numEntries);
 
-                // Read in all the file entries
-                for (int i = 0; i < numFiles; i++)
+                // Read in all the entries
+                for (int i = 0; i < numEntries; i++)
                 {
                     // We need to need to determine the offset based on the length,
                     // which is stored in the texture data.
@@ -93,15 +90,15 @@ namespace PuyoTools.Modules.Archive
                     int entryLength = PTStream.ReadInt32(source) + 8;
 
                     string entryFname = String.Empty;
-                    if (containsFilename)
+                    if (hasFilenames)
                     {
                         source.Position = archiveOffset + headerOffset + 2;
                         entryFname = PTStream.ReadCString(source, 28) + ".pvr";
                         headerOffset += tableEntryLength;
                     }
 
-                    // Add this entry to the file list
-                    Files[i] = new ArchiveEntry(source, archiveOffset + entryOffset, entryLength, entryFname);
+                    // Add this entry to the collection
+                    entries.Add(archiveOffset + entryOffset, entryLength, entryFname);
 
                     entryOffset += entryLength;
                 }
@@ -110,19 +107,15 @@ namespace PuyoTools.Modules.Archive
                 source.Position = archiveOffset + length;
             }
 
-            public override ArchiveEntry GetFile(int index)
+            public override Stream OpenEntry(ArchiveEntry entry)
             {
-                // If this archive does not contain any global indicies, then just return the data as is.
-                if (!containsGlobalIndex)
+                // If this archive does not contain any global indexes, then just return the data as is.
+                if (!hasGlobalIndexes)
                 {
-                    return base.GetFile(index);
+                    return base.OpenEntry(entry);
                 }
 
-                // Make sure index is not out of bounds
-                if (index < 0 || index > Files.Length)
-                    throw new IndexOutOfRangeException();
-
-                long oldPosition = Files[index].Stream.Position;
+                long oldPosition = archiveData.Position;
 
                 MemoryStream data = new MemoryStream();
 
@@ -133,19 +126,19 @@ namespace PuyoTools.Modules.Archive
                 data.WriteByte((byte)'X');
                 PTStream.WriteInt32(data, 8);
 
-                Files[index].Stream.Position = 0xC + (index * tableEntryLength) + globalIndexOffset;
-                PTStream.WriteUInt32(data, PTStream.ReadUInt32(Files[index].Stream));
+                archiveData.Position = 0xC + (entry.Index * tableEntryLength) + globalIndexOffset;
+                PTStream.WriteUInt32(data, PTStream.ReadUInt32(archiveData));
 
                 data.Position += 4;
 
                 // Now copy over the file data
-                Files[index].Stream.Position = Files[index].Offset;
-                PTStream.CopyPartTo(Files[index].Stream, data, Files[index].Length);
+                archiveData.Position = entry.Offset;
+                PTStream.CopyPartTo(archiveData, data, entry.Length);
 
-                Files[index].Stream.Position = oldPosition;
+                archiveData.Position = oldPosition;
                 data.Position = 0;
 
-                return new ArchiveEntry(data, 0, (int)data.Length, Files[index].Filename);
+                return data;
             }
         }
 
@@ -173,10 +166,8 @@ namespace PuyoTools.Modules.Archive
             public bool HasDimensions { get; set; }
             #endregion
 
-            public Writer(Stream destination)
+            public Writer(Stream destination) : base(destination)
             {
-                Initalize(destination);
-
                 // Set default settings
                 HasFilenames = true;
                 HasGlobalIndexes = true;
@@ -184,16 +175,23 @@ namespace PuyoTools.Modules.Archive
                 HasDimensions = true;
             }
 
-            public override void AddFile(Stream source, int length, string fname, string sourceFile)
+            /// <summary>
+            /// Creates an entry that has the specified data entry name in the archive.
+            /// </summary>
+            /// <param name="source">The data to be added to the archive.</param>
+            /// <param name="entryName">The name of the entry to be created.</param>
+            /// <remarks>
+            /// The file may be rejected from the archive. In this case, a CannotAddFileToArchiveException will be thrown.
+            /// </remarks>
+            public override void CreateEntry(Stream source, string entryName)
             {
-                // Only PVR textures can be added to a PVM archive.
-                // If this is not a PVR texture, throw an exception
-                if (!(new PvrTexture()).Is(source, length, fname))
+                // Only PVR textures can be added to a PVM archive. If this is not a PVR texture, throw an exception.
+                if (!(new PvrTexture()).Is(source, entryName))
                 {
                     throw new CannotAddFileToArchiveException();
                 }
 
-                base.AddFile(source, length, fname, sourceFile);
+                base.CreateEntry(source, entryName);
             }
 
             public override void Flush()
@@ -231,36 +229,37 @@ namespace PuyoTools.Modules.Archive
                 destination.WriteByte((byte)'H');
 
                 // Offset of the first texture in the archive
-                long entryOffset = PTMethods.RoundUp(12 + (files.Count * entryLength), 16);
+                long entryOffset = PTMethods.RoundUp(12 + (entries.Count * entryLength), 16);
                 PTStream.WriteInt32(destination, (int)entryOffset - 8);
 
                 // Write out the flags
                 PTStream.WriteUInt16(destination, flags);
 
-                // Write out the number of files
-                PTStream.WriteUInt16(destination, (ushort)files.Count);
+                // Write out the number of entries
+                PTStream.WriteUInt16(destination, (ushort)entries.Count);
 
                 // We're going to be using this a few times. Might as well do this here
                 long oldPosition;
 
-                // Now, let's add the files
-                for (int i = 0; i < files.Count; i++)
+                // Now, let's add the entries
+                for (int i = 0; i < entries.Count; i++)
                 {
+                    Stream entryData = entries[i].Open();
+
                     // We need to get some information about the texture.
                     // We already checked to make sure this texture is a PVR.
                     // No need to check it again.
-                    oldPosition = files[i].Stream.Position;
-                    VrSharp.PvrTexture.PvrTexture texture = new VrSharp.PvrTexture.PvrTexture(files[i].Stream, files[i].Length);
-                    //VrSharp.PvrTexture.PvrTextureInfo textureInfo = (VrSharp.PvrTexture.PvrTextureInfo)texture.GetTextureInfo();
-                    files[i].Stream.Position = oldPosition;
+                    oldPosition = entryData.Position;
+                    VrSharp.PvrTexture.PvrTexture texture = new VrSharp.PvrTexture.PvrTexture(entryData);
+                    entryData.Position = oldPosition;
 
-                    // Write out the file number
+                    // Write out the entry number
                     PTStream.WriteUInt16(destination, (ushort)i);
 
                     // Write the information for this entry in the header
                     if (HasFilenames)
                     {
-                        PTStream.WriteCString(destination, Path.GetFileNameWithoutExtension(files[i].Filename), 28);
+                        PTStream.WriteCString(destination, Path.GetFileNameWithoutExtension(entries[i].Name), 28);
                     }
                     if (HasFormats)
                     {
@@ -279,12 +278,12 @@ namespace PuyoTools.Modules.Archive
                         PTStream.WriteUInt32(destination, texture.GlobalIndex);
                     }
 
-                    // Now write out the file information
+                    // Now write out the entry information
                     oldPosition = destination.Position;
                     destination.Position = entryOffset;
-                    files[i].Stream.Position += texture.PvrtOffset;
+                    entryData.Position += texture.PvrtOffset;
 
-                    PTStream.CopyPartToPadded(files[i].Stream, destination, files[i].Length - texture.PvrtOffset, 16, 0);
+                    PTStream.CopyToPadded(entryData, destination, 16, 0);
 
                     entryOffset = destination.Position;
                     destination.Position = oldPosition;

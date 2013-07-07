@@ -32,6 +32,8 @@ namespace PuyoTools.Modules.Archive
             {
                 archive.Version = AfsArchive.Writer.AfsVersion.Version1;
             }
+
+            archive.HasTimestamps = hasTimestampsCheckbox.Checked;
         }
     }
 }

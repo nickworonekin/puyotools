@@ -39,26 +39,23 @@ namespace PuyoTools.Modules.Archive
 
         public class Reader : ArchiveReader
         {
-            public Reader(Stream source, int length)
+            public Reader(Stream source, int length) : base(source)
             {
-                // The start of the archive
-                archiveOffset = source.Position;
-
-                // Get the number of files in the archive
+                // Get the number of entries in the archive
                 source.Position += 4;
-                int numFiles = PTStream.ReadInt32(source);
-                Files = new ArchiveEntry[numFiles];
+                int numEntries = PTStream.ReadInt32(source);
+                entries = new ArchiveEntryCollection(this, numEntries);
 
-                // Read in all the file entries
-                for (int i = 0; i < numFiles; i++)
+                // Read in all the entries
+                for (int i = 0; i < numEntries; i++)
                 {
-                    // Read in the entry filename extension, offset, length, and filename without the extension
+                    // Read in the entry filename, offset, and length
                     string entryFilename = PTStream.ReadCString(source, 56);
                     int entryOffset = PTStream.ReadInt32(source);
                     int entryLength = PTStream.ReadInt32(source);
 
-                    // Add this entry to the file list
-                    Files[i] = new ArchiveEntry(source, archiveOffset + entryOffset, entryLength, entryFilename);
+                    // Add this entry to the collection
+                    entries.Add(archiveOffset + entryOffset, entryLength, entryFilename);
                 }
 
                 // Set the position of the stream to the end of the file

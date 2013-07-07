@@ -44,21 +44,18 @@ namespace PuyoTools.Modules.Archive
 
         public class Reader : ArchiveReader
         {
-            public Reader(Stream source, int length)
+            public Reader(Stream source, int length) : base(source)
             {
-                // The start of the archive
-                archiveOffset = source.Position;
-
-                // Get the number of files in the archive
+                // Get the number of entries in the archive
                 source.Position += 4;
-                int numFiles = PTStream.ReadInt32(source);
-                Files = new ArchiveEntry[numFiles];
+                int numEntries = PTStream.ReadInt32(source);
+                entries = new ArchiveEntryCollection(this, numEntries);
 
                 // Get the offset of the metadata
-                source.Position += (numFiles * 8);
+                source.Position += (numEntries * 8);
                 int metadataOffset = PTStream.ReadInt32(source);
 
-                // If the offset isn't stored there, then it is stored right before the offset of the first file
+                // If the offset isn't stored there, then it is stored right before the offset of the first entry
                 if (metadataOffset == 0)
                 {
                     source.Position = archiveOffset + 8;
@@ -66,20 +63,20 @@ namespace PuyoTools.Modules.Archive
                     metadataOffset = PTStream.ReadInt32(source);
                 }
 
-                // Read in all the file entries
-                for (int i = 0; i < numFiles; i++)
+                // Read in all the entries
+                for (int i = 0; i < numEntries; i++)
                 {
-                    // Readin the entry offset and length
+                    // Read in the entry offset and length
                     source.Position = archiveOffset + 8 + (i * 8);
                     int entryOffset = PTStream.ReadInt32(source);
                     int entryLength = PTStream.ReadInt32(source);
 
-                    // Read in the entry fname
+                    // Read in the entry file name
                     source.Position = metadataOffset + (i * 48);
                     string entryFname = PTStream.ReadCString(source, 32);
 
-                    // Add this entry to the file list
-                    Files[i] = new ArchiveEntry(source, archiveOffset + entryOffset, entryLength, entryFname);
+                    // Add this entry to the collection
+                    entries.Add(archiveOffset + entryOffset, entryLength, entryFname);
                 }
 
                 // Set the position of the stream to the end of the file
@@ -136,17 +133,15 @@ namespace PuyoTools.Modules.Archive
             /// <summary>
             /// Sets if each file should include a timestamp. The default value is true.
             /// </summary>
-            public bool HasTimestamp { get; set; }
+            public bool HasTimestamps { get; set; }
             #endregion
 
-            public Writer(Stream destination)
+            public Writer(Stream destination) : base(destination)
             {
-                Initalize(destination);
-
                 // Set default settings
                 blockSize = 2048;
                 version = AfsVersion.Version1;
-                HasTimestamp = true;
+                HasTimestamps = true;
             }
 
             public override void Flush()
@@ -160,18 +155,19 @@ namespace PuyoTools.Modules.Archive
                 destination.WriteByte((byte)'S');
                 destination.WriteByte(0);
 
-                // Number of files in the archive
-                PTStream.WriteInt32(destination, files.Count);
+                // Number of entries in the archive
+                PTStream.WriteInt32(destination, entries.Count);
 
                 // Write out the header for the archive
-                int entryOffset = PTMethods.RoundUp(12 + (files.Count * 8), blockSize);
+                int entryOffset = PTMethods.RoundUp(12 + (entries.Count * 8), blockSize);
                 int firstEntryOffset = entryOffset;
-                for (int i = 0; i < files.Count; i++)
+
+                for (int i = 0; i < entries.Count; i++)
                 {
                     PTStream.WriteInt32(destination, entryOffset);
-                    PTStream.WriteInt32(destination, files[i].Length);
+                    PTStream.WriteInt32(destination, entries[i].Length);
 
-                    entryOffset += PTMethods.RoundUp(files[i].Length, blockSize);
+                    entryOffset += PTMethods.RoundUp(entries[i].Length, blockSize);
                 }
 
                 // If this is AFS v1, then the metadata offset is stored at 8 bytes before
@@ -183,36 +179,36 @@ namespace PuyoTools.Modules.Archive
 
                 // Write out the metadata offset and length
                 PTStream.WriteInt32(destination, entryOffset);
-                PTStream.WriteInt32(destination, files.Count * 48);
+                PTStream.WriteInt32(destination, entries.Count * 48);
 
                 destination.Position = offset + firstEntryOffset;
 
-                // Write out the file data for each file
-                for (int i = 0; i < files.Count; i++)
+                // Write out the file data for each entry
+                for (int i = 0; i < entries.Count; i++)
                 {
-                    PTStream.CopyPartToPadded(files[i].Stream, destination, files[i].Length, blockSize, 0);
+                    PTStream.CopyToPadded(entries[i].Open(), destination, blockSize, 0);
 
                     // Call the file added event
                     OnFileAdded(EventArgs.Empty);
                 }
 
                 // Write out the footer for the archive
-                for (int i = 0; i < files.Count; i++)
+                for (int i = 0; i < entries.Count; i++)
                 {
-                    PTStream.WriteCString(destination, files[i].Filename, 32);
+                    PTStream.WriteCString(destination, entries[i].Name, 32);
 
-                    // File creation time
-                    if (!String.IsNullOrEmpty(files[i].SourceFile) && File.Exists(files[i].SourceFile))
+                    // File timestamp
+                    if (HasTimestamps && !String.IsNullOrEmpty(entries[i].Path) && File.Exists(entries[i].Path))
                     {
-                        // File exists, let's read in the file creation time
-                        FileInfo fileInfo = new FileInfo(files[i].SourceFile);
+                        // File exists, let's read in the file timestamp
+                        FileInfo fileInfo = new FileInfo(entries[i].Path);
 
-                        PTStream.WriteInt16(destination, (short)fileInfo.CreationTime.Year);
-                        PTStream.WriteInt16(destination, (short)fileInfo.CreationTime.Month);
-                        PTStream.WriteInt16(destination, (short)fileInfo.CreationTime.Day);
-                        PTStream.WriteInt16(destination, (short)fileInfo.CreationTime.Hour);
-                        PTStream.WriteInt16(destination, (short)fileInfo.CreationTime.Minute);
-                        PTStream.WriteInt16(destination, (short)fileInfo.CreationTime.Second);
+                        PTStream.WriteInt16(destination, (short)fileInfo.LastWriteTime.Year);
+                        PTStream.WriteInt16(destination, (short)fileInfo.LastWriteTime.Month);
+                        PTStream.WriteInt16(destination, (short)fileInfo.LastWriteTime.Day);
+                        PTStream.WriteInt16(destination, (short)fileInfo.LastWriteTime.Hour);
+                        PTStream.WriteInt16(destination, (short)fileInfo.LastWriteTime.Minute);
+                        PTStream.WriteInt16(destination, (short)fileInfo.LastWriteTime.Second);
                     }
                     else
                     {

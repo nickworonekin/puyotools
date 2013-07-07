@@ -84,66 +84,166 @@ namespace PuyoTools.Modules.Archive
 
     public abstract class ArchiveReader : IModule
     {
-        public ArchiveEntry[] Files;
         protected long archiveOffset;
 
-        /// <summary>
-        /// Returns information about a file at the specified index in the archive.
-        /// </summary>
-        /// <param name="index">Index of the file.</param>
-        /// <returns>An ArchiveEntry containing the stream, offset in the stream, length, and the filename of the file.</returns>
-        public virtual ArchiveEntry GetFile(int index)
+        protected Stream archiveData;
+        protected ArchiveEntryCollection entries;
+
+        public ArchiveReader(Stream source)
         {
-            // For most archives, GetFile will just return a reference to Files[index].
-            // As such, it's much better to just impliment this as a virtual method
-            // and only override it if necessary.
+            archiveData = source;
+            archiveOffset = source.Position;
+        }
 
-            // Make sure index is not out of bounds
-            if (index < 0 || index > Files.Length)
-                throw new IndexOutOfRangeException();
+        /// <summary>
+        /// Gets the collection of entries that are currently in the archive.
+        /// </summary>
+        public ArchiveEntryCollection Entries
+        {
+            get { return entries; }
+        }
 
-            return Files[index];
+        /// <summary>
+        /// Retrieves the specified entry in the archive.
+        /// </summary>
+        /// <param name="index">Index of the entry within the archive.</param>
+        /// <returns>An ArchiveEntry.</returns>
+        public ArchiveEntry GetEntry(int index)
+        {
+            return entries[index];
+        }
+
+        /// <summary>
+        /// Opens the specified entry in the archive.
+        /// </summary>
+        /// <param name="entry">An archive entry.</param>
+        /// <returns>The stream that represents the contents of the entry.</returns>
+        public virtual Stream OpenEntry(ArchiveEntry entry)
+        {
+            if (entry == null || entry.ArchiveReader != this)
+            {
+                throw new ArgumentException("entry");
+            }
+
+            return new StreamView(archiveData, entry.Offset, entry.Length);
+        }
+
+        /// <summary>
+        /// Opens the specified entry in the archive.
+        /// </summary>
+        /// <param name="index">Index of the entry within the archive.</param>
+        /// <returns>The stream that represents the contents of the entry.</returns>
+        public Stream OpenEntry(int index)
+        {
+            return OpenEntry(entries[index]);
+        }
+
+        /// <summary>
+        /// Extracts the specified entry to a file.
+        /// </summary>
+        /// <param name="entry">An archive entry.</param>
+        /// <param name="path">The path to extract the file to.</param>
+        public void ExtractToFile(ArchiveEntry entry, string path)
+        {
+            using (Stream source = OpenEntry(entry), destination = File.Create(path))
+            {
+                PTStream.CopyTo(source, destination);
+            }
+        }
+
+        /// <summary>
+        /// Extracts the specified entry to a file.
+        /// </summary>
+        /// <param name="index">Index of the entry within the archive.</param>
+        /// <param name="path">The path to extract the file to.</param>
+        public void ExtractToFile(int index, string path)
+        {
+            ExtractToFile(entries[index], path);
+        }
+
+        /// <summary>
+        /// Adds the specified entry to the ArchiveEntryCollection associated with this archive.
+        /// </summary>
+        /// <param name="entry">An archive entry.</param>
+        protected void AddEntry(ArchiveEntry entry)
+        {
+            entries.Add(entry);
         }
     }
 
     public abstract class ArchiveWriter : IModule
     {
         protected Stream destination;
-        protected List<ArchiveEntry> files;
 
-        public int NumberOfFiles
+        protected ArchiveEntryCollection entries;
+
+        public ArchiveWriter() { }
+
+        public ArchiveWriter(Stream destination)
         {
-            get { return files.Count; }
+            this.destination = destination;
+
+            entries = new ArchiveEntryCollection(this);
+        }
+
+        /// <summary>
+        /// Gets the collection of entries that are currently in the archive.
+        /// </summary>
+        public ArchiveEntryCollection Entries
+        {
+            get { return entries; }
         }
 
         public abstract void Flush();
 
-        protected void Initalize(Stream destination)
+        /// <summary>
+        /// Creates an entry that has the specified data entry name in the archive.
+        /// </summary>
+        /// <param name="source">The data to be added to the archive.</param>
+        /// <param name="entryName">The name of the entry to be created.</param>
+        /// <remarks>
+        /// The file may be rejected from the archive. In this case, a CannotAddFileToArchiveException will be thrown.
+        /// </remarks>
+        public virtual void CreateEntry(Stream source, string entryName)
         {
-            files = new List<ArchiveEntry>();
-            this.destination = destination;
+            entries.Add(new ArchiveEntry(this, source, entryName));
         }
 
-        public void AddFile(Stream source, string fname)
+        /// <summary>
+        /// Creates an entry with no file name that has the specified data entry name in the archive.
+        /// </summary>
+        /// <param name="source">The data to be added to the archive.</param>
+        /// <remarks>
+        /// The file may be rejected from the archive. In this case, a CannotAddFileToArchiveException will be thrown.
+        /// </remarks>
+        public void CreateEntry(Stream source)
         {
-            AddFile(source, (int)(source.Length - source.Position), fname);
+            CreateEntry(source, String.Empty);
         }
 
-        public void AddFile(Stream source, string fname, string sourceFile)
+        /// <summary>
+        /// Adds an existing file to the archive.
+        /// </summary>
+        /// <param name="path">The path of the file to be added.</param>
+        /// <param name="entryName">The name of the entry to be created.</param>
+        /// <remarks>
+        /// The file may be rejected from the archive. In this case, a CannotAddFileToArchiveException will be thrown.
+        /// </remarks>
+        public void CreateEntryFromFile(string path, string entryName)
         {
-            AddFile(source, (int)(source.Length - source.Position), fname, sourceFile);
+            CreateEntry(File.OpenRead(path), entryName);
         }
 
-        public void AddFile(Stream source, int length, string fname)
+        /// <summary>
+        /// Adds an existing file to the archive.
+        /// </summary>
+        /// <param name="path">The path of the file to be added.</param>
+        /// <remarks>
+        /// The file may be rejected from the archive. In this case, a CannotAddFileToArchiveException will be thrown.
+        /// </remarks>
+        public void CreateEntryFromFile(string path)
         {
-            AddFile(source, length, fname, String.Empty);
-        }
-
-        public virtual void AddFile(Stream source, int length, string fname, string sourceFile)
-        {
-            // All we're going to do is add the file to the entry list
-            // The magic happens once Flush is called.
-            files.Add(new ArchiveEntry(source, source.Position, length, fname, sourceFile));
+            CreateEntry(File.OpenRead(path), Path.GetFileName(path));
         }
 
         // File added event
@@ -156,33 +256,6 @@ namespace PuyoTools.Modules.Archive
             {
                 FileAdded(this, e);
             }
-        }
-    }
-
-    public struct ArchiveEntry
-    {
-        public Stream Stream;
-        public long Offset;
-        public int Length;
-        public string Filename;
-        public string SourceFile;
-
-        public ArchiveEntry(Stream stream, long offset, int length, string fname)
-        {
-            Stream = stream;
-            Offset = offset;
-            Length = length;
-            Filename = fname;
-            SourceFile = String.Empty;
-        }
-
-        public ArchiveEntry(Stream stream, long offset, int length, string fname, string sourceFile)
-        {
-            Stream = stream;
-            Offset = offset;
-            Length = length;
-            Filename = fname;
-            SourceFile = sourceFile;
         }
     }
 

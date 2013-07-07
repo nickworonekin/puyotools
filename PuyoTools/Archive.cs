@@ -34,6 +34,12 @@ namespace PuyoTools
         }
 
         // Opens an archive with the specified archive format.
+        public static ArchiveReader Open(Stream source, ArchiveFormat format)
+        {
+            return Formats[format].Open(source);
+        }
+
+        // Opens an archive with the specified archive format.
         public static ArchiveReader Open(Stream source, int length, ArchiveFormat format)
         {
             return Formats[format].Open(source, length);

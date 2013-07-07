@@ -41,11 +41,8 @@ namespace PuyoTools.Modules.Archive
 
         public class Reader : ArchiveReader
         {
-            public Reader(Stream source, int length)
+            public Reader(Stream source, int length) : base(source)
             {
-                // The start of the archive
-                archiveOffset = source.Position;
-
                 // Read the archive header
                 source.Position += 12;
                 ushort fatbOffset = PTStream.ReadUInt16(source); // Should always be 0x10
@@ -55,17 +52,17 @@ namespace PuyoTools.Modules.Archive
                 uint fntbOffset = PTStream.ReadUInt32(source);
                 uint filenameOffset = fntbOffset + 16;
 
-                // Get the number of files in the archive
-                int numFiles = PTStream.ReadInt32(source);
-                Files = new ArchiveEntry[numFiles];
+                // Get the number of entries in the archive
+                int numEntries = PTStream.ReadInt32(source);
+                entries = new ArchiveEntryCollection(this, numEntries);
 
                 // Read the FNTB chunk
                 source.Position = archiveOffset + fntbOffset + 4;
                 bool hasFilenames = (PTStream.ReadUInt32(source) == 8);
 
-                // Read in all the file entries
+                // Read in all the entries
                 source.Position = archiveOffset + fatbOffset + 12;
-                for (int i = 0; i < numFiles; i++)
+                for (int i = 0; i < numEntries; i++)
                 {
                     // Read the entry offset and length
                     int entryOffset = PTStream.ReadInt32(source);
@@ -85,8 +82,8 @@ namespace PuyoTools.Modules.Archive
                         source.Position -= oldPosition;
                     }
 
-                    // Add this entry to the file list
-                    Files[i] = new ArchiveEntry(source, archiveOffset + entryOffset, entryLength, entryFname);
+                    // Add this entry to the collection
+                    entries.Add(archiveOffset + entryOffset, entryLength, entryFname);
                 }
 
                 // Set the position of the stream to the end of the file
@@ -96,10 +93,7 @@ namespace PuyoTools.Modules.Archive
 
         public class Writer : ArchiveWriter
         {
-            public Writer(Stream destination)
-            {
-                Initalize(destination);
-            }
+            public Writer(Stream destination) : base(destination) { }
 
             public override void Flush()
             {

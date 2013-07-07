@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.hasTimestampsCheckbox = new System.Windows.Forms.CheckBox();
             this.label2 = new System.Windows.Forms.Label();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.afsVersion1Radio = new System.Windows.Forms.RadioButton();
@@ -36,6 +37,18 @@
             this.label1 = new System.Windows.Forms.Label();
             this.flowLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
+            // 
+            // hasTimestampsCheckbox
+            // 
+            this.hasTimestampsCheckbox.AutoSize = true;
+            this.hasTimestampsCheckbox.Checked = true;
+            this.hasTimestampsCheckbox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.hasTimestampsCheckbox.Location = new System.Drawing.Point(8, 116);
+            this.hasTimestampsCheckbox.Name = "hasTimestampsCheckbox";
+            this.hasTimestampsCheckbox.Size = new System.Drawing.Size(104, 17);
+            this.hasTimestampsCheckbox.TabIndex = 3;
+            this.hasTimestampsCheckbox.Text = "Has Timestamps";
+            this.hasTimestampsCheckbox.UseVisualStyleBackColor = true;
             // 
             // label2
             // 
@@ -107,12 +120,13 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.hasTimestampsCheckbox);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.flowLayoutPanel1);
             this.Controls.Add(this.blockSizeBox);
             this.Controls.Add(this.label1);
             this.Name = "AfsWriterSettings";
-            this.Size = new System.Drawing.Size(192, 113);
+            this.Size = new System.Drawing.Size(192, 136);
             this.flowLayoutPanel1.ResumeLayout(false);
             this.flowLayoutPanel1.PerformLayout();
             this.ResumeLayout(false);
@@ -128,6 +142,7 @@
         private System.Windows.Forms.ComboBox blockSizeBox;
         private System.Windows.Forms.RadioButton afsVersion1Radio;
         private System.Windows.Forms.RadioButton afsVersion2Radio;
+        private System.Windows.Forms.CheckBox hasTimestampsCheckbox;
 
     }
 }

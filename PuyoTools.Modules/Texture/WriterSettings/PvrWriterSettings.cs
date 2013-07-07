@@ -17,8 +17,8 @@ namespace PuyoTools.Modules.Texture
         {
             InitializeComponent();
 
-            PixelFormatBox.SelectedIndex = 0;
-            DataFormatBox.SelectedIndex = 0;
+            pixelFormatBox.SelectedIndex = 0;
+            dataFormatBox.SelectedIndex = 0;
         }
 
         public override void SetModuleSettings(IModule module)
@@ -26,7 +26,7 @@ namespace PuyoTools.Modules.Texture
             PvrTexture texture = (PvrTexture)module;
 
             // Set the pixel format
-            switch (PixelFormatBox.SelectedIndex)
+            switch (pixelFormatBox.SelectedIndex)
             {
                 case 0: texture.PixelFormat = PvrPixelFormat.Argb1555; break;
                 case 1: texture.PixelFormat = PvrPixelFormat.Rgb565; break;
@@ -34,7 +34,7 @@ namespace PuyoTools.Modules.Texture
             }
 
             // Set the data format
-            switch (DataFormatBox.SelectedIndex)
+            switch (dataFormatBox.SelectedIndex)
             {
                 case 0: texture.DataFormat = PvrDataFormat.SquareTwiddled; break;
                 case 1: texture.DataFormat = PvrDataFormat.SquareTwiddledMipmaps; break;
@@ -46,11 +46,11 @@ namespace PuyoTools.Modules.Texture
             }
 
             // Set the global index and if it has a global index
-            texture.HasGlobalIndex = HasGlobalIndexCheckBox.Checked;
+            texture.HasGlobalIndex = hasGlobalIndexCheckBox.Checked;
             if (texture.HasGlobalIndex)
             {
                 uint globalIndex;
-                if (!uint.TryParse(GlobalIndexTextBox.Text, out globalIndex))
+                if (!uint.TryParse(globalIndexTextBox.Text, out globalIndex))
                 {
                     globalIndex = 0;
                 }
@@ -59,7 +59,7 @@ namespace PuyoTools.Modules.Texture
             }
 
             // RLE compress the texture?
-            if (RleCompressionCheckBox.Checked)
+            if (rleCompressionCheckBox.Checked)
             {
                 texture.CompressionFormat = PvrCompressionFormat.Rle;
             }
@@ -76,7 +76,7 @@ namespace PuyoTools.Modules.Texture
 
         private void hasGlobalIndexCheckBox_CheckedChanged(object sender, EventArgs e)
         {
-            GlobalIndexTextBox.Enabled = HasGlobalIndexCheckBox.Checked;
+            globalIndexTextBox.Enabled = hasGlobalIndexCheckBox.Checked;
         }
     }
 }

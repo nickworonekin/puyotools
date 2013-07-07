@@ -17,9 +17,9 @@ namespace PuyoTools.Modules.Texture
         {
             InitializeComponent();
 
-            PaletteFormatBox.SelectedIndex = 2;
-            DataFormatBox.SelectedIndex = 5;
-            GbixTypeBox.SelectedIndex = 0;
+            paletteFormatBox.SelectedIndex = 2;
+            dataFormatBox.SelectedIndex = 5;
+            gbixTypeBox.SelectedIndex = 0;
 
             DataFormatBox_SelectedIndexChanged(null, null);
         }
@@ -28,13 +28,13 @@ namespace PuyoTools.Modules.Texture
         {
             GvrTexture texture = (GvrTexture)module;
 
-            bool hasPaletteFormat = (DataFormatBox.SelectedIndex == 7 || DataFormatBox.SelectedIndex == 8);
-            bool canHaveMipmaps = (DataFormatBox.SelectedIndex == 4 || DataFormatBox.SelectedIndex == 5 || DataFormatBox.SelectedIndex == 9);
+            bool hasPaletteFormat = (dataFormatBox.SelectedIndex == 7 || dataFormatBox.SelectedIndex == 8);
+            bool canHaveMipmaps = (dataFormatBox.SelectedIndex == 4 || dataFormatBox.SelectedIndex == 5 || dataFormatBox.SelectedIndex == 9);
 
             // Set the palette format
-            if (PaletteFormatBox.Enabled)
+            if (paletteFormatBox.Enabled)
             {
-                switch (PaletteFormatBox.SelectedIndex)
+                switch (paletteFormatBox.SelectedIndex)
                 {
                     case 0: texture.PaletteFormat = GvrPixelFormat.IntensityA8; break;
                     case 1: texture.PaletteFormat = GvrPixelFormat.Rgb565; break;
@@ -47,7 +47,7 @@ namespace PuyoTools.Modules.Texture
             }
 
             // Set the data format
-            switch (DataFormatBox.SelectedIndex)
+            switch (dataFormatBox.SelectedIndex)
             {
                 case 0: texture.DataFormat = GvrDataFormat.Intensity4; break;
                 case 1: texture.DataFormat = GvrDataFormat.Intensity8; break;
@@ -62,17 +62,17 @@ namespace PuyoTools.Modules.Texture
             }
 
             // Set the global index, the global index type, and if it has a global index
-            texture.HasGlobalIndex = HasGlobalIndexCheckBox.Checked;
+            texture.HasGlobalIndex = hasGlobalIndexCheckBox.Checked;
             if (texture.HasGlobalIndex)
             {
                 uint globalIndex;
-                if (!uint.TryParse(GlobalIndexTextBox.Text, out globalIndex))
+                if (!uint.TryParse(globalIndexTextBox.Text, out globalIndex))
                 {
                     globalIndex = 0;
                 }
                 texture.GlobalIndex = globalIndex;
 
-                switch (GbixTypeBox.SelectedIndex)
+                switch (gbixTypeBox.SelectedIndex)
                 {
                     case 0: texture.GbixType = GvrGbixType.Gbix; break;
                     case 1: texture.GbixType = GvrGbixType.Gcix; break;
@@ -80,10 +80,10 @@ namespace PuyoTools.Modules.Texture
             }
 
             // Has mipmaps?
-            texture.HasMipmaps = (canHaveMipmaps && HasMipmapsCheckBox.Checked);
+            texture.HasMipmaps = (canHaveMipmaps && hasMipmapsCheckBox.Checked);
 
             // Has external palette?
-            texture.NeedsExternalPalette = (hasPaletteFormat && HasExternalPaletteCheckBox.Checked);
+            texture.NeedsExternalPalette = (hasPaletteFormat && hasExternalPaletteCheckBox.Checked);
         }
 
         private void globalIndexTextBox_KeyPress(object sender, KeyPressEventArgs e)
@@ -97,21 +97,21 @@ namespace PuyoTools.Modules.Texture
 
         private void hasGlobalIndexCheckBox_CheckedChanged(object sender, EventArgs e)
         {
-            GlobalIndexTextBox.Enabled = HasGlobalIndexCheckBox.Checked;
-            GbixTypeBox.Enabled = HasGlobalIndexCheckBox.Checked;
+            globalIndexTextBox.Enabled = hasGlobalIndexCheckBox.Checked;
+            gbixTypeBox.Enabled = hasGlobalIndexCheckBox.Checked;
         }
 
         private void DataFormatBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             // The palette format box and has external palette checkbox should only be enabled
             // if the data format is 4-bit Indexed or 8-bit Indexed
-            PaletteFormatBox.Enabled = (DataFormatBox.SelectedIndex == 7 || DataFormatBox.SelectedIndex == 8);
-            HasExternalPaletteCheckBox.Enabled = PaletteFormatBox.Enabled;
+            paletteFormatBox.Enabled = (dataFormatBox.SelectedIndex == 7 || dataFormatBox.SelectedIndex == 8);
+            hasExternalPaletteCheckBox.Enabled = paletteFormatBox.Enabled;
 
             // The has mipmaps checkbox should only be enabled if the data format's bpp is 4 or 16 and is
             // not a palettized format.
             // But at the current moment, we're not going to enable it for the intensity formats.
-            HasMipmapsCheckBox.Enabled = (DataFormatBox.SelectedIndex == 4 || DataFormatBox.SelectedIndex == 5 || DataFormatBox.SelectedIndex == 9);
+            hasMipmapsCheckBox.Enabled = (dataFormatBox.SelectedIndex == 4 || dataFormatBox.SelectedIndex == 5 || dataFormatBox.SelectedIndex == 9);
         }
     }
 }

@@ -17,8 +17,8 @@ namespace PuyoTools.Modules.Texture
         {
             InitializeComponent();
 
-            PixelFormatBox.SelectedIndex = 0;
-            DataFormatBox.SelectedIndex = 0;
+            pixelFormatBox.SelectedIndex = 0;
+            dataFormatBox.SelectedIndex = 0;
         }
 
         public override void SetModuleSettings(IModule module)
@@ -26,14 +26,14 @@ namespace PuyoTools.Modules.Texture
             SvrTexture texture = (SvrTexture)module;
 
             // Set the pixel format
-            switch (PixelFormatBox.SelectedIndex)
+            switch (pixelFormatBox.SelectedIndex)
             {
                 case 0: texture.PixelFormat = SvrPixelFormat.Rgb5a3; break;
                 case 1: texture.PixelFormat = SvrPixelFormat.Argb8888; break;
             }
 
             // Set the data format
-            switch (DataFormatBox.SelectedIndex)
+            switch (dataFormatBox.SelectedIndex)
             {
                 case 0: texture.DataFormat = SvrDataFormat.Rectangle; break;
                 case 1: texture.DataFormat = SvrDataFormat.Index4ExternalPalette; break;
@@ -43,11 +43,11 @@ namespace PuyoTools.Modules.Texture
             }
 
             // Set the global index stuff
-            texture.HasGlobalIndex = HasGlobalIndexCheckBox.Checked;
+            texture.HasGlobalIndex = hasGlobalIndexCheckBox.Checked;
             if (texture.HasGlobalIndex)
             {
                 uint globalIndex = 0;
-                if (!uint.TryParse(GlobalIndexTextBox.Text, out globalIndex))
+                if (!uint.TryParse(globalIndexTextBox.Text, out globalIndex))
                 {
                     globalIndex = 0;
                 }
@@ -66,7 +66,7 @@ namespace PuyoTools.Modules.Texture
 
         private void hasGlobalIndexCheckBox_CheckedChanged(object sender, EventArgs e)
         {
-            GlobalIndexTextBox.Enabled = HasGlobalIndexCheckBox.Checked;
+            globalIndexTextBox.Enabled = hasGlobalIndexCheckBox.Checked;
         }
     }
 }

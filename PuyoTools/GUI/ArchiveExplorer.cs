@@ -61,6 +61,21 @@ namespace PuyoTools.GUI
             Populate(info);
         }
 
+        private void OpenArchive(Stream data, string fname, ArchiveFormat format)
+        {
+            // Let's open the archive and add it to the stack
+            ArchiveReader archive = Archive.Open(data, format);
+
+            ArchiveInfo info = new ArchiveInfo();
+            info.Format = format;
+            info.Archive = archive;
+
+            openedArchives.Push(info);
+            openedArchiveNames.Add((fname == String.Empty ? "Unnamed" : fname));
+
+            Populate(info);
+        }
+
         private void OpenTexture(Stream data, int length, string fname, TextureFormat format)
         {
             TextureViewer viewer = new TextureViewer();
@@ -80,9 +95,9 @@ namespace PuyoTools.GUI
                 string textureName = Path.GetFileNameWithoutExtension(fname) + Texture.Formats[format].PaletteFileExtension;
                 int paletteFileIndex = -1;
 
-                for (int i = 0; i < info.Archive.Files.Length; i++)
+                for (int i = 0; i < info.Archive.Entries.Count; i++)
                 {
-                    if (info.Archive.Files[i].Filename.ToLower() == textureName.ToLower())
+                    if (info.Archive.Entries[i].Name.ToLower() == textureName.ToLower())
                     {
                         paletteFileIndex = i;
                         break;
@@ -93,14 +108,20 @@ namespace PuyoTools.GUI
                 // Due to the nature of how this works, we need to copy the palette data to another stream first
                 if (paletteFileIndex != -1)
                 {
-                    ArchiveEntry paletteEntry = info.Archive.GetFile(paletteFileIndex);
+                    //ArchiveEntry paletteEntry = info.Archive.GetFile(paletteFileIndex);
+                    Stream entryData = info.Archive.OpenEntry(paletteFileIndex);
 
                     //TextureReaderSettings textureSettings = new TextureReaderSettings();
-                    Stream paletteData;
-                    int paletteLength;
+                    //Stream paletteData;
+                    //int paletteLength;
+                    int paletteLength = (int)entryData.Length;
 
                     // Get the palette data (we may need to copy over the data to another stream)
-                    if (data == paletteEntry.Stream)
+                    Stream paletteData = new MemoryStream();
+                    PTStream.CopyTo(entryData, paletteData);
+                    paletteData.Position = 0;
+                    
+                    /*if (data == paletteEntry.Stream)
                     {
                         paletteEntry.Stream.Position = paletteEntry.Offset;
 
@@ -118,10 +139,10 @@ namespace PuyoTools.GUI
                     {
                         paletteData = paletteEntry.Stream;
                         paletteData.Position = paletteEntry.Offset;
-                    }
+                    }*/
 
                     //textureSettings.PaletteLength = paletteEntry.Length;
-                    paletteLength = paletteEntry.Length;
+                    //paletteLength = paletteEntry.Length;
 
                     // Now open the texture
                     data.Position = oldPosition;
@@ -148,7 +169,7 @@ namespace PuyoTools.GUI
             }
 
             // Populate the list of entries
-            for (int i = 0; i < info.Archive.Files.Length; i++)
+            /*for (int i = 0; i < info.Archive.Files.Length; i++)
             {
                 listView.Items.Add(new ListViewItem(new string[] {
                     (i + 1).ToString(),
@@ -156,10 +177,23 @@ namespace PuyoTools.GUI
                     FormatFileLength(info.Archive.Files[i].Length),
                     info.Archive.Files[i].Length.ToString("#,##0"),
                 }));
+            }*/
+
+            for (int i = 0; i < info.Archive.Entries.Count; i++)
+            {
+                ArchiveEntry entry = info.Archive.Entries[i];
+
+                listView.Items.Add(new ListViewItem(new string[] {
+                    (i + 1).ToString(),
+                    entry.Name,
+                    FormatFileLength(entry.Length),
+                    entry.Length.ToString("#,##0"),
+                }));
             }
 
             // Display information about the archive
-            numFilesLabel.Text = info.Archive.Files.Length.ToString();
+            //numFilesLabel.Text = info.Archive.Files.Length.ToString();
+            numFilesLabel.Text = info.Archive.Entries.Count.ToString();
             archiveFormatLabel.Text = Archive.Formats[info.Format].Name;
 
             archiveNameLabel.Text = openedArchiveNames[0];
@@ -271,7 +305,7 @@ namespace PuyoTools.GUI
                 }
             }
 
-            ArchiveEntry entry = openedArchives.Peek().Archive.GetFile(index);
+            /*ArchiveEntry entry = openedArchives.Peek().Archive.GetFile(index);
             entry.Stream.Position = entry.Offset;
 
             // Let's determine first if it is an archive or a texture
@@ -282,7 +316,9 @@ namespace PuyoTools.GUI
             if (archiveFormat != ArchiveFormat.Unknown)
             {
                 // This is an archive. Let's open it.
-                OpenArchive(entry.Stream, entry.Length, entry.Filename, archiveFormat);
+                //OpenArchive(entry.Stream, entry.Length, entry.Filename, archiveFormat);
+                StreamView entryStream = new StreamView(entry.Stream, entry.Length);
+                OpenArchive(entryStream, entry.Filename, archiveFormat);
 
                 return;
             }
@@ -323,6 +359,60 @@ namespace PuyoTools.GUI
 
                     return;
                 }
+            }*/
+
+            ArchiveEntry entry = openedArchives.Peek().Archive.Entries[index];
+            Stream entryData = entry.Open();
+
+            // Let's determine first if it is an archive or a texture
+            ArchiveFormat archiveFormat;
+            TextureFormat textureFormat;
+
+            archiveFormat = Archive.GetFormat(entryData, (int)entryData.Length, entry.Name);
+            if (archiveFormat != ArchiveFormat.Unknown)
+            {
+                // This is an archive. Let's open it.
+                OpenArchive(entryData, entry.Name, archiveFormat);
+
+                return;
+            }
+
+            textureFormat = Texture.GetFormat(entryData, (int)entryData.Length, entry.Name);
+            if (textureFormat != TextureFormat.Unknown)
+            {
+                // This is a texture. Let's attempt to open it up in the texture viewer
+                OpenTexture(entryData, (int)entryData.Length, entry.Name, textureFormat);
+
+                return;
+            }
+
+            // It's not an archive or a texture. Maybe it's compressed?
+            CompressionFormat compressionFormat = Compression.GetFormat(entryData, (int)entryData.Length, entry.Name);
+            if (compressionFormat != CompressionFormat.Unknown)
+            {
+                // The file is compressed! Let's decompress it and then try to determine if it is an archive or a texture
+                MemoryStream decompressedData = new MemoryStream();
+                Compression.Decompress(entryData, decompressedData, (int)entryData.Length, compressionFormat);
+                decompressedData.Position = 0;
+
+                // Now with this decompressed data, let's determine if it is an archive or a texture
+                archiveFormat = Archive.GetFormat(decompressedData, (int)decompressedData.Length, entry.Name);
+                if (archiveFormat != ArchiveFormat.Unknown)
+                {
+                    // This is an archive. Let's open it.
+                    OpenArchive(decompressedData, (int)decompressedData.Length, entry.Name, archiveFormat);
+
+                    return;
+                }
+
+                textureFormat = Texture.GetFormat(decompressedData, (int)decompressedData.Length, entry.Name);
+                if (textureFormat != TextureFormat.Unknown)
+                {
+                    // This is a texture. Let's attempt to open it up in the texture viewer
+                    OpenTexture(decompressedData, (int)decompressedData.Length, entry.Name, textureFormat);
+
+                    return;
+                }
             }
         }
 
@@ -349,19 +439,21 @@ namespace PuyoTools.GUI
                 }
 
                 SaveFileDialog sfd = new SaveFileDialog();
-                sfd.FileName = archive.Files[index].Filename;
+                sfd.FileName = archive.Entries[index].Name;
                 sfd.Filter = "All Files (*.*)|*.*";
                 sfd.Title = "Extract File";
 
                 if (sfd.ShowDialog() == DialogResult.OK)
                 {
-                    ArchiveEntry entry = archive.GetFile(index);
+                    /*ArchiveEntry entry = archive.GetFile(index);
                     entry.Stream.Position = entry.Offset;
 
                     using (FileStream outStream = File.Create(sfd.FileName))
                     {
                         PTStream.CopyPartTo(entry.Stream, outStream, entry.Length);
-                    }
+                    }*/
+
+                    archive.ExtractToFile(index, sfd.FileName);
                 }
             }
 
@@ -383,7 +475,15 @@ namespace PuyoTools.GUI
                             index--;
                         }
 
-                        ArchiveEntry entry = archive.GetFile(index);
+                        string entryFilename = archive.Entries[index].Name;
+                        if (entryFilename == String.Empty)
+                        {
+                            entryFilename = index.ToString("D" + archive.Entries.Count.ToString().Length);
+                        }
+
+                        archive.ExtractToFile(index, Path.Combine(fbd.SelectedPath, entryFilename));
+
+                        /*ArchiveEntry entry = archive.GetFile(index);
                         entry.Stream.Position = entry.Offset;
 
                         string fname = entry.Filename;
@@ -393,7 +493,7 @@ namespace PuyoTools.GUI
                         using (FileStream outStream = File.Create(Path.Combine(fbd.SelectedPath, fname)))
                         {
                             PTStream.CopyPartTo(entry.Stream, outStream, entry.Length);
-                        }
+                        }*/
                     }
                 }
             }
@@ -409,26 +509,22 @@ namespace PuyoTools.GUI
             ArchiveReader archive = openedArchives.Peek().Archive;
 
             // No files in the archive
-            if (archive.Files.Length == 0)
+            if (archive.Entries.Count == 0)
                 return;
 
             // One file in the archive
-            else if (archive.Files.Length == 1)
+            else if (archive.Entries.Count == 1)
             {
+                ArchiveEntry entry = archive.Entries[0];
+
                 SaveFileDialog sfd = new SaveFileDialog();
-                sfd.FileName = archive.Files[0].Filename;
+                sfd.FileName = entry.Name;
                 sfd.Filter = "All Files (*.*)|*.*";
                 sfd.Title = "Extract File";
 
                 if (sfd.ShowDialog() == DialogResult.OK)
                 {
-                    ArchiveEntry entry = archive.GetFile(0);
-                    entry.Stream.Position = entry.Offset;
-
-                    using (FileStream outStream = File.Create(sfd.FileName))
-                    {
-                        PTStream.CopyPartTo(entry.Stream, outStream, entry.Length);
-                    }
+                    archive.ExtractToFile(entry, sfd.FileName);
                 }
             }
 
@@ -441,19 +537,15 @@ namespace PuyoTools.GUI
 
                 if (fbd.ShowDialog() == DialogResult.OK)
                 {
-                    for (int i = 0; i < archive.Files.Length; i++)
+                    for (int i = 0; i < archive.Entries.Count; i++)
                     {
-                        ArchiveEntry entry = archive.GetFile(i);
-                        entry.Stream.Position = entry.Offset;
+                        ArchiveEntry entry = archive.Entries[i];
 
-                        string fname = entry.Filename;
+                        string fname = entry.Name;
                         if (fname == String.Empty)
-                            fname = i.ToString("D" + archive.Files.Length.ToString().Length);
+                            fname = i.ToString("D" + archive.Entries.Count.ToString().Length);
 
-                        using (FileStream outStream = File.Create(Path.Combine(fbd.SelectedPath, fname)))
-                        {
-                            PTStream.CopyPartTo(entry.Stream, outStream, entry.Length);
-                        }
+                        archive.ExtractToFile(entry, fname);
                     }
                 }
             }

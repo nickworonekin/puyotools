@@ -64,6 +64,11 @@ namespace PuyoTools.Modules
             }
         }
 
+        public static void CopyToPadded(Stream source, Stream destination, int blockSize, byte paddingByte)
+        {
+            CopyPartToPadded(source, destination, (int)(source.Length - source.Position), blockSize, paddingByte);
+        }
+
         /// <summary>
         /// Reads some of the bytes from the current stream and writes them to another stream.
         /// </summary>

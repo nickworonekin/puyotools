@@ -3,11 +3,24 @@ using System.IO;
 
 namespace PuyoTools.Modules
 {
+    /// <summary>
+    /// Provides a read-only view of a portion of a stream.
+    /// </summary>
     public class StreamView : Stream
     {
         private Stream baseStream; // The base stream
         private long streamStart; // The starting offset of the stream
         private long streamLength; // The length of the stream view
+
+        private bool disposed = false; // Is this StreamView disposed?
+
+        /// <summary>
+        /// Initializes a new instance of the StreamView class for the specified stream. 
+        /// The starting position of this StreamView is the current position of the specified stream.
+        /// The length is the number of bytes between the current position and the end of the stream.
+        /// </summary>
+        /// <param name="source">The stream to be read.</param>
+        public StreamView(Stream source) : this(source, (source.Length - source.Position)) { }
 
         /// <summary>
         /// Initializes a new instance of the StreamView class for the specified stream. 
@@ -80,13 +93,9 @@ namespace PuyoTools.Modules
         }
 
         /// <summary>
-        /// Clears all buffers for this stream and causes any buffered data to be written to the underlying device. 
-        /// This will always throw a NotSupportedException.
+        /// Does nothing.
         /// </summary>
-        public override void Flush()
-        {
-            throw new NotSupportedException();
-        }
+        public override void Flush() { }
 
         /// <summary>
         /// Gets the length in bytes of the stream.
@@ -97,7 +106,7 @@ namespace PuyoTools.Modules
         }
 
         /// <summary>
-        /// Gets or sets the position within the current stream.
+        /// Gets or sets the position within the current stream. The position cannot be outside the bounds of the stream.
         /// </summary>
         public override long Position
         {
@@ -106,7 +115,7 @@ namespace PuyoTools.Modules
             {
                 if (value < 0 || value > streamLength)
                 {
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentException("offset");
                 }
 
                 baseStream.Position = streamStart + value;
@@ -131,7 +140,7 @@ namespace PuyoTools.Modules
                 count = (int)(streamStart + streamLength - baseStream.Position);
             }
 
-            return Read(array, offset, count);
+            return baseStream.Read(array, offset, count);
         }
 
         /// <summary>
@@ -145,65 +154,96 @@ namespace PuyoTools.Modules
                 return -1;
             }
 
-            return base.ReadByte();
+            return baseStream.ReadByte();
         }
 
         /// <summary>
-        /// Sets the position within the current stream.
+        /// Sets the position within the current stream. The position cannot be outside the bounds of the stream.
         /// </summary>
         /// <param name="offset">A byte offset relative to the origin parameter.</param>
         /// <param name="origin">A value of type SeekOrigin indicating the reference point used to obtain the new position.</param>
         /// <returns>The new position within the current stream.</returns>
         public override long Seek(long offset, SeekOrigin origin)
         {
-            if ((origin == SeekOrigin.Begin && (offset < 0 || offset > streamLength)) ||
-                (origin == SeekOrigin.Current && (baseStream.Position + offset < streamStart || baseStream.Position + offset > streamStart + streamLength)) ||
-                (origin == SeekOrigin.End && (streamLength + offset < 0 || streamLength + offset > streamLength)))
+            switch (origin)
             {
-                throw new ArgumentOutOfRangeException();
+                // Seek from the beginning of the stream
+                case SeekOrigin.Begin:
+                    if (offset < 0 || offset > streamLength)
+                    {
+                        throw new ArgumentException("offset");
+                    }
+
+                    return baseStream.Seek(streamStart + offset, SeekOrigin.Begin);
+
+                // Seek from the current position in the stream
+                case SeekOrigin.Current:
+                    if (baseStream.Position + offset < streamStart || baseStream.Position + offset > streamStart + streamLength)
+                    {
+                        throw new ArgumentException("offset");
+                    }
+
+                    return baseStream.Seek(baseStream.Position + offset, SeekOrigin.Current);
+
+                // Seek from the end of the stream
+                case SeekOrigin.End:
+                    if (offset < -streamLength || offset > 0)
+                    {
+                        throw new ArgumentException("offset"); 
+                    }
+
+                    return baseStream.Seek(streamStart + streamLength + offset, SeekOrigin.End);
             }
 
-            if (origin == SeekOrigin.Begin)
-            {
-                return baseStream.Seek(streamStart + offset, origin);
-            }
-            else if (origin == SeekOrigin.End)
-            {
-                return baseStream.Seek(streamStart + streamLength + offset, origin);
-            }
-
-            return Seek(offset, origin);
+            return baseStream.Position - streamStart;
         }
 
         /// <summary>
-        /// Sets the length of the current stream. This will always throw a NotSupportedException.
+        /// Throws a NotSupportedException.
         /// </summary>
-        /// <param name="value"></param>
+        /// <param name="value">Not used</param>
         public override void SetLength(long value)
         {
             throw new NotSupportedException();
         }
 
         /// <summary>
-        /// Writes a sequence of bytes to the current stream and advances the current position within this stream by the number of bytes written. 
-        /// This will always throw a NotSupportedException.
+        /// Throws a NotSupportedException.
         /// </summary>
-        /// <param name="buffer">An array of bytes. This method copies count bytes from buffer to the current stream.</param>
-        /// <param name="offset">The zero-based byte offset in buffer at which to begin copying bytes to the current stream.</param>
-        /// <param name="count">The number of bytes to be written to the current stream.</param>
+        /// <param name="buffer">Not used</param>
+        /// <param name="offset">Not used</param>
+        /// <param name="count">Not used</param>
         public override void Write(byte[] buffer, int offset, int count)
         {
             throw new NotSupportedException();
         }
 
         /// <summary>
-        /// Writes a byte to the current position in the stream and advances the position within the stream by one byte. 
-        /// This will always throw a NotSupportedException.
+        /// Throws a NotSupportedException.
         /// </summary>
-        /// <param name="value">The byte to write to the stream.</param>
+        /// <param name="value">Not used</param>
         public override void WriteByte(byte value)
         {
             throw new NotSupportedException();
+        }
+
+        /// <summary>
+        /// Dispose the StreamView.
+        /// </summary>
+        /// <param name="disposing">true to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                base.Dispose(disposing);
+
+                // Since we don't want to kill the baseStream, there's no need for disposing.
+                baseStream = null;
+                streamStart = -1;
+                streamLength = -1;
+
+                disposed = true;
+            }
         }
     }
 }
