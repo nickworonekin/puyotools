@@ -12,7 +12,7 @@ namespace PuyoTools.Modules.Compression
 
         public override bool CanWrite
         {
-            get { return false; }
+            get { return true; }
         }
 
         /// <summary>

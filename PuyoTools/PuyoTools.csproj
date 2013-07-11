@@ -268,5 +268,7 @@
   <ItemGroup>
     <None Include="Resources\Logo.png" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="Resources\CheckeredBackgroundDark.png" />
+  </ItemGroup>
 </Project>

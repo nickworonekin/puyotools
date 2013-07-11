@@ -12,7 +12,7 @@ namespace PuyoTools.Modules.Compression
 
         public override bool CanWrite
         {
-            get { return false; }
+            get { return true; }
         }
 
         /// <summary>
@@ -32,8 +32,7 @@ namespace PuyoTools.Modules.Compression
             int destinationLength = PTStream.ReadInt32(source) >> 8;
             if (destinationLength == 0)
             {
-                // If the destination length is larger than 0xFFFFFF, then the next 4 bytes
-                // is the destination length
+                // If the destination length is larger than 0xFFFFFF, then the next 4 bytes is the destination length
                 destinationLength = PTStream.ReadInt32(source);
                 sourcePointer += 4;
             }
@@ -122,7 +121,111 @@ namespace PuyoTools.Modules.Compression
         /// <param name="settings">Settings to use when compressing.</param>
         public override void Compress(Stream source, Stream destination, int length)
         {
-            throw new NotImplementedException();
+            // Get the source length
+            int sourceLength = (int)(source.Length - source.Position);
+
+            // LZ10 compression can only handle files smaller than 16MB
+            if (sourceLength >= 0xFFFFFF)
+            {
+                throw new Exception("Source is too large. LZ10 compression can only compress files smaller than 16MB.");
+            }
+
+            // Read the source data into an array
+            byte[] sourceArray = new byte[sourceLength];
+            source.Read(sourceArray, 0, sourceLength);
+
+            // Set the source and destination pointers
+            int sourcePointer = 0x0;
+            int destinationPointer = 0x4;
+
+            // Initalize the LZ dictionary
+            LzWindowDictionary dictionary = new LzWindowDictionary();
+            dictionary.SetWindowSize(0x1000);
+            dictionary.SetMaxMatchAmount(0x1000);
+
+            // Write out the header
+            // Magic code & decompressed length
+            if (sourceLength <= 0xFFFFFF)
+            {
+                PTStream.WriteInt32(destination, 0x11 | (sourceLength << 8));
+            }
+            else
+            {
+                destination.WriteByte(0x11);
+                PTStream.WriteInt32(destination, sourceLength);
+
+                destinationPointer += 4;
+            }
+
+            // Start compression
+            while (sourcePointer < sourceLength)
+            {
+                using (MemoryStream buffer = new MemoryStream())
+                {
+                    byte flag = 0;
+
+                    for (int i = 7; i >= 0; i--)
+                    {
+                        // Search for a match
+                        int[] match = dictionary.Search(sourceArray, (uint)sourcePointer, (uint)sourceLength);
+
+                        if (match[1] > 0) // There is a match
+                        {
+                            flag |= (byte)(1 << i);
+
+                            // How many bytes will the match take up?
+                            if (match[1] <= 0xF + 1) // 2 bytes
+                            {
+                                buffer.WriteByte((byte)((((match[1] - 1) & 0xF) << 4) | (((match[0] - 1) & 0xFFF) >> 8)));
+                                buffer.WriteByte((byte)((match[0] - 1) & 0xFF));
+                            }
+                            else if (match[1] <= 0xFF + 17) // 3 bytes
+                            {
+                                buffer.WriteByte((byte)(((match[1] - 17) & 0xFF) >> 4));
+                                buffer.WriteByte((byte)((((match[1] - 17) & 0xF) << 4) | (((match[0] - 1) & 0xFFF) >> 8)));
+                                buffer.WriteByte((byte)((match[0] - 1) & 0xFF));
+                            }
+                            else // 4 bytes
+                            {
+                                buffer.WriteByte((byte)(0x10 | (((match[1] - 273) & 0xFFFF) >> 12)));
+                                buffer.WriteByte((byte)(((match[1] - 273) & 0xFFF) >> 4));
+                                buffer.WriteByte((byte)((((match[1] - 273) & 0xF) << 4) | (((match[0] - 1) & 0xFFF) >> 8)));
+                                buffer.WriteByte((byte)((match[0] - 1) & 0xFF));
+                            }
+
+                            dictionary.AddEntryRange(sourceArray, sourcePointer, match[1]);
+                            dictionary.SlideWindow(match[1]);
+
+                            sourcePointer += match[1];
+                        }
+                        else // There is not a match
+                        {
+                            buffer.WriteByte(sourceArray[sourcePointer]);
+
+                            dictionary.AddEntry(sourceArray, sourcePointer);
+                            dictionary.SlideWindow(1);
+
+                            sourcePointer++;
+                        }
+
+                        // Check to see if we reached the end of the file
+                        if (sourcePointer >= sourceLength)
+                            break;
+                    }
+
+                    // Flush the buffer and write it to the destination stream
+                    destination.WriteByte(flag);
+
+                    buffer.Position = 0;
+                    while (buffer.Position < buffer.Length)
+                    {
+                        byte value = PTStream.ReadByte(buffer);
+                        destination.WriteByte(value);
+                    }
+
+                    destinationPointer += (int)buffer.Length + 1;
+                }
+            }
         }
 
         /// <summary>

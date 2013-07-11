@@ -92,8 +92,8 @@ namespace PuyoTools.Modules.Compression
         /// <param name="settings">Settings to use when compressing.</param>
         public override void Compress(Stream source, Stream destination, int length)
         {
-            byte[] sourceBuffer = new byte[length];
-            source.Read(sourceBuffer, 0, length);
+            byte[] sourceArray = new byte[length];
+            source.Read(sourceArray, 0, length);
 
             byte bitPos = 0;
             byte controlByte = 0;
@@ -104,7 +104,7 @@ namespace PuyoTools.Modules.Compression
 
             MemoryStream data = new MemoryStream();
 
-            while (position < sourceBuffer.Length)
+            while (position < sourceArray.Length)
             {
                 currentLookBehindLength = 0;
                 lookBehindOffset = 0;
@@ -113,14 +113,14 @@ namespace PuyoTools.Modules.Compression
                 for (currentLookBehindPosition = position - 1; (currentLookBehindPosition >= 0) && (currentLookBehindPosition >= position - 0x1FF0) && (lookBehindLength < 256); currentLookBehindPosition--)
                 {
                     currentLookBehindLength = 1;
-                    if (sourceBuffer[currentLookBehindPosition] == sourceBuffer[position])
+                    if (sourceArray[currentLookBehindPosition] == sourceArray[position])
                     {
                         do
                         {
                             currentLookBehindLength++;
                         } while ((currentLookBehindLength <= 256) &&
-                            (position + currentLookBehindLength <= sourceBuffer.Length) &&
-                            sourceBuffer[currentLookBehindPosition + currentLookBehindLength - 1] == sourceBuffer[position + currentLookBehindLength - 1]);
+                            (position + currentLookBehindLength <= sourceArray.Length) &&
+                            sourceArray[currentLookBehindPosition + currentLookBehindLength - 1] == sourceArray[position + currentLookBehindLength - 1]);
 
                         currentLookBehindLength--;
                         if (((currentLookBehindLength >= 2 && currentLookBehindPosition - position >= -0x100) || currentLookBehindLength >= 3) && currentLookBehindLength > lookBehindLength)
@@ -133,7 +133,7 @@ namespace PuyoTools.Modules.Compression
 
                 if (lookBehindLength == 0)
                 {
-                    data.WriteByte(sourceBuffer[position++]);
+                    data.WriteByte(sourceArray[position++]);
                     PutControlBit(1, ref controlByte, ref bitPos, data, destination);
                 }
                 else

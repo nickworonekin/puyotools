@@ -28,90 +28,100 @@ namespace PuyoTools.Modules.Compression
         /// <param name="length">Number of bytes to read.</param>
         public override void Decompress(Stream source, Stream destination, int length)
         {
-            byte[] sourceBuffer = new byte[length];
-            source.Read(sourceBuffer, 0, length);
+            source.Position += 8;
 
-            // Set up information for decompression
-            int sourcePointer = 0x10;
-            int destPointer   = 0x0;
+            // Get the source length and destination length
+            int sourceLength      = PTStream.ReadInt32BE(source) + 16;
+            int destinationLength = PTStream.ReadInt32BE(source);
 
-            int sourceLength = PTMethods.ToInt32BE(sourceBuffer, 0x8) + 16;
-            int destLength   = PTMethods.ToInt32BE(sourceBuffer, 0xC);
+            // Set the source, destination, and buffer pointers
+            int sourcePointer      = 0x10;
+            int destinationPointer = 0x0;
+            int bufferPointer      = 0x0;
 
-            byte[] destBuffer = new byte[destLength];
+            // Initalize the buffer
+            byte[] buffer = new byte[0x800];
 
-            // Start Decompression
-            while (sourcePointer < length && destPointer < destLength)
+            // Start decompression
+            while (sourcePointer < length && destinationPointer < destinationLength)
             {
-                byte flag = sourceBuffer[sourcePointer]; // Compression Flag
+                byte flag = PTStream.ReadByte(source);
                 sourcePointer++;
 
                 for (int i = 0; i < 4; i++)
                 {
-                    int distance, amount, value;
+                    byte value;
+                    ushort matchPair;
+                    int matchDistance, matchLength;
 
                     switch (flag & 0x3)
                     {
-                        // Padding mode
-                        // All CNX files seem to be packed in 0x800 chunks. when nearing
-                        // a 0x800 cutoff, there usually is a padding command at the end to skip
-                        // a few bytes (to the next 0x800 chunk, i.e. 0x4800, 0x7000, etc.)
+                        // Jump to the next 0x800 boundary
                         case 0:
-                            sourcePointer += (sourceBuffer[sourcePointer] + 1);
+                            value = PTStream.ReadByte(source);
+
+                            sourcePointer += value + 1;
+                            source.Position += value;
+
                             i = 3;
                             break;
 
-                        // Data is not compressed
-                        // Single byte copy mode
+                        // Not compressed, single byte
                         case 1:
-                            destBuffer[destPointer] = sourceBuffer[sourcePointer];
+                            value = PTStream.ReadByte(source);
                             sourcePointer++;
-                            destPointer++;
+
+                            destination.WriteByte(value);
+                            destinationPointer++;
+
+                            buffer[bufferPointer] = value;
+                            bufferPointer = (bufferPointer + 1) & 0x7FF;
                             break;
 
-                        // Data is compressed
+                        // Compressed
                         case 2:
-                            value = PTMethods.ToUInt16BE(sourceBuffer, sourcePointer);
+                            matchPair = PTStream.ReadUInt16BE(source);
                             sourcePointer += 2;
 
-                            distance = (value >> 5) + 1;
-                            amount = (value & 0x1F) + 4;
+                            matchDistance = (matchPair >> 5) + 1;
+                            matchLength = (matchPair & 0x1F) + 4;
 
-                            // Copy the data
-                            for (int j = 0; j < amount; j++)
+                            for (int j = 0; j < matchLength; j++)
                             {
-                                destBuffer[destPointer] = destBuffer[destPointer - distance];
-                                destPointer++;
-                            }
+                                destination.WriteByte(buffer[(bufferPointer - matchDistance) & 0x7FF]);
+                                destinationPointer++;
 
+                                buffer[bufferPointer] = buffer[(bufferPointer - matchDistance) & 0x7FF];
+                                bufferPointer = (bufferPointer + 1) & 0x7FF;
+                            }
                             break;
 
-                        // Data is not compressed
-                        // Block copy mode
+                        // Not compressed, multiple bytes
                         case 3:
-                            amount = sourceBuffer[sourcePointer];
+                            matchLength = PTStream.ReadByte(source);
                             sourcePointer++;
 
-                            // Copy the data
-                            for (int j = 0; j < amount; j++)
+                            for (int j = 0; j < matchLength; j++)
                             {
-                                destBuffer[destPointer] = sourceBuffer[sourcePointer];
+                                value = PTStream.ReadByte(source);
                                 sourcePointer++;
-                                destPointer++;
-                            }
 
+                                destination.WriteByte(value);
+                                destinationPointer++;
+
+                                buffer[bufferPointer] = value;
+                                bufferPointer = (bufferPointer + 1) & 0x7FF;
+                            }
                             break;
                     }
 
-                    // Check for out of range
-                    if (sourcePointer >= length || destPointer >= destLength)
+                    // Check to see if we reached the end of the file
+                    if (sourcePointer >= sourceLength || destinationPointer >= destinationLength)
                         break;
 
                     flag >>= 2;
                 }
             }
-
-            destination.Write(destBuffer, 0, destLength);
         }
 
         /// <summary>

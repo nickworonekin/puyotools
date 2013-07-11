@@ -43,13 +43,16 @@
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.texturePanel = new System.Windows.Forms.Panel();
-            this.textureDisplay = new System.Windows.Forms.PictureBox();
+            this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.copyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.texturePanel = new System.Windows.Forms.Panel();
+            this.textureDisplay = new System.Windows.Forms.PictureBox();
+            this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.lightBackgroundToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.darkBackgroundToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1.SuspendLayout();
             this.textureInfoPanel.SuspendLayout();
             this.menuStrip1.SuspendLayout();
@@ -161,7 +164,8 @@
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem,
-            this.editToolStripMenuItem});
+            this.editToolStripMenuItem,
+            this.viewToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(584, 24);
@@ -188,28 +192,18 @@
             this.openToolStripMenuItem.Text = "Open";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
             // 
-            // texturePanel
+            // saveToolStripMenuItem
             // 
-            this.texturePanel.AutoScroll = true;
-            this.texturePanel.BackColor = System.Drawing.SystemColors.Control;
-            this.texturePanel.Controls.Add(this.textureDisplay);
-            this.texturePanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.texturePanel.Location = new System.Drawing.Point(0, 24);
-            this.texturePanel.Name = "texturePanel";
-            this.texturePanel.Size = new System.Drawing.Size(584, 256);
-            this.texturePanel.TabIndex = 4;
-            this.texturePanel.ClientSizeChanged += new System.EventHandler(this.texturePanel_ClientSizeChanged);
+            this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
+            this.saveToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.saveToolStripMenuItem.Text = "Save";
+            this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
             // 
-            // textureDisplay
+            // toolStripSeparator1
             // 
-            this.textureDisplay.BackgroundImage = global::PuyoTools.BitmapResources.TextureViewerBackground;
-            this.textureDisplay.InitialImage = null;
-            this.textureDisplay.Location = new System.Drawing.Point(0, 0);
-            this.textureDisplay.Margin = new System.Windows.Forms.Padding(0);
-            this.textureDisplay.Name = "textureDisplay";
-            this.textureDisplay.Size = new System.Drawing.Size(128, 128);
-            this.textureDisplay.TabIndex = 0;
-            this.textureDisplay.TabStop = false;
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(149, 6);
             // 
             // exitToolStripMenuItem
             // 
@@ -235,18 +229,57 @@
             this.copyToolStripMenuItem.Text = "Copy";
             this.copyToolStripMenuItem.Click += new System.EventHandler(this.copyToolStripMenuItem_Click);
             // 
-            // saveToolStripMenuItem
+            // texturePanel
             // 
-            this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            this.saveToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.saveToolStripMenuItem.Text = "Save";
-            this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
+            this.texturePanel.AutoScroll = true;
+            this.texturePanel.BackColor = System.Drawing.SystemColors.Control;
+            this.texturePanel.Controls.Add(this.textureDisplay);
+            this.texturePanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.texturePanel.Location = new System.Drawing.Point(0, 24);
+            this.texturePanel.Name = "texturePanel";
+            this.texturePanel.Size = new System.Drawing.Size(584, 256);
+            this.texturePanel.TabIndex = 4;
+            this.texturePanel.ClientSizeChanged += new System.EventHandler(this.texturePanel_ClientSizeChanged);
             // 
-            // toolStripSeparator1
+            // textureDisplay
             // 
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(149, 6);
+            this.textureDisplay.BackgroundImage = global::PuyoTools.BitmapResources.CheckeredBackgroundLight;
+            this.textureDisplay.InitialImage = null;
+            this.textureDisplay.Location = new System.Drawing.Point(0, 0);
+            this.textureDisplay.Margin = new System.Windows.Forms.Padding(0);
+            this.textureDisplay.Name = "textureDisplay";
+            this.textureDisplay.Size = new System.Drawing.Size(128, 128);
+            this.textureDisplay.TabIndex = 0;
+            this.textureDisplay.TabStop = false;
+            // 
+            // viewToolStripMenuItem
+            // 
+            this.viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.lightBackgroundToolStripMenuItem,
+            this.darkBackgroundToolStripMenuItem});
+            this.viewToolStripMenuItem.Name = "viewToolStripMenuItem";
+            this.viewToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
+            this.viewToolStripMenuItem.Text = "View";
+            // 
+            // lightBackgroundToolStripMenuItem
+            // 
+            this.lightBackgroundToolStripMenuItem.Checked = true;
+            this.lightBackgroundToolStripMenuItem.CheckOnClick = true;
+            this.lightBackgroundToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.lightBackgroundToolStripMenuItem.Name = "lightBackgroundToolStripMenuItem";
+            this.lightBackgroundToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.D1)));
+            this.lightBackgroundToolStripMenuItem.Size = new System.Drawing.Size(208, 22);
+            this.lightBackgroundToolStripMenuItem.Text = "Light Background";
+            this.lightBackgroundToolStripMenuItem.Click += new System.EventHandler(this.lightBackgroundToolStripMenuItem_Click);
+            // 
+            // darkBackgroundToolStripMenuItem
+            // 
+            this.darkBackgroundToolStripMenuItem.CheckOnClick = true;
+            this.darkBackgroundToolStripMenuItem.Name = "darkBackgroundToolStripMenuItem";
+            this.darkBackgroundToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.D2)));
+            this.darkBackgroundToolStripMenuItem.Size = new System.Drawing.Size(208, 22);
+            this.darkBackgroundToolStripMenuItem.Text = "Dark Background";
+            this.darkBackgroundToolStripMenuItem.Click += new System.EventHandler(this.darkBackgroundToolStripMenuItem_Click);
             // 
             // TextureViewer
             // 
@@ -292,5 +325,8 @@
         private System.Windows.Forms.ToolStripMenuItem copyToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem saveToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripMenuItem viewToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem lightBackgroundToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem darkBackgroundToolStripMenuItem;
     }
 }

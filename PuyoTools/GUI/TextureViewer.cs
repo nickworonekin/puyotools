@@ -44,6 +44,14 @@ namespace PuyoTools.GUI
             DisplayTexture(textureBitmap, fname, format);
         }
 
+        public void OpenTexture(Stream data, string fname, TextureFormat format)
+        {
+            Bitmap textureBitmap;
+            Texture.Read(data, out textureBitmap, format);
+
+            DisplayTexture(textureBitmap, fname, format);
+        }
+
         public void OpenTexture(Stream data, int length, string fname, Stream paletteData, int paletteLength, TextureFormat format)
         {
             Bitmap textureBitmap;
@@ -52,6 +60,17 @@ namespace PuyoTools.GUI
             texture.PaletteStream = paletteData;
             texture.PaletteLength = paletteLength;
             texture.Read(data, out textureBitmap, length);
+
+            DisplayTexture(textureBitmap, fname, format);
+        }
+
+        public void OpenTexture(Stream data, string fname, Stream paletteData, TextureFormat format)
+        {
+            Bitmap textureBitmap;
+
+            TextureBase texture = Texture.Formats[format];
+            texture.PaletteStream = paletteData;
+            texture.Read(data, out textureBitmap);
 
             DisplayTexture(textureBitmap, fname, format);
         }
@@ -209,6 +228,28 @@ namespace PuyoTools.GUI
                 {
                     textureDisplay.Image.Save(outStream, ImageFormat.Png);
                 }
+            }
+        }
+
+        private void lightBackgroundToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (darkBackgroundToolStripMenuItem.Checked)
+            {
+                darkBackgroundToolStripMenuItem.Checked = false;
+                lightBackgroundToolStripMenuItem.Checked = true;
+
+                textureDisplay.BackgroundImage = BitmapResources.CheckeredBackgroundLight;
+            }
+        }
+
+        private void darkBackgroundToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (lightBackgroundToolStripMenuItem.Checked)
+            {
+                lightBackgroundToolStripMenuItem.Checked = false;
+                darkBackgroundToolStripMenuItem.Checked = true;
+
+                textureDisplay.BackgroundImage = BitmapResources.CheckeredBackgroundDark;
             }
         }
     }

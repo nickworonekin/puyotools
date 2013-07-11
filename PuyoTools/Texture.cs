@@ -34,6 +34,11 @@ namespace PuyoTools
             Formats[format].Read(source, out destination, length);
         }
 
+        public static void Read(Stream source, out Bitmap destination, TextureFormat format)
+        {
+            Formats[format].Read(source, out destination);
+        }
+
         // Writes a texture to the specified texture format and texture writer settings
         public static void Write(Stream source, Stream destination, int length, TextureFormat format)
         {

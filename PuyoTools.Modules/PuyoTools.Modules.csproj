@@ -92,6 +92,8 @@
     <Compile Include="Compression\Formats\Lz11Compression.cs" />
     <Compile Include="Compression\Formats\PrsCompression.cs" />
     <Compile Include="Compression\Formats\Lz00Compression.cs" />
+    <Compile Include="Compression\LzBufferDictionary.cs" />
+    <Compile Include="Compression\LzWindowDictionary.cs" />
     <Compile Include="Core\ModuleBase.cs" />
     <Compile Include="Core\ModuleSettingsControl.cs">
       <SubType>UserControl</SubType>
