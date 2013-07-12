@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Collections.Generic;
 using System.Text;
 
 namespace PuyoTools.Modules.Archive
@@ -22,9 +21,9 @@ namespace PuyoTools.Modules.Archive
             get { return true; }
         }
 
-        public override ArchiveReader Open(Stream source, int length)
+        public override ArchiveReader Open(Stream source)
         {
-            return new Reader(source, length);
+            return new Reader(source);
         }
 
         public override ArchiveWriter Create(Stream destination)
@@ -39,7 +38,7 @@ namespace PuyoTools.Modules.Archive
 
         public class Reader : ArchiveReader
         {
-            public Reader(Stream source, int length) : base(source)
+            public Reader(Stream source) : base(source)
             {
                 // Get the number of entries in the archive
                 source.Position += 4;
@@ -68,7 +67,7 @@ namespace PuyoTools.Modules.Archive
                 }
 
                 // Set the position of the stream to the end of the file
-                source.Position = archiveOffset + length;
+                source.Seek(0, SeekOrigin.End);
             }
         }
 

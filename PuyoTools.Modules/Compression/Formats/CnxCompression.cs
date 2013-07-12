@@ -25,8 +25,7 @@ namespace PuyoTools.Modules.Compression
         /// </summary>
         /// <param name="source">The stream to read from.</param>
         /// <param name="destination">The stream to write to.</param>
-        /// <param name="length">Number of bytes to read.</param>
-        public override void Decompress(Stream source, Stream destination, int length)
+        public override void Decompress(Stream source, Stream destination)
         {
             source.Position += 8;
 
@@ -43,7 +42,7 @@ namespace PuyoTools.Modules.Compression
             byte[] buffer = new byte[0x800];
 
             // Start decompression
-            while (sourcePointer < length && destinationPointer < destinationLength)
+            while (sourcePointer < sourceLength && destinationPointer < destinationLength)
             {
                 byte flag = PTStream.ReadByte(source);
                 sourcePointer++;
@@ -129,9 +128,7 @@ namespace PuyoTools.Modules.Compression
         /// </summary>
         /// <param name="source">The stream to read from.</param>
         /// <param name="destination">The stream to write to.</param>
-        /// <param name="length">Number of bytes to read.</param>
-        /// <param name="settings">Settings to use when compressing.</param>
-        public override void Compress(Stream source, Stream destination, int length)
+        public override void Compress(Stream source, Stream destination)
         {
             throw new NotImplementedException();
         }

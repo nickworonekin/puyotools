@@ -36,14 +36,6 @@ namespace PuyoTools.GUI
             copyToolStripMenuItem.Enabled = false;
         }
 
-        public void OpenTexture(Stream data, int length, string fname, TextureFormat format)
-        {
-            Bitmap textureBitmap;
-            Texture.Read(data, out textureBitmap, length, format);
-
-            DisplayTexture(textureBitmap, fname, format);
-        }
-
         public void OpenTexture(Stream data, string fname, TextureFormat format)
         {
             Bitmap textureBitmap;
@@ -52,23 +44,11 @@ namespace PuyoTools.GUI
             DisplayTexture(textureBitmap, fname, format);
         }
 
-        public void OpenTexture(Stream data, int length, string fname, Stream paletteData, int paletteLength, TextureFormat format)
-        {
-            Bitmap textureBitmap;
-            //Texture.Read(data, out textureBitmap, length, settings, format);
-            TextureBase texture = Texture.Formats[format];
-            texture.PaletteStream = paletteData;
-            texture.PaletteLength = paletteLength;
-            texture.Read(data, out textureBitmap, length);
-
-            DisplayTexture(textureBitmap, fname, format);
-        }
-
         public void OpenTexture(Stream data, string fname, Stream paletteData, TextureFormat format)
         {
             Bitmap textureBitmap;
 
-            TextureBase texture = Texture.Formats[format];
+            TextureBase texture = Texture.GetModule(format);
             texture.PaletteStream = paletteData;
             texture.Read(data, out textureBitmap);
 
@@ -93,7 +73,7 @@ namespace PuyoTools.GUI
             // Display information about the texture
             textureNameLabel.Text = (fname == String.Empty ? "Unnamed" : fname);
             textureDimensionsLabel.Text = textureBitmap.Width + " x " + textureBitmap.Height;
-            textureFormatLabel.Text = Texture.Formats[format].Name;
+            textureFormatLabel.Text = Texture.GetModule(format).Name;
 
             textureInfoPanel.Visible = true;
             textureDisplay.Visible = true;
@@ -137,21 +117,21 @@ namespace PuyoTools.GUI
                 // Let's determine first if it is a texture
                 TextureFormat textureFormat;
 
-                textureFormat = Texture.GetFormat(textureStream, (int)textureStream.Length, ofd.SafeFileName);
+                textureFormat = Texture.GetFormat(textureStream, ofd.SafeFileName);
 
                 if (textureFormat == TextureFormat.Unknown)
                 {
                     // It's not a texture. Maybe it's compressed?
-                    CompressionFormat compressionFormat = Compression.GetFormat(textureStream, (int)textureStream.Length, ofd.SafeFileName);
+                    CompressionFormat compressionFormat = Compression.GetFormat(textureStream, ofd.SafeFileName);
                     if (compressionFormat != CompressionFormat.Unknown)
                     {
                         // The file is compressed! Let's decompress it and then try to determine if it is a texture
                         MemoryStream decompressedData = new MemoryStream();
-                        Compression.Decompress(textureStream, decompressedData, (int)textureStream.Length, compressionFormat);
+                        Compression.Decompress(textureStream, decompressedData, compressionFormat);
                         decompressedData.Position = 0;
 
                         // Now with this decompressed data, let's determine if it is a texture
-                        textureFormat = Texture.GetFormat(decompressedData, (int)decompressedData.Length, ofd.SafeFileName);
+                        textureFormat = Texture.GetFormat(decompressedData, ofd.SafeFileName);
 
                         if (textureFormat != TextureFormat.Unknown)
                         {
@@ -174,7 +154,7 @@ namespace PuyoTools.GUI
                 // This is a texture. Let's open it.
                 try
                 {
-                    OpenTexture(textureStream, (int)textureStream.Length, ofd.SafeFileName, textureFormat);
+                    OpenTexture(textureStream, ofd.SafeFileName, textureFormat);
                 }
                 catch (TextureNeedsPaletteException)
                 {
@@ -187,13 +167,8 @@ namespace PuyoTools.GUI
                         textureStream.Position = 0;
                         using (FileStream paletteData = File.OpenRead(paletteName))
                         {
-                            //TextureReaderSettings textureSettings = new TextureReaderSettings();
-                            //textureSettings.PaletteStream = paletteData;
-                            //textureSettings.PaletteLength = (int)paletteData.Length;
 
-                            OpenTexture(textureStream, (int)textureStream.Length, ofd.SafeFileName, paletteData, (int)paletteData.Length, textureFormat);
-
-                            //OpenTexture(textureStream, (int)textureStream.Length, ofd.SafeFileName, textureSettings, textureFormat);
+                            OpenTexture(textureStream, ofd.SafeFileName, paletteData, textureFormat);
                         }
                     }
                 }

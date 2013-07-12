@@ -25,8 +25,7 @@ namespace PuyoTools.Modules.Compression
         /// </summary>
         /// <param name="source">The stream to read from.</param>
         /// <param name="destination">The stream to write to.</param>
-        /// <param name="length">Number of bytes to read.</param>
-        public override void Decompress(Stream source, Stream destination, int length)
+        public override void Decompress(Stream source, Stream destination)
         {
             int bitPos = 9;
             byte currentByte;
@@ -88,12 +87,13 @@ namespace PuyoTools.Modules.Compression
         /// </summary>
         /// <param name="source">The stream to read from.</param>
         /// <param name="destination">The stream to write to.</param>
-        /// <param name="length">Number of bytes to read.</param>
-        /// <param name="settings">Settings to use when compressing.</param>
-        public override void Compress(Stream source, Stream destination, int length)
+        public override void Compress(Stream source, Stream destination)
         {
-            byte[] sourceArray = new byte[length];
-            source.Read(sourceArray, 0, length);
+            // Get the source length
+            int sourceLength = (int)(source.Length - source.Position);
+
+            byte[] sourceArray = new byte[sourceLength];
+            source.Read(sourceArray, 0, sourceLength);
 
             byte bitPos = 0;
             byte controlByte = 0;
@@ -104,7 +104,7 @@ namespace PuyoTools.Modules.Compression
 
             MemoryStream data = new MemoryStream();
 
-            while (position < sourceArray.Length)
+            while (position < sourceLength)
             {
                 currentLookBehindLength = 0;
                 lookBehindOffset = 0;

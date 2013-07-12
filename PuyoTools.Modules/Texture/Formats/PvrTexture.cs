@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Windows.Forms;
 
 using VrSharp;
 using VrSharp.PvrTexture;
@@ -47,10 +46,10 @@ namespace PuyoTools.Modules.Texture
         /// <param name="source">The stream to read from.</param>
         /// <param name="destination">The stream to write to.</param>
         /// <param name="length">Number of bytes to read.</param>
-        public override void Read(Stream source, Stream destination, int length)
+        public override void Read(Stream source, Stream destination)
         {
             // Reading PVR textures is done through VrSharp, so just pass it to that
-            VrSharp.PvrTexture.PvrTexture texture = new VrSharp.PvrTexture.PvrTexture(source, length);
+            VrSharp.PvrTexture.PvrTexture texture = new VrSharp.PvrTexture.PvrTexture(source);
 
             // Check to see if this texture requires an external palette and throw an exception
             // if we do not have one defined
@@ -119,10 +118,10 @@ namespace PuyoTools.Modules.Texture
         public PvrDataFormat DataFormat { get; set; }
         #endregion
 
-        public override void Write(Stream source, Stream destination, int length)
+        public override void Write(Stream source, Stream destination)
         {
             // Writing PVR textures is done through VrSharp, so just pass it to that
-            PvrTextureEncoder texture = new PvrTextureEncoder(source, length, PixelFormat, DataFormat);
+            PvrTextureEncoder texture = new PvrTextureEncoder(source, PixelFormat, DataFormat);
 
             if (!texture.Initalized)
             {

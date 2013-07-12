@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Windows.Forms;
 
 using VrSharp;
 using VrSharp.SvrTexture;
@@ -45,10 +44,10 @@ namespace PuyoTools.Modules.Texture
         /// <param name="source">The stream to read from.</param>
         /// <param name="destination">The stream to write to.</param>
         /// <param name="length">Number of bytes to read.</param>
-        public override void Read(Stream source, Stream destination, int length)
+        public override void Read(Stream source, Stream destination)
         {
             // Reading SVR textures is done through VrSharp, so just pass it to that
-            VrSharp.SvrTexture.SvrTexture texture = new VrSharp.SvrTexture.SvrTexture(source, length);
+            VrSharp.SvrTexture.SvrTexture texture = new VrSharp.SvrTexture.SvrTexture(source);
 
             // Check to see if this texture requires an external palette and throw an exception
             // if we do not have one defined
@@ -99,10 +98,10 @@ namespace PuyoTools.Modules.Texture
         public SvrDataFormat DataFormat { get; set; }
         #endregion
 
-        public override void Write(Stream source, Stream destination, int length)
+        public override void Write(Stream source, Stream destination)
         {
             // Writing SVR textures is done through VrSharp, so just pass it to that
-            SvrTextureEncoder texture = new SvrTextureEncoder(source, length, PixelFormat, DataFormat);
+            SvrTextureEncoder texture = new SvrTextureEncoder(source, PixelFormat, DataFormat);
 
             if (!texture.Initalized)
             {

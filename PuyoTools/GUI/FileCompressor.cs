@@ -66,7 +66,7 @@ namespace PuyoTools.GUI
                     using (FileStream source = File.OpenRead(file))
                     {
                         // Run it through the compressor.
-                        Compression.Compress(source, buffer, (int)source.Length, Path.GetFileName(file), settings.CompressionFormat);
+                        Compression.Compress(source, buffer, settings.CompressionFormat);
                     }
 
                     // Now that we have a decompressed file (we hope!), let's see what we need to do with it.

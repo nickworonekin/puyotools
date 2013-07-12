@@ -20,15 +20,15 @@ namespace PuyoTools.Modules.Compression
         /// </summary>
         /// <param name="source">The stream to read from.</param>
         /// <param name="destination">The stream to write to.</param>
-        /// <param name="length">Number of bytes to read.</param>
-        public override void Decompress(Stream source, Stream destination, int length)
+        public override void Decompress(Stream source, Stream destination)
         {
             // Set the source, destination, and buffer pointers
             int sourcePointer      = 0x4;
             int destinationPointer = 0x0;
             int bufferPointer      = 0x0;
 
-            // Get the destination length
+            // Get the source and destination length
+            int sourceLength      = (int)(source.Length - source.Position);
             int destinationLength = PTStream.ReadInt32(source) >> 8;
             if (destinationLength == 0)
             {
@@ -41,7 +41,7 @@ namespace PuyoTools.Modules.Compression
             byte[] buffer = new byte[0x1000];
 
             // Start decompression
-            while (sourcePointer < length && destinationPointer < destinationLength)
+            while (sourcePointer < sourceLength && destinationPointer < destinationLength)
             {
                 byte flag = PTStream.ReadByte(source);
                 sourcePointer++;
@@ -104,7 +104,7 @@ namespace PuyoTools.Modules.Compression
                     }
 
                     // Check to see if we reached the end of the file
-                    if (sourcePointer >= length || destinationPointer >= destinationLength)
+                    if (sourcePointer >= sourceLength || destinationPointer >= destinationLength)
                         break;
 
                     flag <<= 1;
@@ -117,9 +117,7 @@ namespace PuyoTools.Modules.Compression
         /// </summary>
         /// <param name="source">The stream to read from.</param>
         /// <param name="destination">The stream to write to.</param>
-        /// <param name="length">Number of bytes to read.</param>
-        /// <param name="settings">Settings to use when compressing.</param>
-        public override void Compress(Stream source, Stream destination, int length)
+        public override void Compress(Stream source, Stream destination)
         {
             // Get the source length
             int sourceLength = (int)(source.Length - source.Position);

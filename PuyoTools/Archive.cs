@@ -39,12 +39,6 @@ namespace PuyoTools
             return Formats[format].Open(source);
         }
 
-        // Opens an archive with the specified archive format.
-        public static ArchiveReader Open(Stream source, int length, ArchiveFormat format)
-        {
-            return Formats[format].Open(source, length);
-        }
-
         // Creates an archive with the specified archive format and writer settings.
         public static ArchiveWriter Create(Stream source, ArchiveFormat format)
         {
@@ -52,15 +46,21 @@ namespace PuyoTools
         }
 
         // Returns the archive format used by the source archive.
-        public static ArchiveFormat GetFormat(Stream source, int length, string fname)
+        public static ArchiveFormat GetFormat(Stream source, string fname)
         {
             foreach (KeyValuePair<ArchiveFormat, ArchiveBase> format in Formats)
             {
-                if (format.Value.Is(source, length, fname))
+                if (format.Value.Is(source, fname))
                     return format.Key;
             }
 
             return ArchiveFormat.Unknown;
+        }
+
+        // Returns the module for this archive format.
+        public static ArchiveBase GetModule(ArchiveFormat format)
+        {
+            return Formats[format];
         }
     }
 

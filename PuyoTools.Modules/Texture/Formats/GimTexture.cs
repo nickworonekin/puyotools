@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Windows.Forms;
 
 using GimSharp;
 
@@ -43,10 +42,10 @@ namespace PuyoTools.Modules.Texture
         /// <param name="source">The stream to read from.</param>
         /// <param name="destination">The stream to write to.</param>
         /// <param name="length">Number of bytes to read.</param>
-        public override void Read(Stream source, Stream destination, int length)
+        public override void Read(Stream source, Stream destination)
         {
             // Reading GIM textures is done through GimSharp, so just pass it to that
-            GimSharp.GimTexture texture = new GimSharp.GimTexture(source, length);
+            GimSharp.GimTexture texture = new GimSharp.GimTexture(source);
 
             texture.Save(destination);
         }
@@ -68,10 +67,10 @@ namespace PuyoTools.Modules.Texture
         public bool HasMetadata { get; set; }
         #endregion
 
-        public override void Write(Stream source, Stream destination, int length)
+        public override void Write(Stream source, Stream destination)
         {
             // Writing GIM textures is done through GimSharp, so just pass it to that
-            GimTextureEncoder texture = new GimTextureEncoder(source, length, PaletteFormat, DataFormat);
+            GimTextureEncoder texture = new GimTextureEncoder(source, PaletteFormat, DataFormat);
 
             if (!texture.Initalized)
             {

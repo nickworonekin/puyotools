@@ -24,37 +24,39 @@ namespace PuyoTools
         }
 
         // Reads a texture with the specified texture format
-        public static void Read(Stream source, Stream destination, int length, TextureFormat format)
+        public static void Read(Stream source, Stream destination, TextureFormat format)
         {
-            Formats[format].Read(source, destination, length);
+            Formats[format].Read(source, destination);
         }
 
-        public static void Read(Stream source, out Bitmap destination, int length, TextureFormat format)
-        {
-            Formats[format].Read(source, out destination, length);
-        }
-
+        // Reads a texture with the specified texture format and returns a bitmap
         public static void Read(Stream source, out Bitmap destination, TextureFormat format)
         {
             Formats[format].Read(source, out destination);
         }
 
-        // Writes a texture to the specified texture format and texture writer settings
-        public static void Write(Stream source, Stream destination, int length, TextureFormat format)
+        // Writes a texture to the specified texture format
+        public static void Write(Stream source, Stream destination, TextureFormat format)
         {
-            Formats[format].Write(source, destination, length);
+            Formats[format].Write(source, destination);
         }
 
         // Returns the format used by the source texture.
-        public static TextureFormat GetFormat(Stream source, int length, string fname)
+        public static TextureFormat GetFormat(Stream source, string fname)
         {
             foreach (KeyValuePair<TextureFormat, TextureBase> format in Formats)
             {
-                if (format.Value.Is(source, length, fname))
+                if (format.Value.Is(source, fname))
                     return format.Key;
             }
 
             return TextureFormat.Unknown;
+        }
+
+        // Returns the module for this texture format.
+        public static TextureBase GetModule(TextureFormat format)
+        {
+            return Formats[format];
         }
     }
 

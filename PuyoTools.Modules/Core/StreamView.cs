@@ -183,7 +183,7 @@ namespace PuyoTools.Modules
                         throw new ArgumentException("offset");
                     }
 
-                    return baseStream.Seek(baseStream.Position + offset, SeekOrigin.Current);
+                    return baseStream.Seek(offset, SeekOrigin.Current);
 
                 // Seek from the end of the stream
                 case SeekOrigin.End:
@@ -192,7 +192,7 @@ namespace PuyoTools.Modules
                         throw new ArgumentException("offset"); 
                     }
 
-                    return baseStream.Seek(streamStart + streamLength + offset, SeekOrigin.End);
+                    return baseStream.Seek(streamStart + streamLength + offset, SeekOrigin.Begin);
             }
 
             return baseStream.Position - streamStart;

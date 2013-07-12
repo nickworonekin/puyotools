@@ -115,7 +115,7 @@ namespace PuyoTools.GUI
                         MemoryStream tempBuffer = new MemoryStream();
                         buffer.Position = 0;
 
-                        Compression.Compress(buffer, tempBuffer, (int)buffer.Length, outFname, settings.CompressionFormat);
+                        Compression.Compress(buffer, tempBuffer, settings.CompressionFormat);
 
                         buffer = tempBuffer;
                     }

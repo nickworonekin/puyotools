@@ -1,6 +1,6 @@
 ﻿using System;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
 
 namespace PuyoTools.Modules.Archive
 {
@@ -18,7 +18,20 @@ namespace PuyoTools.Modules.Archive
         /// <param name="source">The stream to read from.</param>
         /// <param name="length">Number of bytes to read.</param>
         /// <returns>An ArchiveReader object.</returns>
-        public abstract ArchiveReader Open(Stream source, int length);
+        /// <remarks>You must keep the stream open for the duration of the ArchiveReader.</remarks>
+        public abstract ArchiveReader Open(Stream source);
+
+        /// <summary>
+        /// Open an archive from part of a stream.
+        /// </summary>
+        /// <param name="source">The stream to read from.</param>
+        /// <param name="length">Number of bytes to read.</param>
+        /// <returns>An ArchiveReader object.</returns>
+        /// <remarks>You must keep the stream open for the duration of the ArchiveReader.</remarks>
+        public ArchiveReader Open(Stream source, int length)
+        {
+            return Open(new StreamView(source, length));
+        }
 
         /// <summary>
         /// Open an archive from a file.
@@ -27,20 +40,7 @@ namespace PuyoTools.Modules.Archive
         /// <returns>An ArchiveReader object.</returns>
         public ArchiveReader Open(string path)
         {
-            using (FileStream source = File.OpenRead(path))
-            {
-                return Open(source, (int)source.Length);
-            }
-        }
-
-        /// <summary>
-        /// Open an archive from a stream.
-        /// </summary>
-        /// <param name="source">The stream to read from.</param>
-        /// <returns>An ArchiveReader object.</returns>
-        public ArchiveReader Open(Stream source)
-        {
-            return Open(source, (int)(source.Length - source.Position));
+            return Open(File.OpenRead(path));
         }
 
         /// <summary>
@@ -57,18 +57,16 @@ namespace PuyoTools.Modules.Archive
         /// Open an archive from a byte array.
         /// </summary>
         /// <param name="source">Byte array containing the data.</param>
-        /// <param name="sourceIndex">Index of the data in the source array.</param>
+        /// <param name="offset">Offset of the data in the source array.</param>
         /// <param name="length">Length of the data in the source array.</param>
         /// <returns>An ArchiveReader object.</returns>
-        public ArchiveReader Open(byte[] source, int sourceIndex, int length)
+        public ArchiveReader Open(byte[] source, int offset, int length)
         {
-            using (MemoryStream sourceStream = new MemoryStream())
-            {
-                sourceStream.Write(source, sourceIndex, length);
-                sourceStream.Position = 0;
+            MemoryStream sourceStream = new MemoryStream();
+            sourceStream.Write(source, 0, length);
+            sourceStream.Position = 0;
 
-                return Open(sourceStream, length);
-            }
+            return Open(sourceStream);
         }
         #endregion
 

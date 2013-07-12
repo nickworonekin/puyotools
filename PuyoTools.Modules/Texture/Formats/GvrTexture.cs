@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Windows.Forms;
 
 using VrSharp;
 using VrSharp.GvrTexture;
@@ -48,10 +47,10 @@ namespace PuyoTools.Modules.Texture
         /// <param name="source">The stream to read from.</param>
         /// <param name="destination">The stream to write to.</param>
         /// <param name="length">Number of bytes to read.</param>
-        public override void Read(Stream source, Stream destination, int length)
+        public override void Read(Stream source, Stream destination)
         {
             // Reading GVR textures is done through VrSharp, so just pass it to that
-            VrSharp.GvrTexture.GvrTexture texture = new VrSharp.GvrTexture.GvrTexture(source, length);
+            VrSharp.GvrTexture.GvrTexture texture = new VrSharp.GvrTexture.GvrTexture(source);
 
             // Check to see if this texture requires an external palette and throw an exception
             // if we do not have one defined
@@ -136,10 +135,10 @@ namespace PuyoTools.Modules.Texture
         }
         #endregion
 
-        public override void Write(Stream source, Stream destination, int length)
+        public override void Write(Stream source, Stream destination)
         {
             // Writing GVR textures is done through VrSharp, so just pass it to that
-            GvrTextureEncoder texture = new GvrTextureEncoder(source, length, PaletteFormat, DataFormat);
+            GvrTextureEncoder texture = new GvrTextureEncoder(source, PaletteFormat, DataFormat);
 
             if (!texture.Initalized)
             {

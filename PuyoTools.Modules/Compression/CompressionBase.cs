@@ -11,8 +11,18 @@ namespace PuyoTools.Modules.Compression
         /// </summary>
         /// <param name="source">The stream to read from.</param>
         /// <param name="destination">The stream to write to.</param>
+        public abstract void Decompress(Stream source, Stream destination);
+
+        /// <summary>
+        /// Decompress data from part of a stream.
+        /// </summary>
+        /// <param name="source">The stream to read from.</param>
+        /// <param name="destination">The stream to write to.</param>
         /// <param name="length">Number of bytes to read.</param>
-        public abstract void Decompress(Stream source, Stream destination, int length);
+        public void Decompress(Stream source, Stream destination, int length)
+        {
+            Decompress(new StreamView(source, length), destination);
+        }
 
         /// <summary>
         /// Decompress data from a file. This method can read from and write to the same file.
@@ -29,7 +39,7 @@ namespace PuyoTools.Modules.Compression
 
                 using (FileStream source = File.OpenRead(sourcePath), destination = File.Create(tempPath))
                 {
-                    Decompress(source, destination, (int)source.Length);
+                    Decompress(source, destination);
                 }
 
                 File.Delete(sourcePath);
@@ -39,19 +49,9 @@ namespace PuyoTools.Modules.Compression
             {
                 using (FileStream source = File.OpenRead(sourcePath), destination = File.Create(destinationPath))
                 {
-                    Decompress(source, destination, (int)source.Length);
+                    Decompress(source, destination);
                 }
             }
-        }
-
-        /// <summary>
-        /// Decompress data from a stream.
-        /// </summary>
-        /// <param name="source">The stream to read from.</param>
-        /// <param name="destination">The stream to write to.</param>
-        public void Decompress(Stream source, Stream destination)
-        {
-            Decompress(source, destination, (int)(source.Length - source.Position));
         }
 
         /// <summary>
@@ -65,27 +65,17 @@ namespace PuyoTools.Modules.Compression
         }
 
         /// <summary>
-        /// Decompress data from a byte array.
+        /// Decompress data from part of a byte array.
         /// </summary>
         /// <param name="source">Byte array containing the data.</param>
-        /// <param name="destination">The stream to write to.</param>
-        public void Decompress(byte[] source, Stream destination)
-        {
-            Decompress(source, 0, destination, source.Length);
-        }
-
-        /// <summary>
-        /// Decompress data from a byte array.
-        /// </summary>
-        /// <param name="source">Byte array containing the data.</param>
-        /// <param name="sourceIndex">Index of the data in the source array.</param>
+        /// <param name="offset">Offset of the data in the source array.</param>
         /// <param name="destination">Byte array to write the data to.</param>
         /// <param name="length">Length of the data in the source array.</param>
-        public void Decompress(byte[] source, int sourceIndex, out byte[] destination, int length)
+        public void Decompress(byte[] source, int offset, out byte[] destination, int length)
         {
             using (MemoryStream sourceStream = new MemoryStream(), destinationStream = new MemoryStream())
             {
-                sourceStream.Write(source, sourceIndex, length);
+                sourceStream.Write(source, offset, length);
                 sourceStream.Position = 0;
 
                 Decompress(sourceStream, destinationStream, length);
@@ -95,21 +85,30 @@ namespace PuyoTools.Modules.Compression
         }
 
         /// <summary>
+        /// Decompress data from a stream.
+        /// </summary>
+        /// <param name="source">The stream to read from.</param>
+        /// <returns>A MemoryStream containing the decompressed data.</returns>
+        public MemoryStream Decompress(Stream source)
+        {
+            MemoryStream destination = new MemoryStream();
+            Decompress(source, destination);
+            destination.Position = 0;
+
+            return destination;
+        }
+
+        /// <summary>
         /// Decompress data from a byte array.
         /// </summary>
         /// <param name="source">Byte array containing the data.</param>
-        /// <param name="sourceIndex">Index of the data in the source array.</param>
-        /// <param name="destination">The stream to write to.</param>
-        /// <param name="length">Length of the data in the source array.</param>
-        public void Decompress(byte[] source, int sourceIndex, Stream destination, int length)
+        /// <returns>A byte array containing the decompressed data.</returns>
+        public byte[] Decompress(byte[] source)
         {
-            using (MemoryStream sourceStream = new MemoryStream())
-            {
-                sourceStream.Write(source, sourceIndex, length);
-                sourceStream.Position = 0;
+            byte[] destination;
+            Decompress(source, out destination);
 
-                Decompress(sourceStream, destination, length);
-            }
+            return destination;
         }
         #endregion
 
@@ -119,9 +118,18 @@ namespace PuyoTools.Modules.Compression
         /// </summary>
         /// <param name="source">The stream to read from.</param>
         /// <param name="destination">The stream to write to.</param>
+        public abstract void Compress(Stream source, Stream destination);
+
+        /// <summary>
+        /// Compress data from part of a stream.
+        /// </summary>
+        /// <param name="source">The stream to read from.</param>
+        /// <param name="destination">The stream to write to.</param>
         /// <param name="length">Number of bytes to read.</param>
-        /// <param name="settings">Settings to use when compressing.</param>
-        public abstract void Compress(Stream source, Stream destination, int length);
+        public void Compress(Stream source, Stream destination, int length)
+        {
+            Compress(new StreamView(source, length), destination);
+        }
 
         /// <summary>
         /// Compress data from a file. This method can read from and write to the same file.
@@ -138,7 +146,7 @@ namespace PuyoTools.Modules.Compression
 
                 using (FileStream source = File.OpenRead(sourcePath), destination = File.Create(tempPath))
                 {
-                    Compress(source, destination, (int)source.Length);
+                    Compress(source, destination);
                 }
 
                 File.Delete(sourcePath);
@@ -148,19 +156,9 @@ namespace PuyoTools.Modules.Compression
             {
                 using (FileStream source = File.OpenRead(sourcePath), destination = File.Create(destinationPath))
                 {
-                    Compress(source, destination, (int)source.Length);
+                    Compress(source, destination);
                 }
             }
-        }
-
-        /// <summary>
-        /// Compress data from a stream.
-        /// </summary>
-        /// <param name="source">The stream to read from.</param>
-        /// <param name="destination">The stream to write to.</param>
-        public void Compress(Stream source, Stream destination)
-        {
-            Compress(source, destination, (int)(source.Length - source.Position));
         }
 
         /// <summary>
@@ -174,27 +172,17 @@ namespace PuyoTools.Modules.Compression
         }
 
         /// <summary>
-        /// Compress data from a byte array.
+        /// Compress data from part of a byte array.
         /// </summary>
         /// <param name="source">Byte array containing the data.</param>
-        /// <param name="destination">The stream to write to.</param>
-        public void Compress(byte[] source, Stream destination)
-        {
-            Compress(source, 0, destination, source.Length);
-        }
-
-        /// <summary>
-        /// Compress data from a byte array.
-        /// </summary>
-        /// <param name="source">Byte array containing the data.</param>
-        /// <param name="sourceIndex">Index of the data in the source array.</param>
+        /// <param name="offset">Offset of the data in the source array.</param>
         /// <param name="destination">Byte array to write the data to.</param>
         /// <param name="length">Length of the data in the source array.</param>
-        public void Compress(byte[] source, int sourceIndex, out byte[] destination, int length)
+        public void Compress(byte[] source, int offset, out byte[] destination, int length)
         {
             using (MemoryStream sourceStream = new MemoryStream(), destinationStream = new MemoryStream())
             {
-                sourceStream.Write(source, sourceIndex, length);
+                sourceStream.Write(source, offset, length);
                 sourceStream.Position = 0;
 
                 Compress(sourceStream, destinationStream, length);
@@ -204,22 +192,30 @@ namespace PuyoTools.Modules.Compression
         }
 
         /// <summary>
+        /// Compress data from a stream.
+        /// </summary>
+        /// <param name="source">The stream to read from.</param>
+        /// <returns>A MemoryStream containing the compressed data.</returns>
+        public MemoryStream Compress(Stream source)
+        {
+            MemoryStream destination = new MemoryStream();
+            Compress(source, destination);
+            destination.Position = 0;
+
+            return destination;
+        }
+
+        /// <summary>
         /// Compress data from a byte array.
         /// </summary>
         /// <param name="source">Byte array containing the data.</param>
-        /// <param name="sourceIndex">Index of the data in the source array.</param>
-        /// <param name="destination">The stream to write to.</param>
-        /// <param name="length">Length of the data in the source array.</param>
-        /// <param name="settings">Settings to use when compressing.</param>
-        public void Compress(byte[] source, int sourceIndex, Stream destination, int length)
+        /// <returns>A byte array containing the compressed data.</returns>
+        public byte[] Compress(byte[] source)
         {
-            using (MemoryStream sourceStream = new MemoryStream())
-            {
-                sourceStream.Write(source, sourceIndex, length);
-                sourceStream.Position = 0;
+            byte[] destination;
+            Compress(source, out destination);
 
-                Compress(sourceStream, destination, length);
-            }
+            return destination;
         }
         #endregion
     }

@@ -193,7 +193,7 @@ namespace PuyoTools.GUI
 
                 using (FileStream outStream = File.Create(settings.OutFilename))
                 {
-                    Compression.Compress(destination, outStream, (int)destination.Length, Path.GetFileName(settings.OutFilename), settings.CompressionFormat);
+                    Compression.Compress(destination, outStream, settings.CompressionFormat);
                 }
             }
 

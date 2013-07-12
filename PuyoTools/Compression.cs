@@ -26,41 +26,46 @@ namespace PuyoTools
         }
 
         // Decompress a file when the compression format is not known.
-        public static CompressionFormat Decompress(Stream source, Stream destination, int length, string fname)
+        public static CompressionFormat Decompress(Stream source, Stream destination, string fname)
         {
-            CompressionFormat format = GetFormat(source, length, fname);
+            CompressionFormat format = GetFormat(source, fname);
 
             if (format == CompressionFormat.Unknown)
                 return format;
 
-            Formats[format].Decompress(source, destination, length);
+            Formats[format].Decompress(source, destination);
 
             return format;
         }
 
         // Decompress a file with the specified compression format
-        public static void Decompress(Stream source, Stream destination, int length, CompressionFormat format)
+        public static void Decompress(Stream source, Stream destination, CompressionFormat format)
         {
-            Formats[format].Decompress(source, destination, length);
-        }
+            Formats[format].Decompress(source, destination);
+        } 
 
         // Compress a file with the specified compression format
-        public static void Compress(Stream source, Stream destination, int length, string fname, CompressionFormat format)
+        public static void Compress(Stream source, Stream destination, CompressionFormat format)
         {
-            //Formats[format].Compress(source, destination, length, fname);
-            Formats[format].Compress(source, destination, length);
+            Formats[format].Compress(source, destination);
         }
 
         // Returns the compression format used by the source file.
-        public static CompressionFormat GetFormat(Stream source, int length, string fname)
+        public static CompressionFormat GetFormat(Stream source, string fname)
         {
             foreach (KeyValuePair<CompressionFormat, CompressionBase> format in Formats)
             {
-                if (format.Value.Is(source, length, fname))
+                if (format.Value.Is(source, fname))
                     return format.Key;
             }
 
             return CompressionFormat.Unknown;
+        }
+
+        // Returns the module for this compression format.
+        public static CompressionBase GetModule(CompressionFormat format)
+        {
+            return Formats[format];
         }
     }
 
