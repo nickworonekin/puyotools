@@ -10,6 +10,7 @@ namespace VrSharp
     {
         #region Fields
         protected bool initalized = false; // Is the texture initalized?
+        protected bool canDecode = false; // Can we decode this texture?
 
         protected byte[] encodedData; // Encoded texture data (VR data)
 
@@ -133,7 +134,7 @@ namespace VrSharp
 
             if (encodedData != null)
             {
-                initalized = Initalize();
+                Initalize();
             }
         }
 
@@ -154,7 +155,7 @@ namespace VrSharp
 
             if (encodedData != null)
             {
-                initalized = Initalize();
+                Initalize();
             }
         }
 
@@ -168,11 +169,11 @@ namespace VrSharp
 
             if (encodedData != null)
             {
-                initalized = Initalize();
+                Initalize();
             }
         }
 
-        protected abstract bool Initalize();
+        protected abstract void Initalize();
 
         /// <summary>
         /// Returns if the texture was loaded successfully.
@@ -181,6 +182,14 @@ namespace VrSharp
         public bool Initalized
         {
             get { return initalized; }
+        }
+
+        /// <summary>
+        /// Returns if the texture can be decoded.
+        /// </summary>
+        public bool CanDecode
+        {
+            get { return canDecode; }
         }
         #endregion
 
@@ -268,6 +277,12 @@ namespace VrSharp
         // Decodes a texture
         private byte[] DecodeTexture()
         {
+            // Make sure we can decode this texture
+            if (!canDecode)
+            {
+                throw new CannotDecodeTextureException("Cannot decode texture. The pixel format and/or data format may not be supported.");
+            }
+
             if (paletteOffset != -1) // The texture contains an embedded palette
             {
                 dataCodec.SetPalette(encodedData, paletteOffset, dataCodec.PaletteEntries);
@@ -381,6 +396,12 @@ namespace VrSharp
         // Decodes mipmaps
         private byte[][] DecodeMipmaps()
         {
+            // Make sure we can decode this texture
+            if (!canDecode)
+            {
+                throw new CannotDecodeTextureException("Cannot decode texture. The pixel format and/or data format may not be supported.");
+            }
+
             if (paletteOffset != -1) // The texture contains an embedded palette
             {
                 dataCodec.SetPalette(encodedData, paletteOffset, dataCodec.PaletteEntries);

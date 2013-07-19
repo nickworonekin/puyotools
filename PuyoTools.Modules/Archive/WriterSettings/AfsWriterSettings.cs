@@ -20,17 +20,17 @@ namespace PuyoTools.Modules.Archive
 
         public override void SetModuleSettings(IModule module)
         {
-            AfsArchive.Writer archive = (AfsArchive.Writer)module;
+            AfsArchiveWriter archive = (AfsArchiveWriter)module;
 
             archive.BlockSize = int.Parse(blockSizeBox.GetItemText(blockSizeBox.SelectedItem));
 
             if (afsVersion2Radio.Checked)
             {
-                archive.Version = AfsArchive.Writer.AfsVersion.Version2;
+                archive.Version = AfsArchiveWriter.AfsVersion.Version2;
             }
             else
             {
-                archive.Version = AfsArchive.Writer.AfsVersion.Version1;
+                archive.Version = AfsArchiveWriter.AfsVersion.Version1;
             }
 
             archive.HasTimestamps = hasTimestampsCheckbox.Checked;

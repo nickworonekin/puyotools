@@ -7,7 +7,7 @@ namespace PuyoTools.Modules.Archive
     public abstract class ArchiveBase : ModuleBase
     {
         /// <summary>
-        /// Returns the primary file extension for this archive format.
+        /// The primary file extension for this archive format.
         /// </summary>
         public abstract string FileExtension { get; }
 
@@ -82,7 +82,10 @@ namespace PuyoTools.Modules.Archive
 
     public abstract class ArchiveReader : IModule
     {
-        protected long archiveOffset;
+        /// <summary>
+        /// The starting offset of the archive within the stream.
+        /// </summary>
+        protected long startOffset;
 
         protected Stream archiveData;
         protected ArchiveEntryCollection entries;
@@ -90,7 +93,7 @@ namespace PuyoTools.Modules.Archive
         public ArchiveReader(Stream source)
         {
             archiveData = source;
-            archiveOffset = source.Position;
+            startOffset = source.Position;
         }
 
         /// <summary>

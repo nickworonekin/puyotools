@@ -36,4 +36,11 @@ namespace VrSharp
 
         public InvalidTextureDimensionsException(string message) : base(message) { }
     }
+
+    public class CannotDecodeTextureException : Exception
+    {
+        public CannotDecodeTextureException() { }
+
+        public CannotDecodeTextureException(string message) : base(message) { }
+    }
 }

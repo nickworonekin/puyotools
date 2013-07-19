@@ -11,6 +11,7 @@ namespace GimSharp
     {
         #region Fields
         private bool initalized = false; // Is the texture initalized?
+        private bool canDecode = false; // Can we decode this texture?
 
         private byte[] encodedData; // Encoded texture data (GIM data)
 
@@ -106,7 +107,7 @@ namespace GimSharp
 
             if (encodedData != null)
             {
-                initalized = Initalize();
+                Initalize();
             }
         }
 
@@ -136,7 +137,7 @@ namespace GimSharp
 
             if (encodedData != null)
             {
-                initalized = Initalize();
+                Initalize();
             }
         }
 
@@ -158,15 +159,17 @@ namespace GimSharp
 
             if (encodedData != null)
             {
-                initalized = Initalize();
+                Initalize();
             }
         }
 
-        private bool Initalize()
+        private void Initalize()
         {
             // Check to see if what we are dealing with is a GIM texture
             if (!Is(encodedData))
-                return false;
+            {
+                throw new NotAValidTextureException("This is not a valid GIM texture.");
+            }
 
             // Initalize some things
             paletteFormat = GimPaletteFormat.Unknown;
@@ -209,7 +212,6 @@ namespace GimSharp
 
                     // Get the data codec and make sure we can decode using it
                     dataCodec = GimDataCodec.GetDataCodec(dataFormat);
-                    if (dataCodec == null) return false;
 
                     // Check to see if the texture data is swizzled
                     swizzled = (BitConverter.ToUInt16(encodedData, offset + 0x16) == 1);
@@ -244,7 +246,6 @@ namespace GimSharp
 
                     // Get the pixel codec and make sure we can decode using it
                     pixelCodec = GimPixelCodec.GetPixelCodec(paletteFormat);
-                    if (pixelCodec == null) return false;
 
                     // Get the number of entries in the palette
                     paletteEntries = BitConverter.ToUInt16(encodedData, offset + 0x18);
@@ -284,14 +285,14 @@ namespace GimSharp
                 // Invalid chunk
                 else
                 {
-                    return false;
+                    return;
                 }
 
                 // Make sure we are actually advancing in the file, so we don't end up reaching a negative offset
                 // or ending up in an infinite loop 
                 if (offset <= previousOffset)
                 {
-                    return false;
+                    return;
                 }
                 previousOffset = offset;
             }
@@ -299,32 +300,26 @@ namespace GimSharp
             // If all went well, offset should be equal to eofOffset
             if (offset != eofOffset)
             {
-                return false;
+                return;
             }
 
-            // Make sure we have a data codec, and if this is a palettized format, a pixel codec
-            if (dataCodec == null)
+            // If this is a non-palettized format, make sure we have a data codec
+            if (dataCodec != null && dataCodec.PaletteEntries == 0)
             {
-                return false;
-            }
-            if (dataCodec.PaletteEntries != 0 && pixelCodec == null)
-            {
-                return false;
+                canDecode = true;
             }
 
-            if (dataCodec.PaletteEntries != 0)
+            // If this is a palettized format, make sure we have a palette codec, a data codec,
+            // and that the number of palette entires is less than or equal to what this data format supports
+            if (dataCodec != null && dataCodec.PaletteEntries != 0 && pixelCodec != null && paletteEntries <= dataCodec.PaletteEntries)
             {
-                // Make sure the number of entries is less than or equal to what the data codec supports
-                if (paletteEntries > dataCodec.PaletteEntries)
-                {
-                    return false;
-                }
-
                 // Set the data format's pixel codec
                 dataCodec.PixelCodec = pixelCodec;
+
+                canDecode = true;
             }
 
-            return true;
+            initalized = true;
         }
 
         /// <summary>
@@ -334,6 +329,14 @@ namespace GimSharp
         public bool Initalized
         {
             get { return initalized; }
+        }
+
+        /// <summary>
+        /// Returns if the texture can be decoded.
+        /// </summary>
+        public bool CanDecode
+        {
+            get { return canDecode; }
         }
         #endregion
 
@@ -480,6 +483,12 @@ namespace GimSharp
         // Decodes a texture
         private byte[] DecodeTexture()
         {
+            // Make sure we can decode this texture
+            if (!canDecode)
+            {
+                throw new CannotDecodeTextureException("Cannot decode texture. The palette format and/or data format may not be supported.");
+            }
+
             if (paletteOffset != -1) // The texture contains an embedded palette
             {
                 dataCodec.SetPalette(encodedData, paletteOffset, paletteEntries);

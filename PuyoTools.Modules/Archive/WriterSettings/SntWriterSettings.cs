@@ -18,15 +18,15 @@ namespace PuyoTools.Modules.Archive
 
         public override void SetModuleSettings(IModule module)
         {
-            SntArchive.Writer archive = (SntArchive.Writer)module;
+            SntArchiveWriter archive = (SntArchiveWriter)module;
 
             if (platformPspRadio.Checked)
             {
-                archive.Platform = SntArchive.Writer.SntPlatform.Psp;
+                archive.Platform = SntArchiveWriter.SntPlatform.Psp;
             }
             else
             {
-                archive.Platform = SntArchive.Writer.SntPlatform.Ps2;
+                archive.Platform = SntArchiveWriter.SntPlatform.Ps2;
             }
         }
     }

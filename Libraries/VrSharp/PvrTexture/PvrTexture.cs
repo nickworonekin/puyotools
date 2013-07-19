@@ -98,11 +98,13 @@ namespace VrSharp.PvrTexture
         /// <param name="length">Number of bytes to read.</param>
         public PvrTexture(Stream source, int length) : base(source, length) { }
 
-        protected override bool Initalize()
+        protected override void Initalize()
         {
             // Check to see if what we are dealing with is a PVR texture
             if (!Is(encodedData))
-                return false;
+            {
+                throw new NotAValidTextureException("This is not a valid PVR texture.");
+            }
 
             // Determine the offsets of the GBIX (if present) and PVRT header chunks.
             if (PTMethods.Contains(encodedData, 0x00, Encoding.UTF8.GetBytes("GBIX")))
@@ -145,14 +147,16 @@ namespace VrSharp.PvrTexture
 
             // Get the codecs and make sure we can decode using them
             pixelCodec = PvrPixelCodec.GetPixelCodec(pixelFormat);
-            if (pixelCodec == null) return false;
-
             dataCodec = PvrDataCodec.GetDataCodec(dataFormat);
-            if (dataCodec == null) return false;
-            dataCodec.PixelCodec = pixelCodec;
+
+            if (dataCodec != null && pixelCodec != null)
+            {
+                dataCodec.PixelCodec = pixelCodec;
+                canDecode = true;
+            }
 
             // Set the palette and data offsets
-            if (dataCodec.PaletteEntries == 0 || dataCodec.NeedsExternalPalette)
+            if (!canDecode || dataCodec.PaletteEntries == 0 || dataCodec.NeedsExternalPalette)
             {
                 paletteOffset = -1;
                 dataOffset = pvrtOffset + 0x10;
@@ -182,7 +186,7 @@ namespace VrSharp.PvrTexture
             }
 
             // If the texture contains mipmaps, gets the offsets of them
-            if (dataCodec.HasMipmaps)
+            if (canDecode && dataCodec.HasMipmaps)
             {
                 mipmapOffsets = new int[(int)Math.Log(textureWidth, 2) + 1];
 
@@ -208,7 +212,7 @@ namespace VrSharp.PvrTexture
                 }
             }
 
-            return true;
+            initalized = true;
         }
         #endregion
 

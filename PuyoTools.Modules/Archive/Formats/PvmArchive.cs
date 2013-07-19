@@ -7,16 +7,25 @@ namespace PuyoTools.Modules.Archive
 {
     public class PvmArchive : ArchiveBase
     {
+        /// <summary>
+        /// Name of the format.
+        /// </summary>
         public override string Name
         {
             get { return "PVM"; }
         }
 
+        /// <summary>
+        /// The primary file extension for this archive format.
+        /// </summary>
         public override string FileExtension
         {
             get { return ".pvm"; }
         }
 
+        /// <summary>
+        /// Returns if data can be written to this format.
+        /// </summary>
         public override bool CanWrite
         {
             get { return true; }
@@ -24,12 +33,12 @@ namespace PuyoTools.Modules.Archive
 
         public override ArchiveReader Open(Stream source)
         {
-            return new Reader(source);
+            return new PvmArchiveReader(source);
         }
 
         public override ArchiveWriter Create(Stream destination)
         {
-            return new Writer(destination);
+            return new PvmArchiveWriter(destination);
         }
 
         public override ModuleSettingsControl GetModuleSettingsControl()
@@ -41,255 +50,259 @@ namespace PuyoTools.Modules.Archive
         {
             return (length > 12 && PTStream.Contains(source, 0, new byte[] { (byte)'P', (byte)'V', (byte)'M', (byte)'H' }));
         }
+    }
 
-        public class Reader : ArchiveReader
+    #region Archive Reader
+    public class PvmArchiveReader : ArchiveReader
+    {
+        bool hasFilenames, hasFormats, hasDimensions, hasGlobalIndexes;
+        int tableEntryLength, globalIndexOffset;
+
+        public PvmArchiveReader(Stream source) : base(source)
         {
-            bool hasFilenames, hasFormats, hasDimensions, hasGlobalIndexes;
-            int tableEntryLength, globalIndexOffset;
+            // The offset of the first entry
+            source.Position += 4;
+            int entryOffset = PTStream.ReadInt32(source) + 8;
+            int headerOffset = 0xC;
 
-            public Reader(Stream source) : base(source)
+            // Read what properties this archive stores for each texture
+            byte properties  = PTStream.ReadByte(source);
+            hasFilenames     = (properties & (1 << 3)) > 0;
+            hasFormats       = (properties & (1 << 2)) > 0;
+            hasDimensions    = (properties & (1 << 1)) > 0;
+            hasGlobalIndexes = (properties & (1 << 0)) > 0;
+            source.Position++;
+
+            // Determine the size of each entry in the entry table
+            tableEntryLength = 2;
+            if (hasFilenames)  tableEntryLength += 28;
+            if (hasFormats)    tableEntryLength += 2;
+            if (hasDimensions) tableEntryLength += 2;
+
+            if (hasGlobalIndexes)
             {
-                // The offset of the first entry
-                source.Position += 4;
-                int entryOffset = PTStream.ReadInt32(source) + 8;
-                int headerOffset = 0xC;
-
-                // Read what properties this archive stores for each texture
-                byte properties  = PTStream.ReadByte(source);
-                hasFilenames     = (properties & (1 << 3)) > 0;
-                hasFormats       = (properties & (1 << 2)) > 0;
-                hasDimensions    = (properties & (1 << 1)) > 0;
-                hasGlobalIndexes = (properties & (1 << 0)) > 0;
-                source.Position++;
-
-                // Determine the size of each entry in the entry table
-                tableEntryLength = 2;
-                if (hasFilenames)  tableEntryLength += 28;
-                if (hasFormats)    tableEntryLength += 2;
-                if (hasDimensions) tableEntryLength += 2;
-
-                if (hasGlobalIndexes)
-                {
-                    globalIndexOffset = tableEntryLength;
-                    tableEntryLength += 4;
-                }
-
-                // Get the number of entries in the archive
-                ushort numEntries = PTStream.ReadUInt16(source);
-                entries = new ArchiveEntryCollection(this, numEntries);
-
-                // Read in all the entries
-                for (int i = 0; i < numEntries; i++)
-                {
-                    // We need to need to determine the offset based on the length,
-                    // which is stored in the texture data.
-                    // We already have the entry offset
-                    source.Position = archiveOffset + entryOffset + 4;
-                    int entryLength = PTStream.ReadInt32(source) + 8;
-
-                    string entryFname = String.Empty;
-                    if (hasFilenames)
-                    {
-                        source.Position = archiveOffset + headerOffset + 2;
-                        entryFname = PTStream.ReadCString(source, 28) + ".pvr";
-                        headerOffset += tableEntryLength;
-                    }
-
-                    // Add this entry to the collection
-                    entries.Add(archiveOffset + entryOffset, entryLength, entryFname);
-
-                    entryOffset += entryLength;
-                }
-
-                // Set the position of the stream to the end of the file
-                source.Seek(0, SeekOrigin.End);
+                globalIndexOffset = tableEntryLength;
+                tableEntryLength += 4;
             }
 
-            public override Stream OpenEntry(ArchiveEntry entry)
+            // Get the number of entries in the archive
+            ushort numEntries = PTStream.ReadUInt16(source);
+            entries = new ArchiveEntryCollection(this, numEntries);
+
+            // Read in all the entries
+            for (int i = 0; i < numEntries; i++)
             {
-                // If this archive does not contain any global indexes, then just return the data as is.
-                if (!hasGlobalIndexes)
+                // We need to need to determine the offset based on the length,
+                // which is stored in the texture data.
+                // We already have the entry offset
+                source.Position = startOffset + entryOffset + 4;
+                int entryLength = PTStream.ReadInt32(source) + 8;
+
+                string entryFname = String.Empty;
+                if (hasFilenames)
                 {
-                    return base.OpenEntry(entry);
+                    source.Position = startOffset + headerOffset + 2;
+                    entryFname = PTStream.ReadCString(source, 28) + ".pvr";
+                    headerOffset += tableEntryLength;
                 }
 
-                long oldPosition = archiveData.Position;
+                // Add this entry to the collection
+                entries.Add(startOffset + entryOffset, entryLength, entryFname);
 
-                MemoryStream data = new MemoryStream();
-
-                // Write out the GBIX header
-                data.WriteByte((byte)'G');
-                data.WriteByte((byte)'B');
-                data.WriteByte((byte)'I');
-                data.WriteByte((byte)'X');
-                PTStream.WriteInt32(data, 8);
-
-                archiveData.Position = 0xC + (entry.Index * tableEntryLength) + globalIndexOffset;
-                PTStream.WriteUInt32(data, PTStream.ReadUInt32(archiveData));
-
-                data.Position += 4;
-
-                // Now copy over the file data
-                archiveData.Position = entry.Offset;
-                PTStream.CopyPartTo(archiveData, data, entry.Length);
-
-                archiveData.Position = oldPosition;
-                data.Position = 0;
-
-                return data;
+                entryOffset += entryLength;
             }
+
+            // Set the position of the stream to the end of the file
+            source.Seek(0, SeekOrigin.End);
         }
 
-        public class Writer : ArchiveWriter
+        public override Stream OpenEntry(ArchiveEntry entry)
         {
-            #region Settings
-            /// <summary>
-            /// Sets if filenames should be stored in the archive. The default value is true.
-            /// </summary>
-            public bool HasFilenames { get; set; }
-
-            /// <summary>
-            /// Sets if global indexes should be stored in the archive. The default value is true.
-            /// </summary>
-            public bool HasGlobalIndexes { get; set; }
-
-            /// <summary>
-            /// Sets if texture formats should be stored in the archive. The default value is true.
-            /// </summary>
-            public bool HasFormats { get; set; }
-
-            /// <summary>
-            /// Sets if texture dimensions should be stored in the archive. The default value is true.
-            /// </summary>
-            public bool HasDimensions { get; set; }
-            #endregion
-
-            public Writer(Stream destination) : base(destination)
+            // If this archive does not contain any global indexes, then just return the data as is.
+            if (!hasGlobalIndexes)
             {
-                // Set default settings
-                HasFilenames = true;
-                HasGlobalIndexes = true;
-                HasFormats = true;
-                HasDimensions = true;
+                return base.OpenEntry(entry);
             }
 
-            /// <summary>
-            /// Creates an entry that has the specified data entry name in the archive.
-            /// </summary>
-            /// <param name="source">The data to be added to the archive.</param>
-            /// <param name="entryName">The name of the entry to be created.</param>
-            /// <remarks>
-            /// The file may be rejected from the archive. In this case, a CannotAddFileToArchiveException will be thrown.
-            /// </remarks>
-            public override void CreateEntry(Stream source, string entryName)
-            {
-                // Only PVR textures can be added to a PVM archive. If this is not a PVR texture, throw an exception.
-                if (!(new PvrTexture()).Is(source, entryName))
-                {
-                    throw new CannotAddFileToArchiveException();
-                }
+            long oldPosition = archiveData.Position;
 
-                base.CreateEntry(source, entryName);
+            MemoryStream data = new MemoryStream();
+
+            // Write out the GBIX header
+            data.WriteByte((byte)'G');
+            data.WriteByte((byte)'B');
+            data.WriteByte((byte)'I');
+            data.WriteByte((byte)'X');
+            PTStream.WriteInt32(data, 8);
+
+            archiveData.Position = 0xC + (entry.Index * tableEntryLength) + globalIndexOffset;
+            PTStream.WriteUInt32(data, PTStream.ReadUInt32(archiveData));
+
+            data.Position += 4;
+
+            // Now copy over the file data
+            archiveData.Position = entry.Offset;
+            PTStream.CopyPartTo(archiveData, data, entry.Length);
+
+            archiveData.Position = oldPosition;
+            data.Position = 0;
+
+            return data;
+        }
+    }
+    #endregion
+
+    #region Archive Writer
+    public class PvmArchiveWriter : ArchiveWriter
+    {
+        #region Settings
+        /// <summary>
+        /// Sets if filenames should be stored in the archive. The default value is true.
+        /// </summary>
+        public bool HasFilenames { get; set; }
+
+        /// <summary>
+        /// Sets if global indexes should be stored in the archive. The default value is true.
+        /// </summary>
+        public bool HasGlobalIndexes { get; set; }
+
+        /// <summary>
+        /// Sets if texture formats should be stored in the archive. The default value is true.
+        /// </summary>
+        public bool HasFormats { get; set; }
+
+        /// <summary>
+        /// Sets if texture dimensions should be stored in the archive. The default value is true.
+        /// </summary>
+        public bool HasDimensions { get; set; }
+        #endregion
+
+        public PvmArchiveWriter(Stream destination) : base(destination)
+        {
+            // Set default settings
+            HasFilenames = true;
+            HasGlobalIndexes = true;
+            HasFormats = true;
+            HasDimensions = true;
+        }
+
+        /// <summary>
+        /// Creates an entry that has the specified data entry name in the archive.
+        /// </summary>
+        /// <param name="source">The data to be added to the archive.</param>
+        /// <param name="entryName">The name of the entry to be created.</param>
+        /// <remarks>
+        /// The file may be rejected from the archive. In this case, a CannotAddFileToArchiveException will be thrown.
+        /// </remarks>
+        public override void CreateEntry(Stream source, string entryName)
+        {
+            // Only PVR textures can be added to a PVM archive. If this is not a PVR texture, throw an exception.
+            if (!(new PvrTexture()).Is(source, entryName))
+            {
+                throw new CannotAddFileToArchiveException();
             }
 
-            public override void Flush()
-            {
-                // Determine the length of each entry in the header
-                // and the flags that indicate what is stored in the header
-                int entryLength = 2;
-                ushort flags = 0;
+            base.CreateEntry(source, entryName);
+        }
 
+        public override void Flush()
+        {
+            // Determine the length of each entry in the header
+            // and the flags that indicate what is stored in the header
+            int entryLength = 2;
+            ushort flags = 0;
+
+            if (HasFilenames)
+            {
+                entryLength += 28;
+                flags |= 0x8;
+            }
+            if (HasFormats)
+            {
+                entryLength += 2;
+                flags |= 0x4;
+            }
+            if (HasDimensions)
+            {
+                entryLength += 2;
+                flags |= 0x2;
+            }
+            if (HasGlobalIndexes)
+            {
+                entryLength += 4;
+                flags |= 0x1;
+            }
+
+            // Write the start of the header
+            destination.WriteByte((byte)'P');
+            destination.WriteByte((byte)'V');
+            destination.WriteByte((byte)'M');
+            destination.WriteByte((byte)'H');
+
+            // Offset of the first texture in the archive
+            long entryOffset = PTMethods.RoundUp(12 + (entries.Count * entryLength), 16);
+            PTStream.WriteInt32(destination, (int)entryOffset - 8);
+
+            // Write out the flags
+            PTStream.WriteUInt16(destination, flags);
+
+            // Write out the number of entries
+            PTStream.WriteUInt16(destination, (ushort)entries.Count);
+
+            // We're going to be using this a few times. Might as well do this here
+            long oldPosition;
+
+            // Now, let's add the entries
+            for (int i = 0; i < entries.Count; i++)
+            {
+                Stream entryData = entries[i].Open();
+
+                // We need to get some information about the texture.
+                // We already checked to make sure this texture is a PVR.
+                // No need to check it again.
+                oldPosition = entryData.Position;
+                VrSharp.PvrTexture.PvrTexture texture = new VrSharp.PvrTexture.PvrTexture(entryData);
+                entryData.Position = oldPosition;
+
+                // Write out the entry number
+                PTStream.WriteUInt16(destination, (ushort)i);
+
+                // Write the information for this entry in the header
                 if (HasFilenames)
                 {
-                    entryLength += 28;
-                    flags |= 0x8;
+                    PTStream.WriteCString(destination, Path.GetFileNameWithoutExtension(entries[i].Name), 28);
                 }
                 if (HasFormats)
                 {
-                    entryLength += 2;
-                    flags |= 0x4;
+                    destination.WriteByte(0);
+                    destination.WriteByte((byte)texture.DataFormat);
                 }
                 if (HasDimensions)
                 {
-                    entryLength += 2;
-                    flags |= 0x2;
+                    ushort dimensions = 0;
+                    dimensions |= (ushort)(((byte)Math.Log(texture.TextureWidth, 2) - 2) & 0xF);
+                    dimensions |= (ushort)((((byte)Math.Log(texture.TextureHeight, 2) - 2) & 0xF) << 4);
+                    PTStream.WriteUInt16(destination, dimensions);
                 }
                 if (HasGlobalIndexes)
                 {
-                    entryLength += 4;
-                    flags |= 0x1;
+                    PTStream.WriteUInt32(destination, texture.GlobalIndex);
                 }
 
-                // Write the start of the header
-                destination.WriteByte((byte)'P');
-                destination.WriteByte((byte)'V');
-                destination.WriteByte((byte)'M');
-                destination.WriteByte((byte)'H');
+                // Now write out the entry information
+                oldPosition = destination.Position;
+                destination.Position = entryOffset;
+                entryData.Position += texture.PvrtOffset;
 
-                // Offset of the first texture in the archive
-                long entryOffset = PTMethods.RoundUp(12 + (entries.Count * entryLength), 16);
-                PTStream.WriteInt32(destination, (int)entryOffset - 8);
+                PTStream.CopyToPadded(entryData, destination, 16, 0);
 
-                // Write out the flags
-                PTStream.WriteUInt16(destination, flags);
+                entryOffset = destination.Position;
+                destination.Position = oldPosition;
 
-                // Write out the number of entries
-                PTStream.WriteUInt16(destination, (ushort)entries.Count);
-
-                // We're going to be using this a few times. Might as well do this here
-                long oldPosition;
-
-                // Now, let's add the entries
-                for (int i = 0; i < entries.Count; i++)
-                {
-                    Stream entryData = entries[i].Open();
-
-                    // We need to get some information about the texture.
-                    // We already checked to make sure this texture is a PVR.
-                    // No need to check it again.
-                    oldPosition = entryData.Position;
-                    VrSharp.PvrTexture.PvrTexture texture = new VrSharp.PvrTexture.PvrTexture(entryData);
-                    entryData.Position = oldPosition;
-
-                    // Write out the entry number
-                    PTStream.WriteUInt16(destination, (ushort)i);
-
-                    // Write the information for this entry in the header
-                    if (HasFilenames)
-                    {
-                        PTStream.WriteCString(destination, Path.GetFileNameWithoutExtension(entries[i].Name), 28);
-                    }
-                    if (HasFormats)
-                    {
-                        destination.WriteByte(0);
-                        destination.WriteByte((byte)texture.DataFormat);
-                    }
-                    if (HasDimensions)
-                    {
-                        ushort dimensions = 0;
-                        dimensions |= (ushort)(((byte)Math.Log(texture.TextureWidth, 2) - 2) & 0xF);
-                        dimensions |= (ushort)((((byte)Math.Log(texture.TextureHeight, 2) - 2) & 0xF) << 4);
-                        PTStream.WriteUInt16(destination, dimensions);
-                    }
-                    if (HasGlobalIndexes)
-                    {
-                        PTStream.WriteUInt32(destination, texture.GlobalIndex);
-                    }
-
-                    // Now write out the entry information
-                    oldPosition = destination.Position;
-                    destination.Position = entryOffset;
-                    entryData.Position += texture.PvrtOffset;
-
-                    PTStream.CopyToPadded(entryData, destination, 16, 0);
-
-                    entryOffset = destination.Position;
-                    destination.Position = oldPosition;
-
-                    // Call the file added event
-                    OnFileAdded(EventArgs.Empty);
-                }
+                // Call the file added event
+                OnFileAdded(EventArgs.Empty);
             }
         }
     }
+    #endregion
 }

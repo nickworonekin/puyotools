@@ -19,9 +19,9 @@ namespace PuyoTools.Modules.Archive
         public override void SetModuleSettings(IModule module)
         {
             // GVM archive
-            if (module is GvmArchive.Writer)
+            if (module is GvmArchiveWriter)
             {
-                GvmArchive.Writer archive = (GvmArchive.Writer)module;
+                GvmArchiveWriter archive = (GvmArchiveWriter)module;
 
                 archive.HasFilenames = hasFilenamesCheckbox.Checked;
                 archive.HasGlobalIndexes = hasGlobalIndexesCheckbox.Checked;
@@ -30,9 +30,9 @@ namespace PuyoTools.Modules.Archive
             }
 
             // PVM archive
-            else if (module is PvmArchive.Writer)
+            else if (module is PvmArchiveWriter)
             {
-                PvmArchive.Writer archive = (PvmArchive.Writer)module;
+                PvmArchiveWriter archive = (PvmArchiveWriter)module;
 
                 archive.HasFilenames = hasFilenamesCheckbox.Checked;
                 archive.HasGlobalIndexes = hasGlobalIndexesCheckbox.Checked;

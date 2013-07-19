@@ -77,11 +77,13 @@ namespace VrSharp.SvrTexture
         /// <param name="length">Number of bytes to read.</param>
         public SvrTexture(Stream source, int length) : base(source, length) { }
 
-        protected override bool Initalize()
+        protected override void Initalize()
         {
             // Check to see if what we are dealing with is a SVR texture
             if (!Is(encodedData))
-                return false;
+            {
+                throw new NotAValidTextureException("This is not a valid GVR texture.");
+            }
 
             // Determine the offsets of the GBIX (if present) and PVRT header chunks.
             if (PTMethods.Contains(encodedData, 0, Encoding.UTF8.GetBytes("GBIX")))
@@ -114,14 +116,16 @@ namespace VrSharp.SvrTexture
 
             // Get the codecs and make sure we can decode using them
             pixelCodec = SvrPixelCodec.GetPixelCodec(pixelFormat);
-            if (pixelCodec == null) return false;
-
             dataCodec = SvrDataCodec.GetDataCodec(dataFormat);
-            if (dataCodec == null) return false;
-            dataCodec.PixelCodec = pixelCodec;
 
-            // Set the clut and data offsets
-            if (dataCodec.PaletteEntries == 0 || dataCodec.NeedsExternalPalette)
+            if (dataCodec != null && pixelCodec != null)
+            {
+                dataCodec.PixelCodec = pixelCodec;
+                canDecode = true;
+            }
+
+            // Set the palette and data offsets
+            if (!canDecode || dataCodec.PaletteEntries == 0 || dataCodec.NeedsExternalPalette)
             {
                 paletteOffset = -1;
                 dataOffset = pvrtOffset + 0x10;
@@ -132,7 +136,7 @@ namespace VrSharp.SvrTexture
                 dataOffset = paletteOffset + (dataCodec.PaletteEntries * (pixelCodec.Bpp >> 3));
             }
 
-            return true;
+            initalized = true;
         }
         #endregion
 

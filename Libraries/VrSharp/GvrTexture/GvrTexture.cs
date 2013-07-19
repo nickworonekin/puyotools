@@ -113,11 +113,13 @@ namespace VrSharp.GvrTexture
         /// <param name="length">Number of bytes to read.</param>
         public GvrTexture(Stream source, int length) : base(source, length) { }
 
-        protected override bool Initalize()
+        protected override void Initalize()
         {
             // Check to see if what we are dealing with is a GVR texture
             if (!Is(encodedData))
-                return false;
+            {
+                throw new NotAValidTextureException("This is not a valid GVR texture.");
+            }
 
             // Determine the offsets of the GBIX/GCIX (if present) and GCIX header chunks.
             if (PTMethods.Contains(encodedData, 0, Encoding.UTF8.GetBytes("GBIX")) ||
@@ -152,23 +154,30 @@ namespace VrSharp.GvrTexture
 
             // Get the codecs and make sure we can decode using them
             dataCodec = GvrDataCodec.GetDataCodec(dataFormat);
-            if (dataCodec == null) return false;
 
             // We need a pixel codec if this is a palettized texture
-            if (dataCodec.PaletteEntries != 0)
+            if (dataCodec != null && dataCodec.PaletteEntries != 0)
             {
                 pixelCodec = GvrPixelCodec.GetPixelCodec(pixelFormat);
-                if (pixelCodec == null) return false;
 
-                dataCodec.PixelCodec = pixelCodec;
+                if (pixelCodec != null)
+                {
+                    dataCodec.PixelCodec = pixelCodec;
+                    canDecode = true;
+                }
             }
             else
             {
                 pixelFormat = GvrPixelFormat.Unknown;
+
+                if (dataCodec != null)
+                {
+                    canDecode = true;
+                }
             }
 
             // Set the palette and data offsets
-            if (dataCodec.PaletteEntries == 0 || (dataCodec.PaletteEntries != 0 && (dataFlags & GvrDataFlags.ExternalPalette) != 0))
+            if (!canDecode || dataCodec.PaletteEntries == 0 || (dataCodec.PaletteEntries != 0 && (dataFlags & GvrDataFlags.ExternalPalette) != 0))
             {
                 paletteOffset = -1;
                 dataOffset = pvrtOffset + 0x10;
@@ -180,7 +189,7 @@ namespace VrSharp.GvrTexture
             }
 
             // If the texture contains mipmaps, gets the offsets of them
-            if (dataCodec.PaletteEntries == 0 && (dataFlags & GvrDataFlags.Mipmaps) != 0)
+            if (canDecode && dataCodec.PaletteEntries == 0 && (dataFlags & GvrDataFlags.Mipmaps) != 0)
             {
                 mipmapOffsets = new int[(int)Math.Log(textureWidth, 2) + 1];
 
@@ -192,7 +201,7 @@ namespace VrSharp.GvrTexture
                 }
             }
 
-            return true;
+            initalized = true;
         }
         #endregion
 
