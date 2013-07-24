@@ -5,11 +5,17 @@ namespace PuyoTools.Modules.Compression
 {
     public class Lz01Compression : CompressionBase
     {
+        /// <summary>
+        /// Name of the format.
+        /// </summary>
         public override string Name
         {
             get { return "LZ01"; }
         }
 
+        /// <summary>
+        /// Returns if data can be written to this format.
+        /// </summary>
         public override bool CanWrite
         {
             get { return true; }
@@ -39,7 +45,7 @@ namespace PuyoTools.Modules.Compression
             byte[] buffer = new byte[0x1000];
 
             // Start decompression
-            while (sourcePointer < sourceLength && destinationPointer < destinationLength)
+            while (sourcePointer < sourceLength)
             {
                 byte flag = PTStream.ReadByte(source);
                 sourcePointer++;
@@ -75,9 +81,17 @@ namespace PuyoTools.Modules.Compression
                         }
                     }
 
-                    // Check to see if we reached the end of the file
-                    if (sourcePointer >= sourceLength || destinationPointer >= destinationLength)
+                    // Check to see if we reached the end of the source
+                    if (sourcePointer >= sourceLength)
+                    {
                         break;
+                    }
+
+                    // Check to see if we wrote too much data to the destination
+                    if (destinationPointer > destinationLength)
+                    {
+                        throw new Exception("Too much data written to the destination.");
+                    }
 
                     flag >>= 1;
                 }

@@ -16,27 +16,6 @@ namespace VrSharp
         public NotAValidTextureException(string message) : base(message) { }
     }
 
-    public class PixelFormatNotSupportedException : Exception
-    {
-        public PixelFormatNotSupportedException() { }
-
-        public PixelFormatNotSupportedException(string message) : base(message) { }
-    }
-
-    public class DataFormatNotSupportedException : Exception
-    {
-        public DataFormatNotSupportedException() { }
-
-        public DataFormatNotSupportedException(string message) : base(message) { }
-    }
-
-    public class InvalidTextureDimensionsException : Exception
-    {
-        public InvalidTextureDimensionsException() { }
-
-        public InvalidTextureDimensionsException(string message) : base(message) { }
-    }
-
     public class CannotDecodeTextureException : Exception
     {
         public CannotDecodeTextureException() { }

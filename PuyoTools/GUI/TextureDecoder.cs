@@ -100,12 +100,6 @@ namespace PuyoTools.GUI
                             textureData = new MemoryStream(); // Just incase some data was written
                             using (FileStream paletteData = File.OpenRead(paletteName))
                             {
-                                //TextureReaderSettings textureSettings = new TextureReaderSettings();
-                                //textureSettings.PaletteStream = paletteData;
-                                //textureSettings.PaletteLength = (int)paletteData.Length;
-
-                                //Texture.Read(source, textureData, (int)source.Length, textureSettings, format);
-
                                 texture.PaletteStream = paletteData;
                                 texture.PaletteLength = (int)paletteData.Length;
                                 texture.Read(source, textureData, (int)source.Length);

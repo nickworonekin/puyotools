@@ -140,7 +140,6 @@ namespace PuyoTools.GUI
                 }
                 else
                 {
-                    //dialog.ReportProgress(numFilesAdded * 100 / archive.NumberOfFiles, description + "\n\n" + String.Format("Adding {0} ({1:N0} of {2:N0})", Path.GetFileName(settings.FileEntries[numFilesAdded].SourceFile), numFilesAdded + 1, archive.NumberOfFiles));
                     dialog.ReportProgress(numFilesAdded * 100 / archive.Entries.Count, description + "\n\n" + String.Format("Adding {0} ({1:N0} of {2:N0})", Path.GetFileName(settings.FileEntries[numFilesAdded].SourceFile), numFilesAdded + 1, archive.Entries.Count));
                 }
             };
@@ -148,14 +147,10 @@ namespace PuyoTools.GUI
             // Add the files to the archive. We're going to do this in a try catch since
             // sometimes an exception may be thrown (namely if the archive cannot contain
             // the file the user is trying to add)
-            //foreach (ListViewItem item in listView.Items)
             foreach (FileEntry entry in settings.FileEntries)
             {
-                //FileEntry entry = (FileEntry)item.Tag;
-
                 try
                 {
-                    //archive.AddFile(File.OpenRead(entry.SourceFile), entry.FilenameInArchive, entry.SourceFile);
                     archive.CreateEntryFromFile(entry.SourceFile, entry.FilenameInArchive);
                 }
                 catch (CannotAddFileToArchiveException)
@@ -343,14 +338,6 @@ namespace PuyoTools.GUI
                 {
                     settings.CompressionFormat = CompressionFormat.Unknown;
                 }
-
-                /*
-                settings.ArchiveSettings = formatWriterSettings[archiveFormatBox.SelectedIndex - 1];
-                if (settings.ArchiveSettings != null)
-                {
-                    settings.ArchiveSettings.SetSettings();
-                }
-                 */
 
                 settings.WriterSettingsControl = writerSettingsControls[archiveFormatBox.SelectedIndex - 1];
 

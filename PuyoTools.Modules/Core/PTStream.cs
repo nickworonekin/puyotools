@@ -243,12 +243,22 @@ namespace PuyoTools.Modules
             return (uint)(ReadByte(source) << 24 | ReadByte(source) << 16 | ReadByte(source) << 8 | ReadByte(source));
         }
 
+        /// <summary>
+        /// Writes a 2-byte integer to the current stream and advances the current position of the stream by two bytes.
+        /// </summary>
+        /// <param name="destination">The stream to write to.</param>
+        /// <param name="value">A 2-byte signed integer to write to the current stream.</param>
         public static void WriteInt16(Stream destination, short value)
         {
             destination.WriteByte((byte)(value & 0xFF));
             destination.WriteByte((byte)((value >> 8) & 0xFF));
         }
 
+        /// <summary>
+        /// Writes a 4-byte integer to the current stream and advances the current position of the stream by four bytes.
+        /// </summary>
+        /// <param name="destination">The stream to write to.</param>
+        /// <param name="value">A 4-byte signed integer to write to the current stream.</param>
         public static void WriteInt32(Stream destination, int value)
         {
             destination.WriteByte((byte)(value & 0xFF));
@@ -257,6 +267,11 @@ namespace PuyoTools.Modules
             destination.WriteByte((byte)((value >> 24) & 0xFF));
         }
 
+        /// <summary>
+        /// Writes a 4-byte integer as big endian to the current stream and advances the current position of the stream by four bytes.
+        /// </summary>
+        /// <param name="destination">The stream to write to.</param>
+        /// <param name="value">A 4-byte signed integer to write to the current stream.</param>
         public static void WriteInt32BE(Stream destination, int value)
         {
             destination.WriteByte((byte)((value >> 24) & 0xFF));
@@ -265,6 +280,11 @@ namespace PuyoTools.Modules
             destination.WriteByte((byte)(value & 0xFF));
         }
 
+        /// <summary>
+        /// Writes a 2-byte unsigned integer to the current stream and advances the current position of the stream by two bytes.
+        /// </summary>
+        /// <param name="destination">The stream to write to.</param>
+        /// <param name="value">A 2-byte unsigned integer to write to the current stream.</param>
         public static void WriteUInt16(Stream destination, ushort value)
         {
             destination.WriteByte((byte)(value & 0xFF));

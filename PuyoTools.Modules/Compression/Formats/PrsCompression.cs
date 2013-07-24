@@ -10,11 +10,17 @@ namespace PuyoTools.Modules.Compression
          * https://github.com/FraGag/prs.net
          */
 
+        /// <summary>
+        /// Name of the format.
+        /// </summary>
         public override string Name
         {
             get { return "PRS"; }
         }
 
+        /// <summary>
+        /// Returns if data can be written to this format.
+        /// </summary>
         public override bool CanWrite
         {
             get { return true; }

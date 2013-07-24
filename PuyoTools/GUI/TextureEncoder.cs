@@ -139,7 +139,6 @@ namespace PuyoTools.GUI
                         {
                             texture.PaletteStream.Position = 0;
                             PTStream.CopyTo(texture.PaletteStream, destination);
-                            //texture.PaletteStream.WriteTo(destination);
                         }
                     }
 

@@ -8,6 +8,9 @@ namespace PuyoTools.Modules.Compression
         // The CXLZ compression format is identical to the LZ10 compression format with the addition of
         // "CXLZ" at the beginning of the file.
 
+        /// <summary>
+        /// Name of the format.
+        /// </summary>
         public override string Name
         {
             get { return "CXLZ"; }
@@ -32,6 +35,12 @@ namespace PuyoTools.Modules.Compression
         /// <param name="destination">The stream to write to.</param>
         public override void Compress(Stream source, Stream destination)
         {
+            // CXLZ compression can only handle files smaller than 16MB
+            if (source.Length - source.Position > 0xFFFFFF)
+            {
+                throw new Exception("Source is too large. CXLZ compression can only compress files smaller than 16MB.");
+            }
+
             destination.WriteByte((byte)'C');
             destination.WriteByte((byte)'X');
             destination.WriteByte((byte)'L');

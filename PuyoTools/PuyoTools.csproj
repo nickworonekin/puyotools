@@ -74,6 +74,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GUI\AboutPuyoTools.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUI\AboutPuyoTools.Designer.cs">
+      <DependentUpon>AboutPuyoTools.cs</DependentUpon>
+    </Compile>
     <Compile Include="GUI\FileCompressor.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -184,6 +190,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="GUI\AboutPuyoTools.resx">
+      <DependentUpon>AboutPuyoTools.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="GUI\ArchiveCreator.resx">
       <DependentUpon>ArchiveCreator.cs</DependentUpon>
     </EmbeddedResource>
@@ -260,9 +269,6 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\TextureViewerBackground.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\ProgramIcon.ico" />
   </ItemGroup>
   <ItemGroup>
@@ -270,5 +276,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\CheckeredBackgroundDark.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\AboutLogo.png" />
+    <Content Include="Resources\CheckeredBackgroundLight.png" />
   </ItemGroup>
 </Project>

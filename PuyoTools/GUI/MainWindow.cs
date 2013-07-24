@@ -123,5 +123,10 @@ namespace PuyoTools.GUI
         {
             (new TextureEncoder()).Show();
         }
+
+        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            (new AboutPuyoTools()).Show();
+        }
     }
 }
