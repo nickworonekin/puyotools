@@ -122,14 +122,14 @@ namespace PuyoTools.Modules.Archive
             PTStream.WriteInt32BE(destination, entries.Count);
 
             // Write out the header for the archive
-            int entryOffset = PTMethods.RoundUp(8 + (entries.Count * 8), 4);
+            int entryOffset = PTMethods.RoundUp(8 + (entries.Count * 8), blockSize);
             int firstEntryOffset = entryOffset;
             for (int i = 0; i < entries.Count; i++)
             {
                 PTStream.WriteInt32BE(destination, entryOffset);
                 PTStream.WriteInt32BE(destination, entries[i].Length);
 
-                entryOffset += PTMethods.RoundUp(entries[i].Length, 4);
+                entryOffset += PTMethods.RoundUp(entries[i].Length, blockSize);
             }
 
             // Pad before writing out the file data
