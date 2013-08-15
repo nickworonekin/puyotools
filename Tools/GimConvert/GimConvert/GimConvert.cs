@@ -25,12 +25,16 @@ namespace GimConvert
                     return;
                 }
 
-                GimTexture texture = new GimTexture(args[1]);
+                GimTexture texture;
 
-                // Was this texture initalized successfully
-                if (!texture.Initalized)
+                // Initalize the texture
+                try
                 {
-                    Console.WriteLine("Error: This is not a valid GIM texture, or it is an unsupported one.");
+                    texture = new GimTexture(args[1]);
+                }
+                catch (NotAValidTextureException)
+                {
+                    Console.WriteLine("Error: This is not a valid GIM texture.");
                     return;
                 }
 
@@ -79,7 +83,18 @@ namespace GimConvert
                     }
                 }
 
-                GimTexture texture = new GimTexture(args[1]);
+                GimTexture texture;
+
+                // Initalize the texture
+                try
+                {
+                    texture = new GimTexture(args[1]);
+                }
+                catch (NotAValidTextureException)
+                {
+                    Console.WriteLine("Error: This is not a valid GIM texture.");
+                    return;
+                }
 
                 // Was this texture initalized successfully
                 if (!texture.Initalized)
@@ -107,7 +122,16 @@ namespace GimConvert
                     Console.WriteLine("Program           : {0}", texture.Metadata.Program);
                 }
 
-                texture.Save(outPath);
+                // Decode the texture
+                try
+                {
+                    texture.Save(outPath);
+                }
+                catch (CannotDecodeTextureException)
+                {
+                    Console.WriteLine("Error: Unable to decode this texture. The texture's palette format or data format may not be supported.");
+                    return;
+                }
 
                 Console.WriteLine("\nTexture decoded successfully.");
             }

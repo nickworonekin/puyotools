@@ -66,6 +66,12 @@
     <Compile Include="Archive\Formats\SpkArchive.cs" />
     <Compile Include="Archive\Formats\TexArchive.cs" />
     <Compile Include="Archive\Formats\U8Archive.cs" />
+    <Compile Include="Archive\WriterSettings\AcxWriterSettings.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Archive\WriterSettings\AcxWriterSettings.Designer.cs">
+      <DependentUpon>AcxWriterSettings.cs</DependentUpon>
+    </Compile>
     <Compile Include="Archive\WriterSettings\AfsWriterSettings.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -136,6 +142,9 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <EmbeddedResource Include="Archive\WriterSettings\AcxWriterSettings.resx">
+      <DependentUpon>AcxWriterSettings.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Archive\WriterSettings\AfsWriterSettings.resx">
       <DependentUpon>AfsWriterSettings.cs</DependentUpon>
     </EmbeddedResource>

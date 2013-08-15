@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 
+using VrSharp;
 using VrSharp.GvrTexture;
 
 namespace VrConvert
@@ -9,9 +10,8 @@ namespace VrConvert
     {
         public static void Decode(string[] args)
         {
-            string inPath = args[1];
-            string inPalettePath = Path.ChangeExtension(inPath, ".gvp");
-            string outPath = Path.ChangeExtension(inPath, ".png");
+            string inPalettePath = Path.ChangeExtension(args[1], ".gvp");
+            string outPath = Path.ChangeExtension(args[1], ".png");
 
             // Get arguments
             for (int i = 2; i < args.Length; i++)
@@ -33,12 +33,16 @@ namespace VrConvert
                 }
             }
 
-            GvrTexture texture = new GvrTexture(inPath);
-
-            // Was this texture initalized successfully
-            if (!texture.Initalized)
+            GvrTexture texture;
+            
+            // Initalize the texture
+            try
             {
-                Console.WriteLine("Error: This is not a valid GVR texture, or it is an unsupported one.");
+                texture = new GvrTexture(args[1]);
+            }
+            catch (NotAValidTextureException)
+            {
+                Console.WriteLine("Error: This is not a valid GVR texture.");
                 return;
             }
 
@@ -60,7 +64,16 @@ namespace VrConvert
                 Console.WriteLine("Data Flags     : {0}", DataFlagsToString(texture.DataFlags));
             }
 
-            texture.Save(outPath);
+            // Decode the texture
+            try
+            {
+                texture.Save(outPath);
+            }
+            catch (CannotDecodeTextureException)
+            {
+                Console.WriteLine("Error: Unable to decode this texture. The texture's palette format or data format may not be supported.");
+                return;
+            }
 
             Console.WriteLine("\nTexture decoded successfully.");
         }
@@ -166,12 +179,16 @@ namespace VrConvert
 
         public static void Information(string[] args)
         {
-            GvrTexture texture = new GvrTexture(args[1]);
+            GvrTexture texture;
 
-            // Was this texture initalized successfully
-            if (!texture.Initalized)
+            // Initalize the texture
+            try
             {
-                Console.WriteLine("Error: This is not a valid GVR texture, or it is an unsupported one.");
+                texture = new GvrTexture(args[1]);
+            }
+            catch (NotAValidTextureException)
+            {
+                Console.WriteLine("Error: This is not a valid GVR texture.");
                 return;
             }
 

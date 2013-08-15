@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 
+using VrSharp;
 using VrSharp.PvrTexture;
 
 namespace VrConvert
@@ -32,12 +33,16 @@ namespace VrConvert
                 }
             }
 
-            PvrTexture texture = new PvrTexture(args[1]);
+            PvrTexture texture;
 
-            // Was this texture initalized successfully
-            if (!texture.Initalized)
+            // Initalize the texture
+            try
             {
-                Console.WriteLine("Error: This is not a valid PVR texture, or it is an unsupported one.");
+                texture = new PvrTexture(args[1]);
+            }
+            catch (NotAValidTextureException)
+            {
+                Console.WriteLine("Error: This is not a valid PVR texture.");
                 return;
             }
 
@@ -74,7 +79,16 @@ namespace VrConvert
                 Console.WriteLine("Compression  : {0}", CompressionFormatToString(texture.CompressionFormat));
             }
 
-            texture.Save(outPath);
+            // Decode the texture
+            try
+            {
+                texture.Save(outPath);
+            }
+            catch (CannotDecodeTextureException)
+            {
+                Console.WriteLine("Error: Unable to decode this texture. The texture's pixel format or data format may not be supported.");
+                return;
+            }
 
             Console.WriteLine("\nTexture decoded successfully.");
         }
@@ -166,12 +180,16 @@ namespace VrConvert
 
         public static void Information(string[] args)
         {
-            PvrTexture texture = new PvrTexture(args[1]);
+            PvrTexture texture;
 
-            // Was this texture initalized successfully
-            if (!texture.Initalized)
+            // Initalize the texture
+            try
             {
-                Console.WriteLine("Error: This is not a valid PVR texture, or it is an unsupported one.");
+                texture = new PvrTexture(args[1]);
+            }
+            catch (NotAValidTextureException)
+            {
+                Console.WriteLine("Error: This is not a valid PVR texture.");
                 return;
             }
 

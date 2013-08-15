@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 
+using VrSharp;
 using VrSharp.SvrTexture;
 
 namespace VrConvert
@@ -32,12 +33,16 @@ namespace VrConvert
                 }
             }
 
-            SvrTexture texture = new SvrTexture(args[1]);
+            SvrTexture texture;
 
-            // Was this texture initalized successfully
-            if (!texture.Initalized)
+            // Initalize the texture
+            try
             {
-                Console.WriteLine("Error: This is not a valid SVR texture, or it is an unsupported one.");
+                texture = new SvrTexture(args[1]);
+            }
+            catch (NotAValidTextureException)
+            {
+                Console.WriteLine("Error: This is not a valid SVR texture.");
                 return;
             }
 
@@ -70,7 +75,16 @@ namespace VrConvert
             Console.WriteLine("Pixel Format : {0}", PixelFormatToString(texture.PixelFormat));
             Console.WriteLine("Data Format  : {0}", DataFormatToString(texture.DataFormat));
 
-            texture.Save(outPath);
+            // Decode the texture
+            try
+            {
+                texture.Save(outPath);
+            }
+            catch (CannotDecodeTextureException)
+            {
+                Console.WriteLine("Error: Unable to decode this texture. The texture's pixel format or data format may not be supported.");
+                return;
+            }
 
             Console.WriteLine("\nTexture decoded successfully.");
         }
@@ -151,12 +165,16 @@ namespace VrConvert
 
         public static void Information(string[] args)
         {
-            SvrTexture texture = new SvrTexture(args[1]);
+            SvrTexture texture;
 
-            // Was this texture initalized successfully
-            if (!texture.Initalized)
+            // Initalize the texture
+            try
             {
-                Console.WriteLine("Error: This is not a valid SVR texture, or it is an unsupported one.");
+                texture = new SvrTexture(args[1]);
+            }
+            catch (NotAValidTextureException)
+            {
+                Console.WriteLine("Error: This is not a valid SVR texture.");
                 return;
             }
 

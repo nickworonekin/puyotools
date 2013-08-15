@@ -39,6 +39,11 @@ namespace PuyoTools.Modules.Archive
             return new AcxArchiveWriter(destination);
         }
 
+        public override ModuleSettingsControl GetModuleSettingsControl()
+        {
+            return new AcxWriterSettings();
+        }
+
         public override bool Is(Stream source, int length, string fname)
         {
             return (Path.GetExtension(fname).ToLower() == ".acx" &&
@@ -76,7 +81,31 @@ namespace PuyoTools.Modules.Archive
     #region Archive Writer
     public class AcxArchiveWriter : ArchiveWriter
     {
-        public AcxArchiveWriter(Stream destination) : base(destination) { }
+        #region Settings
+        /// <summary>
+        /// The block size for this archive. The default value is 4.
+        /// </summary>
+        public int BlockSize
+        {
+            get { return blockSize; }
+            set
+            {
+                if (value < 0)
+                {
+                    throw new ArgumentOutOfRangeException("BlockSize");
+                }
+
+                blockSize = value;
+            }
+        }
+        private int blockSize;
+        #endregion
+
+        public AcxArchiveWriter(Stream destination) : base(destination)
+        {
+            // Set default settings
+            blockSize = 4;
+        }
 
         public override void Flush()
         {
@@ -103,10 +132,14 @@ namespace PuyoTools.Modules.Archive
                 entryOffset += PTMethods.RoundUp(entries[i].Length, 4);
             }
 
+            // Pad before writing out the file data
+            while ((destination.Position - offset) % blockSize != 0)
+                destination.WriteByte(0);
+
             // Write out the file data for each entry
             for (int i = 0; i < entries.Count; i++)
             {
-                PTStream.CopyToPadded(entries[i].Open(), destination, 4, 0);
+                PTStream.CopyToPadded(entries[i].Open(), destination, blockSize, 0);
 
                 // Call the file added event
                 OnFileAdded(EventArgs.Empty);
