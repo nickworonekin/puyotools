@@ -224,11 +224,11 @@ namespace GimSharp
                     // We'll just do it the lazy way and set their width/height to a multiple of 16/8.
                     if (textureWidth % 16 != 0)
                     {
-                        textureWidth = (ushort)((textureWidth + 15) / 16);
+                        textureWidth = (ushort)PTMethods.RoundUp(textureWidth, 16);
                     }
                     if (textureHeight % 8 != 0)
                     {
-                        textureHeight = (ushort)((textureHeight + 7) / 8);
+                        textureHeight = (ushort)PTMethods.RoundUp(textureHeight, 8);
                     }
 
                     // Set the offset of the texture data
