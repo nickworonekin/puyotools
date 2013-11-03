@@ -167,7 +167,6 @@ namespace PuyoTools.GUI
                         textureStream.Position = 0;
                         using (FileStream paletteData = File.OpenRead(paletteName))
                         {
-
                             OpenTexture(textureStream, ofd.SafeFileName, paletteData, textureFormat);
                         }
                     }
