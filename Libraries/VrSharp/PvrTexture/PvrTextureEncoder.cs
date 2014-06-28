@@ -227,7 +227,9 @@ namespace VrSharp.PvrTexture
                 if (dataFormat == PvrDataFormat.SquareTwiddledMipmaps)
                 {
                     // A 1x1 mipmap takes up as much space as a 2x1 mipmap
+                    // There are also 4 extra bytes at the end of the file
                     mipmapPadding = (dataCodec.Bpp) >> 3;
+                    textureLength += 4;
                 }
                 else if (dataFormat == PvrDataFormat.SquareTwiddledMipmapsAlt)
                 {
@@ -307,6 +309,12 @@ namespace VrSharp.PvrTexture
             // Write the texture data
             byte[] textureData = dataCodec.Encode(decodedData, textureWidth, textureHeight, null);
             destination.Write(textureData, 0, textureData.Length);
+
+            // If the data format is square twiddled with mipmaps, write out the extra bytes.
+            if (dataFormat == PvrDataFormat.SquareTwiddledMipmaps)
+            {
+                destination.Write(new byte[] { 0, 0, 0, 0 }, 0, 4);
+            }
 
             // Compress the texture
             if (compressionFormat != PvrCompressionFormat.None)
