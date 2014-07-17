@@ -345,8 +345,12 @@ namespace VrSharp
             Bitmap img = new Bitmap(minSize, minSize, PixelFormat.Format32bppArgb);
             using (Graphics g = Graphics.FromImage(img))
             {
-                g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                g.DrawImage(source, 0, 0, size, size);
+                using (ImageAttributes attr = new ImageAttributes())
+                {
+                    attr.SetWrapMode(WrapMode.TileFlipXY);
+                    g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                    g.DrawImage(source, new Rectangle(0, 0, size, size), 0, 0, source.Width, source.Height, GraphicsUnit.Pixel, attr);
+                }
             }
 
             // Copy over the data to the destination. It's ok to do it without utilizing Stride
