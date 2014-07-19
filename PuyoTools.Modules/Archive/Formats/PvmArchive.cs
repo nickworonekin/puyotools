@@ -98,15 +98,6 @@ namespace PuyoTools.Modules.Archive
                 source.Position = startOffset + entryOffset + 4;
                 int entryLength = PTStream.ReadInt32(source) + 8;
 
-                // Sometimes there are extra bytes of padding between files,
-                // namely in the case of Sonic Adventure DX's ADVSS01.PVM.
-                if (entryLength == 8)
-                {
-                    entryOffset += 8;
-                    i--;
-                    continue;
-                }
-
                 string entryFname = String.Empty;
                 if (hasFilenames)
                 {
