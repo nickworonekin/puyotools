@@ -5,9 +5,9 @@ Puyo Tools is a collection of tools and libraries used to access the contents of
 
 ## Current Release
 
-The current binary release of Puyo Tools is **1.1.0**, which was released on March 3rd, 2013. You can download it [over here](https://code.google.com/p/puyotools/downloads/list).
+The current stable release (released on November 24, 2016) is **2.0.1**.
 
-The current preview release is **2.0.0 (2013/09/09 Build)**, which you can download [here](https://dl.dropboxusercontent.com/u/39279135/PuyoTools%20%282013-09-09%20Build%29.zip).
+The current legacy release (released on Match 3, 2013) is **1.1.0**.
 
 **Puyo Tools requires [.NET Framework 3.5](http://www.microsoft.com/downloads/details.aspx?FamilyId=333325FD-AE52-4E35-B531-508D977D32A6&displaylang=en).**
 
@@ -16,6 +16,7 @@ Source code for Puyo Tools is available in C#.
 ## Supported Formats
 ### Compression:
   * CNX
+  * COMP
   * CXLZ
   * LZ00
   * LZ01
