@@ -17,6 +17,7 @@ namespace PuyoTools
             Formats = new Dictionary<CompressionFormat, CompressionBase>();
 
             Formats.Add(CompressionFormat.Cnx,  new CnxCompression());
+            Formats.Add(CompressionFormat.Comp, new CompCompression());
             Formats.Add(CompressionFormat.Cxlz, new CxlzCompression());
             Formats.Add(CompressionFormat.Lz00, new Lz00Compression());
             Formats.Add(CompressionFormat.Lz01, new Lz01Compression());
@@ -74,6 +75,7 @@ namespace PuyoTools
     {
         Unknown,
         Cnx,
+        Comp,
         Cxlz,
         Lz00,
         Lz01,

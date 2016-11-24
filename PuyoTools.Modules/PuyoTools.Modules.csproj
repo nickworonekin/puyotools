@@ -92,6 +92,7 @@
     </Compile>
     <Compile Include="Compression\CompressionBase.cs" />
     <Compile Include="Compression\Formats\CnxCompression.cs" />
+    <Compile Include="Compression\Formats\CompCompression.cs" />
     <Compile Include="Compression\Formats\CxlzCompression.cs" />
     <Compile Include="Compression\Formats\Lz01Compression.cs" />
     <Compile Include="Compression\Formats\Lz10Compression.cs" />
