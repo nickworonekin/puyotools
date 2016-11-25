@@ -125,7 +125,8 @@ namespace VrSharp.SvrTexture
             }
 
             // Set the palette and data offsets
-            if (!canDecode || dataCodec.PaletteEntries == 0 || dataCodec.NeedsExternalPalette)
+            paletteEntries = dataCodec.PaletteEntries;
+            if (!canDecode || paletteEntries == 0 || dataCodec.NeedsExternalPalette)
             {
                 paletteOffset = -1;
                 dataOffset = pvrtOffset + 0x10;
@@ -133,7 +134,7 @@ namespace VrSharp.SvrTexture
             else
             {
                 paletteOffset = pvrtOffset + 0x10;
-                dataOffset = paletteOffset + (dataCodec.PaletteEntries * (pixelCodec.Bpp >> 3));
+                dataOffset = paletteOffset + (paletteEntries * (pixelCodec.Bpp >> 3));
             }
 
             initalized = true;

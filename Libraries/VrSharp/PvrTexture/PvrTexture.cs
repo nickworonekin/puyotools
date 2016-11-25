@@ -155,8 +155,27 @@ namespace VrSharp.PvrTexture
                 canDecode = true;
             }
 
+            // Set the number of palette entries
+            // The number in a Small Vq encoded texture various based on its size
+            paletteEntries = dataCodec.PaletteEntries;
+            if (dataFormat == PvrDataFormat.SmallVq || dataFormat == PvrDataFormat.SmallVqMipmaps)
+            {
+                if (textureWidth <= 16)
+                {
+                    paletteEntries = 64; // Actually 16
+                }
+                else if (textureWidth <= 64)
+                {
+                    paletteEntries = 512; // Actually 128
+                }
+                else
+                {
+                    paletteEntries = 1024; // Actually 256
+                }
+            }
+
             // Set the palette and data offsets
-            if (!canDecode || dataCodec.PaletteEntries == 0 || dataCodec.NeedsExternalPalette)
+            if (!canDecode || paletteEntries == 0 || dataCodec.NeedsExternalPalette)
             {
                 paletteOffset = -1;
                 dataOffset = pvrtOffset + 0x10;
@@ -164,7 +183,7 @@ namespace VrSharp.PvrTexture
             else
             {
                 paletteOffset = pvrtOffset + 0x10;
-                dataOffset = paletteOffset + (dataCodec.PaletteEntries * (pixelCodec.Bpp >> 3));
+                dataOffset = paletteOffset + (paletteEntries * (pixelCodec.Bpp >> 3));
             }
 
             // Get the compression format and determine if we need to decompress this texture

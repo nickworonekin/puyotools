@@ -156,7 +156,7 @@ namespace VrSharp.GvrTexture
             dataCodec = GvrDataCodec.GetDataCodec(dataFormat);
 
             // We need a pixel codec if this is a palettized texture
-            if (dataCodec != null && dataCodec.PaletteEntries != 0)
+            if (dataCodec != null && paletteEntries != 0)
             {
                 pixelCodec = GvrPixelCodec.GetPixelCodec(pixelFormat);
 
@@ -177,7 +177,8 @@ namespace VrSharp.GvrTexture
             }
 
             // Set the palette and data offsets
-            if (!canDecode || dataCodec.PaletteEntries == 0 || (dataCodec.PaletteEntries != 0 && (dataFlags & GvrDataFlags.ExternalPalette) != 0))
+            paletteEntries = dataCodec.PaletteEntries;
+            if (!canDecode || paletteEntries == 0 || (paletteEntries != 0 && (dataFlags & GvrDataFlags.ExternalPalette) != 0))
             {
                 paletteOffset = -1;
                 dataOffset = pvrtOffset + 0x10;
@@ -185,11 +186,11 @@ namespace VrSharp.GvrTexture
             else
             {
                 paletteOffset = pvrtOffset + 0x10;
-                dataOffset = paletteOffset + (dataCodec.PaletteEntries * (pixelCodec.Bpp >> 3));
+                dataOffset = paletteOffset + (paletteEntries * (pixelCodec.Bpp >> 3));
             }
 
             // If the texture contains mipmaps, gets the offsets of them
-            if (canDecode && dataCodec.PaletteEntries == 0 && (dataFlags & GvrDataFlags.Mipmaps) != 0)
+            if (canDecode && paletteEntries == 0 && (dataFlags & GvrDataFlags.Mipmaps) != 0)
             {
                 mipmapOffsets = new int[(int)Math.Log(textureWidth, 2) + 1];
 
@@ -228,7 +229,7 @@ namespace VrSharp.GvrTexture
                     throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
                 }
 
-                return (dataCodec.PaletteEntries != 0 && (dataFlags & GvrDataFlags.ExternalPalette) != 0);
+                return (paletteEntries != 0 && (dataFlags & GvrDataFlags.ExternalPalette) != 0);
             }
         }
         #endregion

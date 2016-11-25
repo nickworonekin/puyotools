@@ -143,7 +143,7 @@ namespace VrSharp.PvrTexture
 
             public override int PaletteEntries
             {
-                get { return 1024; }
+                get { return 1024; } // Actually 256
             }
 
             public override byte[] Decode(byte[] source, int sourceIndex, int width, int height)
@@ -206,7 +206,7 @@ namespace VrSharp.PvrTexture
 
             public override int PaletteEntries
             {
-                get { return 1024; }
+                get { return 1024; } // Actually 256
             }
 
             public override bool HasMipmaps
@@ -626,7 +626,7 @@ namespace VrSharp.PvrTexture
 
             public override int PaletteEntries
             {
-                get { return 512; }
+                get { return 1024; } // Varies, 1024 (actually 256) is the largest
             }
 
             public override byte[] Decode(byte[] source, int sourceIndex, int width, int height)
@@ -689,7 +689,7 @@ namespace VrSharp.PvrTexture
 
             public override int PaletteEntries
             {
-                get { return 256; }
+                get { return 1024; } // Varies, 1024 (actually 256) is the largest
             }
 
             public override bool HasMipmaps

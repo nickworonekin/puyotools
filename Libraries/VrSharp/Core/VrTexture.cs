@@ -17,8 +17,9 @@ namespace VrSharp
         protected VrPixelCodec pixelCodec; // Pixel codec
         protected VrDataCodec dataCodec;   // Data codec
 
-        protected int paletteOffset; // Offset of the palette data in the texture (-1 if there is none)
-        protected int dataOffset;    // Offset of the actual data in the texture
+        protected int paletteEntries; // Number of palette entries in the palette data
+        protected int paletteOffset;  // Offset of the palette data in the texture (-1 if there is none)
+        protected int dataOffset;     // Offset of the actual data in the texture
 
         protected int[] mipmapOffsets; // Mipmap offsets
         #endregion
@@ -285,7 +286,7 @@ namespace VrSharp
 
             if (paletteOffset != -1) // The texture contains an embedded palette
             {
-                dataCodec.SetPalette(encodedData, paletteOffset, dataCodec.PaletteEntries);
+                dataCodec.SetPalette(encodedData, paletteOffset, paletteEntries);
             }
 
             if (HasMipmaps)
@@ -404,7 +405,7 @@ namespace VrSharp
 
             if (paletteOffset != -1) // The texture contains an embedded palette
             {
-                dataCodec.SetPalette(encodedData, paletteOffset, dataCodec.PaletteEntries);
+                dataCodec.SetPalette(encodedData, paletteOffset, paletteEntries);
             }
 
             byte[][] mipmaps = new byte[mipmapOffsets.Length][];
