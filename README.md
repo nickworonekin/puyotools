@@ -5,7 +5,7 @@ Puyo Tools is a collection of tools and libraries used to access the contents of
 
 ## Current Release
 
-The current stable release (released on November 24, 2016) is **2.0.1**.
+The current stable release (released on November 25, 2016) is **2.0.2**.
 
 The current legacy release (released on Match 3, 2013) is **1.1.0**.
 
