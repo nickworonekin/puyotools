@@ -1,5 +1,4 @@
-﻿using System;
-using System.Drawing;
+using System;
 using System.IO;
 using System.Text;
 
@@ -9,6 +8,15 @@ namespace VrSharp.PvrTexture
     {
         #region Fields
         private PvrCompressionCodec compressionCodec; // Compression Codec
+
+        // Size of the entire GBIX header in bytes.
+        private const int gbixSizeInBytes = 12;
+        // FourCC for GBIX headers.
+        private static readonly byte[] gbixFourCC = { (byte)'G', (byte)'B', (byte)'I', (byte)'X' };
+        // Size of the entire PVRT header in bytes.
+        private const int pvrtSizeInBytes = 12;
+        // FourCC for PVRT headers.
+        private static readonly byte[] pvrtFourCC = { (byte)'P', (byte)'V', (byte)'R', (byte)'T' };
         #endregion
 
         #region Texture Properties
@@ -110,12 +118,12 @@ namespace VrSharp.PvrTexture
             if (PTMethods.Contains(encodedData, 0x00, Encoding.UTF8.GetBytes("GBIX")))
             {
                 gbixOffset = 0x00;
-                pvrtOffset = 0x10;
+                pvrtOffset = 0x08 + BitConverter.ToInt32(encodedData, gbixOffset + 4);
             }
             else if (PTMethods.Contains(encodedData, 0x04, Encoding.UTF8.GetBytes("GBIX")))
             {
                 gbixOffset = 0x04;
-                pvrtOffset = 0x14;
+                pvrtOffset = 0x08 + BitConverter.ToInt32(encodedData, gbixOffset + 4);
             }
             else if (PTMethods.Contains(encodedData, 0x04, Encoding.UTF8.GetBytes("PVRT")))
             {
@@ -260,6 +268,47 @@ namespace VrSharp.PvrTexture
 
         #region Texture Check
         /// <summary>
+        /// Checks for the PVRT header and validates it.
+        /// <para>See also: <seealso cref="IsValidGbix"/></para>
+        /// </summary>
+        /// <param name="source">Byte array containing the data.</param>
+        /// <param name="offset">The offset in the byte array to start at.</param>
+        /// <param name="length">The expected length of the PVR data minus the preceding header sizes.</param>
+        /// <returns>True if the header is PVRT and it passes validation, false otherwise.</returns>
+        private static bool IsValidPvrt(byte[] source, int offset, uint length)
+        {
+            if (!PTMethods.Contains(source, offset + 0x00, pvrtFourCC))
+                return false;
+
+            if (source[offset + 0x09] >= 0x60)
+                return false;
+
+            if (BitConverter.ToUInt32(source, offset + 0x04) != length - (pvrtSizeInBytes - pvrtFourCC.Length))
+                return false;
+
+            return true;
+        }
+
+        /// <summary>
+        /// Checks for and validates GBIX headers as well as PVRT.
+        /// <para>See also: <seealso cref="IsValidPvrt"/></para>
+        /// </summary>
+        /// <param name="source">Byte array containing the data.</param>
+        /// <param name="offset">The offset in the byte array to start at.</param>
+        /// <param name="length">The expected length of the data minus the preceding header sizes.</param>
+        /// <returns>True if the header is GBIX and it passes validation, false otherwise.</returns>
+        private static bool IsValidGbix(byte[] source, int offset, uint length)
+        {
+            if (!PTMethods.Contains(source, offset + 0x00, gbixFourCC))
+                return false;
+
+            // Immediately after the "GBIX" part of the GBIX header, there is
+            // an offset indicating where the PVRT header begins relative to 0x08.
+            var dataOffset = offset + BitConverter.ToInt32(source, offset + 0x04) + (gbixSizeInBytes - gbixFourCC.Length);
+            return IsValidPvrt(source, dataOffset, length - (uint)(dataOffset - offset));
+        }
+
+        /// <summary>
         /// Determines if this is a PVR texture.
         /// </summary>
         /// <param name="source">Byte array containing the data.</param>
@@ -268,35 +317,30 @@ namespace VrSharp.PvrTexture
         /// <returns>True if this is a PVR texture, false otherwise.</returns>
         public static bool Is(byte[] source, int offset, int length)
         {
+            if (length <= 0)
+                return false;
+
             // GBIX and PVRT
-            if (length >= 0x20 &&
-                PTMethods.Contains(source, offset + 0x00, Encoding.UTF8.GetBytes("GBIX")) &&
-                PTMethods.Contains(source, offset + 0x10, Encoding.UTF8.GetBytes("PVRT")) &&
-                source[offset + 0x19] < 0x60 &&
-                BitConverter.ToUInt32(source, offset + 0x14) == length - 24)
+            if (length >= 0x20 && IsValidGbix(source, offset + 0x00, (uint)length))
                 return true;
 
             // PVRT (and no GBIX chunk)
-            else if (length >= 0x10 &&
-                PTMethods.Contains(source, offset + 0x00, Encoding.UTF8.GetBytes("PVRT")) &&
-                source[offset + 0x09] < 0x60 &&
-                BitConverter.ToUInt32(source, offset + 0x04) == length - 8)
+            if (length >= 0x10 && IsValidPvrt(source, offset, (uint)length))
                 return true;
 
             // GBIX and PVRT with RLE compression
-            else if (length >= 0x24 &&
-                PTMethods.Contains(source, offset + 0x04, Encoding.UTF8.GetBytes("GBIX")) &&
-                PTMethods.Contains(source, offset + 0x14, Encoding.UTF8.GetBytes("PVRT")) &&
-                source[offset + 0x1D] < 0x60 &&
-                BitConverter.ToUInt32(source, offset + 0x18) == BitConverter.ToUInt32(source, offset + 0x00) - 24)
+            if (length >= 0x24 &&
+                IsValidGbix(source, offset + 0x04, BitConverter.ToUInt32(source, offset + 0x00) - 4))
+            {
                 return true;
+            }
 
             // PVRT (and no GBIX chunk) with RLE compression 
-            else if (length >= 0x14 &&
-                PTMethods.Contains(source, offset + 0x04, Encoding.UTF8.GetBytes("PVRT")) &&
-                source[offset + 0x0D] < 0x60 &&
-                BitConverter.ToUInt32(source, offset + 0x08) == BitConverter.ToUInt32(source, offset + 0x00) - 8)
+            if (length >= 0x14 &&
+                IsValidPvrt(source, offset + 0x04, BitConverter.ToUInt32(source, offset + 0x00) - 4))
+            {
                 return true;
+            }
 
             return false;
         }
