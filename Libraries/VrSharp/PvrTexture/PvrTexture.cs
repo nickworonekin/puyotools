@@ -12,8 +12,6 @@ namespace VrSharp.PvrTexture
         private const int gbixSizeInBytes = 12;
         // FourCC for GBIX headers.
         private static readonly byte[] gbixFourCC = { (byte)'G', (byte)'B', (byte)'I', (byte)'X' };
-        // Size of the entire PVRT header in bytes.
-        private const int pvrtSizeInBytes = 12;
         // FourCC for PVRT headers.
         private static readonly byte[] pvrtFourCC = { (byte)'P', (byte)'V', (byte)'R', (byte)'T' };
         #endregion
@@ -282,7 +280,7 @@ namespace VrSharp.PvrTexture
             if (source[offset + 0x09] >= 0x60)
                 return false;
 
-            if (BitConverter.ToUInt32(source, offset + 0x04) != length - (pvrtSizeInBytes - pvrtFourCC.Length))
+            if (BitConverter.ToUInt32(source, offset + 0x04) != length - 8)
                 return false;
 
             return true;
