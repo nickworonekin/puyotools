@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Text;
 
 namespace VrSharp.PvrTexture
 {
@@ -8,7 +7,7 @@ namespace VrSharp.PvrTexture
     {
         #region Fields
         private PvrCompressionCodec compressionCodec; // Compression Codec
-
+        // Perhaps these could be moved to VrTexture?
         // Size of the entire GBIX header in bytes.
         private const int gbixSizeInBytes = 12;
         // FourCC for GBIX headers.
@@ -115,17 +114,17 @@ namespace VrSharp.PvrTexture
             }
 
             // Determine the offsets of the GBIX (if present) and PVRT header chunks.
-            if (PTMethods.Contains(encodedData, 0x00, Encoding.UTF8.GetBytes("GBIX")))
+            if (PTMethods.Contains(encodedData, 0x00, gbixFourCC))
             {
                 gbixOffset = 0x00;
                 pvrtOffset = 0x08 + BitConverter.ToInt32(encodedData, gbixOffset + 4);
             }
-            else if (PTMethods.Contains(encodedData, 0x04, Encoding.UTF8.GetBytes("GBIX")))
+            else if (PTMethods.Contains(encodedData, 0x04, gbixFourCC))
             {
                 gbixOffset = 0x04;
                 pvrtOffset = 0x08 + BitConverter.ToInt32(encodedData, gbixOffset + 4);
             }
-            else if (PTMethods.Contains(encodedData, 0x04, Encoding.UTF8.GetBytes("PVRT")))
+            else if (PTMethods.Contains(encodedData, 0x04, pvrtFourCC))
             {
                 gbixOffset = -1;
                 pvrtOffset = 0x04;
