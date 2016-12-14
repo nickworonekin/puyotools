@@ -643,7 +643,7 @@ namespace VrSharp.PvrTexture
                 {
                     for (int x = 0; x < width; x += 2)
                     {
-                        int index = (source[sourceIndex + ((twiddleMap[x >> 1] << 1) | twiddleMap[y >> 1])] & 0x7F) * 4;
+                        int index = (source[sourceIndex + ((twiddleMap[x >> 1] << 1) | twiddleMap[y >> 1])]) * 4;
 
                         for (int x2 = 0; x2 < 2; x2++)
                         {
@@ -728,7 +728,7 @@ namespace VrSharp.PvrTexture
                 {
                     for (int x = 0; x < width; x += 2)
                     {
-                        int index = (source[sourceIndex + ((twiddleMap[x >> 1] << 1) | twiddleMap[y >> 1])] & 0x3F) * 4;
+                        int index = (source[sourceIndex + ((twiddleMap[x >> 1] << 1) | twiddleMap[y >> 1])]) * 4;
 
                         for (int x2 = 0; x2 < 2; x2++)
                         {

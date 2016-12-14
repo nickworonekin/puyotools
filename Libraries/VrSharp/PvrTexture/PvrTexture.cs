@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 
 namespace VrSharp.PvrTexture
@@ -120,7 +120,7 @@ namespace VrSharp.PvrTexture
             else if (PTMethods.Contains(encodedData, 0x04, gbixFourCC))
             {
                 gbixOffset = 0x04;
-                pvrtOffset = 0x08 + BitConverter.ToInt32(encodedData, gbixOffset + 4);
+                pvrtOffset = 0x0C + BitConverter.ToInt32(encodedData, gbixOffset + 4);
             }
             else if (PTMethods.Contains(encodedData, 0x04, pvrtFourCC))
             {
@@ -168,6 +168,10 @@ namespace VrSharp.PvrTexture
                 if (textureWidth <= 16)
                 {
                     paletteEntries = 64; // Actually 16
+                }
+                else if (textureWidth <= 32)
+                {
+                    paletteEntries = 256; // Actually 64
                 }
                 else if (textureWidth <= 64)
                 {
@@ -222,7 +226,7 @@ namespace VrSharp.PvrTexture
                     // A 1x1 mipmap takes up as much space as a 2x1 mipmap
                     mipmapOffset = (dataCodec.Bpp) >> 3;
                 }
-                if (dataFormat == PvrDataFormat.SquareTwiddledMipmapsAlt)
+                else if (dataFormat == PvrDataFormat.SquareTwiddledMipmapsAlt)
                 {
                     // A 1x1 mipmap takes up as much space as a 2x2 mipmap
                     mipmapOffset = (3 * dataCodec.Bpp) >> 3;
@@ -272,18 +276,11 @@ namespace VrSharp.PvrTexture
         /// <param name="offset">The offset in the byte array to start at.</param>
         /// <param name="length">The expected length of the PVR data minus the preceding header sizes.</param>
         /// <returns>True if the header is PVRT and it passes validation, false otherwise.</returns>
-        private static bool IsValidPvrt(byte[] source, int offset, uint length)
+        private static bool IsValidPvrt(byte[] source, int offset, int length)
         {
-            if (!PTMethods.Contains(source, offset + 0x00, pvrtFourCC))
-                return false;
-
-            if (source[offset + 0x09] >= 0x60)
-                return false;
-
-            if (BitConverter.ToUInt32(source, offset + 0x04) != length - 8)
-                return false;
-
-            return true;
+            return PTMethods.Contains(source, offset, pvrtFourCC)
+                && source[offset + 0x09] < 0x60
+                && BitConverter.ToUInt32(source, offset + 0x04) == length - 8;
         }
 
         /// <summary>
@@ -294,15 +291,17 @@ namespace VrSharp.PvrTexture
         /// <param name="offset">The offset in the byte array to start at.</param>
         /// <param name="length">The expected length of the data minus the preceding header sizes.</param>
         /// <returns>True if the header is GBIX and it passes validation, false otherwise.</returns>
-        private static bool IsValidGbix(byte[] source, int offset, uint length)
+        private static bool IsValidGbix(byte[] source, int offset, int length)
         {
-            if (!PTMethods.Contains(source, offset + 0x00, gbixFourCC))
+            if (!PTMethods.Contains(source, offset, gbixFourCC))
+            {
                 return false;
+            }
 
             // Immediately after the "GBIX" part of the GBIX header, there is
             // an offset indicating where the PVRT header begins relative to 0x08.
-            var dataOffset = offset + BitConverter.ToInt32(source, offset + 0x04) + (gbixSizeInBytes - gbixFourCC.Length);
-            return IsValidPvrt(source, dataOffset, length - (uint)(dataOffset - offset));
+            int pvrtOffset = BitConverter.ToInt32(source, offset + 0x04) + 8;
+            return IsValidPvrt(source, offset + pvrtOffset, length - pvrtOffset);
         }
 
         /// <summary>
@@ -314,27 +313,26 @@ namespace VrSharp.PvrTexture
         /// <returns>True if this is a PVR texture, false otherwise.</returns>
         public static bool Is(byte[] source, int offset, int length)
         {
-            if (length <= 0)
-                return false;
-
             // GBIX and PVRT
-            if (length >= 0x20 && IsValidGbix(source, offset + 0x00, (uint)length))
+            if (length >= 32 && IsValidGbix(source, offset, length))
+            {
                 return true;
+            }
 
             // PVRT (and no GBIX chunk)
-            if (length >= 0x10 && IsValidPvrt(source, offset, (uint)length))
+            if (length >= 16 && IsValidPvrt(source, offset, length))
+            {
                 return true;
+            }
 
             // GBIX and PVRT with RLE compression
-            if (length >= 0x24 &&
-                IsValidGbix(source, offset + 0x04, BitConverter.ToUInt32(source, offset + 0x00) - 4))
+            if (length >= 36 && IsValidGbix(source, offset + 0x04, BitConverter.ToInt32(source, offset + 0x00)))
             {
                 return true;
             }
 
             // PVRT (and no GBIX chunk) with RLE compression 
-            if (length >= 0x14 &&
-                IsValidPvrt(source, offset + 0x04, BitConverter.ToUInt32(source, offset + 0x00) - 4))
+            if (length >= 20 && IsValidPvrt(source, offset + 0x04, BitConverter.ToInt32(source, offset + 0x00)))
             {
                 return true;
             }
