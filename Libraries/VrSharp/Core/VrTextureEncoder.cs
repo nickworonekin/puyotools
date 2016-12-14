@@ -212,7 +212,9 @@ namespace VrSharp
                 throw new TextureNotInitalizedException("Cannot encode this texture as it is not initalized.");
             }
 
-            return EncodeTexture();
+            MemoryStream textureStream = EncodeTexture();
+            textureStream.Position = 0;
+            return textureStream;
         }
 
         /// <summary>

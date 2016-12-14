@@ -448,6 +448,7 @@ namespace GimSharp
 
             MemoryStream destination = new MemoryStream();
             ToBitmap().Save(destination, ImageFormat.Png);
+            destination.Position = 0;
 
             return destination;
         }

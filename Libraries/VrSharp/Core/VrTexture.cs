@@ -243,6 +243,7 @@ namespace VrSharp
 
             MemoryStream destination = new MemoryStream();
             ToBitmap().Save(destination, ImageFormat.Png);
+            destination.Position = 0;
 
             return destination;
         }
@@ -389,6 +390,7 @@ namespace VrSharp
             for (int i = 0; i < img.Length; i++)
             {
                 img[i].Save(destination[i], ImageFormat.Png);
+                destination[i].Position = 0;
             }
 
             return destination;

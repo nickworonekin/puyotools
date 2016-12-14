@@ -38,7 +38,9 @@ namespace VrSharp
         /// <returns></returns>
         public MemoryStream ToStream()
         {
-            return EncodePalette();
+            MemoryStream paletteStream = EncodePalette();
+            paletteStream.Position = 0;
+            return paletteStream;
         }
 
         /// <summary>
