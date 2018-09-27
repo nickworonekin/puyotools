@@ -101,9 +101,11 @@ namespace PuyoTools.GUI
                         texture.SourcePath = file;
 
                         // Set texture settings
-                        if (settings.WriterSettingsControl != null)
+                        ModuleSettingsControl settingsControl = settings.WriterSettingsControl;
+                        if (settingsControl != null)
                         {
-                            settings.WriterSettingsControl.SetModuleSettings(texture);
+                            Action moduleSettingsAction = () => settingsControl.SetModuleSettings(texture);
+                            settingsControl.Invoke(moduleSettingsAction);
                         }
 
                         texture.Write(source, buffer, (int)source.Length);
