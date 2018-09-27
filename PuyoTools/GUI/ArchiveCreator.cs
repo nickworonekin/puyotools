@@ -123,9 +123,11 @@ namespace PuyoTools.GUI
             ArchiveWriter archive = Archive.Create(destination, settings.ArchiveFormat);
 
             // Set archive settings
-            if (settings.WriterSettingsControl != null)
+            ModuleSettingsControl settingsControl = settings.WriterSettingsControl;
+            if (settingsControl != null)
             {
-                settings.WriterSettingsControl.SetModuleSettings(archive);
+                Action moduleSettingsAction = () => settingsControl.SetModuleSettings(archive);
+                settingsControl.Invoke(moduleSettingsAction);
             }
 
             // Add the file added event handler the archive
