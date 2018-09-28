@@ -1,4 +1,8 @@
-﻿using System;
+﻿using PuyoTools.GUI;
+using PuyoTools.Modules.Archive;
+using PuyoTools.Modules.Compression;
+using PuyoTools.Modules.Texture;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
@@ -17,22 +21,16 @@ namespace PuyoTools
         [STAThread]
         public static void Main()
         {
+            LoadPlugins();
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-
-            Initalize();
-
-            Application.Run(new GUI.MainWindow());
+            Application.Run(new MainWindow());
         }
 
-        // Initalize directories
-        private static void Initalize()
+        // Load plugins
+        private static void LoadPlugins()
         {
-            Compression.Initalize();
-            Archive.Initalize();
-            Texture.Initalize();
-
-            // Load plugins
             int archivePlugins = 0, compressionPlugins = 0, texturePlugins = 0;
             try
             {
@@ -46,27 +44,24 @@ namespace PuyoTools
                     // Now, let's attempt to determine which type of plugin this is
                     // and add it to the appropiate module lists.
 
-                    if (plugin is Modules.Archive.ArchiveBase)
+                    if (plugin is ArchiveBase archiveModule)
                     {
                         // Archive module
-                        Modules.Archive.ArchiveBase module = (Modules.Archive.ArchiveBase)plugin;
-                        Archive.Formats.Add(ArchiveFormat.Plugin + archivePlugins, module);
+                        Archive.Formats.Add(ArchiveFormat.Plugin + archivePlugins, archiveModule);
                         archivePlugins++;
                     }
 
-                    else if (plugin is Modules.Compression.CompressionBase)
+                    else if (plugin is CompressionBase compressionModule)
                     {
                         // Compression module
-                        Modules.Compression.CompressionBase module = (Modules.Compression.CompressionBase)plugin;
-                        Compression.Formats.Add(CompressionFormat.Plugin + compressionPlugins, module);
+                        Compression.Formats.Add(CompressionFormat.Plugin + compressionPlugins, compressionModule);
                         compressionPlugins++;
                     }
 
-                    else if (plugin is Modules.Texture.TextureBase)
+                    else if (plugin is TextureBase textureModule)
                     {
                         // Texture module
-                        Modules.Texture.TextureBase module = (Modules.Texture.TextureBase)plugin;
-                        Texture.Formats.Add(TextureFormat.Plugin + texturePlugins, module);
+                        Texture.Formats.Add(TextureFormat.Plugin + texturePlugins, textureModule);
                         texturePlugins++;
                     }
                 }

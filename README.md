@@ -1,17 +1,13 @@
 Puyo Tools
 =========
 
-Puyo Tools is a collection of tools and libraries used to access the contents of various game files. Although it was initially built to handle files used in Puyo Puyo games, it can handle files used in other games as well.
+Puyo Tools is a collection of tools and libraries used to access the contents of various game files. Although its main focus is to handle files used in Puyo Puyo games, it can handle files used in other games as well.
 
-## Current Release
+## Releases
 
-The current stable release (released on December 14, 2016) is **2.0.3**.
+The latest version is **[2.0.3](https://github.com/nickworonekin/puyotools/releases/latest)**, released on December 14, 2016.
 
-The current legacy release (released on Match 3, 2013) is **1.1.0**.
-
-**Puyo Tools requires [.NET Framework 3.5](http://www.microsoft.com/downloads/details.aspx?FamilyId=333325FD-AE52-4E35-B531-508D977D32A6&displaylang=en).**
-
-Source code for Puyo Tools is available in C#.
+.NET Framework 4.0 or higher is required to run this app.
 
 ## Supported Formats
 ### Compression:
@@ -30,24 +26,25 @@ Source code for Puyo Tools is available in C#.
   * GNT
   * GVM
   * MDL
-  * MRG
-  * NARC
-  * Puyo Fever 2 SPK
-  * Puyo Fever 2 TEX
+  * NARC<sup>[1](#archive-footnote-1)</sup> (See notes)
   * PVM
   * SNT
-  * Storybook Archive (ONE)
-  * Storybook TXD
-  * Unleashed ONE
   * VDD
+  * MRG (Puyo Puyo Fever 2)
+  * SPK (Puyo Puyo Fever 2)
+  * TEX (Puyo Puyo Fever 2)
+  * ONE (Sonic Storybook series)
+  * TXD (Sonic Storybook series)
+  * ONE (Sonic Unleashed for Wii & PS2)
 
 ### Textures:
-  * PVR (Native Dreamcast Texture Format)
-  * GVR (Dreamcast Texture Format for Gamecube & Wii)
-  * SVR (Dreamcast Texture Format for PlayStation 2)
-  * GIM (Native PlayStation Portable Texture Format)
-  * Compile BMP (GMP)
+  * GIM
+  * GMP
+  * GVR
+  * PVR (Dreamcast)
+  * SVR
 
-## Help Wanted
-If you have any information on any of the following please post it at the [relevant topic at Puyo Nexus](http://www.puyonexus.net/forum/viewtopic.php?f=7&t=393). Thank you!
-  * No help needed at the moment.
+<sup id="archive-footnote-1">1</sup> NARC support is incomplete. Use another app such as [Narchive](https://github.com/nickworonekin/narchive) to handle these archives.
+
+## License
+Puyo Tools is licensed under the [MIT license](LICENSE.md).

@@ -5,27 +5,27 @@ namespace PuyoTools.Modules.Compression
 {
     class LzWindowDictionary
     {
-        int WindowSize = 0x1000;
-        int WindowStart = 0;
-        int WindowLength = 0;
-        int MinMatchAmount = 3;
-        int MaxMatchAmount = 18;
-        int BlockSize = 0;
-        List<int>[] OffsetList;
+        int windowSize = 0x1000;
+        int windowStart = 0;
+        int windowLength = 0;
+        int minMatchAmount = 3;
+        int maxMatchAmount = 18;
+        int blockSize = 0;
+        List<int>[] offsetList;
 
         public LzWindowDictionary()
         {
             // Build the offset list, so Lz compression will become significantly faster
-            OffsetList = new List<int>[0x100];
-            for (int i = 0; i < OffsetList.Length; i++)
-                OffsetList[i] = new List<int>();
+            offsetList = new List<int>[0x100];
+            for (int i = 0; i < offsetList.Length; i++)
+                offsetList[i] = new List<int>();
         }
 
-        public int[] Search(byte[] DecompressedData, uint offset, uint length)
+        public int[] Search(byte[] decompressedData, uint offset, uint length)
         {
-            RemoveOldEntries(DecompressedData[offset]); // Remove old entries for this index
+            RemoveOldEntries(decompressedData[offset]); // Remove old entries for this index
 
-            if (offset < MinMatchAmount || length - offset < MinMatchAmount) // Can't find matches if there isn't enough data
+            if (offset < minMatchAmount || length - offset < minMatchAmount) // Can't find matches if there isn't enough data
                 return new int[] { 0, 0 };
 
             // Start finding matches
@@ -33,19 +33,19 @@ namespace PuyoTools.Modules.Compression
             int MatchStart;
             int MatchSize;
 
-            for (int i = OffsetList[DecompressedData[offset]].Count - 1; i >= 0; i--)
+            for (int i = offsetList[decompressedData[offset]].Count - 1; i >= 0; i--)
             {
-                MatchStart = OffsetList[DecompressedData[offset]][i];
+                MatchStart = offsetList[decompressedData[offset]][i];
                 MatchSize = 1;
 
-                while (MatchSize < MaxMatchAmount && MatchSize < WindowLength && MatchStart + MatchSize < offset && offset + MatchSize < length && DecompressedData[offset + MatchSize] == DecompressedData[MatchStart + MatchSize])
+                while (MatchSize < maxMatchAmount && MatchSize < windowLength && MatchStart + MatchSize < offset && offset + MatchSize < length && decompressedData[offset + MatchSize] == decompressedData[MatchStart + MatchSize])
                     MatchSize++;
 
-                if (MatchSize >= MinMatchAmount && MatchSize > Match[1]) // This is a good match
+                if (MatchSize >= minMatchAmount && MatchSize > Match[1]) // This is a good match
                 {
                     Match = new int[] { (int)(offset - MatchStart), MatchSize };
 
-                    if (MatchSize == MaxMatchAmount) // Don't look for more matches
+                    if (MatchSize == maxMatchAmount) // Don't look for more matches
                         break;
                 }
             }
@@ -56,19 +56,19 @@ namespace PuyoTools.Modules.Compression
         }
 
         // Slide the window
-        public void SlideWindow(int Amount)
+        public void SlideWindow(int amount)
         {
-            if (WindowLength == WindowSize)
-                WindowStart += Amount;
+            if (windowLength == windowSize)
+                windowStart += amount;
             else
             {
-                if (WindowLength + Amount <= WindowSize)
-                    WindowLength += Amount;
+                if (windowLength + amount <= windowSize)
+                    windowLength += amount;
                 else
                 {
-                    Amount -= (WindowSize - WindowLength);
-                    WindowLength = WindowSize;
-                    WindowStart += Amount;
+                    amount -= (windowSize - windowLength);
+                    windowLength = windowSize;
+                    windowStart += amount;
                 }
             }
         }
@@ -76,49 +76,49 @@ namespace PuyoTools.Modules.Compression
         // Slide the window to the next block
         public void SlideBlock()
         {
-            WindowStart += BlockSize;
+            windowStart += blockSize;
         }
 
         // Remove old entries
         private void RemoveOldEntries(byte index)
         {
-            for (int i = 0; i < OffsetList[index].Count; ) // Don't increment i
+            for (int i = 0; i < offsetList[index].Count; ) // Don't increment i
             {
-                if (OffsetList[index][i] >= WindowStart)
+                if (offsetList[index][i] >= windowStart)
                     break;
                 else
-                    OffsetList[index].RemoveAt(0);
+                    offsetList[index].RemoveAt(0);
             }
         }
 
         // Set variables
         public void SetWindowSize(int size)
         {
-            WindowSize = size;
+            windowSize = size;
         }
         public void SetMinMatchAmount(int amount)
         {
-            MinMatchAmount = amount;
+            minMatchAmount = amount;
         }
         public void SetMaxMatchAmount(int amount)
         {
-            MaxMatchAmount = amount;
+            maxMatchAmount = amount;
         }
         public void SetBlockSize(int size)
         {
-            BlockSize = size;
-            WindowLength = size; // The window will work in blocks now
+            blockSize = size;
+            windowLength = size; // The window will work in blocks now
         }
 
         // Add entries
-        public void AddEntry(byte[] DecompressedData, int offset)
+        public void AddEntry(byte[] decompressedData, int offset)
         {
-            OffsetList[DecompressedData[offset]].Add(offset);
+            offsetList[decompressedData[offset]].Add(offset);
         }
-        public void AddEntryRange(byte[] DecompressedData, int offset, int length)
+        public void AddEntryRange(byte[] decompressedData, int offset, int length)
         {
             for (int i = 0; i < length; i++)
-                AddEntry(DecompressedData, offset + i);
+                AddEntry(decompressedData, offset + i);
         }
     }
 }

@@ -12,25 +12,27 @@ namespace PuyoTools
     public static class Archive
     {
         // Archive format dictionary
-        public static Dictionary<ArchiveFormat, ArchiveBase> Formats;
+        public static readonly Dictionary<ArchiveFormat, ArchiveBase> Formats;
 
         // Initalize the archive format dictionary
-        public static void Initalize()
+        static Archive()
         {
-            Formats = new Dictionary<ArchiveFormat, ArchiveBase>();
-
-            Formats.Add(ArchiveFormat.Acx, new AcxArchive());
-            Formats.Add(ArchiveFormat.Afs, new AfsArchive());
-            Formats.Add(ArchiveFormat.Gnt, new GntArchive());
-            Formats.Add(ArchiveFormat.Gvm, new GvmArchive());
-            Formats.Add(ArchiveFormat.Mrg, new MrgArchive());
-            Formats.Add(ArchiveFormat.Narc, new NarcArchive());
-            Formats.Add(ArchiveFormat.OneUnleashed, new OneUnleashedArchive());
-            Formats.Add(ArchiveFormat.Pvm, new PvmArchive());
-            Formats.Add(ArchiveFormat.Snt, new SntArchive());
-            Formats.Add(ArchiveFormat.Spk, new SpkArchive());
-            Formats.Add(ArchiveFormat.Tex, new TexArchive());
-            Formats.Add(ArchiveFormat.U8,  new U8Archive());
+            // Initalize the archive format dictionary
+            Formats = new Dictionary<ArchiveFormat, ArchiveBase>
+            {
+                [ArchiveFormat.Acx] = new AcxArchive(),
+                [ArchiveFormat.Afs] = new AfsArchive(),
+                [ArchiveFormat.Gnt] = new GntArchive(),
+                [ArchiveFormat.Gvm] = new GvmArchive(),
+                [ArchiveFormat.Mrg] = new MrgArchive(),
+                [ArchiveFormat.Narc] = new NarcArchive(),
+                [ArchiveFormat.OneUnleashed] = new OneUnleashedArchive(),
+                [ArchiveFormat.Pvm] = new PvmArchive(),
+                [ArchiveFormat.Snt] = new SntArchive(),
+                [ArchiveFormat.Spk] = new SpkArchive(),
+                [ArchiveFormat.Tex] = new TexArchive(),
+                [ArchiveFormat.U8] = new U8Archive(),
+            };
         }
 
         // Opens an archive with the specified archive format.

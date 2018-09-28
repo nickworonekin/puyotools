@@ -10,17 +10,18 @@ namespace PuyoTools
     public static class Texture
     {
         // Texture format dictionary
-        public static Dictionary<TextureFormat, TextureBase> Formats;
-
-        // Initalize the texture format dictionary
-        public static void Initalize()
+        public static readonly Dictionary<TextureFormat, TextureBase> Formats;
+        
+        static Texture()
         {
-            Formats = new Dictionary<TextureFormat, TextureBase>();
-
-            Formats.Add(TextureFormat.Gim, new GimTexture());
-            Formats.Add(TextureFormat.Gvr, new GvrTexture());
-            Formats.Add(TextureFormat.Pvr, new PvrTexture());
-            Formats.Add(TextureFormat.Svr, new SvrTexture());
+            // Initalize the texture format dictionary
+            Formats = new Dictionary<TextureFormat, TextureBase>
+            {
+                [TextureFormat.Gim] = new GimTexture(),
+                [TextureFormat.Gvr] = new GvrTexture(),
+                [TextureFormat.Pvr] = new PvrTexture(),
+                [TextureFormat.Svr] = new SvrTexture(),
+            };
         }
 
         // Reads a texture with the specified texture format

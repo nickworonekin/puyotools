@@ -5,30 +5,30 @@ namespace PuyoTools.Modules.Compression
 {
     class LzBufferDictionary
     {
-        int MinMatchAmount = 3;
-        int MaxMatchAmount = 18;
-        int BufferSize = 0;
-        int BufferStart = 0;
-        int BufferPointer = 0;
-        byte[] BufferData;
-        List<int>[] OffsetList;
+        int minMatchAmount = 3;
+        int maxMatchAmount = 18;
+        int bufferSize = 0;
+        int bufferStart = 0;
+        int bufferPointer = 0;
+        byte[] bufferData;
+        List<int>[] offsetList;
 
         public LzBufferDictionary()
         {
             // Build the offset list, so Lz compression will become significantly faster
-            OffsetList = new List<int>[0x100];
-            for (int i = 0; i < OffsetList.Length; i++)
-                OffsetList[i] = new List<int>();
+            offsetList = new List<int>[0x100];
+            for (int i = 0; i < offsetList.Length; i++)
+                offsetList[i] = new List<int>();
 
             // Build a new blank buffer
-            BufferData = new byte[0];
+            bufferData = new byte[0];
         }
 
-        public int[] Search(byte[] DecompressedData, uint offset, uint length)
+        public int[] Search(byte[] decompressedData, uint offset, uint length)
         {
-            RemoveOldEntries(DecompressedData[offset]); // Remove old entries for this index
+            RemoveOldEntries(decompressedData[offset]); // Remove old entries for this index
 
-            if (offset < MinMatchAmount || length - offset < MinMatchAmount) // Can't find matches if there isn't enough data
+            if (offset < minMatchAmount || length - offset < minMatchAmount) // Can't find matches if there isn't enough data
                 return new int[] { 0, 0 };
 
             // Start finding matches
@@ -37,20 +37,20 @@ namespace PuyoTools.Modules.Compression
             int MatchSize;
             int BufferPos;
 
-            for (int i = OffsetList[DecompressedData[offset]].Count - 1; i >= 0; i--)
+            for (int i = offsetList[decompressedData[offset]].Count - 1; i >= 0; i--)
             {
-                MatchStart = OffsetList[DecompressedData[offset]][i];
-                BufferPos = (BufferStart + MatchStart) & (BufferSize - 1);
+                MatchStart = offsetList[decompressedData[offset]][i];
+                BufferPos = (bufferStart + MatchStart) & (bufferSize - 1);
                 MatchSize = 1;
 
-                while (MatchSize < MaxMatchAmount && MatchSize < BufferSize && MatchStart + MatchSize < offset && offset + MatchSize < length && DecompressedData[offset + MatchSize] == BufferData[(BufferPos + MatchSize) & (BufferSize - 1)])
+                while (MatchSize < maxMatchAmount && MatchSize < bufferSize && MatchStart + MatchSize < offset && offset + MatchSize < length && decompressedData[offset + MatchSize] == bufferData[(BufferPos + MatchSize) & (bufferSize - 1)])
                     MatchSize++;
 
-                if (MatchSize >= MinMatchAmount && MatchSize > Match[1]) // This is a good match
+                if (MatchSize >= minMatchAmount && MatchSize > Match[1]) // This is a good match
                 {
                     Match = new int[] { BufferPos, MatchSize };
 
-                    if (MatchSize == MaxMatchAmount) // Don't look for more matches
+                    if (MatchSize == maxMatchAmount) // Don't look for more matches
                         break;
                 }
             }
@@ -63,55 +63,55 @@ namespace PuyoTools.Modules.Compression
         // Remove old entries
         private void RemoveOldEntries(byte index)
         {
-            for (int i = 0; i < OffsetList[index].Count; ) // Don't increment i
+            for (int i = 0; i < offsetList[index].Count; ) // Don't increment i
             {
-                if (OffsetList[index][i] >= BufferPointer - BufferSize)
+                if (offsetList[index][i] >= bufferPointer - bufferSize)
                     break;
                 else
-                    OffsetList[index].RemoveAt(0);
+                    offsetList[index].RemoveAt(0);
             }
         }
 
         // Set variables
         public void SetBufferSize(int size)
         {
-            if (BufferSize != size)
+            if (bufferSize != size)
             {
-                BufferSize = size;
-                BufferData = new byte[BufferSize];
+                bufferSize = size;
+                bufferData = new byte[bufferSize];
 
                 // Add the 0's to the buffer
-                for (int i = 0; i < BufferSize; i++)
+                for (int i = 0; i < bufferSize; i++)
                 {
-                    BufferData[i] = 0;
-                    OffsetList[0].Add(i - BufferSize); // So the entries get deleted upon filling up
+                    bufferData[i] = 0;
+                    offsetList[0].Add(i - bufferSize); // So the entries get deleted upon filling up
                 }
             }
         }
         public void SetBufferStart(int pos)
         {
-            BufferStart = pos;
+            bufferStart = pos;
         }
         public void SetMinMatchAmount(int amount)
         {
-            MinMatchAmount = amount;
+            minMatchAmount = amount;
         }
         public void SetMaxMatchAmount(int amount)
         {
-            MaxMatchAmount = amount;
+            maxMatchAmount = amount;
         }
 
         // Add entries
-        public void AddEntry(byte[] DecompressedData, int offset)
+        public void AddEntry(byte[] decompressedData, int offset)
         {
-            BufferData[(BufferStart + BufferPointer) & (BufferSize - 1)] = DecompressedData[offset];
-            OffsetList[DecompressedData[offset]].Add(BufferPointer);
-            BufferPointer++;
+            bufferData[(bufferStart + bufferPointer) & (bufferSize - 1)] = decompressedData[offset];
+            offsetList[decompressedData[offset]].Add(bufferPointer);
+            bufferPointer++;
         }
-        public void AddEntryRange(byte[] DecompressedData, int offset, int length)
+        public void AddEntryRange(byte[] decompressedData, int offset, int length)
         {
             for (int i = 0; i < length; i++)
-                AddEntry(DecompressedData, offset + i);
+                AddEntry(decompressedData, offset + i);
         }
     }
 }
