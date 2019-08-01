@@ -128,6 +128,7 @@ namespace PuyoTools.GUI
                         // The file is compressed! Let's decompress it and then try to determine if it is a texture
                         MemoryStream decompressedData = new MemoryStream();
                         Compression.Decompress(textureStream, decompressedData, compressionFormat);
+                        textureStream.Close();
                         decompressedData.Position = 0;
 
                         // Now with this decompressed data, let's determine if it is a texture
@@ -147,6 +148,7 @@ namespace PuyoTools.GUI
                     else
                     {
                         // Hmm... doesn't appear to be a texture. Just ignore this file then.
+                        textureStream.Close();
                         return;
                     }
                 }
@@ -169,6 +171,11 @@ namespace PuyoTools.GUI
                         {
                             OpenTexture(textureStream, ofd.SafeFileName, paletteData, textureFormat);
                         }
+                    }
+                    else
+                    {
+                        // Can't load the palette, so close the texture.
+                        textureStream.Close();
                     }
                 }
             }
