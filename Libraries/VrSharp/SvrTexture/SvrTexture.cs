@@ -166,16 +166,24 @@ namespace VrSharp.SvrTexture
             if (length >= 0x20 &&
                 PTMethods.Contains(source, offset + 0x00, Encoding.UTF8.GetBytes("GBIX")) &&
                 PTMethods.Contains(source, offset + 0x10, Encoding.UTF8.GetBytes("PVRT")) &&
-                source[offset + 0x19] >= 0x60 && source[offset + 0x19] < 0x70 &&
-                BitConverter.ToUInt32(source, offset + 0x14) == length - 24)
-                return true;
+                source[offset + 0x19] >= 0x60 && source[offset + 0x19] < 0x70)
+            {
+                // Some SVR files have an extra byte at the end for seemingly no reason.
+                UInt32 expected_length = BitConverter.ToUInt32(source, offset + 0x14);
+                if (expected_length == length - 24 || expected_length == length - 24 - 1)
+                    return true;
+            }
 
             // PVRT (and no GBIX chunk)
             else if (length >= 0x10 &&
                 PTMethods.Contains(source, offset + 0x00, Encoding.UTF8.GetBytes("PVRT")) &&
-                source[offset + 0x19] >= 0x60 && source[offset + 0x19] < 0x70 &&
-                BitConverter.ToUInt32(source, offset + 0x04) == length - 8)
-                return true;
+                source[offset + 0x09] >= 0x60 && source[offset + 0x19] < 0x70)
+            {
+                // Some SVR files have an extra byte at the end for seemingly no reason.
+                UInt32 expected_length = BitConverter.ToUInt32(source, offset + 0x04);
+                if (expected_length == length - 8 || expected_length == length - 8 - 1)
+                    return true;
+            }
 
             return false;
         }
