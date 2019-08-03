@@ -177,7 +177,7 @@ namespace VrSharp.SvrTexture
             // PVRT (and no GBIX chunk)
             else if (length >= 0x10 &&
                 PTMethods.Contains(source, offset + 0x00, Encoding.UTF8.GetBytes("PVRT")) &&
-                source[offset + 0x09] >= 0x60 && source[offset + 0x19] < 0x70)
+                source[offset + 0x09] >= 0x60 && source[offset + 0x09] < 0x70)
             {
                 // Some SVR files have an extra byte at the end for seemingly no reason.
                 UInt32 expected_length = BitConverter.ToUInt32(source, offset + 0x04);
