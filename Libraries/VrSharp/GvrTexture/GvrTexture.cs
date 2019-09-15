@@ -156,7 +156,7 @@ namespace VrSharp.GvrTexture
             dataCodec = GvrDataCodec.GetDataCodec(dataFormat);
 
             // We need a pixel codec if this is a palettized texture
-            if (dataCodec != null && paletteEntries != 0)
+            if (dataCodec != null && dataCodec.PaletteEntries != 0)
             {
                 pixelCodec = GvrPixelCodec.GetPixelCodec(pixelFormat);
 
