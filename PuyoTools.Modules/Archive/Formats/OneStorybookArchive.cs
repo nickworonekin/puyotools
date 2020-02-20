@@ -1,5 +1,6 @@
 ﻿using PuyoTools.Modules.Compression;
 using System;
+using System.Diagnostics;
 using System.IO;
 
 namespace PuyoTools.Modules.Archive
@@ -27,7 +28,7 @@ namespace PuyoTools.Modules.Archive
         /// </summary>
         public override bool CanWrite
         {
-            get { return false; }
+            get { return true; }
         }
 
         public override ArchiveReader Open(Stream source)
@@ -37,7 +38,7 @@ namespace PuyoTools.Modules.Archive
 
         public override ArchiveWriter Create(Stream destination)
         {
-            throw new NotImplementedException();
+            return new OneStorybookArchiveWriter(destination);
         }
 
         public override bool Is(Stream source, int length, string fname)
@@ -71,10 +72,11 @@ namespace PuyoTools.Modules.Archive
             // Read in all the entries
             for (int i = 0; i < numEntries; i++)
             {
+                string entryFilename = PTStream.ReadCStringAt(source, 0x10 + (i * 0x30), 0x20);
+
                 source.Position = 0x34 + (i * 0x30);
                 int entryOffset = PTStream.ReadInt32BE(source);
                 int entryLength = PTStream.ReadInt32BE(source);
-                string entryFilename = PTStream.ReadCStringAt(source, 0x10 + (i * 0x30), 0x20);
 
                 // Add this entry to the collection
                 entries.Add(startOffset + entryOffset, entryLength, entryFilename);
@@ -106,7 +108,46 @@ namespace PuyoTools.Modules.Archive
 
         public override void Flush()
         {
+            const int tableStartPtr = 0x10;
+            int dataStartPtr = PTMethods.RoundUp(tableStartPtr + (entries.Count * 0x30), 0x10); // just to be safe
 
+            PTStream.WriteInt32BE(destination, entries.Count);
+            PTStream.WriteInt32BE(destination, tableStartPtr); // pointer to table start
+            PTStream.WriteInt32BE(destination, dataStartPtr); // pointer to data start
+            PTStream.WriteInt32BE(destination, 0); // not 100% sure on this one
+
+            int offset = dataStartPtr;
+
+            using (var compressedStream = new MemoryStream())
+            {
+                for (int i = 0; i < entries.Count; i++)
+                {
+                    var entry = entries[i];
+                    var entryStream = entry.Open();
+                    _prsCompression.Compress(entryStream, compressedStream);
+
+                    compressedStream.Position = 0;
+
+                    PTStream.WriteCString(destination, entry.Name, 0x20); // name
+                    PTStream.WriteInt32BE(destination, i); // index
+                    PTStream.WriteInt32BE(destination, offset); // offset
+                    PTStream.WriteInt32BE(destination, (int)compressedStream.Length); // compressed length
+                    PTStream.WriteInt32BE(destination, (int)entryStream.Length); // uncompressed length
+
+                    Debug.Assert(destination.Position <= dataStartPtr, "Table overrun!");
+
+                    var currentPos = destination.Position;
+                    destination.Position = offset;
+                    PTStream.CopyTo(compressedStream, destination);
+                    destination.Position = currentPos;
+
+                    offset += (int)compressedStream.Length;
+                    compressedStream.Position = 0;
+                    compressedStream.SetLength(0);
+
+                    OnFileAdded(EventArgs.Empty);
+                }
+            }
         }
     }
 }
