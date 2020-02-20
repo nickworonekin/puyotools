@@ -32,6 +32,8 @@ namespace PuyoTools
                 [ArchiveFormat.Spk] = new SpkArchive(),
                 [ArchiveFormat.Tex] = new TexArchive(),
                 [ArchiveFormat.U8] = new U8Archive(),
+                [ArchiveFormat.OneStorybook] = new OneStorybookArchive(),
+                [ArchiveFormat.TxdStorybook] = new TxdStorybookArchive()
             };
         }
 
@@ -82,6 +84,8 @@ namespace PuyoTools
         Spk,
         Tex,
         U8,
+        OneStorybook,
+        TxdStorybook,
         Plugin,
     }
 }

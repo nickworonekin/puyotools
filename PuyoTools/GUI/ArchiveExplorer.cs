@@ -222,6 +222,10 @@ namespace PuyoTools.GUI
                         return;
                     }
                 }
+
+                // maybe let's actually tell people why their shit won't open
+                // rather than just sitting there like a duck doing nothing?
+                MessageBox.Show("Unknown or unsupported archive format!");
             }
         }
 
