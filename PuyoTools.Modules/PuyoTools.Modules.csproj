@@ -61,11 +61,13 @@
     <Compile Include="Archive\Formats\GvmArchive.cs" />
     <Compile Include="Archive\Formats\MrgArchive.cs" />
     <Compile Include="Archive\Formats\NarcArchive.cs" />
+    <Compile Include="Archive\Formats\OneStorybookArchive.cs" />
     <Compile Include="Archive\Formats\OneUnleashedArchive.cs" />
     <Compile Include="Archive\Formats\PvmArchive.cs" />
     <Compile Include="Archive\Formats\SntArchive.cs" />
     <Compile Include="Archive\Formats\SpkArchive.cs" />
     <Compile Include="Archive\Formats\TexArchive.cs" />
+    <Compile Include="Archive\Formats\TxdStorybookArchive.cs" />
     <Compile Include="Archive\Formats\U8Archive.cs" />
     <Compile Include="Archive\WriterSettings\AcxWriterSettings.cs">
       <SubType>UserControl</SubType>

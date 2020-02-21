@@ -343,6 +343,16 @@ namespace PuyoTools.Modules
             return value;
         }
 
+        public static uint ReadUInt32BEAt(Stream source, long offset)
+        {
+            long oldPosition = source.Position;
+            source.Position = offset;
+            uint value = ReadUInt32BE(source);
+            source.Position = oldPosition;
+
+            return value;
+        }
+
         /// <summary>
         /// Reads an ASCII encoded null terminated C string from a stream.
         /// The stream is read until a null byte is reached.
@@ -394,6 +404,28 @@ namespace PuyoTools.Modules
             }
 
             return encoding.GetString(buffer, 0, index);
+        }
+
+        public static string ReadCStringAt(Stream source, int offset, int? length = null, Encoding encoding = null)
+        {
+            long oldPosition = source.Position;
+            try
+            {
+                source.Position = offset;
+
+                if (length == null)
+                {
+                    return ReadCString(source);
+                }
+                else
+                {
+                    return ReadCString(source, length.Value, encoding ?? Encoding.ASCII);
+                }
+            }
+            finally
+            {
+                source.Position = oldPosition;
+            }
         }
 
         /// <summary>
