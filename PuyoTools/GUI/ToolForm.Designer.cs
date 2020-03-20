@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.panel1 = new System.Windows.Forms.Panel();
+            this.addFromEntriesButton = new System.Windows.Forms.Button();
             this.fileListButton = new System.Windows.Forms.Button();
             this.addDirectoryButton = new System.Windows.Forms.Button();
             this.addFilesButton = new System.Windows.Forms.Button();
@@ -42,6 +43,7 @@
             // panel1
             // 
             this.panel1.BackColor = System.Drawing.SystemColors.ControlLight;
+            this.panel1.Controls.Add(this.addFromEntriesButton);
             this.panel1.Controls.Add(this.fileListButton);
             this.panel1.Controls.Add(this.addDirectoryButton);
             this.panel1.Controls.Add(this.addFilesButton);
@@ -50,6 +52,16 @@
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(584, 50);
             this.panel1.TabIndex = 0;
+            // 
+            // addFromEntriesButton
+            // 
+            this.addFromEntriesButton.Location = new System.Drawing.Point(206, 13);
+            this.addFromEntriesButton.Name = "addFromEntriesButton";
+            this.addFromEntriesButton.Size = new System.Drawing.Size(126, 25);
+            this.addFromEntriesButton.TabIndex = 3;
+            this.addFromEntriesButton.Text = "Add from entries.txt";
+            this.addFromEntriesButton.UseVisualStyleBackColor = true;
+            this.addFromEntriesButton.Visible = false;
             // 
             // fileListButton
             // 
@@ -138,5 +150,6 @@
         protected System.Windows.Forms.Button fileListButton;
         protected System.Windows.Forms.Button addFilesButton;
         protected System.Windows.Forms.Button addDirectoryButton;
+        protected System.Windows.Forms.Button addFromEntriesButton;
     }
 }

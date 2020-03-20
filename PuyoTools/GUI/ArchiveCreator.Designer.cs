@@ -111,6 +111,7 @@
             this.listView.FullRowSelect = true;
             this.listView.GridLines = true;
             this.listView.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
+            this.listView.HideSelection = false;
             this.listView.Location = new System.Drawing.Point(3, 3);
             this.listView.Name = "listView";
             this.listView.Size = new System.Drawing.Size(550, 282);
@@ -178,7 +179,7 @@
             this.archiveSettingsPanel.Location = new System.Drawing.Point(0, 30);
             this.archiveSettingsPanel.Margin = new System.Windows.Forms.Padding(0);
             this.archiveSettingsPanel.Name = "archiveSettingsPanel";
-            this.archiveSettingsPanel.Size = new System.Drawing.Size(556, 258);
+            this.archiveSettingsPanel.Size = new System.Drawing.Size(556, 358);
             this.archiveSettingsPanel.TabIndex = 4;
             // 
             // compressionFormatBox
@@ -218,7 +219,7 @@
             "Select a format"});
             this.archiveFormatBox.Location = new System.Drawing.Point(94, 11);
             this.archiveFormatBox.Name = "archiveFormatBox";
-            this.archiveFormatBox.Size = new System.Drawing.Size(150, 21);
+            this.archiveFormatBox.Size = new System.Drawing.Size(250, 21);
             this.archiveFormatBox.TabIndex = 2;
             this.archiveFormatBox.SelectedIndexChanged += new System.EventHandler(this.archiveFormatBox_SelectedIndexChanged);
             // 

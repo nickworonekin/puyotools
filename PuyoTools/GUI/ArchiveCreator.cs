@@ -12,6 +12,7 @@ using PuyoTools.Modules.Archive;
 using PuyoTools.Modules.Compression;
 
 using Ookii.Dialogs;
+using System.Linq;
 
 namespace PuyoTools.GUI
 {
@@ -28,6 +29,10 @@ namespace PuyoTools.GUI
             // Remove event handlers from the base class
             addFilesButton.Click -= base.addFilesButton_Click;
             addDirectoryButton.Click -= base.addDirectoryButton_Click;
+
+            // Enable the "Add from entries.txt" button
+            addFromEntriesButton.Visible = true;
+            addFromEntriesButton.Click += addFromEntriesButton_Click;
 
             // Make the list view rows bigger
             ImageList imageList = new ImageList();
@@ -242,6 +247,23 @@ namespace PuyoTools.GUI
                 {
                     AddFiles(Directory.GetFiles(fbd.SelectedPath));
                 }
+
+                EnableRunButton();
+            }
+        }
+
+        private void addFromEntriesButton_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Filter = "entries.txt|entries.txt|All Files (*.*)|*.*";
+            ofd.Multiselect = true;
+            ofd.Title = "Add Files";
+
+            if (ofd.ShowDialog() == DialogResult.OK)
+            {
+                string directory = Path.GetDirectoryName(ofd.FileName);
+
+                AddFiles(File.ReadLines(ofd.FileName).Select(x => Path.Combine(directory, x)));
 
                 EnableRunButton();
             }

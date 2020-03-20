@@ -13,7 +13,7 @@ namespace PuyoTools
 {
     public static class PuyoTools
     {
-        public const string Version = "2.0.3";
+        public const string Version = "2.0.4";
 
         [ImportMany("IPuyoToolsPlugin")]
         static IEnumerable<IPuyoToolsPlugin> Plugins;

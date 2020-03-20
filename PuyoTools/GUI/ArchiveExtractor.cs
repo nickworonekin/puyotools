@@ -46,6 +46,7 @@ namespace PuyoTools.GUI
                     ArchiveFormat format;
                     string outPath, outName;
                     Queue<TextureEntry> textureFileQueue = null;
+                    List<string> entryFilenames = settings.ExtractFileStructure ? new List<string>() : null;
 
                     using (FileStream inStream = File.OpenRead(file))
                     {
@@ -132,15 +133,21 @@ namespace PuyoTools.GUI
                                 // Use the file number as its filename
                                 outName = j.ToString("D" + archive.Entries.Count.ToString().Length) + Path.GetExtension(entry.Name);
                             }
-                            else if (settings.AppendFileNumber)
+                            else if (settings.PrependFileNumber)
                             {
-                                // Append the file number to its filename
-                                outName = Path.GetFileNameWithoutExtension(entry.Name) + j.ToString("D" + archive.Entries.Count.ToString().Length) + Path.GetExtension(entry.Name);
+                                // Prepend the file number to its filename
+                                outName = j.ToString("D" + archive.Entries.Count.ToString().Length) + "_" + entry.Name;
                             }
                             else
                             {
                                 // Just use the filename as defined in the archive
                                 outName = entry.Name;
+                            }
+
+                            // Add the output filename to the entry filename list if we are extracting the archive's file structure.
+                            if (entryFilenames != null)
+                            {
+                                entryFilenames.Add(outName);
                             }
 
                             // What we're going to do here may seem a tiny bit hackish, but it'll make my job much simplier.
@@ -290,6 +297,13 @@ namespace PuyoTools.GUI
                         }
                     }
 
+                    // Extract the archive's file structure if this option was selected
+                    if (settings.ExtractFileStructure)
+                    {
+                        // TODO extract the file structure
+                        File.WriteAllLines(Path.Combine(outPath, "entries.txt"), entryFilenames);
+                    }
+
                     // Delete the source archive if the user chose to
                     if (settings.DeleteSourceArchive)
                     {
@@ -314,11 +328,12 @@ namespace PuyoTools.GUI
             public bool DecompressSourceArchive;
             public bool ExtractToSourceDirectory;
             public bool ExtractToSameNameDirectory;
+            public bool ExtractFileStructure;
             public bool DeleteSourceArchive;
 
             public bool DecompressExtractedFiles;
             public bool FileNumberAsFilename;
-            public bool AppendFileNumber;
+            public bool PrependFileNumber;
             public bool ExtractExtractedArchives;
             public bool ConvertExtractedTextures;
         }
@@ -339,11 +354,12 @@ namespace PuyoTools.GUI
             settings.DecompressSourceArchive = decompressSourceArchiveCheckbox.Checked;
             settings.ExtractToSourceDirectory = extractToSourceDirCheckbox.Checked;
             settings.ExtractToSameNameDirectory = extractToSameNameDirCheckbox.Checked && !settings.ExtractToSourceDirectory;
+            settings.ExtractFileStructure = extractFileStructureCheckbox.Checked;
             settings.DeleteSourceArchive = deleteSourceArchiveCheckbox.Checked || settings.ExtractToSameNameDirectory;
 
             settings.DecompressExtractedFiles = decompressExtractedFilesCheckbox.Checked;
             settings.FileNumberAsFilename = fileNumberAsFilenameCheckbox.Checked;
-            settings.AppendFileNumber = appendFileNumberCheckbox.Checked && !settings.FileNumberAsFilename;
+            settings.PrependFileNumber = prependFileNumberCheckbox.Checked && !settings.FileNumberAsFilename;
             settings.ExtractExtractedArchives = extractExtractedArchivesCheckbox.Checked;
             settings.ConvertExtractedTextures = convertExtractedTexturesCheckbox.Checked;
 
