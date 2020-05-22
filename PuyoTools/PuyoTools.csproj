@@ -4,6 +4,7 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net472</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
+    <Version>2.1.0-dev</Version>
   </PropertyGroup>
 
   <ItemGroup>

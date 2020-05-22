@@ -9,9 +9,7 @@ using System.Threading.Tasks;
 
 namespace PuyoTools.Formats.Textures
 {
-    /// <summary>
     /// <inheritdoc/>
-    /// </summary>
     internal class GvrFormat : ITextureFormat
     {
         private GvrFormat() { }

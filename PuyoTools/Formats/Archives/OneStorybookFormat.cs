@@ -10,9 +10,7 @@ using System.Threading.Tasks;
 
 namespace PuyoTools.Formats.Archives
 {
-    /// <summary>
     /// <inheritdoc/>
-    /// </summary>
     internal class OneStorybookFormat : IArchiveFormat
     {
         private OneStorybookFormat() { }

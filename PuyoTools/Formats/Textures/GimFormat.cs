@@ -10,9 +10,7 @@ using System.Threading.Tasks;
 
 namespace PuyoTools.Formats.Textures
 {
-    /// <summary>
     /// <inheritdoc/>
-    /// </summary>
     internal class GimFormat : ITextureFormat
     {
         private GimFormat() { }

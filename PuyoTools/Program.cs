@@ -11,24 +11,25 @@ using System.Windows.Forms;
 
 namespace PuyoTools
 {
-    public static class PuyoTools
+    static class Program
     {
-        public const string Version = "2.0.4";
+        /*[ImportMany("IPuyoToolsPlugin")]
+        static IEnumerable<IPuyoToolsPlugin> Plugins;*/
 
-        [ImportMany("IPuyoToolsPlugin")]
-        static IEnumerable<IPuyoToolsPlugin> Plugins;
-
+        /// <summary>
+        /// The main entry point for the application.
+        /// </summary>
         [STAThread]
-        public static void Main()
+        static void Main()
         {
-            LoadPlugins();
+            //LoadPlugins();
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new MainWindow());
         }
 
-        // Load plugins
+        /*// Load plugins
         private static void LoadPlugins()
         {
             int archivePlugins = 0, compressionPlugins = 0, texturePlugins = 0;
@@ -44,7 +45,7 @@ namespace PuyoTools
                     // Now, let's attempt to determine which type of plugin this is
                     // and add it to the appropiate module lists.
 
-                    /*if (plugin is ArchiveBase archiveModule)
+                    if (plugin is ArchiveBase archiveModule)
                     {
                         // Archive module
                         Archive.Formats.Add(ArchiveFormat.Plugin + archivePlugins, archiveModule);
@@ -63,10 +64,10 @@ namespace PuyoTools
                         // Texture module
                         Texture.Formats.Add(TextureFormat.Plugin + texturePlugins, textureModule);
                         texturePlugins++;
-                    }*/
+                    }
                 }
             }
             catch { }
-        }
+        }*/
     }
 }

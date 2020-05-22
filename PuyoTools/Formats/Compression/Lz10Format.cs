@@ -8,9 +8,7 @@ using System.Threading.Tasks;
 
 namespace PuyoTools.Formats.Compression
 {
-    /// <summary>
     /// <inheritdoc/>
-    /// </summary>
     internal class Lz10Format : ICompressionFormat
     {
         private Lz10Format() { }

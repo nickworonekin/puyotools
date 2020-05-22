@@ -11,9 +11,7 @@ using System.Threading.Tasks;
 
 namespace PuyoTools.Formats.Archives
 {
-    /// <summary>
     /// <inheritdoc/>
-    /// </summary>
     internal class GvmFormat : IArchiveFormat
     {
         private GvmFormat() { }

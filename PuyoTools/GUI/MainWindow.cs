@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
 
@@ -18,10 +19,10 @@ namespace PuyoTools.GUI
             this.Icon = IconResources.ProgramIcon;
             this.MinimumSize = this.Size;
 
-            // Write out the version, but do it in a hackish way
+            /*// Write out the version, but do it in a hackish way
             int oldWidth = versionLabel.Width;
             versionLabel.Text = "Version " + PuyoTools.Version;
-            versionLabel.Left -= (versionLabel.Width - oldWidth);
+            versionLabel.Left -= (versionLabel.Width - oldWidth);*/
         }
 
         private void selectFilesToolStripMenuItem_Click(object sender, EventArgs e)

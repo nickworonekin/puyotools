@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
 
@@ -17,7 +18,7 @@ namespace PuyoTools.GUI
 
             this.Icon = IconResources.ProgramIcon;
 
-            versionLabel.Text = "Version " + PuyoTools.Version;
+            versionLabel.Text = "Version " + Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
         }
 
         private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
