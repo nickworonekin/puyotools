@@ -1,78 +1,12 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{18707752-78B4-4735-AE5A-4261AD5C06EE}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>GimSharp</RootNamespace>
-    <AssemblyName>GimSharp</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <StartupObject>
-    </StartupObject>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>
-    </AssemblyOriginatorKeyFile>
-    <FileUpgradeFlags>
-    </FileUpgradeFlags>
-    <OldToolsVersion>3.5</OldToolsVersion>
-    <UpgradeBackupLocation />
-    <TargetFrameworkProfile />
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <TargetFrameworks>netstandard2.0;net472</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
-  <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Drawing" />
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+    <PackageReference Include="System.Drawing.Common" Version="4.7.0" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="GimTexture\GimDataCodec.cs" />
-    <Compile Include="GimTexture\GimExceptions.cs" />
-    <Compile Include="GimTexture\GimFormats.cs" />
-    <Compile Include="GimTexture\GimPixelCodec.cs" />
-    <Compile Include="GimTexture\GimTexture.cs" />
-    <Compile Include="GimTexture\GimTextureEncoder.cs" />
-    <Compile Include="Core\PTMethods.cs" />
-    <Compile Include="Core\PTStream.cs" />
-    <Compile Include="WuQuantizer\Box.cs" />
-    <Compile Include="WuQuantizer\ColorData.cs" />
-    <Compile Include="WuQuantizer\CubeCut.cs" />
-    <Compile Include="WuQuantizer\IWuQuantizer.cs" />
-    <Compile Include="WuQuantizer\Lookup.cs" />
-    <Compile Include="WuQuantizer\LookupData.cs" />
-    <Compile Include="WuQuantizer\Pixel.cs" />
-    <Compile Include="WuQuantizer\QuantizationException.cs" />
-    <Compile Include="WuQuantizer\QuantizedPalette.cs" />
-    <Compile Include="WuQuantizer\WuQuantizer.cs" />
-    <Compile Include="WuQuantizer\WuQuantizerBase.cs" />
-  </ItemGroup>
+
 </Project>

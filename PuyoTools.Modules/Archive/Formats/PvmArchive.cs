@@ -41,11 +41,6 @@ namespace PuyoTools.Modules.Archive
             return new PvmArchiveWriter(destination);
         }
 
-        public override ModuleSettingsControl GetModuleSettingsControl()
-        {
-            return new PvmWriterSettings();
-        }
-
         public override bool Is(Stream source, int length, string fname)
         {
             return (length > 12 && PTStream.Contains(source, 0, new byte[] { (byte)'P', (byte)'V', (byte)'M', (byte)'H' }));

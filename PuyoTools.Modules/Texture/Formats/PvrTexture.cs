@@ -152,11 +152,6 @@ namespace PuyoTools.Modules.Texture
             texture.Save(destination);
         }
 
-        public override ModuleSettingsControl GetModuleSettingsControl()
-        {
-            return new PvrWriterSettings();
-        }
-
         public override bool Is(Stream source, int length, string fname)
         {
             return (length > 16 && VrSharp.PvrTexture.PvrTexture.Is(source, length));

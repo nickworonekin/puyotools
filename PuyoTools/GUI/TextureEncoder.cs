@@ -10,14 +10,16 @@ using System.IO;
 using PuyoTools.Modules;
 using PuyoTools.Modules.Compression;
 using PuyoTools.Modules.Texture;
+using PuyoTools.Formats.Compression;
+using PuyoTools.Formats.Textures;
 
 namespace PuyoTools.GUI
 {
     public partial class TextureEncoder : ToolForm
     {
         List<ModuleSettingsControl> writerSettingsControls;
-        List<TextureFormat> textureFormats;
-        List<CompressionFormat> compressionFormats;
+        List<ITextureFormat> textureFormats;
+        List<ICompressionFormat> compressionFormats;
 
         public TextureEncoder()
         {
@@ -28,28 +30,22 @@ namespace PuyoTools.GUI
 
             // Fill the texture format box
             textureFormatBox.SelectedIndex = 0;
-            textureFormats = new List<TextureFormat>();
-            foreach (KeyValuePair<TextureFormat, TextureBase> format in Texture.Formats)
+            textureFormats = new List<ITextureFormat>();
+            foreach (var format in Texture.EncoderFormats)
             {
-                if (format.Value.CanWrite)
-                {
-                    textureFormatBox.Items.Add(format.Value.Name);
-                    textureFormats.Add(format.Key);
+                textureFormatBox.Items.Add(format.Name);
+                textureFormats.Add(format);
 
-                    writerSettingsControls.Add(format.Value.GetModuleSettingsControl());
-                }
+                writerSettingsControls.Add(format.GetModuleSettingsControl());
             }
 
             // Fill the compression format box
             compressionFormatBox.SelectedIndex = 0;
-            compressionFormats = new List<CompressionFormat>();
-            foreach (KeyValuePair<CompressionFormat, CompressionBase> format in Compression.Formats)
+            compressionFormats = new List<ICompressionFormat>();
+            foreach (var format in Compression.EncoderFormats)
             {
-                if (format.Value.CanWrite)
-                {
-                    compressionFormatBox.Items.Add(format.Value.Name);
-                    compressionFormats.Add(format.Key);
-                }
+                compressionFormatBox.Items.Add(format.Name);
+                compressionFormats.Add(format);
             }
         }
 
@@ -88,12 +84,12 @@ namespace PuyoTools.GUI
                     {
                         outPath = Path.Combine(Path.GetDirectoryName(file), "Encoded Textures");
                     }
-                    string outFname = Path.ChangeExtension(Path.GetFileName(file), Texture.Formats[settings.TextureFormat].FileExtension);
+                    string outFname = Path.ChangeExtension(Path.GetFileName(file), settings.TextureFormat.FileExtension);
 
                     MemoryStream buffer = new MemoryStream();
 
                     // Run it through the texture encoder.
-                    TextureBase texture = Texture.Formats[settings.TextureFormat];
+                    TextureBase texture = settings.TextureFormat.GetCodec();
 
                     using (FileStream source = File.OpenRead(file))
                     {
@@ -112,12 +108,12 @@ namespace PuyoTools.GUI
                     }
 
                     // Do we want to compress this texture?
-                    if (settings.CompressionFormat != CompressionFormat.Unknown)
+                    if (settings.CompressionFormat != null)
                     {
                         MemoryStream tempBuffer = new MemoryStream();
                         buffer.Position = 0;
 
-                        Compression.Compress(buffer, tempBuffer, settings.CompressionFormat);
+                        settings.CompressionFormat.GetCodec().Compress(buffer, tempBuffer);
 
                         buffer = tempBuffer;
                     }
@@ -137,7 +133,7 @@ namespace PuyoTools.GUI
                     // Write out the palette file (if one was created along with the texture).
                     if (texture.PaletteStream != null)
                     {
-                        using (FileStream destination = File.Create(Path.Combine(outPath, Path.ChangeExtension(outFname, Texture.Formats[settings.TextureFormat].PaletteFileExtension))))
+                        using (FileStream destination = File.Create(Path.Combine(outPath, Path.ChangeExtension(outFname, settings.TextureFormat.PaletteFileExtension))))
                         {
                             texture.PaletteStream.Position = 0;
                             PTStream.CopyTo(texture.PaletteStream, destination);
@@ -178,7 +174,7 @@ namespace PuyoTools.GUI
             this.Enabled = false;
 
             // Get the format of the texture the user wants to create
-            TextureFormat textureFormat = textureFormats[textureFormatBox.SelectedIndex - 1];
+            ITextureFormat textureFormat = textureFormats[textureFormatBox.SelectedIndex - 1];
 
             // Set the settings for the tool
             Settings settings = new Settings();
@@ -192,7 +188,7 @@ namespace PuyoTools.GUI
             }
             else
             {
-                settings.CompressionFormat = CompressionFormat.Unknown;
+                settings.CompressionFormat = null;
             }
 
             settings.WriterSettingsControl = writerSettingsControls[textureFormatBox.SelectedIndex - 1];
@@ -215,8 +211,8 @@ namespace PuyoTools.GUI
 
         private struct Settings
         {
-            public TextureFormat TextureFormat;
-            public CompressionFormat CompressionFormat;
+            public ITextureFormat TextureFormat;
+            public ICompressionFormat CompressionFormat;
             public ModuleSettingsControl WriterSettingsControl;
 
             public bool OutputToSourceDirectory;

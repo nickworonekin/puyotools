@@ -28,15 +28,6 @@ namespace PuyoTools.Modules
         /// </summary>
         public string DestinationPath = String.Empty;
 
-        /// <summary>
-        /// Returns the ModuleSettingsControl associated with this format.
-        /// </summary>
-        /// <returns></returns>
-        public virtual ModuleSettingsControl GetModuleSettingsControl()
-        {
-            return null;
-        }
-
         #region Is Methods
         /// <summary>
         /// Determines if the data is in the specified format.

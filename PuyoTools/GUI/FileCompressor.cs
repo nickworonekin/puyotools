@@ -8,12 +8,13 @@ using System.Windows.Forms;
 using System.IO;
 
 using PuyoTools.Modules.Compression;
+using PuyoTools.Formats.Compression;
 
 namespace PuyoTools.GUI
 {
     public partial class FileCompressor : ToolForm
     {
-        List<CompressionFormat> compressionFormats;
+        List<ICompressionFormat> compressionFormats;
 
         public FileCompressor()
         {
@@ -25,14 +26,11 @@ namespace PuyoTools.GUI
 
             // Fill the compression format box
             compressionFormatBox.SelectedIndex = 0;
-            compressionFormats = new List<CompressionFormat>();
-            foreach (KeyValuePair<CompressionFormat, CompressionBase> format in Compression.Formats)
+            compressionFormats = new List<ICompressionFormat>();
+            foreach (var format in Compression.EncoderFormats)
             {
-                if (format.Value.CanWrite)
-                {
-                    compressionFormatBox.Items.Add(format.Value.Name);
-                    compressionFormats.Add(format.Key);
-                }
+                compressionFormatBox.Items.Add(format.Name);
+                compressionFormats.Add(format);
             }
         }
 
@@ -66,7 +64,7 @@ namespace PuyoTools.GUI
                     using (FileStream source = File.OpenRead(file))
                     {
                         // Run it through the compressor.
-                        Compression.Compress(source, buffer, settings.CompressionFormat);
+                        settings.CompressionFormat.GetCodec().Compress(source, buffer);
                     }
 
                     // Now that we have a decompressed file (we hope!), let's see what we need to do with it.
@@ -110,7 +108,7 @@ namespace PuyoTools.GUI
 
         private struct Settings
         {
-            public CompressionFormat CompressionFormat;
+            public ICompressionFormat CompressionFormat;
             public bool OverwriteSourceFile;
             public bool DeleteSourceFile;
         }

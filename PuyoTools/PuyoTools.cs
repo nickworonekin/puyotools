@@ -44,26 +44,26 @@ namespace PuyoTools
                     // Now, let's attempt to determine which type of plugin this is
                     // and add it to the appropiate module lists.
 
-                    if (plugin is ArchiveBase archiveModule)
+                    /*if (plugin is ArchiveBase archiveModule)
                     {
                         // Archive module
                         Archive.Formats.Add(ArchiveFormat.Plugin + archivePlugins, archiveModule);
                         archivePlugins++;
-                    }
+                    }*/
 
-                    else if (plugin is CompressionBase compressionModule)
+                    /*else if (plugin is CompressionBase compressionModule)
                     {
                         // Compression module
                         Compression.Formats.Add(CompressionFormat.Plugin + compressionPlugins, compressionModule);
                         compressionPlugins++;
-                    }
+                    }*/
 
-                    else if (plugin is TextureBase textureModule)
+                    /*else if (plugin is TextureBase textureModule)
                     {
                         // Texture module
                         Texture.Formats.Add(TextureFormat.Plugin + texturePlugins, textureModule);
                         texturePlugins++;
-                    }
+                    }*/
                 }
             }
             catch { }

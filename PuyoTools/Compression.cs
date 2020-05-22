@@ -1,88 +1,69 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-
+using System.Linq;
+using System.Text;
+using PuyoTools.Formats.Compression;
 using PuyoTools.Modules.Compression;
 
 namespace PuyoTools
 {
     public static class Compression
     {
-        // Compression format dictionary
-        public static readonly Dictionary<CompressionFormat, CompressionBase> Formats;
+        private static readonly List<ICompressionFormat> decoderFormats;
+        private static readonly List<ICompressionFormat> encoderFormats;
 
         static Compression()
         {
-            // Initalize the compression format dictionary
-            Formats = new Dictionary<CompressionFormat, CompressionBase>
+            // Compression formats that can be used to decompress files.
+            decoderFormats = new List<ICompressionFormat>()
             {
-                [CompressionFormat.Cnx] = new CnxCompression(),
-                [CompressionFormat.Comp] = new CompCompression(),
-                [CompressionFormat.Cxlz] = new CxlzCompression(),
-                [CompressionFormat.Lz00] = new Lz00Compression(),
-                [CompressionFormat.Lz01] = new Lz01Compression(),
-                [CompressionFormat.Lz10] = new Lz10Compression(),
-                [CompressionFormat.Lz11] = new Lz11Compression(),
-                [CompressionFormat.Prs] = new PrsCompression(),
+                CnxFormat.Instance,
+                CompFormat.Instance,
+                CxlzFormat.Instance,
+                Lz00Format.Instance,
+                Lz01Format.Instance,
+                Lz10Format.Instance,
+                Lz11Format.Instance,
+                PrsFormat.Instance,
+            };
+
+            // Compression formats that can be used to compress files.
+            encoderFormats = new List<ICompressionFormat>()
+            {
+                CompFormat.Instance,
+                CxlzFormat.Instance,
+                Lz00Format.Instance,
+                Lz01Format.Instance,
+                Lz10Format.Instance,
+                Lz11Format.Instance,
+                PrsFormat.Instance,
             };
         }
 
-        // Decompress a file when the compression format is not known.
-        public static CompressionFormat Decompress(Stream source, Stream destination, string fname)
+        /// <summary>
+        /// Gets the <see cref="ICompressionFormat"/> that describes the data in <paramref name="source"/>.
+        /// </summary>
+        /// <param name="source">The data.</param>
+        /// <param name="filename">The name of the file containing the data.</param>
+        /// <returns>An instance of <see cref="ICompressionFormat"/>, or null if there is no format.</returns>
+        /// <remarks>This method deals with formats used to decompress data. To get all the formats that can be used to compress data, see <see cref="EncoderFormats"/>.</remarks>
+        internal static ICompressionFormat GetFormat(Stream source, string filename)
         {
-            CompressionFormat format = GetFormat(source, fname);
-
-            if (format == CompressionFormat.Unknown)
-                return format;
-
-            Formats[format].Decompress(source, destination);
-
-            return format;
-        }
-
-        // Decompress a file with the specified compression format
-        public static void Decompress(Stream source, Stream destination, CompressionFormat format)
-        {
-            Formats[format].Decompress(source, destination);
-        } 
-
-        // Compress a file with the specified compression format
-        public static void Compress(Stream source, Stream destination, CompressionFormat format)
-        {
-            Formats[format].Compress(source, destination);
-        }
-
-        // Returns the compression format used by the source file.
-        public static CompressionFormat GetFormat(Stream source, string fname)
-        {
-            foreach (KeyValuePair<CompressionFormat, CompressionBase> format in Formats)
+            foreach (var format in decoderFormats)
             {
-                if (format.Value.Is(source, fname))
-                    return format.Key;
+                if (format.Identify(source, filename))
+                {
+                    return format;
+                }
             }
 
-            return CompressionFormat.Unknown;
+            return null;
         }
 
-        // Returns the module for this compression format.
-        public static CompressionBase GetModule(CompressionFormat format)
-        {
-            return Formats[format];
-        }
-    }
-
-    // List of compression formats
-    public enum CompressionFormat
-    {
-        Unknown,
-        Cnx,
-        Comp,
-        Cxlz,
-        Lz00,
-        Lz01,
-        Lz10,
-        Lz11,
-        Prs,
-        Plugin,
+        /// <summary>
+        /// Gets a collection of <see cref="ICompressionFormat"/> that can be used to compress data.
+        /// </summary>
+        internal static IEnumerable<ICompressionFormat> EncoderFormats => encoderFormats.AsReadOnly();
     }
 }

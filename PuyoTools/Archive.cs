@@ -6,86 +6,79 @@ using PuyoTools.Modules;
 using PuyoTools.Modules.Archive;
 
 using PuyoTools.GUI;
+using PuyoTools.Formats.Archives;
+using System.Linq;
 
 namespace PuyoTools
 {
     public static class Archive
     {
-        // Archive format dictionary
-        public static readonly Dictionary<ArchiveFormat, ArchiveBase> Formats;
+        private static readonly List<IArchiveFormat> readerFormats;
+        private static readonly List<IArchiveFormat> writerFormats;
 
         // Initalize the archive format dictionary
         static Archive()
         {
-            // Initalize the archive format dictionary
-            Formats = new Dictionary<ArchiveFormat, ArchiveBase>
+            // Archive formats that can be used to read archives.
+            readerFormats = new List<IArchiveFormat>
             {
-                [ArchiveFormat.Acx] = new AcxArchive(),
-                [ArchiveFormat.Afs] = new AfsArchive(),
-                [ArchiveFormat.Gnt] = new GntArchive(),
-                [ArchiveFormat.Gvm] = new GvmArchive(),
-                [ArchiveFormat.Mrg] = new MrgArchive(),
-                [ArchiveFormat.Narc] = new NarcArchive(),
-                [ArchiveFormat.OneUnleashed] = new OneUnleashedArchive(),
-                [ArchiveFormat.Pvm] = new PvmArchive(),
-                [ArchiveFormat.Snt] = new SntArchive(),
-                [ArchiveFormat.Spk] = new SpkArchive(),
-                [ArchiveFormat.Tex] = new TexArchive(),
-                [ArchiveFormat.U8] = new U8Archive(),
-                [ArchiveFormat.OneStorybook] = new OneStorybookArchive(),
-                [ArchiveFormat.TxdStorybook] = new TxdStorybookArchive()
+                AcxFormat.Instance,
+                AfsFormat.Instance,
+                GntFormat.Instance,
+                GvmFormat.Instance,
+                MrgFormat.Instance,
+                NarcFormat.Instance,
+                OneStorybookFormat.Instance,
+                OneUnleashedFormat.Instance,
+                PvmFormat.Instance,
+                SntFormat.Instance,
+                SpkFormat.Instance,
+                TexFormat.Instance,
+                TxdStorybookFormat.Instance,
+                U8Format.Instance,
+            };
+
+            // Compression formats that can be used to write archives.
+            writerFormats = new List<IArchiveFormat>
+            {
+                AcxFormat.Instance,
+                AfsFormat.Instance,
+                GntFormat.Instance,
+                GvmFormat.Instance,
+                MrgFormat.Instance,
+                OneStorybookFormat.Instance,
+                PvmFormat.Instance,
+                SntFormat.Instance,
+                SpkFormat.Instance,
+                TexFormat.Instance,
+                TxdStorybookFormat.Instance,
+                U8Format.Instance,
             };
         }
 
-        // Opens an archive with the specified archive format.
-        public static ArchiveReader Open(Stream source, ArchiveFormat format)
+        /// <summary>
+        /// Gets the <see cref="IArchiveFormat"/> that describes the data in <paramref name="source"/>.
+        /// </summary>
+        /// <param name="source">The data.</param>
+        /// <param name="filename">The name of the file containing the data.</param>
+        /// <returns>An instance of <see cref="IArchiveFormat"/>, or null if there is no format.</returns>
+        /// <remarks>This method deals with formats used to read data. To get all the formats that can be used to write data, see <see cref="EncoderFormats"/>.</remarks>
+        internal static IArchiveFormat GetFormat(Stream source, string filename)
         {
-            return Formats[format].Open(source);
-        }
-
-        // Creates an archive with the specified archive format and writer settings.
-        public static ArchiveWriter Create(Stream source, ArchiveFormat format)
-        {
-            return Formats[format].Create(source);
-        }
-
-        // Returns the archive format used by the source archive.
-        public static ArchiveFormat GetFormat(Stream source, string fname)
-        {
-            foreach (KeyValuePair<ArchiveFormat, ArchiveBase> format in Formats)
+            foreach (var format in readerFormats)
             {
-                if (format.Value.Is(source, fname))
-                    return format.Key;
+                if (format.Identify(source, filename))
+                {
+                    return format;
+                }
             }
 
-            return ArchiveFormat.Unknown;
+            return null;
         }
 
-        // Returns the module for this archive format.
-        public static ArchiveBase GetModule(ArchiveFormat format)
-        {
-            return Formats[format];
-        }
-    }
-
-    // List of archive formats
-    public enum ArchiveFormat
-    {
-        Unknown,
-        Acx,
-        Afs,
-        Gnt,
-        Gvm,
-        Mrg,
-        Narc,
-        OneUnleashed,
-        Pvm,
-        Snt,
-        Spk,
-        Tex,
-        U8,
-        OneStorybook,
-        TxdStorybook,
-        Plugin,
+        /// <summary>
+        /// Gets a collection of <see cref="ITextureFormat"/> that can be used to write archive data.
+        /// </summary>
+        internal static IEnumerable<IArchiveFormat> WriterFormats => writerFormats.AsReadOnly();
     }
 }

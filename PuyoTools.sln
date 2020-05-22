@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30114.105
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PuyoTools", "PuyoTools\PuyoTools.csproj", "{7578281C-3030-4640-A7E3-5AD83C598694}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GimSharp", "Libraries\GimSharp\GimSharp.csproj", "{18707752-78B4-4735-AE5A-4261AD5C06EE}"
@@ -34,5 +36,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1A16FAE9-F660-434B-A87E-8441ED166920}
 	EndGlobalSection
 EndGlobal

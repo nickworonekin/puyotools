@@ -171,11 +171,6 @@ namespace PuyoTools.Modules.Texture
             texture.Save(destination);
         }
 
-        public override ModuleSettingsControl GetModuleSettingsControl()
-        {
-            return new GvrWriterSettings();
-        }
-
         public override bool Is(Stream source, int length, string fname)
         {
             return (length > 16 && VrSharp.GvrTexture.GvrTexture.Is(source, length));

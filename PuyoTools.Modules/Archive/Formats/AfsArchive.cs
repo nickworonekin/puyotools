@@ -39,11 +39,6 @@ namespace PuyoTools.Modules.Archive
             return new AfsArchiveWriter(destination);
         }
 
-        public override ModuleSettingsControl GetModuleSettingsControl()
-        {
-            return new AfsWriterSettings();
-        }
-
         public override bool Is(Stream source, int length, string fname)
         {
             return (length > 8 && PTStream.Contains(source, 0, new byte[] { (byte)'A', (byte)'F', (byte)'S', 0 }));

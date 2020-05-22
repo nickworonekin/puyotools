@@ -8,7 +8,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.IO;
 
-using Ookii.Dialogs;
+using Ookii.Dialogs.WinForms;
 
 namespace PuyoTools.GUI
 {

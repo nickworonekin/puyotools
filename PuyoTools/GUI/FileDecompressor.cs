@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using System.IO;
+using PuyoTools.Formats.Compression;
 
 namespace PuyoTools.GUI
 {
@@ -36,20 +37,20 @@ namespace PuyoTools.GUI
                 // But, we're going to do this in a try catch in case any errors happen.
                 try
                 {
-                    CompressionFormat format;
                     MemoryStream buffer = new MemoryStream();
 
                     using (FileStream source = File.OpenRead(file))
                     {
-                        // Just run it through the decompressor.
-                        // No need to check the format beforehand.
-                        format = Compression.Decompress(source, buffer, Path.GetFileName(file));
+                        // Get the compression format, then run it through the decompressor.
+                        var format = Compression.GetFormat(source, Path.GetFileName(file));
+                        if (format == null)
+                        {
+                            // File isn't compressed or the compression format is unknown.
+                            // Just continue on with the next file.
+                            continue;
+                        }
+                        format.GetCodec().Decompress(source, buffer);
                     }
-
-                    // If the compression format is unknown, then nothing happened.
-                    // Just continue on with the next file
-                    if (format == CompressionFormat.Unknown)
-                        continue;
 
                     // Now that we have a decompressed file (we hope!), let's see what we need to do with it.
                     if (settings.OverwriteSourceFile)

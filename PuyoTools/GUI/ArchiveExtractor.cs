@@ -11,6 +11,9 @@ using System.IO;
 using PuyoTools.Modules;
 using PuyoTools.Modules.Archive;
 using PuyoTools.Modules.Texture;
+using PuyoTools.Formats.Compression;
+using PuyoTools.Formats.Archives;
+using PuyoTools.Formats.Textures;
 
 namespace PuyoTools.GUI
 {
@@ -43,7 +46,7 @@ namespace PuyoTools.GUI
                 // But, we're going to do this in a try catch in case any errors happen.
                 try
                 {
-                    ArchiveFormat format;
+                    IArchiveFormat format;
                     string outPath, outName;
                     Queue<TextureEntry> textureFileQueue = null;
                     List<string> entryFilenames = settings.ExtractFileStructure ? new List<string>() : null;
@@ -57,19 +60,19 @@ namespace PuyoTools.GUI
 
                         // Get the format of the archive
                         format = Archive.GetFormat(source, Path.GetFileName(file));
-                        if (format == ArchiveFormat.Unknown)
+                        if (format == null)
                         {
                             // Maybe it's compressed? Let's check.
                             // But first, we need to make sure we want to check
                             if (settings.DecompressSourceArchive)
                             {
                                 // Get the compression format, if it is compressed that is.
-                                CompressionFormat compressionFormat = Compression.GetFormat(source, Path.GetFileName(file));
-                                if (compressionFormat != CompressionFormat.Unknown)
+                                ICompressionFormat compressionFormat = Compression.GetFormat(source, Path.GetFileName(file));
+                                if (compressionFormat != null)
                                 {
                                     // Ok, it appears to be compressed. Let's decompress it, and then check the format again
                                     source = new MemoryStream();
-                                    Compression.Decompress(inStream, source, compressionFormat);
+                                    compressionFormat.GetCodec().Decompress(inStream, source);
 
                                     source.Position = 0;
                                     format = Archive.GetFormat(source, Path.GetFileName(file));
@@ -77,14 +80,14 @@ namespace PuyoTools.GUI
                             }
 
                             // If we still don't know what the archive format is, just skip the file.
-                            if (format == ArchiveFormat.Unknown)
+                            if (format == null)
                             {
                                 continue;
                             }
                         }
 
                         // Now that we know its format, let's open it and start working with it.
-                        ArchiveReader archive = Archive.Open(source, format);
+                        ArchiveReader archive = format.GetCodec().Open(source);
 
                         // Get the appropiate output directory
                         if (settings.ExtractToSourceDirectory)
@@ -155,12 +158,12 @@ namespace PuyoTools.GUI
                             if (settings.DecompressExtractedFiles)
                             {
                                 // Get the compression format, if it is compressed that is.
-                                CompressionFormat compressionFormat = Compression.GetFormat(entryData, entry.Name);
-                                if (compressionFormat != CompressionFormat.Unknown)
+                                ICompressionFormat compressionFormat = Compression.GetFormat(entryData, entry.Name);
+                                if (compressionFormat != null)
                                 {
                                     // Ok, it appears to be compressed. Let's decompress it, and then edit the entry
                                     MemoryStream decompressedData = new MemoryStream();
-                                    Compression.Decompress(entryData, decompressedData, compressionFormat);
+                                    compressionFormat.GetCodec().Decompress(entryData, decompressedData);
 
                                     entryData = decompressedData;
                                     entryData.Position = 0;
@@ -171,8 +174,8 @@ namespace PuyoTools.GUI
                             if (settings.ConvertExtractedTextures)
                             {
                                 // Get the texture format, if it is a texture that is.
-                                TextureFormat textureFormat = Texture.GetFormat(entryData, entry.Name);
-                                if (textureFormat != TextureFormat.Unknown)
+                                ITextureFormat textureFormat = Texture.GetFormat(entryData, entry.Name);
+                                if (textureFormat != null)
                                 {
                                     // Ok, it appears to be a texture. We're going to attempt to convert it here.
                                     // If we get a TextureNeedsPalette exception, we'll wait until after we extract
@@ -180,7 +183,7 @@ namespace PuyoTools.GUI
                                     try
                                     {
                                         MemoryStream textureData = new MemoryStream();
-                                        Texture.Read(entryData, textureData, textureFormat);
+                                        textureFormat.GetCodec().Read(entryData, textureData);
 
                                         // If no exception was thrown, then we are all good doing what we need to do
                                         entryData = textureData;
@@ -217,8 +220,8 @@ namespace PuyoTools.GUI
                             entryData.Position = 0;
                             if (settings.ExtractExtractedArchives)
                             {
-                                ArchiveFormat archiveFormat = Archive.GetFormat(entryData, entry.Name);
-                                if (archiveFormat != ArchiveFormat.Unknown)
+                                IArchiveFormat archiveFormat = Archive.GetFormat(entryData, entry.Name);
+                                if (archiveFormat != null)
                                 {
                                     // It appears to be an archive. Let's add it to the file list
                                     if (settings.ExtractToSameNameDirectory)
@@ -253,7 +256,7 @@ namespace PuyoTools.GUI
                             TextureEntry textureEntry = textureFileQueue.Dequeue();
 
                             // Get the palette file name, and the out file name
-                            string paletteName = Path.Combine(Path.GetDirectoryName(textureEntry.Filename), Path.GetFileNameWithoutExtension(textureEntry.Filename)) + Texture.Formats[textureEntry.Format].PaletteFileExtension;
+                            string paletteName = Path.Combine(Path.GetDirectoryName(textureEntry.Filename), Path.GetFileNameWithoutExtension(textureEntry.Filename)) + textureEntry.Format.PaletteFileExtension;
                             string textureOutName = Path.Combine(Path.GetDirectoryName(textureEntry.Filename), Path.GetFileNameWithoutExtension(textureEntry.Filename)) + ".png";
 
                             // Make sure the two files exist before we attempt to open them.
@@ -268,7 +271,7 @@ namespace PuyoTools.GUI
                                 {
                                     using (FileStream inTextureStream = File.OpenRead(textureEntry.Filename))
                                     {
-                                        if (!Texture.Formats[textureEntry.Format].Is(inTextureStream, (int)inTextureStream.Length, textureEntry.Filename))
+                                        if (!textureEntry.Format.GetCodec().Is(inTextureStream, (int)inTextureStream.Length, textureEntry.Filename))
                                         {
                                             // Oh dear, somehow this isn't a texture anymore. Just skip over it
                                             continue;
@@ -278,7 +281,7 @@ namespace PuyoTools.GUI
                                         using (FileStream inPaletteStream = File.OpenRead(paletteName),
                                         outTextureStream = File.Create(textureOutName))
                                         {
-                                            TextureBase texture = Texture.Formats[textureEntry.Format];
+                                            TextureBase texture = textureEntry.Format.GetCodec();
                                             texture.PaletteStream = inPaletteStream;
                                             texture.PaletteLength = (int)inPaletteStream.Length;
                                             texture.Read(inTextureStream, outTextureStream, (int)inTextureStream.Length);
@@ -340,7 +343,7 @@ namespace PuyoTools.GUI
 
         private struct TextureEntry
         {
-            public TextureFormat Format;
+            public ITextureFormat Format;
             public string Filename;
         }
 

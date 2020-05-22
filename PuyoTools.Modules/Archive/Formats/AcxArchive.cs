@@ -39,11 +39,6 @@ namespace PuyoTools.Modules.Archive
             return new AcxArchiveWriter(destination);
         }
 
-        public override ModuleSettingsControl GetModuleSettingsControl()
-        {
-            return new AcxWriterSettings();
-        }
-
         public override bool Is(Stream source, int length, string fname)
         {
             return (Path.GetExtension(fname).ToLower() == ".acx" &&

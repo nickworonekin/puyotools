@@ -2,73 +2,61 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
-
+using System.Linq;
+using PuyoTools.Formats.Textures;
 using PuyoTools.Modules.Texture;
 
 namespace PuyoTools
 {
     public static class Texture
     {
-        // Texture format dictionary
-        public static readonly Dictionary<TextureFormat, TextureBase> Formats;
-        
+        private static readonly List<ITextureFormat> decoderFormats;
+        private static readonly List<ITextureFormat> encoderFormats;
+
         static Texture()
         {
-            // Initalize the texture format dictionary
-            Formats = new Dictionary<TextureFormat, TextureBase>
+            // Texture formats that can be used to read textures.
+            decoderFormats = new List<ITextureFormat>
             {
-                [TextureFormat.Gim] = new GimTexture(),
-                [TextureFormat.Gvr] = new GvrTexture(),
-                [TextureFormat.Pvr] = new PvrTexture(),
-                [TextureFormat.Svr] = new SvrTexture(),
+                GimFormat.Instance,
+                GvrFormat.Instance,
+                PvrFormat.Instance,
+                SvrFormat.Instance,
+            };
+
+            // Texture formats that can be used to write textures.
+            encoderFormats = new List<ITextureFormat>
+            {
+                GimFormat.Instance,
+                GvrFormat.Instance,
+                PvrFormat.Instance,
+                SvrFormat.Instance,
             };
         }
 
-        // Reads a texture with the specified texture format
-        public static void Read(Stream source, Stream destination, TextureFormat format)
+        /// <summary>
+        /// Gets the <see cref="ITextureFormat"/> that describes the data in <paramref name="source"/>.
+        /// </summary>
+        /// <param name="source">The data.</param>
+        /// <param name="filename">The name of the file containing the data.</param>
+        /// <returns>An instance of <see cref="ITextureFormat"/>, or null if there is no format.</returns>
+        /// <remarks>This method deals with formats used to read data. To get all the formats that can be used to write data, see <see cref="EncoderFormats"/>.</remarks>
+        internal static ITextureFormat GetFormat(Stream source, string filename)
         {
-            Formats[format].Read(source, destination);
-        }
-
-        // Reads a texture with the specified texture format and returns a bitmap
-        public static void Read(Stream source, out Bitmap destination, TextureFormat format)
-        {
-            Formats[format].Read(source, out destination);
-        }
-
-        // Writes a texture to the specified texture format
-        public static void Write(Stream source, Stream destination, TextureFormat format)
-        {
-            Formats[format].Write(source, destination);
-        }
-
-        // Returns the format used by the source texture.
-        public static TextureFormat GetFormat(Stream source, string fname)
-        {
-            foreach (KeyValuePair<TextureFormat, TextureBase> format in Formats)
+            foreach (var format in decoderFormats)
             {
-                if (format.Value.Is(source, fname))
-                    return format.Key;
+                if (format.Identify(source, filename))
+                {
+                    return format;
+                }
             }
 
-            return TextureFormat.Unknown;
+            return null;
         }
 
-        // Returns the module for this texture format.
-        public static TextureBase GetModule(TextureFormat format)
-        {
-            return Formats[format];
-        }
-    }
-
-    // List of texture formats
-    public enum TextureFormat
-    {
-        Unknown,
-        Gim,
-        Gvr,
-        Pvr,
-        Svr,
-        Plugin,
+        /// <summary>
+        /// Gets a collection of <see cref="ITextureFormat"/> that can be used to write texture data.
+        /// </summary>
+        internal static IEnumerable<ITextureFormat> EncoderFormats => encoderFormats.AsReadOnly();
     }
 }

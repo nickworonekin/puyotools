@@ -11,16 +11,18 @@ using PuyoTools.Modules;
 using PuyoTools.Modules.Archive;
 using PuyoTools.Modules.Compression;
 
-using Ookii.Dialogs;
+using Ookii.Dialogs.WinForms;
 using System.Linq;
+using PuyoTools.Formats.Compression;
+using PuyoTools.Formats.Archives;
 
 namespace PuyoTools.GUI
 {
     public partial class ArchiveCreator : ToolForm
     {
         List<ModuleSettingsControl> writerSettingsControls;
-        List<ArchiveFormat> archiveFormats;
-        List<CompressionFormat> compressionFormats;
+        List<IArchiveFormat> archiveFormats;
+        List<ICompressionFormat> compressionFormats;
 
         public ArchiveCreator()
         {
@@ -47,28 +49,22 @@ namespace PuyoTools.GUI
 
             // Fill the archive format box
             archiveFormatBox.SelectedIndex = 0;
-            archiveFormats = new List<ArchiveFormat>();
-            foreach (KeyValuePair<ArchiveFormat, ArchiveBase> format in Archive.Formats)
+            archiveFormats = new List<IArchiveFormat>();
+            foreach (var format in Archive.WriterFormats)
             {
-                if (format.Value.CanWrite)
-                {
-                    archiveFormatBox.Items.Add(format.Value.Name);
-                    archiveFormats.Add(format.Key);
+                archiveFormatBox.Items.Add(format.Name);
+                archiveFormats.Add(format);
 
-                    writerSettingsControls.Add(format.Value.GetModuleSettingsControl());
-                }
+                writerSettingsControls.Add(format.GetModuleSettingsControl());
             }
 
             // Fill the compression format box
             compressionFormatBox.SelectedIndex = 0;
-            compressionFormats = new List<CompressionFormat>();
-            foreach (KeyValuePair<CompressionFormat, CompressionBase> format in Compression.Formats)
+            compressionFormats = new List<ICompressionFormat>();
+            foreach (var format in Compression.EncoderFormats)
             {
-                if (format.Value.CanWrite)
-                {
-                    compressionFormatBox.Items.Add(format.Value.Name);
-                    compressionFormats.Add(format.Key);
-                }
+                compressionFormatBox.Items.Add(format.Name);
+                compressionFormats.Add(format);
             }
         }
 
@@ -113,7 +109,7 @@ namespace PuyoTools.GUI
 
             // Create the stream we are going to write the archive to
             Stream destination;
-            if (settings.CompressionFormat == CompressionFormat.Unknown)
+            if (settings.CompressionFormat == null)
             {
                 // We are not compression the archive. Write directly to the destination
                 destination = File.Create(settings.OutFilename);
@@ -125,7 +121,7 @@ namespace PuyoTools.GUI
             }
 
             // Create the archive
-            ArchiveWriter archive = Archive.Create(destination, settings.ArchiveFormat);
+            ArchiveWriter archive = settings.ArchiveFormat.GetCodec().Create(destination);
 
             // Set archive settings
             ModuleSettingsControl settingsControl = settings.WriterSettingsControl;
@@ -189,13 +185,13 @@ namespace PuyoTools.GUI
             archive.Flush();
 
             // Do we want to compress this archive?
-            if (settings.CompressionFormat != CompressionFormat.Unknown)
+            if (settings.CompressionFormat != null)
             {
                 destination.Position = 0;
 
                 using (FileStream outStream = File.Create(settings.OutFilename))
                 {
-                    Compression.Compress(destination, outStream, settings.CompressionFormat);
+                    settings.CompressionFormat.GetCodec().Compress(destination, outStream);
                 }
             }
 
@@ -337,13 +333,13 @@ namespace PuyoTools.GUI
         private void runButton_Click(object sender, EventArgs e)
         {
             // Get the format of the archive the user wants to create
-            ArchiveFormat archiveFormat = archiveFormats[archiveFormatBox.SelectedIndex - 1];
-            string fileExtension = (Archive.Formats[archiveFormat].FileExtension != String.Empty ? Archive.Formats[archiveFormat].FileExtension : ".*");
+            IArchiveFormat archiveFormat = archiveFormats[archiveFormatBox.SelectedIndex - 1];
+            string fileExtension = archiveFormat.FileExtension != string.Empty ? archiveFormat.FileExtension : ".*";
 
             // Prompt the user to save the archive
             SaveFileDialog sfd = new SaveFileDialog();
             sfd.Title = "Save Archive";
-            sfd.Filter = Archive.Formats[archiveFormat].Name + " Archive (*" + fileExtension + ")|*" + fileExtension + "|All Files (*.*)|*.*";
+            sfd.Filter = archiveFormat.Name + " Archive (*" + fileExtension + ")|*" + fileExtension + "|All Files (*.*)|*.*";
 
             if (sfd.ShowDialog() == DialogResult.OK)
             {
@@ -360,7 +356,7 @@ namespace PuyoTools.GUI
                 }
                 else
                 {
-                    settings.CompressionFormat = CompressionFormat.Unknown;
+                    settings.CompressionFormat = null;
                 }
 
                 settings.WriterSettingsControl = writerSettingsControls[archiveFormatBox.SelectedIndex - 1];
@@ -397,8 +393,8 @@ namespace PuyoTools.GUI
 
         private struct Settings
         {
-            public ArchiveFormat ArchiveFormat;
-            public CompressionFormat CompressionFormat;
+            public IArchiveFormat ArchiveFormat;
+            public ICompressionFormat CompressionFormat;
             public string OutFilename;
             public List<FileEntry> FileEntries;
             public ModuleSettingsControl WriterSettingsControl;

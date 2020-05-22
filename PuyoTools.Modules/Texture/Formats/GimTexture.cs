@@ -88,11 +88,6 @@ namespace PuyoTools.Modules.Texture
             texture.Save(destination);
         }
 
-        public override ModuleSettingsControl GetModuleSettingsControl()
-        {
-            return new GimWriterSettings();
-        }
-
         public override bool Is(Stream source, int length, string fname)
         {
             return (length > 24 && GimSharp.GimTexture.Is(source, length));

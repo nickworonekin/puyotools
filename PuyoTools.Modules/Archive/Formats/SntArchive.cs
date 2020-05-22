@@ -41,11 +41,6 @@ namespace PuyoTools.Modules.Archive
             return new SntArchiveWriter(destination);
         }
 
-        public override ModuleSettingsControl GetModuleSettingsControl()
-        {
-            return new SntWriterSettings();
-        }
-
         public override bool Is(Stream source, int length, string fname)
         {
             return (length > 36

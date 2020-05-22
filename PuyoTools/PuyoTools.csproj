@@ -1,285 +1,56 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{7578281C-3030-4640-A7E3-5AD83C598694}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>PuyoTools</RootNamespace>
-    <AssemblyName>PuyoTools</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <StartupObject>PuyoTools.PuyoTools</StartupObject>
-    <ApplicationIcon>Resources\ProgramIcon.ico</ApplicationIcon>
-    <FileUpgradeFlags>
-    </FileUpgradeFlags>
-    <OldToolsVersion>3.5</OldToolsVersion>
-    <UpgradeBackupLocation />
-    <PublishUrl>publish\</PublishUrl>
-    <Install>true</Install>
-    <InstallFrom>Disk</InstallFrom>
-    <UpdateEnabled>false</UpdateEnabled>
-    <UpdateMode>Foreground</UpdateMode>
-    <UpdateInterval>7</UpdateInterval>
-    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
-    <UpdatePeriodically>false</UpdatePeriodically>
-    <UpdateRequired>false</UpdateRequired>
-    <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
-    <UseApplicationTrust>false</UseApplicationTrust>
-    <BootstrapperEnabled>true</BootstrapperEnabled>
-    <TargetFrameworkProfile />
+    <TargetFramework>net472</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+
   <ItemGroup>
-    <Reference Include="Ookii.Dialogs, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c15020868fd6249, processorArchitecture=MSIL">
-      <HintPath>..\packages\Ookii.Dialogs.WindowsForms.1.0\lib\net35\Ookii.Dialogs.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.ComponentModel.Composition" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
+    <PackageReference Include="Ookii.Dialogs.WinForms" Version="1.1.0" />
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="GUI\AboutPuyoTools.cs">
-      <SubType>Form</SubType>
+    <ProjectReference Include="..\PuyoTools.Modules\PuyoTools.Modules.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System.ComponentModel.Composition" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Formats\Archives\WriterSettings\AcxWriterSettings.cs" />
+    <Compile Update="Formats\Archives\WriterSettings\AfsWriterSettings.cs" />
+    <Compile Update="Formats\Archives\WriterSettings\PvmWriterSettings.cs" />
+    <Compile Update="Formats\Archives\WriterSettings\SntWriterSettings.cs" />
+    <Compile Update="Formats\Textures\WriterSettings\GimWriterSettings.cs" />
+    <Compile Update="Formats\Textures\WriterSettings\GvrWriterSettings.cs" />
+    <Compile Update="Formats\Textures\WriterSettings\PvrWriterSettings.cs" />
+    <Compile Update="Formats\Textures\WriterSettings\SvrWriterSettings.cs" />
+    <Compile Update="GUI\ModuleSettingsControl.cs">
+      <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="GUI\AboutPuyoTools.Designer.cs">
-      <DependentUpon>AboutPuyoTools.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GUI\FileCompressor.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="GUI\FileCompressor.Designer.cs">
-      <DependentUpon>FileCompressor.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Archive.cs" />
-    <Compile Include="Compression.cs" />
-    <Compile Include="GUI\ArchiveCreator.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="GUI\ArchiveCreator.Designer.cs">
-      <DependentUpon>ArchiveCreator.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GUI\ArchiveExplorer.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="GUI\ArchiveExplorer.Designer.cs">
-      <DependentUpon>ArchiveExplorer.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GUI\ArchiveExtractor.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="GUI\ArchiveExtractor.Designer.cs">
-      <DependentUpon>ArchiveExtractor.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GUI\FileDecompressor.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="GUI\FileDecompressor.Designer.cs">
-      <DependentUpon>FileDecompressor.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GUI\FileListForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="GUI\FileListForm.Designer.cs">
-      <DependentUpon>FileListForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GUI\FilesNotAddedDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="GUI\FilesNotAddedDialog.Designer.cs">
-      <DependentUpon>FilesNotAddedDialog.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GUI\MainWindow.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="GUI\MainWindow.Designer.cs">
-      <DependentUpon>MainWindow.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GUI\ProgressDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="GUI\ProgressDialog.Designer.cs">
-      <DependentUpon>ProgressDialog.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GUI\TextureDecoder.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="GUI\TextureDecoder.Designer.cs">
-      <DependentUpon>TextureDecoder.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GUI\TextureEncoder.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="GUI\TextureEncoder.Designer.cs">
-      <DependentUpon>TextureEncoder.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GUI\TextureViewer.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="GUI\TextureViewer.Designer.cs">
-      <DependentUpon>TextureViewer.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GUI\ToolForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="GUI\ToolForm.Designer.cs">
-      <DependentUpon>ToolForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="IconResources.Designer.cs">
+    <Compile Update="IconResources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>IconResources.resx</DependentUpon>
     </Compile>
-    <Compile Include="BitmapResources.Designer.cs">
+    <Compile Update="BitmapResources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>BitmapResources.resx</DependentUpon>
     </Compile>
-    <Compile Include="IPuyoToolsPlugin.cs" />
-    <Compile Include="ListViewWithReordering.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <Compile Include="PuyoTools.cs" />
-    <Compile Include="Texture.cs" />
   </ItemGroup>
+
   <ItemGroup>
-    <ProjectReference Include="..\PuyoTools.Modules\PuyoTools.Modules.csproj">
-      <Project>{e5d36ffb-a89f-4f4d-928c-87fc863b4c6c}</Project>
-      <Name>PuyoTools.Modules</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="GUI\AboutPuyoTools.resx">
-      <DependentUpon>AboutPuyoTools.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GUI\ArchiveCreator.resx">
-      <DependentUpon>ArchiveCreator.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GUI\ArchiveExplorer.resx">
-      <DependentUpon>ArchiveExplorer.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GUI\ArchiveExtractor.resx">
-      <DependentUpon>ArchiveExtractor.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GUI\FileCompressor.resx">
-      <DependentUpon>FileCompressor.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GUI\FileDecompressor.resx">
-      <DependentUpon>FileDecompressor.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GUI\FileListForm.resx">
-      <DependentUpon>FileListForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GUI\FilesNotAddedDialog.resx">
-      <DependentUpon>FilesNotAddedDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GUI\MainWindow.resx">
-      <DependentUpon>MainWindow.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GUI\ProgressDialog.resx">
-      <DependentUpon>ProgressDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GUI\TextureDecoder.resx">
-      <DependentUpon>TextureDecoder.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GUI\TextureEncoder.resx">
-      <DependentUpon>TextureEncoder.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GUI\TextureViewer.resx">
-      <DependentUpon>TextureViewer.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GUI\ToolForm.resx">
-      <DependentUpon>ToolForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="IconResources.resx">
+    <EmbeddedResource Update="IconResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>IconResources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="BitmapResources.resx">
+    <EmbeddedResource Update="BitmapResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>BitmapResources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
-      <Install>false</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
-      <Visible>False</Visible>
-      <ProductName>Windows Installer 3.1</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-    <None Include="Resources\ProgramIcon.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Logo.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\CheckeredBackgroundDark.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\AboutLogo.png" />
-    <Content Include="Resources\CheckeredBackgroundLight.png" />
-  </ItemGroup>
+
 </Project>
