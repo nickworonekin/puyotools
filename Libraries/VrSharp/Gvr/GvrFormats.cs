@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace VrSharp.GvrTexture
+namespace VrSharp.Gvr
 {
     // Gvr Pixel Formats
     public enum GvrPixelFormat : byte

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace VrSharp.PvrTexture
+namespace VrSharp.Pvr
 {
     // Pvr Pixel Formats
     public enum PvrPixelFormat : byte

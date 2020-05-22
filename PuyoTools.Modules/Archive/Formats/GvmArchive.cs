@@ -287,7 +287,7 @@ namespace PuyoTools.Modules.Archive
                 // We already checked to make sure this texture is a GVR.
                 // No need to check it again.
                 oldPosition = entryData.Position;
-                VrSharp.GvrTexture.GvrTexture texture = new VrSharp.GvrTexture.GvrTexture(entryData);
+                VrSharp.Gvr.GvrTexture texture = new VrSharp.Gvr.GvrTexture(entryData);
                 entryData.Position = oldPosition;
 
                 // Write out the entry number

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace VrSharp.GvrTexture
+namespace VrSharp.Gvr
 {
     public abstract class GvrDataCodec : VrDataCodec
     {

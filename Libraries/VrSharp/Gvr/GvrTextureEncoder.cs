@@ -2,7 +2,7 @@
 using System.Drawing;
 using System.IO;
 
-namespace VrSharp.GvrTexture
+namespace VrSharp.Gvr
 {
     public class GvrTextureEncoder : VrTextureEncoder
     {

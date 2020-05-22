@@ -2,7 +2,8 @@
 using System.IO;
 
 using VrSharp;
-using VrSharp.SvrTexture;
+using VrSharp.Svr;
+using VrSharpSvrTexture = VrSharp.Svr.SvrTexture;
 
 namespace PuyoTools.Modules.Texture
 {
@@ -47,7 +48,7 @@ namespace PuyoTools.Modules.Texture
         public override void Read(Stream source, Stream destination)
         {
             // Reading SVR textures is done through VrSharp, so just pass it to that
-            VrSharp.SvrTexture.SvrTexture texture = new VrSharp.SvrTexture.SvrTexture(source);
+            VrSharpSvrTexture texture = new VrSharpSvrTexture(source);
 
             // Check to see if this texture requires an external palette and throw an exception
             // if we do not have one defined
@@ -132,7 +133,7 @@ namespace PuyoTools.Modules.Texture
 
         public override bool Is(Stream source, int length, string fname)
         {
-            return (length > 16 && VrSharp.SvrTexture.SvrTexture.Is(source, length));
+            return (length > 16 && VrSharpSvrTexture.Is(source, length));
         }
     }
 }

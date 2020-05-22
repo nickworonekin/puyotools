@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace VrSharp.PvrTexture
+namespace VrSharp.Pvr
 {
     public abstract class PvrDataCodec : VrDataCodec
     {

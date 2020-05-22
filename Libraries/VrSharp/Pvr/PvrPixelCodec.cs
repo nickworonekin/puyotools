@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Drawing;
 
-namespace VrSharp.PvrTexture
+namespace VrSharp.Pvr
 {
     public abstract class PvrPixelCodec : VrPixelCodec
     {

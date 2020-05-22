@@ -2,15 +2,15 @@
 using System.IO;
 using System.Text;
 
-namespace VrSharp.PvrTexture
+namespace VrSharp.Svr
 {
-    public class PvpPalette : VpPalette
+    public class SvpPalette : VpPalette
     {
         #region Palette Properties
         /// <summary>
         /// The palette's pixel format.
         /// </summary>
-        public PvrPixelFormat PixelFormat
+        public SvrPixelFormat PixelFormat
         {
             get
             {
@@ -22,42 +22,42 @@ namespace VrSharp.PvrTexture
                 return pixelFormat;
             }
         }
-        private PvrPixelFormat pixelFormat;
+        private SvrPixelFormat pixelFormat;
         #endregion
 
         #region Constructors & Initalizers
         /// <summary>
-        /// Open a PVP palette from a file.
+        /// Open a SVP palette from a file.
         /// </summary>
         /// <param name="file">Filename of the file that contains the palette data.</param>
-        public PvpPalette(string file) : base(file) { }
+        public SvpPalette(string file) : base(file) { }
 
         /// <summary>
-        /// Open a PVP palette from a byte array.
+        /// Open a SVP palette from a byte array.
         /// </summary>
         /// <param name="source">Byte array that contains the palette data.</param>
-        public PvpPalette(byte[] source) : base(source) { }
+        public SvpPalette(byte[] source) : base(source) { }
 
         /// <summary>
-        /// Open a PVP palette from a byte array.
+        /// Open a SVP palette from a byte array.
         /// </summary>
         /// <param name="source">Byte array that contains the palette data.</param>
         /// <param name="offset">Offset of the palette in the array.</param>
         /// <param name="length">Number of bytes to read.</param>
-        public PvpPalette(byte[] source, int offset, int length) : base(source, offset, length) { }
+        public SvpPalette(byte[] source, int offset, int length) : base(source, offset, length) { }
 
         /// <summary>
-        /// Open a PVP palette from a stream.
+        /// Open a SVP palette from a stream.
         /// </summary>
         /// <param name="source">Stream that contains the palette data.</param>
-        public PvpPalette(Stream source) : base(source) { }
+        public SvpPalette(Stream source) : base(source) { }
 
         /// <summary>
-        /// Open a PVP palette from a stream.
+        /// Open a SVP palette from a stream.
         /// </summary>
         /// <param name="source">Stream that contains the palette data.</param>
         /// <param name="length">Number of bytes to read.</param>
-        public PvpPalette(Stream source, int length) : base(source, length) { }
+        public SvpPalette(Stream source, int length) : base(source, length) { }
 
         protected override bool Initalize()
         {
@@ -66,8 +66,8 @@ namespace VrSharp.PvrTexture
                 return false;
 
             // Get the pixel format and the codec and make sure we can decode using them
-            pixelFormat = (PvrPixelFormat)encodedData[0x08];
-            pixelCodec = PvrPixelCodec.GetPixelCodec(pixelFormat);
+            pixelFormat = (SvrPixelFormat)encodedData[0x08];
+            pixelCodec = SvrPixelCodec.GetPixelCodec(pixelFormat);
             if (pixelCodec == null) return false;
 
             // Get the number of colors contained in the palette
@@ -79,12 +79,12 @@ namespace VrSharp.PvrTexture
 
         #region Palette Check
         /// <summary>
-        /// Determines if this is a PVP palette.
+        /// Determines if this is a SVP palette.
         /// </summary>
         /// <param name="source">Byte array containing the data.</param>
         /// <param name="offset">The offset in the byte array to start at.</param>
         /// <param name="length">Length of the data (in bytes).</param>
-        /// <returns>True if this is a PVP palette, false otherwise.</returns>
+        /// <returns>True if this is a SVP palette, false otherwise.</returns>
         public static bool Is(byte[] source, int offset, int length)
         {
             if (length >= 16 &&
@@ -96,21 +96,21 @@ namespace VrSharp.PvrTexture
         }
 
         /// <summary>
-        /// Determines if this is a PVP palette.
+        /// Determines if this is a SVP palette.
         /// </summary>
         /// <param name="source">Byte array containing the data.</param>
-        /// <returns>True if this is a PVP palette, false otherwise.</returns>
+        /// <returns>True if this is a SVP palette, false otherwise.</returns>
         public static bool Is(byte[] source)
         {
             return Is(source, 0, source.Length);
         }
 
         /// <summary>
-        /// Determines if this is a PVP palette.
+        /// Determines if this is a SVP palette.
         /// </summary>
         /// <param name="source">The stream to read from. The stream position is not changed.</param>
         /// <param name="length">Number of bytes to read.</param>
-        /// <returns>True if this is a PVP palette, false otherwise.</returns>
+        /// <returns>True if this is a SVP palette, false otherwise.</returns>
         public static bool Is(Stream source, int length)
         {
             // If the length is < 16, then there is no way this is a valid palette file.
@@ -127,20 +127,20 @@ namespace VrSharp.PvrTexture
         }
 
         /// <summary>
-        /// Determines if this is a PVP palette.
+        /// Determines if this is a SVP palette.
         /// </summary>
         /// <param name="source">The stream to read from. The stream position is not changed.</param>
-        /// <returns>True if this is a PVP palette, false otherwise.</returns>
+        /// <returns>True if this is a SVP palette, false otherwise.</returns>
         public static bool Is(Stream source)
         {
             return Is(source, (int)(source.Length - source.Position));
         }
 
         /// <summary>
-        /// Determines if this is a PVP palette.
+        /// Determines if this is a SVP palette.
         /// </summary>
         /// <param name="file">Filename of the file that contains the data.</param>
-        /// <returns>True if this is a PVP palette, false otherwise.</returns>
+        /// <returns>True if this is a SVP palette, false otherwise.</returns>
         public static bool Is(string file)
         {
             using (FileStream stream = File.OpenRead(file))

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace VrSharp.SvrTexture
+namespace VrSharp.Svr
 {
     public abstract class SvrPixelCodec : VrPixelCodec
     {

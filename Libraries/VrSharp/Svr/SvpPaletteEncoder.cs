@@ -1,16 +1,16 @@
 ﻿using System;
 using System.IO;
 
-namespace VrSharp.PvrTexture
+namespace VrSharp.Svr
 {
-    public class PvpPaletteEncoder : VpPaletteEncoder
+    public class SvpPaletteEncoder : VpPaletteEncoder
     {
         #region Fields
-        private PvrPixelFormat pixelFormat; // Pixel format
+        private SvrPixelFormat pixelFormat; // Pixel format
         #endregion
 
         #region Constructors & Initalizers
-        internal PvpPaletteEncoder(byte[][] palette, ushort numColors, PvrPixelFormat pixelFormat, VrPixelCodec pixelCodec)
+        internal SvpPaletteEncoder(byte[][] palette, ushort numColors, SvrPixelFormat pixelFormat, VrPixelCodec pixelCodec)
             : base(palette, numColors, pixelCodec)
         {
             this.pixelFormat = pixelFormat;

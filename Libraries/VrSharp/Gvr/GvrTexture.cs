@@ -3,7 +3,7 @@ using System.Drawing;
 using System.IO;
 using System.Text;
 
-namespace VrSharp.GvrTexture
+namespace VrSharp.Gvr
 {
     public class GvrTexture : VrTexture
     {

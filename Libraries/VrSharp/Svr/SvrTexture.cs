@@ -3,7 +3,7 @@ using System.Drawing;
 using System.IO;
 using System.Text;
 
-namespace VrSharp.SvrTexture
+namespace VrSharp.Svr
 {
     public class SvrTexture : VrTexture
     {

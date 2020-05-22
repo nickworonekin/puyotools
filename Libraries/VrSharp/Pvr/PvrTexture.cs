@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace VrSharp.PvrTexture
+namespace VrSharp.Pvr
 {
     public class PvrTexture : VrTexture
     {

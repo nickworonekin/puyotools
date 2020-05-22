@@ -256,7 +256,7 @@ namespace PuyoTools.Modules.Archive
                 // We already checked to make sure this texture is a PVR.
                 // No need to check it again.
                 oldPosition = entryData.Position;
-                VrSharp.PvrTexture.PvrTexture texture = new VrSharp.PvrTexture.PvrTexture(entryData);
+                VrSharp.Pvr.PvrTexture texture = new VrSharp.Pvr.PvrTexture(entryData);
                 entryData.Position = oldPosition;
 
                 // Write out the entry number

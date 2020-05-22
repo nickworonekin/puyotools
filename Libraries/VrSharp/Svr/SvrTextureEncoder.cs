@@ -2,45 +2,15 @@
 using System.Drawing;
 using System.IO;
 
-namespace VrSharp.PvrTexture
+namespace VrSharp.Svr
 {
-    public class PvrTextureEncoder : VrTextureEncoder
+    public class SvrTextureEncoder : VrTextureEncoder
     {
-        #region Fields
-        private PvrCompressionCodec compressionCodec;   // Compression codec
-        #endregion
-
         #region Texture Properties
-        /// <summary>
-        /// The texture's compression format. The default value is PvrCompressionFormat.None.
-        /// </summary>
-        public PvrCompressionFormat CompressionFormat
-        {
-            get
-            {
-                if (!initalized)
-                {
-                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
-                }
-
-                return compressionFormat;
-            }
-            set
-            {
-                if (!initalized)
-                {
-                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
-                }
-
-                compressionFormat = value;
-            }
-        }
-        protected PvrCompressionFormat compressionFormat;
-
         /// <summary>
         /// The texture's pixel format.
         /// </summary>
-        public PvrPixelFormat PixelFormat
+        public SvrPixelFormat PixelFormat
         {
             get
             {
@@ -52,12 +22,12 @@ namespace VrSharp.PvrTexture
                 return pixelFormat;
             }
         }
-        private PvrPixelFormat pixelFormat;
+        private SvrPixelFormat pixelFormat;
 
         /// <summary>
         /// The texture's data format.
         /// </summary>
-        public PvrDataFormat DataFormat
+        public SvrDataFormat DataFormat
         {
             get
             {
@@ -69,7 +39,7 @@ namespace VrSharp.PvrTexture
                 return dataFormat;
             }
         }
-        private PvrDataFormat dataFormat;
+        private SvrDataFormat dataFormat;
         #endregion
 
         #region Constructors & Initalizers
@@ -79,7 +49,7 @@ namespace VrSharp.PvrTexture
         /// <param name="file">Filename of the file that contains the texture data.</param>
         /// <param name="pixelFormat">Pixel format to encode the texture to.</param>
         /// <param name="dataFormat">Data format to encode the texture to.</param>
-        public PvrTextureEncoder(string file, PvrPixelFormat pixelFormat, PvrDataFormat dataFormat) : base(file)
+        public SvrTextureEncoder(string file, SvrPixelFormat pixelFormat, SvrDataFormat dataFormat) : base(file)
         {
             if (decodedBitmap != null)
             {
@@ -93,7 +63,7 @@ namespace VrSharp.PvrTexture
         /// <param name="source">Byte array that contains the texture data.</param>
         /// <param name="pixelFormat">Pixel format to encode the texture to.</param>
         /// <param name="dataFormat">Data format to encode the texture to.</param>
-        public PvrTextureEncoder(byte[] source, PvrPixelFormat pixelFormat, PvrDataFormat dataFormat)
+        public SvrTextureEncoder(byte[] source, SvrPixelFormat pixelFormat, SvrDataFormat dataFormat)
             : base(source)
         {
             if (decodedBitmap != null)
@@ -110,7 +80,7 @@ namespace VrSharp.PvrTexture
         /// <param name="length">Number of bytes to read.</param>
         /// <param name="pixelFormat">Pixel format to encode the texture to.</param>
         /// <param name="dataFormat">Data format to encode the texture to.</param>
-        public PvrTextureEncoder(byte[] source, int offset, int length, PvrPixelFormat pixelFormat, PvrDataFormat dataFormat)
+        public SvrTextureEncoder(byte[] source, int offset, int length, SvrPixelFormat pixelFormat, SvrDataFormat dataFormat)
             : base(source, offset, length)
         {
             if (decodedBitmap != null)
@@ -125,7 +95,7 @@ namespace VrSharp.PvrTexture
         /// <param name="source">Stream that contains the texture data.</param>
         /// <param name="pixelFormat">Pixel format to encode the texture to.</param>
         /// <param name="dataFormat">Data format to encode the texture to.</param>
-        public PvrTextureEncoder(Stream source, PvrPixelFormat pixelFormat, PvrDataFormat dataFormat)
+        public SvrTextureEncoder(Stream source, SvrPixelFormat pixelFormat, SvrDataFormat dataFormat)
             : base(source)
         {
             if (decodedBitmap != null)
@@ -141,7 +111,7 @@ namespace VrSharp.PvrTexture
         /// <param name="length">Number of bytes to read.</param>
         /// <param name="pixelFormat">Pixel format to encode the texture to.</param>
         /// <param name="dataFormat">Data format to encode the texture to.</param>
-        public PvrTextureEncoder(Stream source, int length, PvrPixelFormat pixelFormat, PvrDataFormat dataFormat)
+        public SvrTextureEncoder(Stream source, int length, SvrPixelFormat pixelFormat, SvrDataFormat dataFormat)
             : base(source, length)
         {
             if (decodedBitmap != null)
@@ -156,7 +126,7 @@ namespace VrSharp.PvrTexture
         /// <param name="source">Bitmap to encode.</param>
         /// <param name="pixelFormat">Pixel format to encode the texture to.</param>
         /// <param name="dataFormat">Data format to encode the texture to.</param>
-        public PvrTextureEncoder(Bitmap source, PvrPixelFormat pixelFormat, PvrDataFormat dataFormat)
+        public SvrTextureEncoder(Bitmap source, SvrPixelFormat pixelFormat, SvrDataFormat dataFormat)
             : base(source)
         {
             if (decodedBitmap != null)
@@ -165,34 +135,87 @@ namespace VrSharp.PvrTexture
             }
         }
 
-        private bool Initalize(PvrPixelFormat pixelFormat, PvrDataFormat dataFormat)
+        private bool Initalize(SvrPixelFormat pixelFormat, SvrDataFormat dataFormat)
         {
             // Set the default values
             hasGlobalIndex = true;
             globalIndex = 0;
-            compressionFormat = PvrCompressionFormat.None;
 
             // Set the data format and pixel format and load the appropiate codecs
             this.pixelFormat = pixelFormat;
-            pixelCodec = PvrPixelCodec.GetPixelCodec(pixelFormat);
+            pixelCodec = SvrPixelCodec.GetPixelCodec(pixelFormat);
 
             this.dataFormat = dataFormat;
-            dataCodec = PvrDataCodec.GetDataCodec(dataFormat);
+            dataCodec = SvrDataCodec.GetDataCodec(dataFormat);
 
             // Make sure the pixel and data codecs exists and we can encode to it
             if (pixelCodec == null || !pixelCodec.CanEncode) return false;
             if (dataCodec == null || !dataCodec.CanEncode) return false;
-            dataCodec.PixelCodec = pixelCodec;
+
+            // Set the correct data format (it's ok to do it after getting the codecs).
+            if (dataFormat == SvrDataFormat.Index4Rgb5a3Rectangle || dataFormat == SvrDataFormat.Index4Rgb5a3Square ||
+                dataFormat == SvrDataFormat.Index4Argb8Rectangle || dataFormat == SvrDataFormat.Index4Argb8Square)
+            {
+                if (textureWidth == textureHeight) // Square texture
+                {
+                    if (pixelFormat == SvrPixelFormat.Rgb5a3)
+                    {
+                        dataFormat = SvrDataFormat.Index4Rgb5a3Square;
+                    }
+                    else
+                    {
+                        dataFormat = SvrDataFormat.Index4Argb8Square;
+                    }
+                }
+                else // Rectangular texture
+                {
+                    if (pixelFormat == SvrPixelFormat.Rgb5a3)
+                    {
+                        dataFormat = SvrDataFormat.Index4Rgb5a3Rectangle;
+                    }
+                    else
+                    {
+                        dataFormat = SvrDataFormat.Index4Argb8Rectangle;
+                    }
+                }
+            }
+
+            else if (dataFormat == SvrDataFormat.Index8Rgb5a3Rectangle || dataFormat == SvrDataFormat.Index8Rgb5a3Square ||
+                dataFormat == SvrDataFormat.Index8Argb8Rectangle || dataFormat == SvrDataFormat.Index8Argb8Square)
+            {
+                if (textureWidth == textureHeight) // Square texture
+                {
+                    if (pixelFormat == SvrPixelFormat.Rgb5a3)
+                    {
+                        dataFormat = SvrDataFormat.Index8Rgb5a3Square;
+                    }
+                    else
+                    {
+                        dataFormat = SvrDataFormat.Index8Argb8Square;
+                    }
+                }
+                else // Rectangular texture
+                {
+                    if (pixelFormat == SvrPixelFormat.Rgb5a3)
+                    {
+                        dataFormat = SvrDataFormat.Index8Rgb5a3Rectangle;
+                    }
+                    else
+                    {
+                        dataFormat = SvrDataFormat.Index8Argb8Rectangle;
+                    }
+                }
+            }
 
             if (dataCodec.PaletteEntries != 0)
             {
                 // Convert the bitmap to an array containing indicies.
                 decodedData = BitmapToRawIndexed(decodedBitmap, dataCodec.PaletteEntries, out texturePalette);
-
+                
                 // If this texture has an external palette file, set up the palette encoder
                 if (dataCodec.NeedsExternalPalette)
                 {
-                    paletteEncoder = new PvpPaletteEncoder(texturePalette, (ushort)dataCodec.PaletteEntries, pixelFormat, pixelCodec);
+                    paletteEncoder = new SvpPaletteEncoder(texturePalette, (ushort)dataCodec.PaletteEntries, pixelFormat, pixelCodec);
                 }
             }
             else
@@ -217,32 +240,6 @@ namespace VrSharp.PvrTexture
             if (dataCodec.PaletteEntries != 0 && !dataCodec.NeedsExternalPalette)
             {
                 textureLength += (dataCodec.PaletteEntries * pixelCodec.Bpp / 8);
-            }
-
-            // Calculate the mipmap padding (if the texture contains mipmaps)
-            int mipmapPadding = 0;
-
-            if (dataCodec.HasMipmaps)
-            {
-                if (dataFormat == PvrDataFormat.SquareTwiddledMipmaps)
-                {
-                    // A 1x1 mipmap takes up as much space as a 2x1 mipmap
-                    // There are also 4 extra bytes at the end of the file
-                    mipmapPadding = (dataCodec.Bpp) >> 3;
-                    textureLength += 4;
-                }
-                else if (dataFormat == PvrDataFormat.SquareTwiddledMipmapsAlt)
-                {
-                    // A 1x1 mipmap takes up as much space as a 2x2 mipmap
-                    mipmapPadding = (3 * dataCodec.Bpp) >> 3;
-                }
-
-                textureLength += mipmapPadding;
-
-                for (int size = 1; size < textureWidth; size <<= 1)
-                {
-                    textureLength += Math.Max((size * size * dataCodec.Bpp) >> 3, 1);
-                }
             }
 
             MemoryStream destination = new MemoryStream(textureLength);
@@ -289,48 +286,9 @@ namespace VrSharp.PvrTexture
                 destination.Write(palette, 0, palette.Length);
             }
 
-            // Write out any mipmaps
-            if (dataCodec.HasMipmaps)
-            {
-                // Write out any padding bytes before the 1x1 mipmap
-                for (int i = 0; i < mipmapPadding; i++)
-                {
-                    destination.WriteByte(0);
-                }
-
-                for (int size = 1; size < textureWidth; size <<= 1)
-                {
-                    byte[] mipmapDecodedData = BitmapToRawResized(decodedBitmap, size, 1);
-                    byte[] mipmapTextureData = dataCodec.Encode(mipmapDecodedData, 0, size, size);
-                    destination.Write(mipmapTextureData, 0, mipmapTextureData.Length);
-                }
-            }
-
             // Write the texture data
             byte[] textureData = dataCodec.Encode(decodedData, textureWidth, textureHeight, null);
             destination.Write(textureData, 0, textureData.Length);
-
-            // If the data format is square twiddled with mipmaps, write out the extra bytes.
-            if (dataFormat == PvrDataFormat.SquareTwiddledMipmaps)
-            {
-                destination.Write(new byte[] { 0, 0, 0, 0 }, 0, 4);
-            }
-
-            // Compress the texture
-            if (compressionFormat != PvrCompressionFormat.None)
-            {
-                compressionCodec = PvrCompressionCodec.GetCompressionCodec(compressionFormat);
-
-                if (compressionCodec != null)
-                {
-                    // Ok, we need to convert the current stream to an array, compress it, then write it back to a new stream
-                    byte[] buffer = destination.ToArray();
-                    buffer = compressionCodec.Compress(buffer, (hasGlobalIndex ? 0x20 : 0x10), pixelCodec, dataCodec);
-
-                    destination = new MemoryStream();
-                    destination.Write(buffer, 0, buffer.Length);
-                }
-            }
 
             return destination;
         }

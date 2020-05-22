@@ -1,16 +1,16 @@
 ﻿using System;
 using System.IO;
 
-namespace VrSharp.SvrTexture
+namespace VrSharp.Gvr
 {
-    public class SvpPaletteEncoder : VpPaletteEncoder
+    public class GvpPaletteEncoder : VpPaletteEncoder
     {
         #region Fields
-        private SvrPixelFormat pixelFormat; // Pixel format
+        private GvrPixelFormat pixelFormat; // Pixel format
         #endregion
 
         #region Constructors & Initalizers
-        internal SvpPaletteEncoder(byte[][] palette, ushort numColors, SvrPixelFormat pixelFormat, VrPixelCodec pixelCodec)
+        internal GvpPaletteEncoder(byte[][] palette, ushort numColors, GvrPixelFormat pixelFormat, VrPixelCodec pixelCodec)
             : base(palette, numColors, pixelCodec)
         {
             this.pixelFormat = pixelFormat;
@@ -25,20 +25,20 @@ namespace VrSharp.SvrTexture
 
             MemoryStream destination = new MemoryStream(paletteLength);
 
-            // Write out the PVPL header
-            destination.WriteByte((byte)'P');
+            // Write out the GVPL header
+            destination.WriteByte((byte)'G');
             destination.WriteByte((byte)'V');
             destination.WriteByte((byte)'P');
             destination.WriteByte((byte)'L');
 
             PTStream.WriteInt32(destination, paletteLength - 8);
 
-            destination.WriteByte((byte)pixelFormat);
             destination.WriteByte(0);
+            destination.WriteByte((byte)pixelFormat);
 
             PTStream.WriteUInt32(destination, 0);
 
-            PTStream.WriteUInt16(destination, paletteEntries);
+            PTStream.WriteUInt16BE(destination, paletteEntries);
 
             // Write the palette data
             byte[] palette = pixelCodec.EncodePalette(decodedPalette, paletteEntries);
