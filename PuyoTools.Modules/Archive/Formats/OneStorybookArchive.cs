@@ -7,30 +7,6 @@ namespace PuyoTools.Modules.Archive
 {
     public class OneStorybookArchive : ArchiveBase
     {
-        /// <summary>
-        /// Name of the format.
-        /// </summary>
-        public override string Name
-        {
-            get { return "ONE (Sonic and the Secret Rings)"; }
-        }
-
-        /// <summary>
-        /// The primary file extension for this archive format.
-        /// </summary>
-        public override string FileExtension
-        {
-            get { return ".one"; }
-        }
-
-        /// <summary>
-        /// Returns if data can be written to this format.
-        /// </summary>
-        public override bool CanWrite
-        {
-            get { return true; }
-        }
-
         public override ArchiveReader Open(Stream source)
         {
             return new OneStorybookArchiveReader(source);
@@ -41,17 +17,26 @@ namespace PuyoTools.Modules.Archive
             return new OneStorybookArchiveWriter(destination);
         }
 
-        public override bool Is(Stream source, int length, string fname)
+        /// <summary>
+        /// Returns if this codec can read the data in <paramref name="source"/>.
+        /// </summary>
+        /// <param name="source">The data to read.</param>
+        /// <returns>True if the data can be read, false otherwise.</returns>
+        public static bool Identify(Stream source)
         {
-            if (PTStream.ReadUInt32BEAt(source, 0x4) != 0x10)
+            if (source.Length <= 16
+                || PTStream.ReadUInt32BEAt(source, 0x4) != 0x10)
+            {
                 return false;
+            }
 
             var i = PTStream.ReadUInt32BEAt(source, 0xC);
 
             if (i != 0xFFFFFFFF && i != 0x00000000)
+            {
                 return false;
+            }
 
-            source.Seek(0, SeekOrigin.Begin);
             return true;
         }
     }

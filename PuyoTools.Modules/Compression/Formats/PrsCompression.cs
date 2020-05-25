@@ -11,22 +11,6 @@ namespace PuyoTools.Modules.Compression
          */
 
         /// <summary>
-        /// Name of the format.
-        /// </summary>
-        public override string Name
-        {
-            get { return "PRS"; }
-        }
-
-        /// <summary>
-        /// Returns if data can be written to this format.
-        /// </summary>
-        public override bool CanWrite
-        {
-            get { return true; }
-        }
-
-        /// <summary>
         /// Decompress data from a stream.
         /// </summary>
         /// <param name="source">The stream to read from.</param>
@@ -162,15 +146,14 @@ namespace PuyoTools.Modules.Compression
         }
 
         /// <summary>
-        /// Determines if the data is in the specified format.
+        /// Returns if this codec can read the data in <paramref name="source"/>.
         /// </summary>
-        /// <param name="source">The stream to read from.</param>
-        /// <param name="length">Number of bytes to read.</param>
-        /// <param name="fname">Name of the file.</param>
-        /// <returns>True if the data is in the specified format, false otherwise.</returns>
-        public override bool Is(Stream source, int length, string fname)
+        /// <param name="source">The data to read.</param>
+        /// <returns>True if the data can be read, false otherwise.</returns>
+        public static bool Identify(Stream source)
         {
-            return (Path.GetExtension(fname).ToLower() == ".prs" && length > 2 && PTStream.Contains(source, length - 2, new byte[] { 0, 0 }));
+            return source.Length > 2
+                && PTStream.Contains(source, source.Length - 2, new byte[] { 0, 0 });
         }
 
         private static void Copy(int offset, int size, ref byte controlByte, ref byte bitPos, MemoryStream data, Stream destination)

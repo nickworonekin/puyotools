@@ -29,6 +29,6 @@ namespace PuyoTools.Formats.Textures
 
         public ModuleSettingsControl GetModuleSettingsControl() => new SvrWriterSettings();
 
-        public bool Identify(Stream source, string filename) => GetCodec().Is(source, filename);
+        public bool Identify(Stream source, string filename) => SvrTexture.Identify(source);
     }
 }

@@ -22,6 +22,6 @@ namespace PuyoTools.Formats.Compression
 
         public CompressionBase GetCodec() => new Lz11Compression();
 
-        public bool Identify(Stream source, string filename) => GetCodec().Is(source, filename);
+        public bool Identify(Stream source, string filename) => Lz11Compression.Identify(source);
     }
 }

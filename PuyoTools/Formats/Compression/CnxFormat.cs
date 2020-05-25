@@ -23,6 +23,6 @@ namespace PuyoTools.Formats.Compression
 
         public CompressionBase GetCodec() => new CnxCompression();
 
-        public bool Identify(Stream source, string filename) => GetCodec().Is(source, filename);
+        public bool Identify(Stream source, string filename) => CnxCompression.Identify(source);
     }
 }

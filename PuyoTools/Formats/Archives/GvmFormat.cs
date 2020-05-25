@@ -29,6 +29,6 @@ namespace PuyoTools.Formats.Archives
 
         public ModuleSettingsControl GetModuleSettingsControl() => new PvmWriterSettings();
 
-        public bool Identify(Stream source, string filename) => GetCodec().Is(source, filename);
+        public bool Identify(Stream source, string filename) => GvmArchive.Identify(source);
     }
 }

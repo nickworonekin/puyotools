@@ -5,30 +5,6 @@ namespace PuyoTools.Modules.Archive
 {
     public class GntArchive : ArchiveBase
     {
-        /// <summary>
-        /// Name of the format.
-        /// </summary>
-        public override string Name
-        {
-            get { return "GNT"; }
-        }
-
-        /// <summary>
-        /// The primary file extension for this archive format.
-        /// </summary>
-        public override string FileExtension
-        {
-            get { return ".gnt"; }
-        }
-
-        /// <summary>
-        /// Returns if data can be written to this format.
-        /// </summary>
-        public override bool CanWrite
-        {
-            get { return true; }
-        }
-
         public override ArchiveReader Open(Stream source)
         {
             return new GntArchiveReader(source);
@@ -39,11 +15,16 @@ namespace PuyoTools.Modules.Archive
             return new GntArchiveWriter(destination);
         }
 
-        public override bool Is(Stream source, int length, string fname)
+        /// <summary>
+        /// Returns if this codec can read the data in <paramref name="source"/>.
+        /// </summary>
+        /// <param name="source">The data to read.</param>
+        /// <returns>True if the data can be read, false otherwise.</returns>
+        public static bool Identify(Stream source)
         {
-            return (length > 36
+            return source.Length > 36
                 && PTStream.Contains(source, 0, new byte[] { (byte)'N', (byte)'G', (byte)'I', (byte)'F' })
-                && PTStream.Contains(source, 32, new byte[] { (byte)'N', (byte)'G', (byte)'T', (byte)'L' }));
+                && PTStream.Contains(source, 32, new byte[] { (byte)'N', (byte)'G', (byte)'T', (byte)'L' });
         }
     }
 

@@ -6,11 +6,6 @@ namespace PuyoTools.Modules.Archive
 {
     public abstract class ArchiveBase : ModuleBase
     {
-        /// <summary>
-        /// The primary file extension for this archive format.
-        /// </summary>
-        public abstract string FileExtension { get; }
-
         #region Open Methods
         /// <summary>
         /// Open an archive from a stream.

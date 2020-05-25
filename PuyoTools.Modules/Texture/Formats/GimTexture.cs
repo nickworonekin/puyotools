@@ -2,31 +2,12 @@
 using System.IO;
 
 using GimSharp;
+using GimSharpGimTexture = GimSharp.GimTexture;
 
 namespace PuyoTools.Modules.Texture
 {
     public class GimTexture : TextureBase
     {
-        public override string Name
-        {
-            get { return "GIM"; }
-        }
-
-        public override string FileExtension
-        {
-            get { return ".gim"; }
-        }
-
-        public override string PaletteFileExtension
-        {
-            get { return String.Empty; }
-        }
-
-        public override bool CanWrite
-        {
-            get { return true; }
-        }
-
         public GimTexture()
         {
             // Set default values
@@ -45,7 +26,7 @@ namespace PuyoTools.Modules.Texture
         public override void Read(Stream source, Stream destination)
         {
             // Reading GIM textures is done through GimSharp, so just pass it to that
-            GimSharp.GimTexture texture = new GimSharp.GimTexture(source);
+            GimSharpGimTexture texture = new GimSharpGimTexture(source);
 
             texture.Save(destination);
         }
@@ -88,9 +69,11 @@ namespace PuyoTools.Modules.Texture
             texture.Save(destination);
         }
 
-        public override bool Is(Stream source, int length, string fname)
-        {
-            return (length > 24 && GimSharp.GimTexture.Is(source, length));
-        }
+        /// <summary>
+        /// Returns if this codec can read the data in <paramref name="source"/>.
+        /// </summary>
+        /// <param name="source">The data to read.</param>
+        /// <returns>True if the data can be read, false otherwise.</returns>
+        public static bool Identify(Stream source) => GimSharpGimTexture.Is(source);
     }
 }

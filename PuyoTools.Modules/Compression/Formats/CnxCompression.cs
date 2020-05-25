@@ -11,22 +11,6 @@ namespace PuyoTools.Modules.Compression
          */
 
         /// <summary>
-        /// Name of the format.
-        /// </summary>
-        public override string Name
-        {
-            get { return "CNX"; }
-        }
-
-        /// <summary>
-        /// Returns if data can be written to this format.
-        /// </summary>
-        public override bool CanWrite
-        {
-            get { return false; }
-        }
-
-        /// <summary>
         /// Decompress data from a stream.
         /// </summary>
         /// <param name="source">The stream to read from.</param>
@@ -52,6 +36,12 @@ namespace PuyoTools.Modules.Compression
             {
                 byte flag = PTStream.ReadByte(source);
                 sourcePointer++;
+
+                // If all bits are 0, this is the end of the compressed data.
+                if (flag == 0)
+                {
+                    break;
+                }
 
                 for (int i = 0; i < 4; i++)
                 {
@@ -148,17 +138,15 @@ namespace PuyoTools.Modules.Compression
         }
 
         /// <summary>
-        /// Determines if the data is in the specified format.
+        /// Returns if this codec can read the data in <paramref name="source"/>.
         /// </summary>
-        /// <param name="source">The stream to read from.</param>
-        /// <param name="length">Number of bytes to read.</param>
-        /// <param name="fname">Name of the file.</param>
-        /// <returns>True if the data is in the specified format, false otherwise.</returns>
-        public override bool Is(Stream source, int length, string fname)
+        /// <param name="source">The data to read.</param>
+        /// <returns>True if the data can be read, false otherwise.</returns>
+        public static bool Identify(Stream source)
         {
-            return (length > 16 &&
-                PTStream.Contains(source, 0, new byte[] { (byte)'C', (byte)'N', (byte)'X', 0x2 }) &&
-                PTStream.ReadInt32BEAt(source, source.Position + 8) + 16 == length);
+            return source.Length > 16
+                && PTStream.Contains(source, 0, new byte[] { (byte)'C', (byte)'N', (byte)'X', 0x2 })
+                && PTStream.ReadInt32BEAt(source, source.Position + 8) + 16 == source.Length;
         }
     }
 }

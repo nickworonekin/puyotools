@@ -7,30 +7,6 @@ namespace PuyoTools.Modules.Archive
 {
     public class SntArchive : ArchiveBase
     {
-        /// <summary>
-        /// Name of the format.
-        /// </summary>
-        public override string Name
-        {
-            get { return "SNT"; }
-        }
-
-        /// <summary>
-        /// The primary file extension for this archive format.
-        /// </summary>
-        public override string FileExtension
-        {
-            get { return ".snt"; }
-        }
-
-        /// <summary>
-        /// Returns if data can be written to this format.
-        /// </summary>
-        public override bool CanWrite
-        {
-            get { return true; }
-        }
-
         public override ArchiveReader Open(Stream source)
         {
             return new SntArchiveReader(source);
@@ -41,14 +17,19 @@ namespace PuyoTools.Modules.Archive
             return new SntArchiveWriter(destination);
         }
 
-        public override bool Is(Stream source, int length, string fname)
+        /// <summary>
+        /// Returns if this codec can read the data in <paramref name="source"/>.
+        /// </summary>
+        /// <param name="source">The data to read.</param>
+        /// <returns>True if the data can be read, false otherwise.</returns>
+        public static bool Identify(Stream source)
         {
-            return (length > 36
+            return source.Length > 36
                 && (PTStream.Contains(source, 0, new byte[] { (byte)'N', (byte)'U', (byte)'I', (byte)'F' })
                 && PTStream.Contains(source, 32, new byte[] { (byte)'N', (byte)'U', (byte)'T', (byte)'L' }))
                 || (PTStream.Contains(source, 0, new byte[] { (byte)'N', (byte)'S', (byte)'I', (byte)'F' })
                 && PTStream.Contains(source, 32, new byte[] { (byte)'N', (byte)'S', (byte)'T', (byte)'L' }))
-                && PTStream.ReadInt32At(source, source.Position + 8) == 1);
+                && PTStream.ReadInt32At(source, source.Position + 8) == 1;
         }
     }
 
@@ -79,7 +60,7 @@ namespace PuyoTools.Modules.Archive
                     long oldPosition = source.Position;
                     source.Position = startOffset + entryOffset;
 
-                    if ((new GimTexture()).Is(source, entryLength, String.Empty))
+                    if (GimTexture.Identify(new StreamView(source, entryLength)))
                     {
                         // It's a GIM texture. Let's try to find a filename
                         source.Position += 36;

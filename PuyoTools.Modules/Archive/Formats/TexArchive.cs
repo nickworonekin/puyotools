@@ -6,30 +6,6 @@ namespace PuyoTools.Modules.Archive
 {
     public class TexArchive : ArchiveBase
     {
-        /// <summary>
-        /// Name of the format.
-        /// </summary>
-        public override string Name
-        {
-            get { return "TEX (Puyo Fever 2)"; }
-        }
-
-        /// <summary>
-        /// The primary file extension for this archive format.
-        /// </summary>
-        public override string FileExtension
-        {
-            get { return ".tex"; }
-        }
-
-        /// <summary>
-        /// Returns if data can be written to this format.
-        /// </summary>
-        public override bool CanWrite
-        {
-            get { return true; }
-        }
-
         public override ArchiveReader Open(Stream source)
         {
             return new TexArchiveReader(source);
@@ -40,9 +16,15 @@ namespace PuyoTools.Modules.Archive
             return new TexArchiveWriter(destination);
         }
 
-        public override bool Is(Stream source, int length, string fname)
+        /// <summary>
+        /// Returns if this codec can read the data in <paramref name="source"/>.
+        /// </summary>
+        /// <param name="source">The data to read.</param>
+        /// <returns>True if the data can be read, false otherwise.</returns>
+        public static bool Identify(Stream source)
         {
-            return (length > 16 && PTStream.Contains(source, 0, new byte[] { (byte)'T', (byte)'E', (byte)'X', (byte)'0' }));
+            return source.Length > 16
+                && PTStream.Contains(source, 0, new byte[] { (byte)'T', (byte)'E', (byte)'X', (byte)'0' });
         }
     }
 

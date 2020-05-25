@@ -29,6 +29,6 @@ namespace PuyoTools.Formats.Archives
 
         public ModuleSettingsControl GetModuleSettingsControl() => new SntWriterSettings();
 
-        public bool Identify(Stream source, string filename) => GetCodec().Is(source, filename);
+        public bool Identify(Stream source, string filename) => SntArchive.Identify(source);
     }
 }

@@ -7,9 +7,6 @@ namespace PuyoTools.Modules.Texture
 {
     public abstract class TextureBase : ModuleBase
     {
-        public abstract string FileExtension { get; }
-        public abstract string PaletteFileExtension { get; }
-
         /// <summary>
         /// After encoding a texture, returns if the texture needs an external palette file.
         /// The external palette file can be retrieved from PaletteStream.

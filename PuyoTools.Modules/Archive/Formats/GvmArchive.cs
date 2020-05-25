@@ -7,30 +7,6 @@ namespace PuyoTools.Modules.Archive
 {
     public class GvmArchive : ArchiveBase
     {
-        /// <summary>
-        /// Name of the format.
-        /// </summary>
-        public override string Name
-        {
-            get { return "GVM"; }
-        }
-
-        /// <summary>
-        /// The primary file extension for this archive format.
-        /// </summary>
-        public override string FileExtension
-        {
-            get { return ".gvm"; }
-        }
-
-        /// <summary>
-        /// Returns if data can be written to this format.
-        /// </summary>
-        public override bool CanWrite
-        {
-            get { return true; }
-        }
-
         public override ArchiveReader Open(Stream source)
         {
             return new GvmArchiveReader(source);
@@ -41,9 +17,15 @@ namespace PuyoTools.Modules.Archive
             return new GvmArchiveWriter(destination);
         }
 
-        public override bool Is(Stream source, int length, string fname)
+        /// <summary>
+        /// Returns if this codec can read the data in <paramref name="source"/>.
+        /// </summary>
+        /// <param name="source">The data to read.</param>
+        /// <returns>True if the data can be read, false otherwise.</returns>
+        public static bool Identify(Stream source)
         {
-            return (length > 12 && PTStream.Contains(source, 0, new byte[] { (byte)'G', (byte)'V', (byte)'M', (byte)'H' }));
+            return source.Length > 12
+                && PTStream.Contains(source, 0, new byte[] { (byte)'G', (byte)'V', (byte)'M', (byte)'H' });
         }
     }
 
@@ -223,7 +205,7 @@ namespace PuyoTools.Modules.Archive
         public override void CreateEntry(Stream source, string entryName)
         {
             // Only GVR textures can be added to a GVM archive. If this is not a GVR texture, throw an exception.
-            if (!(new GvrTexture()).Is(source, entryName))
+            if (!GvrTexture.Identify(source))
             {
                 throw new CannotAddFileToArchiveException();
             }

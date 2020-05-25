@@ -30,6 +30,6 @@ namespace PuyoTools.Formats.Textures
 
         public ModuleSettingsControl GetModuleSettingsControl() => new GimWriterSettings();
 
-        public bool Identify(Stream source, string filename) => GetCodec().Is(source, filename);
+        public bool Identify(Stream source, string filename) => GimTexture.Identify(source);
     }
 }

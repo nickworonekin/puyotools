@@ -271,7 +271,7 @@ namespace PuyoTools.GUI
                                 {
                                     using (FileStream inTextureStream = File.OpenRead(textureEntry.Filename))
                                     {
-                                        if (!textureEntry.Format.GetCodec().Is(inTextureStream, (int)inTextureStream.Length, textureEntry.Filename))
+                                        if (!textureEntry.Format.Identify(inTextureStream, textureEntry.Filename))
                                         {
                                             // Oh dear, somehow this isn't a texture anymore. Just skip over it
                                             continue;

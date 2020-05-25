@@ -9,26 +9,6 @@ namespace PuyoTools.Modules.Texture
 {
     public class GvrTexture : TextureBase
     {
-        public override string Name
-        {
-            get { return "GVR"; }
-        }
-
-        public override string FileExtension
-        {
-            get { return ".gvr"; }
-        }
-
-        public override string PaletteFileExtension
-        {
-            get { return ".gvp"; }
-        }
-
-        public override bool CanWrite
-        {
-            get { return true; }
-        }
-
         public GvrTexture()
         {
             // Set default values
@@ -172,9 +152,11 @@ namespace PuyoTools.Modules.Texture
             texture.Save(destination);
         }
 
-        public override bool Is(Stream source, int length, string fname)
-        {
-            return (length > 16 && VrSharpGvrTexture.Is(source, length));
-        }
+        /// <summary>
+        /// Returns if this codec can read the data in <paramref name="source"/>.
+        /// </summary>
+        /// <param name="source">The data to read.</param>
+        /// <returns>True if the data can be read, false otherwise.</returns>
+        public static bool Identify(Stream source) => VrSharpGvrTexture.Is(source);
     }
 }

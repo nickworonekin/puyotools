@@ -9,26 +9,6 @@ namespace PuyoTools.Modules.Texture
 {
     public class PvrTexture : TextureBase
     {
-        public override string Name
-        {
-            get { return "PVR"; }
-        }
-
-        public override string FileExtension
-        {
-            get { return ".pvr"; }
-        }
-
-        public override string PaletteFileExtension
-        {
-            get { return ".pvp"; }
-        }
-
-        public override bool CanWrite
-        {
-            get { return true; }
-        }
-
         public PvrTexture()
         {
             // Set default values
@@ -153,9 +133,11 @@ namespace PuyoTools.Modules.Texture
             texture.Save(destination);
         }
 
-        public override bool Is(Stream source, int length, string fname)
-        {
-            return (length > 16 && VrSharpPvrTexture.Is(source, length));
-        }
+        /// <summary>
+        /// Returns if this codec can read the data in <paramref name="source"/>.
+        /// </summary>
+        /// <param name="source">The data to read.</param>
+        /// <returns>True if the data can be read, false otherwise.</returns>
+        public static bool Identify(Stream source) => VrSharpPvrTexture.Is(source);
     }
 }

@@ -29,6 +29,6 @@ namespace PuyoTools.Formats.Archives
 
         public ModuleSettingsControl GetModuleSettingsControl() => new AcxWriterSettings();
 
-        public bool Identify(Stream source, string filename) => GetCodec().Is(source, filename);
+        public bool Identify(Stream source, string filename) => Path.GetExtension(filename).Equals(FileExtension, StringComparison.OrdinalIgnoreCase) && AcxArchive.Identify(source);
     }
 }

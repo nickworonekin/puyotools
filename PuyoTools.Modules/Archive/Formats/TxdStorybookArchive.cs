@@ -7,30 +7,6 @@ namespace PuyoTools.Modules.Archive
 {
     public class TxdStorybookArchive : ArchiveBase
     {
-        /// <summary>
-        /// Name of the format.
-        /// </summary>
-        public override string Name
-        {
-            get { return "TXD (Sonic and the Secret Rings)"; }
-        }
-
-        /// <summary>
-        /// The primary file extension for this archive format.
-        /// </summary>
-        public override string FileExtension
-        {
-            get { return ".txd"; }
-        }
-
-        /// <summary>
-        /// Returns if data can be written to this format.
-        /// </summary>
-        public override bool CanWrite
-        {
-            get { return true; }
-        }
-
         public override ArchiveReader Open(Stream source)
         {
             return new TxdStorybookArchiveReader(source);
@@ -41,10 +17,15 @@ namespace PuyoTools.Modules.Archive
             return new TxdStorybookArchiveWriter(destination);
         }
 
-        public override bool Is(Stream source, int length, string fname)
+        /// <summary>
+        /// Returns if this codec can read the data in <paramref name="source"/>.
+        /// </summary>
+        /// <param name="source">The data to read.</param>
+        /// <returns>True if the data can be read, false otherwise.</returns>
+        public static bool Identify(Stream source)
         {
-            source.Position = 0;
-            return (length > 16 && PTStream.Contains(source, 0, new byte[] { (byte)'T', (byte)'X', (byte)'A', (byte)'G' }));
+            return source.Length > 16
+                && PTStream.Contains(source, 0, new byte[] { (byte)'T', (byte)'X', (byte)'A', (byte)'G' });
         }
     }
 
@@ -86,7 +67,7 @@ namespace PuyoTools.Modules.Archive
         public override void CreateEntry(Stream source, string entryName)
         {
             // Only PVR textures can be added to a PVM archive. If this is not a PVR texture, throw an exception.
-            if (!(new GvrTexture()).Is(source, entryName))
+            if (!GvrTexture.Identify(source))
             {
                 throw new CannotAddFileToArchiveException();
             }

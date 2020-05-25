@@ -11,22 +11,6 @@ namespace PuyoTools.Modules.Compression
          */
 
         /// <summary>
-        /// Name of the format.
-        /// </summary>
-        public override string Name
-        {
-            get { return "LZ00"; }
-        }
-
-        /// <summary>
-        /// Returns if data can be written to this format.
-        /// </summary>
-        public override bool CanWrite
-        {
-            get { return true; }
-        }
-
-        /// <summary>
         /// Decompress data from a stream.
         /// </summary>
         /// <param name="source">The stream to read from.</param>
@@ -209,17 +193,15 @@ namespace PuyoTools.Modules.Compression
         }
 
         /// <summary>
-        /// Determines if the data is in the specified format.
+        /// Returns if this codec can read the data in <paramref name="source"/>.
         /// </summary>
-        /// <param name="source">The stream to read from.</param>
-        /// <param name="length">Number of bytes to read.</param>
-        /// <param name="fname">Name of the file.</param>
-        /// <returns>True if the data is in the specified format, false otherwise.</returns>
-        public override bool Is(Stream source, int length, string fname)
+        /// <param name="source">The data to read.</param>
+        /// <returns>True if the data can be read, false otherwise.</returns>
+        public static bool Identify(Stream source)
         {
-            return (length > 64 &&
-                PTStream.Contains(source, 0, new byte[] { (byte)'L', (byte)'Z', (byte)'0', (byte)'0' }) &&
-                PTStream.ReadInt32At(source, source.Position + 4) == length);
+            return source.Length > 64
+                && PTStream.Contains(source, 0, new byte[] { (byte)'L', (byte)'Z', (byte)'0', (byte)'0' })
+                && PTStream.ReadInt32At(source, source.Position + 4) == source.Length;
         }
 
         private byte ReadByte(Stream source, ref uint key)

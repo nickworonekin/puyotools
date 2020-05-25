@@ -22,6 +22,6 @@ namespace PuyoTools.Formats.Compression
 
         public CompressionBase GetCodec() => new PrsCompression();
 
-        public bool Identify(Stream source, string filename) => GetCodec().Is(source, filename);
+        public bool Identify(Stream source, string filename) => Path.GetExtension(filename).Equals(".prs", StringComparison.OrdinalIgnoreCase) && PrsCompression.Identify(source);
     }
 }
