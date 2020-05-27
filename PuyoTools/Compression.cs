@@ -31,6 +31,7 @@ namespace PuyoTools
             // Compression formats that can be used to compress files.
             encoderFormats = new List<ICompressionFormat>()
             {
+                CnxFormat.Instance,
                 CompFormat.Instance,
                 CxlzFormat.Instance,
                 Lz00Format.Instance,

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace PuyoTools.Modules.Compression
 {
@@ -134,7 +135,149 @@ namespace PuyoTools.Modules.Compression
         /// <param name="destination">The stream to write to.</param>
         public override void Compress(Stream source, Stream destination)
         {
-            throw new NotImplementedException();
+            long destinationStart = destination.Position;
+
+            // Get the source length
+            int sourceLength = (int)(source.Length - source.Position);
+
+            // Read the source data into an array
+            byte[] sourceArray = new byte[sourceLength];
+            source.Read(sourceArray, 0, sourceLength);
+
+            // Set the source and destination pointers
+            int sourcePointer = 0x0;
+            int destinationPointer = 0x10;
+
+            // Initalize the LZ dictionary
+            LzWindowDictionary dictionary = new LzWindowDictionary();
+            dictionary.SetWindowSize(0x800);
+            dictionary.SetMinMatchAmount(4);
+            dictionary.SetMaxMatchAmount(0x1F + 4);
+
+            // Write out the header
+            // Magic code
+            destination.WriteByte((byte)'C');
+            destination.WriteByte((byte)'N');
+            destination.WriteByte((byte)'X');
+            destination.WriteByte(0x2);
+
+            // Get the file extension, and adjust as necessary to get it as 3 bytes
+            var fileExtension = Path.GetExtension(SourcePath) ?? string.Empty;
+            for (var i = 1; i < fileExtension.Length && i < 4; i++)
+            {
+                destination.WriteByte((byte)fileExtension[i]);
+            }
+            for (var i = fileExtension.Length; i < 4; i++)
+            {
+                destination.WriteByte(0);
+            }
+
+            destination.WriteByte(0x10);
+            PTStream.WriteInt32BE(destination, 0); // Compressed length (will be filled in later)
+            PTStream.WriteInt32BE(destination, sourceLength); // Decompressed length
+
+            // Set the initial match
+            int[] match = new[] { 0, 0 };
+
+            // Start compression
+            while (sourcePointer < sourceLength)
+            {
+                using (MemoryStream buffer = new MemoryStream())
+                {
+                    byte flag = 0;
+
+                    for (int i = 0; i < 4; i++)
+                    {
+                        if (match[1] > 0) // There is a match
+                        {
+                            flag |= (byte)(2 << (i * 2));
+
+                            var matchPair = (ushort)((((match[0] - 1) & 0x7FF) << 5) | ((match[1] - 4) & 0x1F));
+                            PTStream.WriteUInt16BE(buffer, matchPair);
+
+                            dictionary.AddEntryRange(sourceArray, sourcePointer, match[1]);
+                            dictionary.SlideWindow(match[1]);
+
+                            sourcePointer += match[1];
+
+                            // Search for a match
+                            if (sourcePointer < sourceLength)
+                            {
+                                match = dictionary.Search(sourceArray, (uint)sourcePointer, (uint)sourceLength);
+                            }
+                        }
+                        else // There is not a match
+                        {
+                            dictionary.AddEntry(sourceArray, sourcePointer);
+                            dictionary.SlideWindow(1);
+
+                            byte matchLength = 1;
+
+                            // Search for a match
+                            while (sourcePointer + matchLength < sourceLength
+                                && matchLength < 255
+                                && (match = dictionary.Search(sourceArray, (uint)(sourcePointer + matchLength), (uint)sourceLength))[1] == 0)
+                            {
+                                dictionary.AddEntry(sourceArray, sourcePointer + matchLength);
+                                dictionary.SlideWindow(1);
+
+                                matchLength++;
+                            }
+
+                            // Determine the type of flag to write based on the length of the match
+                            if (matchLength > 1)
+                            {
+                                flag |= (byte)(3 << (i * 2));
+                                buffer.WriteByte(matchLength);
+                            }
+                            else
+                            {
+                                flag |= (byte)(1 << (i * 2));
+                            }
+
+                            buffer.Write(sourceArray, sourcePointer, matchLength);
+
+                            sourcePointer += matchLength;
+                        }
+
+                        // Check to see if we reached the end of the file
+                        if (sourcePointer >= sourceLength)
+                        {
+                            break;
+                        }
+                    }
+
+                    // Check to see if we reached the end of the file
+                    if (sourcePointer >= sourceLength && ((flag >> 6) & 0x3) == 0)
+                    {
+                        // Write out values for this flag
+                        buffer.WriteByte(0);
+                    }
+
+                    // Flush the buffer and write it to the destination stream
+                    destination.WriteByte(flag);
+
+                    buffer.Position = 0;
+                    while (buffer.Position < buffer.Length)
+                    {
+                        byte value = PTStream.ReadByte(buffer);
+                        destination.WriteByte(value);
+                    }
+
+                    destinationPointer += (int)buffer.Length + 1;
+                }
+            }
+
+            // Write the final flag of 0
+            destination.WriteByte(0);
+
+            destinationPointer++;
+
+            // Go back to the beginning of the file and write out the compressed length
+            long currentPosition = destination.Position;
+            destination.Position = destinationStart + 8;
+            PTStream.WriteInt32BE(destination, destinationPointer - 16);
+            destination.Position = currentPosition;
         }
 
         /// <summary>
