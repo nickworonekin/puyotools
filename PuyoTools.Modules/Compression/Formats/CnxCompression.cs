@@ -163,12 +163,21 @@ namespace PuyoTools.Modules.Compression
 
             // Get the file extension, and adjust as necessary to get it as 3 bytes
             var fileExtension = Path.GetExtension(SourcePath) ?? string.Empty;
-            for (var i = 1; i < fileExtension.Length && i < 4; i++)
+            if (fileExtension.Length > 0)
             {
-                destination.WriteByte((byte)fileExtension[i]);
+                for (var i = 1; i < fileExtension.Length && i < 4; i++)
+                {
+                    destination.WriteByte((byte)fileExtension[i]);
+                }
+                for (var i = fileExtension.Length; i < 4; i++)
+                {
+                    destination.WriteByte(0);
+                }
             }
-            for (var i = fileExtension.Length; i < 4; i++)
+            else
             {
+                destination.WriteByte(0);
+                destination.WriteByte(0);
                 destination.WriteByte(0);
             }
 
