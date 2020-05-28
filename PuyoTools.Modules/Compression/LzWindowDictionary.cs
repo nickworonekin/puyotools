@@ -10,7 +10,6 @@ namespace PuyoTools.Modules.Compression
         int windowLength = 0;
         int minMatchAmount = 3;
         int maxMatchAmount = 18;
-        int blockSize = 0;
         List<int>[] offsetList;
 
         public LzWindowDictionary()
@@ -56,7 +55,7 @@ namespace PuyoTools.Modules.Compression
         }
 
         // Slide the window
-        public void SlideWindow(int amount)
+        private void SlideWindow(int amount)
         {
             if (windowLength == windowSize)
                 windowStart += amount;
@@ -71,12 +70,6 @@ namespace PuyoTools.Modules.Compression
                     windowStart += amount;
                 }
             }
-        }
-
-        // Slide the window to the next block
-        public void SlideBlock()
-        {
-            windowStart += blockSize;
         }
 
         // Remove old entries
@@ -104,16 +97,12 @@ namespace PuyoTools.Modules.Compression
         {
             maxMatchAmount = amount;
         }
-        public void SetBlockSize(int size)
-        {
-            blockSize = size;
-            windowLength = size; // The window will work in blocks now
-        }
 
         // Add entries
         public void AddEntry(byte[] decompressedData, int offset)
         {
             offsetList[decompressedData[offset]].Add(offset);
+            SlideWindow(1);
         }
         public void AddEntryRange(byte[] decompressedData, int offset, int length)
         {

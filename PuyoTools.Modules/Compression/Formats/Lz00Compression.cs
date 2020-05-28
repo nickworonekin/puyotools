@@ -128,16 +128,16 @@ namespace PuyoTools.Modules.Compression
             PTStream.WriteInt32(destination, 0);
             PTStream.WriteInt32(destination, 0);
 
-            PTStream.WriteCString(destination, Path.GetFileName(DestinationPath), 32, Encoding.GetEncoding("Shift_JIS")); // File name
+            PTStream.WriteCString(destination, Path.GetFileName(DestinationPath), 32, EncodingExtensions.ShiftJIS); // File name
             PTStream.WriteInt32(destination, sourceLength); // Decompressed length
             PTStream.WriteUInt32(destination, key); // Encryption key
             PTStream.WriteInt32(destination, 0);
             PTStream.WriteInt32(destination, 0);
 
             // Start compression
-            while (sourcePointer < sourceLength)
+            using (MemoryStream buffer = new MemoryStream())
             {
-                using (MemoryStream buffer = new MemoryStream())
+                while (sourcePointer < sourceLength)
                 {
                     byte flag = 0;
 
@@ -182,6 +182,8 @@ namespace PuyoTools.Modules.Compression
                     }
 
                     destinationPointer += (int)buffer.Length + 1;
+
+                    buffer.SetLength(0);
                 }
             }
 

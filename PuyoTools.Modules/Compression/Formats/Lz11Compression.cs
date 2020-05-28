@@ -148,9 +148,9 @@ namespace PuyoTools.Modules.Compression
             }
 
             // Start compression
-            while (sourcePointer < sourceLength)
+            using (MemoryStream buffer = new MemoryStream())
             {
-                using (MemoryStream buffer = new MemoryStream())
+                while (sourcePointer < sourceLength)
                 {
                     byte flag = 0;
 
@@ -184,7 +184,6 @@ namespace PuyoTools.Modules.Compression
                             }
 
                             dictionary.AddEntryRange(sourceArray, sourcePointer, match[1]);
-                            dictionary.SlideWindow(match[1]);
 
                             sourcePointer += match[1];
                         }
@@ -193,7 +192,6 @@ namespace PuyoTools.Modules.Compression
                             buffer.WriteByte(sourceArray[sourcePointer]);
 
                             dictionary.AddEntry(sourceArray, sourcePointer);
-                            dictionary.SlideWindow(1);
 
                             sourcePointer++;
                         }
@@ -206,14 +204,11 @@ namespace PuyoTools.Modules.Compression
                     // Flush the buffer and write it to the destination stream
                     destination.WriteByte(flag);
 
-                    buffer.Position = 0;
-                    while (buffer.Position < buffer.Length)
-                    {
-                        byte value = PTStream.ReadByte(buffer);
-                        destination.WriteByte(value);
-                    }
+                    buffer.WriteTo(destination);
 
                     destinationPointer += (int)buffer.Length + 1;
+
+                    buffer.SetLength(0);
                 }
             }
         }

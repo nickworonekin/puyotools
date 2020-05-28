@@ -189,9 +189,9 @@ namespace PuyoTools.Modules.Compression
             int[] match = new[] { 0, 0 };
 
             // Start compression
-            while (sourcePointer < sourceLength)
+            using (MemoryStream buffer = new MemoryStream())
             {
-                using (MemoryStream buffer = new MemoryStream())
+                while (sourcePointer < sourceLength)
                 {
                     byte flag = 0;
 
@@ -205,7 +205,6 @@ namespace PuyoTools.Modules.Compression
                             PTStream.WriteUInt16BE(buffer, matchPair);
 
                             dictionary.AddEntryRange(sourceArray, sourcePointer, match[1]);
-                            dictionary.SlideWindow(match[1]);
 
                             sourcePointer += match[1];
 
@@ -218,7 +217,6 @@ namespace PuyoTools.Modules.Compression
                         else // There is not a match
                         {
                             dictionary.AddEntry(sourceArray, sourcePointer);
-                            dictionary.SlideWindow(1);
 
                             byte matchLength = 1;
 
@@ -228,7 +226,6 @@ namespace PuyoTools.Modules.Compression
                                 && (match = dictionary.Search(sourceArray, (uint)(sourcePointer + matchLength), (uint)sourceLength))[1] == 0)
                             {
                                 dictionary.AddEntry(sourceArray, sourcePointer + matchLength);
-                                dictionary.SlideWindow(1);
 
                                 matchLength++;
                             }
@@ -266,14 +263,11 @@ namespace PuyoTools.Modules.Compression
                     // Flush the buffer and write it to the destination stream
                     destination.WriteByte(flag);
 
-                    buffer.Position = 0;
-                    while (buffer.Position < buffer.Length)
-                    {
-                        byte value = PTStream.ReadByte(buffer);
-                        destination.WriteByte(value);
-                    }
+                    buffer.WriteTo(destination);
 
                     destinationPointer += (int)buffer.Length + 1;
+
+                    buffer.SetLength(0);
                 }
             }
 
