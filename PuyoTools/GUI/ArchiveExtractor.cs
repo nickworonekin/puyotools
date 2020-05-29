@@ -213,7 +213,7 @@ namespace PuyoTools.GUI
                             // Time to write out the file
                             using (FileStream destination = File.Create(Path.Combine(outPath, outName)))
                             {
-                                PTStream.CopyTo(entryData, destination, (int)entryData.Length);
+                                entryData.CopyTo(destination);
                             }
 
                             // Let's check to see if this is an archive. If it is an archive, add it to the file list.

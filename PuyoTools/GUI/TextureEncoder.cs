@@ -136,7 +136,7 @@ namespace PuyoTools.GUI
                         using (FileStream destination = File.Create(Path.Combine(outPath, Path.ChangeExtension(outFname, settings.TextureFormat.PaletteFileExtension))))
                         {
                             texture.PaletteStream.Position = 0;
-                            PTStream.CopyTo(texture.PaletteStream, destination);
+                            texture.PaletteStream.CopyTo(destination);
                         }
                     }
 

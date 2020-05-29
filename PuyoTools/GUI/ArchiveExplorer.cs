@@ -101,7 +101,7 @@ namespace PuyoTools.GUI
 
                     // Get the palette data (we may need to copy over the data to another stream)
                     Stream paletteData = new MemoryStream();
-                    PTStream.CopyTo(entryData, paletteData);
+                    entryData.CopyTo(paletteData);
                     paletteData.Position = 0;
 
                     // Now open the texture

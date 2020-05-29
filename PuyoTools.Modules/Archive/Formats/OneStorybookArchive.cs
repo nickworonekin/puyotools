@@ -123,7 +123,7 @@ namespace PuyoTools.Modules.Archive
 
                     var currentPos = destination.Position;
                     destination.Position = offset;
-                    PTStream.CopyTo(compressedStream, destination);
+                    compressedStream.CopyTo(destination);
                     destination.Position = currentPos;
 
                     offset += (int)compressedStream.Length;

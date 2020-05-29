@@ -143,7 +143,7 @@ namespace PuyoTools.Modules.Archive
         {
             using (Stream source = OpenEntry(entry), destination = File.Create(path))
             {
-                PTStream.CopyTo(source, destination);
+                source.CopyTo(destination);
             }
         }
 

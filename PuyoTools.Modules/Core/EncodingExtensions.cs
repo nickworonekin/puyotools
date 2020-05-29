@@ -6,8 +6,8 @@ namespace PuyoTools.Modules
 {
     internal static class EncodingExtensions
     {
-        private static Encoding shiftJisEncoding;
-        private static Encoding utf8NoBomEncoding;
+        private static readonly Lazy<Encoding> shiftJisEncoding = new Lazy<Encoding>(() => Encoding.GetEncoding("Shift_JIS"));
+        private static readonly Lazy<Encoding> utf8NoBomEncoding = new Lazy<Encoding>(() => new UTF8Encoding(false));
 
 #if NETSTANDARD2_0
         static EncodingExtensions()
@@ -21,33 +21,11 @@ namespace PuyoTools.Modules
         /// <summary>
         /// Gets an encoding for the Shift JIS format.
         /// </summary>
-        public static Encoding ShiftJIS
-        {
-            get
-            {
-                if (shiftJisEncoding == null)
-                {
-                    shiftJisEncoding = Encoding.GetEncoding("Shift_JIS");
-                }
-
-                return shiftJisEncoding;
-            }
-        }
+        public static Encoding ShiftJIS => shiftJisEncoding.Value;
 
         /// <summary>
         /// Gets an encoding for the UTF-8 format with no Unicode byte order mark.
         /// </summary>
-        public static Encoding UTF8NoBOM
-        {
-            get
-            {
-                if (utf8NoBomEncoding == null)
-                {
-                    utf8NoBomEncoding = new UTF8Encoding(false);
-                }
-
-                return utf8NoBomEncoding;
-            }
-        }
+        public static Encoding UTF8NoBOM => utf8NoBomEncoding.Value;
     }
 }

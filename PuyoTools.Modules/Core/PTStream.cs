@@ -38,32 +38,6 @@ namespace PuyoTools.Modules
             }
         }
 
-        /// <summary>
-        /// Reads the bytes from the current stream and writes them to another stream.
-        /// </summary>
-        /// <param name="source">The stream to read from.</param>
-        /// <param name="destination">The stream to which the contents of the current stream will be copied.</param>
-        public static void CopyTo(Stream source, Stream destination)
-        {
-            CopyTo(source, destination, 4096);
-        }
-
-        /// <summary>
-        /// Reads the bytes from the current stream and writes them to another stream.
-        /// </summary>
-        /// <param name="source">The stream to read from.</param>
-        /// <param name="destination">The stream to which the contents of the current stream will be copied.</param>
-        /// <param name="bufferSize">The size of the buffer. This value must be greater than zero. The default size is 4096.</param>
-        public static void CopyTo(Stream source, Stream destination, int bufferSize)
-        {
-            int num;
-            byte[] buffer = new byte[bufferSize];
-            while ((num = source.Read(buffer, 0, buffer.Length)) != 0)
-            {
-                destination.Write(buffer, 0, num);
-            }
-        }
-
         public static void CopyToPadded(Stream source, Stream destination, int blockSize, byte paddingByte)
         {
             CopyPartToPadded(source, destination, (int)(source.Length - source.Position), blockSize, paddingByte);
