@@ -28,257 +28,153 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.panel1 = new System.Windows.Forms.Panel();
-            this.versionLabel = new System.Windows.Forms.Label();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.linkLabel1 = new System.Windows.Forms.LinkLabel();
-            this.label1 = new System.Windows.Forms.Label();
-            this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.label13 = new System.Windows.Forms.Label();
+            this.versionLabel = new System.Windows.Forms.Label();
+            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.licenseLinkLabel = new System.Windows.Forms.LinkLabel();
+            this.textBox1 = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
-            this.label4 = new System.Windows.Forms.Label();
-            this.label5 = new System.Windows.Forms.Label();
-            this.label6 = new System.Windows.Forms.Label();
-            this.label7 = new System.Windows.Forms.Label();
-            this.label8 = new System.Windows.Forms.Label();
-            this.label9 = new System.Windows.Forms.Label();
-            this.label10 = new System.Windows.Forms.Label();
-            this.label11 = new System.Windows.Forms.Label();
-            this.label12 = new System.Windows.Forms.Label();
-            this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
-            this.flowLayoutPanel1.SuspendLayout();
+            this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // panel1
-            // 
-            this.panel1.BackColor = System.Drawing.SystemColors.ControlLightLight;
-            this.panel1.Controls.Add(this.versionLabel);
-            this.panel1.Controls.Add(this.pictureBox1);
-            this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panel1.Location = new System.Drawing.Point(0, 0);
-            this.panel1.Name = "panel1";
-            this.panel1.Padding = new System.Windows.Forms.Padding(5);
-            this.panel1.Size = new System.Drawing.Size(523, 70);
-            this.panel1.TabIndex = 0;
-            // 
-            // versionLabel
-            // 
-            this.versionLabel.Dock = System.Windows.Forms.DockStyle.Right;
-            this.versionLabel.Location = new System.Drawing.Point(274, 5);
-            this.versionLabel.Name = "versionLabel";
-            this.versionLabel.Padding = new System.Windows.Forms.Padding(0, 0, 20, 0);
-            this.versionLabel.Size = new System.Drawing.Size(244, 60);
-            this.versionLabel.TabIndex = 1;
-            this.versionLabel.Text = "Version";
-            this.versionLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            // 
-            // pictureBox1
-            // 
-            this.pictureBox1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-            this.pictureBox1.Dock = System.Windows.Forms.DockStyle.Left;
-            this.pictureBox1.Image = global::PuyoTools.BitmapResources.AboutLogo;
-            this.pictureBox1.Location = new System.Drawing.Point(5, 5);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(263, 60);
-            this.pictureBox1.TabIndex = 0;
-            this.pictureBox1.TabStop = false;
             // 
             // linkLabel1
             // 
+            this.linkLabel1.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.linkLabel1.AutoSize = true;
-            this.linkLabel1.Location = new System.Drawing.Point(12, 73);
+            this.linkLabel1.Location = new System.Drawing.Point(136, 13);
             this.linkLabel1.Name = "linkLabel1";
-            this.linkLabel1.Padding = new System.Windows.Forms.Padding(0, 10, 0, 15);
-            this.linkLabel1.Size = new System.Drawing.Size(68, 38);
+            this.linkLabel1.Size = new System.Drawing.Size(40, 13);
             this.linkLabel1.TabIndex = 4;
             this.linkLabel1.TabStop = true;
-            this.linkLabel1.Text = "Project Page";
+            this.linkLabel1.Text = "GitHub";
+            this.linkLabel1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.linkLabel1.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel1_LinkClicked);
             // 
-            // label1
+            // pictureBox1
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(12, 111);
-            this.label1.Name = "label1";
-            this.label1.Padding = new System.Windows.Forms.Padding(0, 0, 0, 15);
-            this.label1.Size = new System.Drawing.Size(138, 28);
-            this.label1.TabIndex = 5;
-            this.label1.Text = "Created by Nick Woronekin";
+            this.pictureBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+            this.pictureBox1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+            this.pictureBox1.Image = global::PuyoTools.BitmapResources.Logo192;
+            this.pictureBox1.Location = new System.Drawing.Point(19, 19);
+            this.pictureBox1.Margin = new System.Windows.Forms.Padding(10, 10, 15, 10);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(192, 249);
+            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
+            this.pictureBox1.TabIndex = 7;
+            this.pictureBox1.TabStop = false;
             // 
-            // flowLayoutPanel1
+            // label13
             // 
-            this.flowLayoutPanel1.AutoSize = true;
-            this.flowLayoutPanel1.Controls.Add(this.label2);
-            this.flowLayoutPanel1.Controls.Add(this.label3);
-            this.flowLayoutPanel1.Controls.Add(this.label4);
-            this.flowLayoutPanel1.Controls.Add(this.label5);
-            this.flowLayoutPanel1.Controls.Add(this.label6);
-            this.flowLayoutPanel1.Controls.Add(this.label7);
-            this.flowLayoutPanel1.Controls.Add(this.label8);
-            this.flowLayoutPanel1.Controls.Add(this.label9);
-            this.flowLayoutPanel1.Controls.Add(this.label10);
-            this.flowLayoutPanel1.Controls.Add(this.label11);
-            this.flowLayoutPanel1.Controls.Add(this.label12);
-            this.flowLayoutPanel1.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
-            this.flowLayoutPanel1.Location = new System.Drawing.Point(9, 142);
-            this.flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(0, 3, 3, 3);
-            this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(502, 198);
-            this.flowLayoutPanel1.TabIndex = 6;
+            this.label13.AutoSize = true;
+            this.label13.Font = new System.Drawing.Font("Microsoft Sans Serif", 27.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label13.Location = new System.Drawing.Point(222, 19);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(216, 42);
+            this.label13.TabIndex = 8;
+            this.label13.Text = "Puyo Tools";
+            // 
+            // versionLabel
+            // 
+            this.versionLabel.AutoSize = true;
+            this.versionLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.versionLabel.Location = new System.Drawing.Point(226, 61);
+            this.versionLabel.Name = "versionLabel";
+            this.versionLabel.Padding = new System.Windows.Forms.Padding(0, 5, 0, 5);
+            this.versionLabel.Size = new System.Drawing.Size(49, 23);
+            this.versionLabel.TabIndex = 9;
+            this.versionLabel.Text = "Version";
+            // 
+            // tableLayoutPanel1
+            // 
+            this.tableLayoutPanel1.BackColor = System.Drawing.SystemColors.ControlLight;
+            this.tableLayoutPanel1.ColumnCount = 2;
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel1.Controls.Add(this.linkLabel1, 0, 0);
+            this.tableLayoutPanel1.Controls.Add(this.licenseLinkLabel, 1, 0);
+            this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 281);
+            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
+            this.tableLayoutPanel1.RowCount = 1;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(624, 40);
+            this.tableLayoutPanel1.TabIndex = 10;
+            // 
+            // licenseLinkLabel
+            // 
+            this.licenseLinkLabel.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.licenseLinkLabel.AutoSize = true;
+            this.licenseLinkLabel.Location = new System.Drawing.Point(446, 13);
+            this.licenseLinkLabel.Name = "licenseLinkLabel";
+            this.licenseLinkLabel.Size = new System.Drawing.Size(44, 13);
+            this.licenseLinkLabel.TabIndex = 5;
+            this.licenseLinkLabel.TabStop = true;
+            this.licenseLinkLabel.Text = "License";
+            this.licenseLinkLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.licenseLinkLabel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.licenseLinkLabel_LinkClicked);
+            // 
+            // textBox1
+            // 
+            this.textBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox1.Location = new System.Drawing.Point(229, 110);
+            this.textBox1.Multiline = true;
+            this.textBox1.Name = "textBox1";
+            this.textBox1.ReadOnly = true;
+            this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox1.Size = new System.Drawing.Size(383, 158);
+            this.textBox1.TabIndex = 11;
+            this.textBox1.Text = "Francis Gagné (FraGag)\r\nJohn Chadwick (nmn)\r\nLuke Zapart (drx)\r\nQPjDDYwQLI\r\nMicha" +
+    "el Fadely\r\ntj32767\r\nGerbilSoft\r\nMainMemory\r\nnnn1590\r\nThomas May (WamWooWam)";
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(3, 0);
+            this.label2.Location = new System.Drawing.Point(226, 84);
             this.label2.Name = "label2";
-            this.label2.Padding = new System.Windows.Forms.Padding(0, 0, 0, 5);
-            this.label2.Size = new System.Drawing.Size(82, 18);
-            this.label2.TabIndex = 0;
-            this.label2.Text = "Contributions by";
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(3, 18);
-            this.label3.Name = "label3";
-            this.label3.Padding = new System.Windows.Forms.Padding(10, 0, 0, 5);
-            this.label3.Size = new System.Drawing.Size(130, 18);
-            this.label3.TabIndex = 1;
-            this.label3.Text = "Francis Gagné (FraGag)";
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(3, 36);
-            this.label4.Name = "label4";
-            this.label4.Padding = new System.Windows.Forms.Padding(10, 0, 0, 5);
-            this.label4.Size = new System.Drawing.Size(119, 18);
-            this.label4.TabIndex = 2;
-            this.label4.Text = "John Chadwick (nmn)";
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(3, 54);
-            this.label5.Name = "label5";
-            this.label5.Padding = new System.Windows.Forms.Padding(10, 0, 0, 5);
-            this.label5.Size = new System.Drawing.Size(98, 18);
-            this.label5.TabIndex = 3;
-            this.label5.Text = "Luke Zapart (drx)";
-            // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(3, 72);
-            this.label6.Name = "label6";
-            this.label6.Padding = new System.Windows.Forms.Padding(10, 0, 0, 5);
-            this.label6.Size = new System.Drawing.Size(82, 18);
-            this.label6.TabIndex = 4;
-            this.label6.Text = "QPjDDYwQLI";
-            // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(3, 90);
-            this.label7.Name = "label7";
-            this.label7.Padding = new System.Windows.Forms.Padding(10, 0, 0, 5);
-            this.label7.Size = new System.Drawing.Size(88, 18);
-            this.label7.TabIndex = 5;
-            this.label7.Text = "Michael Fadely";
-            // 
-            // label8
-            // 
-            this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(3, 108);
-            this.label8.Name = "label8";
-            this.label8.Padding = new System.Windows.Forms.Padding(10, 0, 0, 5);
-            this.label8.Size = new System.Drawing.Size(52, 18);
-            this.label8.TabIndex = 6;
-            this.label8.Text = "tj32767";
-            // 
-            // label9
-            // 
-            this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(3, 126);
-            this.label9.Name = "label9";
-            this.label9.Padding = new System.Windows.Forms.Padding(10, 0, 0, 5);
-            this.label9.Size = new System.Drawing.Size(63, 18);
-            this.label9.TabIndex = 7;
-            this.label9.Text = "GerbilSoft";
-            // 
-            // label10
-            // 
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(3, 144);
-            this.label10.Name = "label10";
-            this.label10.Padding = new System.Windows.Forms.Padding(10, 0, 0, 5);
-            this.label10.Size = new System.Drawing.Size(77, 18);
-            this.label10.TabIndex = 8;
-            this.label10.Text = "MainMemory";
-            // 
-            // label11
-            // 
-            this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(3, 162);
-            this.label11.Name = "label11";
-            this.label11.Padding = new System.Windows.Forms.Padding(10, 0, 0, 5);
-            this.label11.Size = new System.Drawing.Size(59, 18);
-            this.label11.TabIndex = 9;
-            this.label11.Text = "nnn1590";
-            // 
-            // label12
-            // 
-            this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(3, 180);
-            this.label12.Name = "label12";
-            this.label12.Padding = new System.Windows.Forms.Padding(10, 0, 0, 5);
-            this.label12.Size = new System.Drawing.Size(160, 18);
-            this.label12.TabIndex = 10;
-            this.label12.Text = "Thomas May (WamWooWam)";
+            this.label2.Padding = new System.Windows.Forms.Padding(0, 5, 0, 5);
+            this.label2.Size = new System.Drawing.Size(255, 23);
+            this.label2.TabIndex = 12;
+            this.label2.Text = "Developed by Nick Woronekin with contributions by:";
             // 
             // AboutPuyoTools
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(523, 347);
-            this.Controls.Add(this.flowLayoutPanel1);
-            this.Controls.Add(this.label1);
-            this.Controls.Add(this.linkLabel1);
-            this.Controls.Add(this.panel1);
+            this.ClientSize = new System.Drawing.Size(624, 321);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.textBox1);
+            this.Controls.Add(this.tableLayoutPanel1);
+            this.Controls.Add(this.versionLabel);
+            this.Controls.Add(this.label13);
+            this.Controls.Add(this.pictureBox1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "AboutPuyoTools";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "About Puyo Tools";
-            this.panel1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
-            this.flowLayoutPanel1.ResumeLayout(false);
-            this.flowLayoutPanel1.PerformLayout();
+            this.tableLayoutPanel1.ResumeLayout(false);
+            this.tableLayoutPanel1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
         }
 
         #endregion
-
-        private System.Windows.Forms.Panel panel1;
-        private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.LinkLabel linkLabel1;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.Label label13;
         private System.Windows.Forms.Label versionLabel;
-        private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.Label label8;
-        private System.Windows.Forms.Label label9;
-        private System.Windows.Forms.Label label10;
-        private System.Windows.Forms.Label label11;
-        private System.Windows.Forms.Label label12;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
+        private System.Windows.Forms.LinkLabel licenseLinkLabel;
+        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.Label label2;
     }
 }

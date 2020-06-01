@@ -63,9 +63,9 @@ namespace PuyoTools {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap AboutLogo {
+        internal static System.Drawing.Bitmap ArchiveIconDark {
             get {
-                object obj = ResourceManager.GetObject("AboutLogo", resourceCulture);
+                object obj = ResourceManager.GetObject("ArchiveIconDark", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -93,9 +93,29 @@ namespace PuyoTools {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap Logo {
+        internal static System.Drawing.Bitmap CompressIconDark {
             get {
-                object obj = ResourceManager.GetObject("Logo", resourceCulture);
+                object obj = ResourceManager.GetObject("CompressIconDark", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Logo192 {
+            get {
+                object obj = ResourceManager.GetObject("Logo192", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap TextureIconDark {
+            get {
+                object obj = ResourceManager.GetObject("TextureIconDark", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

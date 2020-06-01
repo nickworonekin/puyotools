@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
@@ -18,12 +19,17 @@ namespace PuyoTools.GUI
 
             this.Icon = IconResources.ProgramIcon;
 
-            versionLabel.Text = "Version " + Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
+            versionLabel.Text = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
         }
 
         private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            System.Diagnostics.Process.Start("https://github.com/nickworonekin/puyotools");
+            Process.Start("https://github.com/nickworonekin/puyotools");
+        }
+
+        private void licenseLinkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            Process.Start("https://github.com/nickworonekin/puyotools/blob/master/LICENSE.md");
         }
     }
 }
