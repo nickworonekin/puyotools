@@ -20,9 +20,7 @@ namespace PuyoTools.GUI
 {
     public partial class ArchiveCreator : ToolForm
     {
-        List<ModuleSettingsControl> writerSettingsControls;
-        List<IArchiveFormat> archiveFormats;
-        List<ICompressionFormat> compressionFormats;
+        Dictionary<IArchiveFormat, ModuleSettingsControl> writerSettingsControlsCache;
 
         public ArchiveCreator()
         {
@@ -44,28 +42,18 @@ namespace PuyoTools.GUI
             // Resize the column widths
             listView_ClientSizeChanged(null, null);
 
-            // Set up the writer settings controls
-            writerSettingsControls = new List<ModuleSettingsControl>();
+            // Set up the writer settings controls cache
+            writerSettingsControlsCache = new Dictionary<IArchiveFormat, ModuleSettingsControl>();
 
             // Fill the archive format box
             archiveFormatBox.SelectedIndex = 0;
-            archiveFormats = new List<IArchiveFormat>();
-            foreach (var format in Archive.WriterFormats)
-            {
-                archiveFormatBox.Items.Add(format.Name);
-                archiveFormats.Add(format);
-
-                writerSettingsControls.Add(format.GetModuleSettingsControl());
-            }
+            archiveFormatBox.Items.AddRange(Archive.WriterFormats.ToArray());
+            archiveFormatBox.DisplayMember = nameof(IArchiveFormat.Name);
 
             // Fill the compression format box
             compressionFormatBox.SelectedIndex = 0;
-            compressionFormats = new List<ICompressionFormat>();
-            foreach (var format in Compression.EncoderFormats)
-            {
-                compressionFormatBox.Items.Add(format.Name);
-                compressionFormats.Add(format);
-            }
+            compressionFormatBox.Items.AddRange(Compression.EncoderFormats.ToArray());
+            compressionFormatBox.DisplayMember = nameof(ICompressionFormat.Name);
         }
 
         private void AddFiles(IEnumerable<string> files)
@@ -271,10 +259,14 @@ namespace PuyoTools.GUI
 
             if (archiveFormatBox.SelectedIndex != 0)
             {
-                if (writerSettingsControls[archiveFormatBox.SelectedIndex - 1] != null)
+                var archiveFormat = (IArchiveFormat)archiveFormatBox.SelectedItem;
+                if (!writerSettingsControlsCache.TryGetValue(archiveFormat, out var writerSettingsControl))
                 {
-                    archiveSettingsPanel.Controls.Add(writerSettingsControls[archiveFormatBox.SelectedIndex - 1]);
+                    writerSettingsControl = archiveFormat.GetModuleSettingsControl();
+                    writerSettingsControlsCache.Add(archiveFormat, writerSettingsControl);
                 }
+
+                archiveSettingsPanel.Controls.Add(writerSettingsControl);
             }
 
             EnableRunButton();
@@ -333,7 +325,7 @@ namespace PuyoTools.GUI
         private void runButton_Click(object sender, EventArgs e)
         {
             // Get the format of the archive the user wants to create
-            IArchiveFormat archiveFormat = archiveFormats[archiveFormatBox.SelectedIndex - 1];
+            IArchiveFormat archiveFormat = (IArchiveFormat)archiveFormatBox.SelectedItem;
             string fileExtension = archiveFormat.FileExtension != string.Empty ? archiveFormat.FileExtension : ".*";
 
             // Prompt the user to save the archive
@@ -352,14 +344,21 @@ namespace PuyoTools.GUI
 
                 if (compressionFormatBox.SelectedIndex != 0)
                 {
-                    settings.CompressionFormat = compressionFormats[compressionFormatBox.SelectedIndex - 1];
+                    settings.CompressionFormat = (ICompressionFormat)compressionFormatBox.SelectedItem;
                 }
                 else
                 {
                     settings.CompressionFormat = null;
                 }
 
-                settings.WriterSettingsControl = writerSettingsControls[archiveFormatBox.SelectedIndex - 1];
+                if (writerSettingsControlsCache.TryGetValue(archiveFormat, out var writerSettingsControl))
+                {
+                    settings.WriterSettingsControl = writerSettingsControl;
+                }
+                else
+                {
+                    settings.WriterSettingsControl = null;
+                }
 
                 settings.FileEntries = new List<FileEntry>();
                 foreach (ListViewItem item in listView.Items)

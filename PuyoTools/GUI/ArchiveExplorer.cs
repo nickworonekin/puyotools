@@ -81,23 +81,13 @@ namespace PuyoTools.GUI
 
                 // Seems like we need a palette for this texture. Let's try to find one.
                 string textureName = Path.GetFileNameWithoutExtension(filename) + format.PaletteFileExtension;
-                int paletteFileIndex = -1;
-
-                for (int i = 0; i < info.Archive.Entries.Count; i++)
-                {
-                    if (info.Archive.Entries[i].Name.ToLower() == textureName.ToLower())
-                    {
-                        paletteFileIndex = i;
-                        break;
-                    }
-                }
+                ArchiveEntry paletteEntry = info.Archive.Entries.FirstOrDefault(x => x.Name.Equals(textureName, StringComparison.OrdinalIgnoreCase));
 
                 // Let's see if we found the palette file. And if so, open it up.
                 // Due to the nature of how this works, we need to copy the palette data to another stream first
-                if (paletteFileIndex != -1)
+                if (paletteEntry != null)
                 {
-                    Stream entryData = info.Archive.OpenEntry(paletteFileIndex);
-                    int paletteLength = (int)entryData.Length;
+                    Stream entryData = paletteEntry.Open();
 
                     // Get the palette data (we may need to copy over the data to another stream)
                     Stream paletteData = new MemoryStream();
@@ -141,10 +131,7 @@ namespace PuyoTools.GUI
             // Display information about the archive
             numFilesLabel.Text = info.Archive.Entries.Count.ToString();
             archiveFormatLabel.Text = info.Format.Name;
-
-            archiveNameLabel.Text = openedArchiveNames[0];
-            for (int i = 1; i < openedArchiveNames.Count; i++)
-                archiveNameLabel.Text += " / " + openedArchiveNames[i];
+            archiveNameLabel.Text = string.Join(" / ", openedArchiveNames);
         }
 
         private string FormatFileLength(long bytes)

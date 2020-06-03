@@ -12,41 +12,30 @@ using PuyoTools.Modules.Compression;
 using PuyoTools.Modules.Texture;
 using PuyoTools.Formats.Compression;
 using PuyoTools.Formats.Textures;
+using System.Linq;
 
 namespace PuyoTools.GUI
 {
     public partial class TextureEncoder : ToolForm
     {
-        List<ModuleSettingsControl> writerSettingsControls;
-        List<ITextureFormat> textureFormats;
-        List<ICompressionFormat> compressionFormats;
+        Dictionary<ITextureFormat, ModuleSettingsControl> writerSettingsControlsCache;
 
         public TextureEncoder()
         {
             InitializeComponent();
 
-            // Set up the writer settings panel and format writer settings
-            writerSettingsControls = new List<ModuleSettingsControl>();
+            // Set up the writer settings panel and format writer settings cache
+            writerSettingsControlsCache = new Dictionary<ITextureFormat, ModuleSettingsControl>();
 
             // Fill the texture format box
             textureFormatBox.SelectedIndex = 0;
-            textureFormats = new List<ITextureFormat>();
-            foreach (var format in Texture.EncoderFormats)
-            {
-                textureFormatBox.Items.Add(format.Name);
-                textureFormats.Add(format);
-
-                writerSettingsControls.Add(format.GetModuleSettingsControl());
-            }
+            textureFormatBox.Items.AddRange(Texture.EncoderFormats.ToArray());
+            textureFormatBox.DisplayMember = nameof(ITextureFormat.Name);
 
             // Fill the compression format box
             compressionFormatBox.SelectedIndex = 0;
-            compressionFormats = new List<ICompressionFormat>();
-            foreach (var format in Compression.EncoderFormats)
-            {
-                compressionFormatBox.Items.Add(format.Name);
-                compressionFormats.Add(format);
-            }
+            compressionFormatBox.Items.AddRange(Compression.EncoderFormats.ToArray());
+            compressionFormatBox.DisplayMember = nameof(ICompressionFormat.Name);
         }
 
         private void EnableRunButton()
@@ -159,10 +148,14 @@ namespace PuyoTools.GUI
 
             if (textureFormatBox.SelectedIndex != 0)
             {
-                if (writerSettingsControls[textureFormatBox.SelectedIndex - 1] != null)
+                var textureFormat = (ITextureFormat)textureFormatBox.SelectedItem;
+                if (!writerSettingsControlsCache.TryGetValue(textureFormat, out var writerSettingsControl))
                 {
-                    textureSettingsPanel.Controls.Add(writerSettingsControls[textureFormatBox.SelectedIndex - 1]);
+                    writerSettingsControl = textureFormat.GetModuleSettingsControl();
+                    writerSettingsControlsCache.Add(textureFormat, writerSettingsControl);
                 }
+
+                textureSettingsPanel.Controls.Add(writerSettingsControl);
             }
 
             EnableRunButton();
@@ -174,7 +167,7 @@ namespace PuyoTools.GUI
             this.Enabled = false;
 
             // Get the format of the texture the user wants to create
-            ITextureFormat textureFormat = textureFormats[textureFormatBox.SelectedIndex - 1];
+            ITextureFormat textureFormat = (ITextureFormat)textureFormatBox.SelectedItem;
 
             // Set the settings for the tool
             Settings settings = new Settings();
@@ -184,14 +177,21 @@ namespace PuyoTools.GUI
 
             if (compressionFormatBox.SelectedIndex != 0)
             {
-                settings.CompressionFormat = compressionFormats[compressionFormatBox.SelectedIndex - 1];
+                settings.CompressionFormat = (ICompressionFormat)compressionFormatBox.SelectedItem;
             }
             else
             {
                 settings.CompressionFormat = null;
             }
 
-            settings.WriterSettingsControl = writerSettingsControls[textureFormatBox.SelectedIndex - 1];
+            if (writerSettingsControlsCache.TryGetValue(textureFormat, out var writerSettingsControl))
+            {
+                settings.WriterSettingsControl = writerSettingsControl;
+            }
+            else
+            {
+                settings.WriterSettingsControl = null;
+            }
 
             // Set up the process dialog and then run the tool
             ProgressDialog dialog = new ProgressDialog();

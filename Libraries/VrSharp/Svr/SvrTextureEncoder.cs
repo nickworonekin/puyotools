@@ -151,6 +151,7 @@ namespace VrSharp.Svr
             // Make sure the pixel and data codecs exists and we can encode to it
             if (pixelCodec == null || !pixelCodec.CanEncode) return false;
             if (dataCodec == null || !dataCodec.CanEncode) return false;
+            dataCodec.PixelCodec = pixelCodec;
 
             // Set the correct data format (it's ok to do it after getting the codecs).
             if (dataFormat == SvrDataFormat.Index4Rgb5a3Rectangle || dataFormat == SvrDataFormat.Index4Rgb5a3Square ||

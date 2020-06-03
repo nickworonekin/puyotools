@@ -9,13 +9,12 @@ using System.IO;
 
 using PuyoTools.Modules.Compression;
 using PuyoTools.Formats.Compression;
+using System.Linq;
 
 namespace PuyoTools.GUI
 {
     public partial class FileCompressor : ToolForm
     {
-        List<ICompressionFormat> compressionFormats;
-
         public FileCompressor()
         {
             InitializeComponent();
@@ -26,12 +25,8 @@ namespace PuyoTools.GUI
 
             // Fill the compression format box
             compressionFormatBox.SelectedIndex = 0;
-            compressionFormats = new List<ICompressionFormat>();
-            foreach (var format in Compression.EncoderFormats)
-            {
-                compressionFormatBox.Items.Add(format.Name);
-                compressionFormats.Add(format);
-            }
+            compressionFormatBox.Items.AddRange(Compression.EncoderFormats.ToArray());
+            compressionFormatBox.DisplayMember = nameof(ICompressionFormat.Name);
         }
 
         private void EnableRunButton(object sender, EventArgs e)
@@ -120,7 +115,7 @@ namespace PuyoTools.GUI
 
             // Set up the settings we will be using for this
             Settings settings = new Settings();
-            settings.CompressionFormat = compressionFormats[compressionFormatBox.SelectedIndex - 1];
+            settings.CompressionFormat = (ICompressionFormat)compressionFormatBox.SelectedItem;
             settings.OverwriteSourceFile = overwriteSourceFileCheckbox.Checked;
             settings.DeleteSourceFile = deleteSourceFileCheckbox.Checked;
 

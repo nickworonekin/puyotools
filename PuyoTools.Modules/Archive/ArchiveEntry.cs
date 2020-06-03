@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -19,7 +20,7 @@ namespace PuyoTools.Modules.Archive
         /// <summary>
         /// Creates a new instance of ArchiveEntry
         /// </summary>
-        /// <param name="archive">The archive this entry belongs to.</param>
+        /// <param name="archiveReader">The <see cref="ArchiveReader"/> this entry belongs to.</param>
         /// <param name="offset">The offset of the entry within the archive.</param>
         /// <param name="length">The size of the entry within the archive.</param>
         /// <param name="name">The file name of the entry.</param>
@@ -38,6 +39,7 @@ namespace PuyoTools.Modules.Archive
         /// <summary>
         /// Creates an entry that has the specified data and entry name in the archive.
         /// </summary>
+        /// <param name="archiveWriter">The <see cref="ArchiveWriter"/> this entry belongs to.</param>
         /// <param name="source">The data to be added to the archive.</param>
         /// <param name="name">A path that specifies the name of the entry to be created.</param>
         internal ArchiveEntry(ArchiveWriter archiveWriter, Stream source, string name)
@@ -93,7 +95,7 @@ namespace PuyoTools.Modules.Archive
         }
 
         /// <summary>
-        /// Gets the zero-based index of the item within the ListViewItemCollection.
+        /// Gets the zero-based index of the item within the <see cref="ArchiveEntryCollection"/>.
         /// </summary>
         public int Index { get; internal set; }
 
@@ -161,7 +163,7 @@ namespace PuyoTools.Modules.Archive
     /// <summary>
     /// A read-only collection of archive entries.
     /// </summary>
-    public class ArchiveEntryCollection
+    public class ArchiveEntryCollection : IReadOnlyList<ArchiveEntry>
     {
         private ArchiveReader ownerReader; // Archive reader owner
         private ArchiveWriter ownerWriter; // Archive writer owner
@@ -237,10 +239,12 @@ namespace PuyoTools.Modules.Archive
         /// <returns>A IEnumerator that can be used to iterate through the collection.</returns>
         public IEnumerator<ArchiveEntry> GetEnumerator()
         {
-            foreach (ArchiveEntry entry in entries)
-            {
-                yield return entry;
-            }
+            return entries.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return entries.GetEnumerator();
         }
     }
 }
