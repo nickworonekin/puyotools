@@ -30,13 +30,14 @@ namespace PuyoTools.GUI
         {
             InitializeComponent();
 
-            this.Icon = IconResources.ProgramIcon;
-            this.MinimumSize = this.Size;
+            Icon = IconResources.ProgramIcon;
+            MinimumSize = Size;
 
             // Make the list view rows bigger
-            ImageList imageList = new ImageList();
-            imageList.ImageSize = new Size(1, 20);
-            listView.SmallImageList = imageList;
+            listView.SmallImageList = new ImageList
+            {
+                ImageSize = new Size(1, 20),
+            };
 
             // Hide the archive information until an archive is opened
             archiveInfoPanel.Visible = false;
@@ -144,10 +145,10 @@ namespace PuyoTools.GUI
                 terabyte = 1024 * gigabyte;
 
             // Ok, let's format our filesize now
-            if (bytes > terabyte) return Decimal.Divide(bytes, terabyte).ToString("N2") + " TB";
-            else if (bytes > gigabyte) return Decimal.Divide(bytes, gigabyte).ToString("N2") + " GB";
-            else if (bytes > megabyte) return Decimal.Divide(bytes, megabyte).ToString("N2") + " MB";
-            else if (bytes > kilobyte) return Decimal.Divide(bytes, kilobyte).ToString("N2") + " KB";
+            if (bytes > terabyte) return decimal.Divide(bytes, terabyte).ToString("N2") + " TB";
+            else if (bytes > gigabyte) return decimal.Divide(bytes, gigabyte).ToString("N2") + " GB";
+            else if (bytes > megabyte) return decimal.Divide(bytes, megabyte).ToString("N2") + " MB";
+            else if (bytes > kilobyte) return decimal.Divide(bytes, kilobyte).ToString("N2") + " KB";
 
             return bytes.ToString("N0") + " B";
         }
@@ -213,9 +214,8 @@ namespace PuyoTools.GUI
                     }
                 }
 
-                // maybe let's actually tell people why their shit won't open
-                // rather than just sitting there like a duck doing nothing?
-                MessageBox.Show("Unknown or unsupported archive format!");
+                // Display a message if we are not able to open the file the user selected
+                MessageBox.Show("Unknown or unsupported archive format.");
             }
         }
 
@@ -353,7 +353,7 @@ namespace PuyoTools.GUI
                         ArchiveEntry entry = archive.Entries[index];
 
                         string entryFilename = entry.Name;
-                        if (entryFilename == String.Empty)
+                        if (entryFilename == string.Empty)
                         {
                             entryFilename = index.ToString("D" + archive.Entries.Count.ToString().Length);
                         }
@@ -366,7 +366,7 @@ namespace PuyoTools.GUI
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            this.Close();
+            Close();
         }
 
         private void extractAllToolStripMenuItem_Click(object sender, EventArgs e)
@@ -407,7 +407,7 @@ namespace PuyoTools.GUI
                         ArchiveEntry entry = archive.Entries[i];
 
                         string entryFilename = entry.Name;
-                        if (entryFilename == String.Empty)
+                        if (entryFilename == string.Empty)
                         {
                             entryFilename = i.ToString("D" + archive.Entries.Count.ToString().Length);
                         }

@@ -23,9 +23,9 @@ namespace PuyoTools.GUI
         {
             InitializeComponent();
 
-            this.Icon = IconResources.ProgramIcon;
-            this.ClientSize = new Size(512, this.ClientSize.Height);
-            this.MinimumSize = this.Size;
+            Icon = IconResources.ProgramIcon;
+            ClientSize = new Size(512, ClientSize.Height);
+            MinimumSize = Size;
 
             texturePanel.BackColor = Color.FromArgb(68, 68, 68);
 
@@ -65,12 +65,12 @@ namespace PuyoTools.GUI
             textureDisplay.Size = textureBitmap.Size;
 
             // Now let's adjust the width and height of the form
-            this.ClientSize = new Size(Math.Max(Math.Min(1024, textureDisplay.Width), texturePanel.Width), this.ClientSize.Height - texturePanel.Height + Math.Max(Math.Min(512, textureDisplay.Height), texturePanel.Height));
+            ClientSize = new Size(Math.Max(Math.Min(1024, textureDisplay.Width), texturePanel.Width), ClientSize.Height - texturePanel.Height + Math.Max(Math.Min(512, textureDisplay.Height), texturePanel.Height));
 
 
             texturePanel_ClientSizeChanged(null, null);
 
-            this.CenterToScreen();
+            CenterToScreen();
 
             // Display information about the texture
             textureNameLabel.Text = filename == string.Empty ? "Unnamed" : filename;
@@ -185,7 +185,7 @@ namespace PuyoTools.GUI
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            this.Close();
+            Close();
         }
 
         private void copyToolStripMenuItem_Click(object sender, EventArgs e)

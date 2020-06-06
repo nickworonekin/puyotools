@@ -164,48 +164,33 @@ namespace PuyoTools.GUI
         private void runButton_Click(object sender, EventArgs e)
         {
             // Disable the form
-            this.Enabled = false;
+            Enabled = false;
 
             // Get the format of the texture the user wants to create
             ITextureFormat textureFormat = (ITextureFormat)textureFormatBox.SelectedItem;
 
             // Set the settings for the tool
-            Settings settings = new Settings();
-            settings.TextureFormat = textureFormat;
-            settings.OutputToSourceDirectory = outputToSourceDirButton.Checked;
-            settings.DeleteSource = deleteSourceButton.Checked;
-
-            if (compressionFormatBox.SelectedIndex != 0)
+            Settings settings = new Settings
             {
-                settings.CompressionFormat = (ICompressionFormat)compressionFormatBox.SelectedItem;
-            }
-            else
-            {
-                settings.CompressionFormat = null;
-            }
-
-            if (writerSettingsControlsCache.TryGetValue(textureFormat, out var writerSettingsControl))
-            {
-                settings.WriterSettingsControl = writerSettingsControl;
-            }
-            else
-            {
-                settings.WriterSettingsControl = null;
-            }
+                TextureFormat = textureFormat,
+                OutputToSourceDirectory = outputToSourceDirButton.Checked,
+                DeleteSource = deleteSourceButton.Checked,
+                CompressionFormat = compressionFormatBox.SelectedIndex != 0
+                    ? (ICompressionFormat)compressionFormatBox.SelectedItem
+                    : null,
+                WriterSettingsControl = writerSettingsControlsCache.TryGetValue(textureFormat, out var writerSettingsControl)
+                    ? writerSettingsControl
+                    : null,
+            };
 
             // Set up the process dialog and then run the tool
-            ProgressDialog dialog = new ProgressDialog();
-            dialog.WindowTitle = "Processing";
-            dialog.Title = "Encoding Textures";
-            dialog.DoWork += delegate(object sender2, DoWorkEventArgs e2)
+            ProgressDialog dialog = new ProgressDialog
             {
-                Run(settings, dialog);
+                WindowTitle = "Processing",
+                Title = "Encoding Textures",
             };
-            dialog.RunWorkerCompleted += delegate(object sender2, RunWorkerCompletedEventArgs e2)
-            {
-                // The tool is finished doing what it needs to do. We can close it now.
-                this.Close();
-            };
+            dialog.DoWork += (sender2, e2) => Run(settings, dialog);
+            dialog.RunWorkerCompleted += (sender2, e2) => Close();
             dialog.RunWorkerAsync();
         }
 

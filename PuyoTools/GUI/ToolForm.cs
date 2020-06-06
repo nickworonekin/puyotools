@@ -20,33 +20,39 @@ namespace PuyoTools.GUI
         {
             InitializeComponent();
 
-            this.Icon = IconResources.ProgramIcon;
-            this.MinimumSize = this.Size;
+            Icon = IconResources.ProgramIcon;
+            MinimumSize = Size;
 
             fileList = new List<string>();
         }
 
         protected void addFilesButton_Click(object sender, EventArgs e)
         {
-            OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Filter = "All Files (*.*)|*.*";
-            ofd.Multiselect = true;
-            ofd.Title = "Add Files";
+            OpenFileDialog ofd = new OpenFileDialog
+            {
+                Filter = "All Files (*.*)|*.*",
+                Multiselect = true,
+                Title = "Add Files",
+            };
 
             if (ofd.ShowDialog() == DialogResult.OK)
             {
                 fileList.AddRange(ofd.FileNames);
 
                 if (fileList.Count > 0)
+                {
                     runButton.Enabled = true;
+                }
             }
         }
 
         protected void addDirectoryButton_Click(object sender, EventArgs e)
         {
-            VistaFolderBrowserDialog fbd = new VistaFolderBrowserDialog();
-            fbd.Description = "Select a directory.";
-            fbd.UseDescriptionForTitle = true;
+            VistaFolderBrowserDialog fbd = new VistaFolderBrowserDialog
+            {
+                Description = "Select a directory.",
+                UseDescriptionForTitle = true,
+            };
 
             if (fbd.ShowDialog() == DialogResult.OK)
             {
@@ -60,16 +66,20 @@ namespace PuyoTools.GUI
                 }
 
                 if (fileList.Count > 0)
+                {
                     runButton.Enabled = true;
+                }
             }
         }
 
         private void fileListButton_Click(object sender, EventArgs e)
         {
-            (new FileListForm(fileList)).ShowDialog();
+            new FileListForm(fileList).ShowDialog();
 
             if (fileList.Count == 0)
+            {
                 runButton.Enabled = false;
+            }
         }
     }
 }

@@ -35,9 +35,10 @@ namespace PuyoTools.GUI
             addFromEntriesButton.Click += addFromEntriesButton_Click;
 
             // Make the list view rows bigger
-            ImageList imageList = new ImageList();
-            imageList.ImageSize = new Size(1, 20);
-            listView.SmallImageList = imageList;
+            listView.SmallImageList = new ImageList
+            {
+                ImageSize = new Size(1, 20),
+            };
 
             // Resize the column widths
             listView_ClientSizeChanged(null, null);
@@ -86,7 +87,7 @@ namespace PuyoTools.GUI
         {
             // Setup some stuff for the progress dialog
             int numFilesAdded = 0;
-            string description = String.Format("Processing {0}", Path.GetFileName(settings.OutFilename));
+            string description = string.Format("Processing {0}", Path.GetFileName(settings.OutFilename));
 
             dialog.ReportProgress(0, description);
 
@@ -131,7 +132,7 @@ namespace PuyoTools.GUI
                 }
                 else
                 {
-                    dialog.ReportProgress(numFilesAdded * 100 / archive.Entries.Count, description + "\n\n" + String.Format("Adding {0} ({1:N0} of {2:N0})", Path.GetFileName(settings.FileEntries[numFilesAdded].SourceFile), numFilesAdded + 1, archive.Entries.Count));
+                    dialog.ReportProgress(numFilesAdded * 100 / archive.Entries.Count, description + "\n\n" + string.Format("Adding {0} ({1:N0} of {2:N0})", Path.GetFileName(settings.FileEntries[numFilesAdded].SourceFile), numFilesAdded + 1, archive.Entries.Count));
                 }
             };
 
@@ -163,11 +164,11 @@ namespace PuyoTools.GUI
 
             if (archive.Entries.Count == 1)
             {
-                dialog.Description = description + "\n\n" + String.Format("Adding {0}", Path.GetFileName(settings.FileEntries[numFilesAdded].SourceFile));
+                dialog.Description = description + "\n\n" + string.Format("Adding {0}", Path.GetFileName(settings.FileEntries[numFilesAdded].SourceFile));
             }
             else
             {
-                dialog.Description = description + "\n\n" + String.Format("Adding {0} ({1:N0} of {2:N0})", Path.GetFileName(settings.FileEntries[numFilesAdded].SourceFile), numFilesAdded + 1, archive.Entries.Count);
+                dialog.Description = description + "\n\n" + string.Format("Adding {0} ({1:N0} of {2:N0})", Path.GetFileName(settings.FileEntries[numFilesAdded].SourceFile), numFilesAdded + 1, archive.Entries.Count);
             }
 
             archive.Flush();
@@ -336,56 +337,38 @@ namespace PuyoTools.GUI
             if (sfd.ShowDialog() == DialogResult.OK)
             {
                 // Disable the form
-                this.Enabled = false;
+                Enabled = false;
 
-                Settings settings = new Settings();
-                settings.ArchiveFormat = archiveFormat;
-                settings.OutFilename = sfd.FileName;
-
-                if (compressionFormatBox.SelectedIndex != 0)
+                var settings = new Settings
                 {
-                    settings.CompressionFormat = (ICompressionFormat)compressionFormatBox.SelectedItem;
-                }
-                else
-                {
-                    settings.CompressionFormat = null;
-                }
-
-                if (writerSettingsControlsCache.TryGetValue(archiveFormat, out var writerSettingsControl))
-                {
-                    settings.WriterSettingsControl = writerSettingsControl;
-                }
-                else
-                {
-                    settings.WriterSettingsControl = null;
-                }
-
-                settings.FileEntries = new List<FileEntry>();
-                foreach (ListViewItem item in listView.Items)
-                {
-                    FileEntry listViewEntry = (FileEntry)item.Tag;
-                    FileEntry entry = new FileEntry();
-
-                    entry.Filename = listViewEntry.Filename;
-                    entry.FilenameInArchive = listViewEntry.FilenameInArchive;
-                    entry.SourceFile = listViewEntry.SourceFile;
-
-                    settings.FileEntries.Add(entry);
-                }
+                    ArchiveFormat = archiveFormat,
+                    OutFilename = sfd.FileName,
+                    CompressionFormat = compressionFormatBox.SelectedIndex != 0
+                        ? (ICompressionFormat)compressionFormatBox.SelectedItem
+                        : null,
+                    WriterSettingsControl = writerSettingsControlsCache.TryGetValue(archiveFormat, out var writerSettingsControl)
+                        ? writerSettingsControl
+                        : null,
+                    FileEntries = listView.Items
+                        .Cast<ListViewItem>()
+                        .Select(x => (FileEntry)x.Tag)
+                        .Select(x => new FileEntry
+                        {
+                            Filename = x.Filename,
+                            FilenameInArchive = x.FilenameInArchive,
+                            SourceFile = x.SourceFile,
+                        })
+                        .ToList(),
+                };
 
                 // Set up the process dialog and then run the tool
-                ProgressDialog dialog = new ProgressDialog();
-                dialog.WindowTitle = "Processing";
-                dialog.Title = "Creating Archive";
-                dialog.DoWork += delegate(object sender2, DoWorkEventArgs e2)
+                var dialog = new ProgressDialog
                 {
-                    Run(settings, dialog);
+                    WindowTitle = "Processing",
+                    Title = "Creating Archive",
                 };
-                dialog.RunWorkerCompleted += delegate(object sender2, RunWorkerCompletedEventArgs e2)
-                {
-                    // The tool is finished doing what it needs to do. We can close it now.
-                    this.Close();
-                };
+                dialog.DoWork += (sender2, e2) => Run(settings, dialog);
+                dialog.RunWorkerCompleted += (sender2, e2) => Close();
                 dialog.RunWorkerAsync();
             }
         }

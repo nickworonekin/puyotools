@@ -120,11 +120,11 @@ namespace PuyoTools.GUI
                                 // If there is just one file in the file list, then the progress will be
                                 // based on how many files are being extracted from the archive, not
                                 // how many archives we are extracting.
-                                dialog.ReportProgress(j * 100 / archive.Entries.Count, description + "\n\n" + String.Format("{0:N0} of {1:N0} extracted", j + 1, archive.Entries.Count));
+                                dialog.ReportProgress(j * 100 / archive.Entries.Count, description + "\n\n" + string.Format("{0:N0} of {1:N0} extracted", j + 1, archive.Entries.Count));
                             }
                             else
                             {
-                                dialog.Description = description + "\n\n" + String.Format("{0:N0} of {1:N0} extracted", j + 1, archive.Entries.Count);
+                                dialog.Description = description + "\n\n" + string.Format("{0:N0} of {1:N0} extracted", j + 1, archive.Entries.Count);
                             }
 
                             ArchiveEntry entry = archive.Entries[j];
@@ -239,8 +239,8 @@ namespace PuyoTools.GUI
                                     {
                                         // If there was one archive in the file list, and now there is more,
                                         // adjust the progress bar and the description
-                                        description = String.Format("Processing {0} ({1:N0} of {2:N0})", Path.GetFileName(file), i + 1, fileList.Count);
-                                        dialog.ReportProgress(i * 100 / fileList.Count, description + "\n\n" + String.Format("{0:N0} of {1:N0} extracted", j + 1, archive.Entries.Count));
+                                        description = string.Format("Processing {0} ({1:N0} of {2:N0})", Path.GetFileName(file), i + 1, fileList.Count);
+                                        dialog.ReportProgress(i * 100 / fileList.Count, description + "\n\n" + string.Format("{0:N0} of {1:N0} extracted", j + 1, archive.Entries.Count));
                                     }
                                 }
                             }
@@ -350,7 +350,7 @@ namespace PuyoTools.GUI
         private void runButton_Click(object sender, EventArgs e)
         {
             // Disable the form
-            this.Enabled = false;
+            Enabled = false;
 
             // Set up the settings we will be using for this
             Settings settings = new Settings();
@@ -367,18 +367,13 @@ namespace PuyoTools.GUI
             settings.ConvertExtractedTextures = convertExtractedTexturesCheckbox.Checked;
 
             // Set up the process dialog and then run the tool
-            ProgressDialog dialog = new ProgressDialog();
-            dialog.WindowTitle = "Processing";
-            dialog.Title = "Extracting Archives";
-            dialog.DoWork += delegate(object sender2, DoWorkEventArgs e2)
+            ProgressDialog dialog = new ProgressDialog
             {
-                Run(settings, dialog);
+                WindowTitle = "Processing",
+                Title = "Extracting Archives",
             };
-            dialog.RunWorkerCompleted += delegate(object sender2, RunWorkerCompletedEventArgs e2)
-            {
-                // The tool is finished doing what it needs to do. We can close it now.
-                this.Close();
-            };
+            dialog.DoWork += (sender2, e2) => Run(settings, dialog);
+            dialog.RunWorkerCompleted += (sender2, e2) => Close();
             dialog.RunWorkerAsync();
         }
     }

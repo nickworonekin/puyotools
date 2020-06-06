@@ -35,14 +35,14 @@
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.compressionMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.compressToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.decompressToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.button3 = new System.Windows.Forms.Button();
-            this.button2 = new System.Windows.Forms.Button();
-            this.button1 = new System.Windows.Forms.Button();
+            this.compressToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.texturesButton = new System.Windows.Forms.Button();
+            this.archivesButton = new System.Windows.Forms.Button();
+            this.compressionButton = new System.Windows.Forms.Button();
             this.archivesMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.createToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.extractToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.createToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.texturesMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
@@ -107,13 +107,6 @@
             this.compressionMenuStrip.Name = "compressionMenuStrip";
             this.compressionMenuStrip.Size = new System.Drawing.Size(140, 48);
             // 
-            // compressToolStripMenuItem1
-            // 
-            this.compressToolStripMenuItem1.Name = "compressToolStripMenuItem1";
-            this.compressToolStripMenuItem1.Size = new System.Drawing.Size(139, 22);
-            this.compressToolStripMenuItem1.Text = "Compress";
-            this.compressToolStripMenuItem1.Click += new System.EventHandler(this.compressToolStripMenuItem1_Click);
-            // 
             // decompressToolStripMenuItem1
             // 
             this.decompressToolStripMenuItem1.Name = "decompressToolStripMenuItem1";
@@ -121,53 +114,60 @@
             this.decompressToolStripMenuItem1.Text = "Decompress";
             this.decompressToolStripMenuItem1.Click += new System.EventHandler(this.decompressToolStripMenuItem1_Click);
             // 
-            // button3
+            // compressToolStripMenuItem1
             // 
-            this.button3.Image = global::PuyoTools.BitmapResources.TextureIconDark;
-            this.button3.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
-            this.button3.Location = new System.Drawing.Point(290, 10);
-            this.button3.Margin = new System.Windows.Forms.Padding(10);
-            this.button3.Name = "button3";
-            this.button3.Padding = new System.Windows.Forms.Padding(10);
-            this.button3.Size = new System.Drawing.Size(120, 120);
-            this.button3.TabIndex = 4;
-            this.button3.TabStop = false;
-            this.button3.Text = "Textures";
-            this.button3.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
-            this.button3.UseVisualStyleBackColor = true;
-            this.button3.Click += new System.EventHandler(this.button3_Click);
+            this.compressToolStripMenuItem1.Name = "compressToolStripMenuItem1";
+            this.compressToolStripMenuItem1.Size = new System.Drawing.Size(139, 22);
+            this.compressToolStripMenuItem1.Text = "Compress";
+            this.compressToolStripMenuItem1.Click += new System.EventHandler(this.compressToolStripMenuItem1_Click);
             // 
-            // button2
+            // texturesButton
             // 
-            this.button2.Image = global::PuyoTools.BitmapResources.ArchiveIconDark;
-            this.button2.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
-            this.button2.Location = new System.Drawing.Point(150, 10);
-            this.button2.Margin = new System.Windows.Forms.Padding(10);
-            this.button2.Name = "button2";
-            this.button2.Padding = new System.Windows.Forms.Padding(10);
-            this.button2.Size = new System.Drawing.Size(120, 120);
-            this.button2.TabIndex = 3;
-            this.button2.TabStop = false;
-            this.button2.Text = "Archives";
-            this.button2.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
+            this.texturesButton.Image = global::PuyoTools.BitmapResources.TextureIconDark;
+            this.texturesButton.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.texturesButton.Location = new System.Drawing.Point(290, 10);
+            this.texturesButton.Margin = new System.Windows.Forms.Padding(10);
+            this.texturesButton.Name = "texturesButton";
+            this.texturesButton.Padding = new System.Windows.Forms.Padding(10);
+            this.texturesButton.Size = new System.Drawing.Size(120, 120);
+            this.texturesButton.TabIndex = 4;
+            this.texturesButton.TabStop = false;
+            this.texturesButton.Text = "Textures";
+            this.texturesButton.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
+            this.texturesButton.UseVisualStyleBackColor = true;
+            this.texturesButton.Click += new System.EventHandler(this.texturesButton_Click);
             // 
-            // button1
+            // archivesButton
             // 
-            this.button1.Image = global::PuyoTools.BitmapResources.CompressIconDark;
-            this.button1.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
-            this.button1.Location = new System.Drawing.Point(10, 10);
-            this.button1.Margin = new System.Windows.Forms.Padding(10);
-            this.button1.Name = "button1";
-            this.button1.Padding = new System.Windows.Forms.Padding(10);
-            this.button1.Size = new System.Drawing.Size(120, 120);
-            this.button1.TabIndex = 1;
-            this.button1.TabStop = false;
-            this.button1.Text = "Compression";
-            this.button1.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.archivesButton.Image = global::PuyoTools.BitmapResources.ArchiveIconDark;
+            this.archivesButton.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.archivesButton.Location = new System.Drawing.Point(150, 10);
+            this.archivesButton.Margin = new System.Windows.Forms.Padding(10);
+            this.archivesButton.Name = "archivesButton";
+            this.archivesButton.Padding = new System.Windows.Forms.Padding(10);
+            this.archivesButton.Size = new System.Drawing.Size(120, 120);
+            this.archivesButton.TabIndex = 3;
+            this.archivesButton.TabStop = false;
+            this.archivesButton.Text = "Archives";
+            this.archivesButton.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
+            this.archivesButton.UseVisualStyleBackColor = true;
+            this.archivesButton.Click += new System.EventHandler(this.archivesButton_Click);
+            // 
+            // compressionButton
+            // 
+            this.compressionButton.Image = global::PuyoTools.BitmapResources.CompressIconDark;
+            this.compressionButton.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.compressionButton.Location = new System.Drawing.Point(10, 10);
+            this.compressionButton.Margin = new System.Windows.Forms.Padding(10);
+            this.compressionButton.Name = "compressionButton";
+            this.compressionButton.Padding = new System.Windows.Forms.Padding(10);
+            this.compressionButton.Size = new System.Drawing.Size(120, 120);
+            this.compressionButton.TabIndex = 1;
+            this.compressionButton.TabStop = false;
+            this.compressionButton.Text = "Compression";
+            this.compressionButton.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
+            this.compressionButton.UseVisualStyleBackColor = true;
+            this.compressionButton.Click += new System.EventHandler(this.compressionButton_Click);
             // 
             // archivesMenuStrip
             // 
@@ -177,31 +177,31 @@
             this.toolStripSeparator3,
             this.toolStripMenuItem1});
             this.archivesMenuStrip.Name = "archivesMenuStrip";
-            this.archivesMenuStrip.Size = new System.Drawing.Size(181, 98);
-            // 
-            // createToolStripMenuItem1
-            // 
-            this.createToolStripMenuItem1.Name = "createToolStripMenuItem1";
-            this.createToolStripMenuItem1.Size = new System.Drawing.Size(180, 22);
-            this.createToolStripMenuItem1.Text = "Create";
-            this.createToolStripMenuItem1.Click += new System.EventHandler(this.createToolStripMenuItem1_Click);
+            this.archivesMenuStrip.Size = new System.Drawing.Size(118, 76);
             // 
             // extractToolStripMenuItem1
             // 
             this.extractToolStripMenuItem1.Name = "extractToolStripMenuItem1";
-            this.extractToolStripMenuItem1.Size = new System.Drawing.Size(180, 22);
+            this.extractToolStripMenuItem1.Size = new System.Drawing.Size(117, 22);
             this.extractToolStripMenuItem1.Text = "Extract";
             this.extractToolStripMenuItem1.Click += new System.EventHandler(this.extractToolStripMenuItem1_Click);
+            // 
+            // createToolStripMenuItem1
+            // 
+            this.createToolStripMenuItem1.Name = "createToolStripMenuItem1";
+            this.createToolStripMenuItem1.Size = new System.Drawing.Size(117, 22);
+            this.createToolStripMenuItem1.Text = "Create";
+            this.createToolStripMenuItem1.Click += new System.EventHandler(this.createToolStripMenuItem1_Click);
             // 
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(177, 6);
+            this.toolStripSeparator3.Size = new System.Drawing.Size(114, 6);
             // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(180, 22);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(117, 22);
             this.toolStripMenuItem1.Text = "Explorer";
             this.toolStripMenuItem1.Click += new System.EventHandler(this.toolStripMenuItem1_Click);
             // 
@@ -243,9 +243,9 @@
             // 
             // flowLayoutPanel1
             // 
-            this.flowLayoutPanel1.Controls.Add(this.button1);
-            this.flowLayoutPanel1.Controls.Add(this.button2);
-            this.flowLayoutPanel1.Controls.Add(this.button3);
+            this.flowLayoutPanel1.Controls.Add(this.compressionButton);
+            this.flowLayoutPanel1.Controls.Add(this.archivesButton);
+            this.flowLayoutPanel1.Controls.Add(this.texturesButton);
             this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flowLayoutPanel1.Location = new System.Drawing.Point(0, 24);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
@@ -279,12 +279,12 @@
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button compressionButton;
         private System.Windows.Forms.ContextMenuStrip compressionMenuStrip;
         private System.Windows.Forms.ToolStripMenuItem compressToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem decompressToolStripMenuItem1;
-        private System.Windows.Forms.Button button2;
-        private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.Button archivesButton;
+        private System.Windows.Forms.Button texturesButton;
         private System.Windows.Forms.ContextMenuStrip archivesMenuStrip;
         private System.Windows.Forms.ToolStripMenuItem createToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem extractToolStripMenuItem1;

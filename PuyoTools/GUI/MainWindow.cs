@@ -16,8 +16,8 @@ namespace PuyoTools.GUI
         {
             InitializeComponent();
 
-            this.Icon = IconResources.ProgramIcon;
-            this.MinimumSize = this.Size;
+            Icon = IconResources.ProgramIcon;
+            MinimumSize = Size;
         }
 
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
@@ -25,17 +25,17 @@ namespace PuyoTools.GUI
             new AboutPuyoTools().Show();
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void compressionButton_Click(object sender, EventArgs e)
         {
             compressionMenuStrip.Show(MousePosition);
         }
 
-        private void button2_Click(object sender, EventArgs e)
+        private void archivesButton_Click(object sender, EventArgs e)
         {
             archivesMenuStrip.Show(MousePosition);
         }
 
-        private void button3_Click(object sender, EventArgs e)
+        private void texturesButton_Click(object sender, EventArgs e)
         {
             texturesMenuStrip.Show(MousePosition);
         }

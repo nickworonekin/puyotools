@@ -17,12 +17,12 @@ namespace PuyoTools.GUI
         {
             InitializeComponent();
 
-            this.Icon = IconResources.ProgramIcon;
+            Icon = IconResources.ProgramIcon;
 
             versionLabel.Text = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
         }
 
-        private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void gitHubLinkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             Process.Start("https://github.com/nickworonekin/puyotools");
         }

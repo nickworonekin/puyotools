@@ -43,11 +43,11 @@ namespace PuyoTools.GUI
                 // Report progress. If we only have one file to process, no need to display (x of n).
                 if (fileList.Count == 1)
                 {
-                    dialog.ReportProgress(i * 100 / fileList.Count, String.Format("Processing {0}", Path.GetFileName(file)));
+                    dialog.ReportProgress(i * 100 / fileList.Count, string.Format("Processing {0}", Path.GetFileName(file)));
                 }
                 else
                 {
-                    dialog.ReportProgress(i * 100 / fileList.Count, String.Format("Processing {0} ({1:N0} of {2:N0})", Path.GetFileName(file), i + 1, fileList.Count));
+                    dialog.ReportProgress(i * 100 / fileList.Count, string.Format("Processing {0} ({1:N0} of {2:N0})", Path.GetFileName(file), i + 1, fileList.Count));
                 }
 
                 // Let's open the file.
@@ -111,27 +111,24 @@ namespace PuyoTools.GUI
         private void runButton_Click(object sender, EventArgs e)
         {
             // Disable the form
-            this.Enabled = false;
+            Enabled = false;
 
             // Set up the settings we will be using for this
-            Settings settings = new Settings();
-            settings.CompressionFormat = (ICompressionFormat)compressionFormatBox.SelectedItem;
-            settings.OverwriteSourceFile = overwriteSourceFileCheckbox.Checked;
-            settings.DeleteSourceFile = deleteSourceFileCheckbox.Checked;
+            Settings settings = new Settings
+            {
+                CompressionFormat = (ICompressionFormat)compressionFormatBox.SelectedItem,
+                OverwriteSourceFile = overwriteSourceFileCheckbox.Checked,
+                DeleteSourceFile = deleteSourceFileCheckbox.Checked,
+            };
 
             // Set up the process dialog and then run the tool
-            ProgressDialog dialog = new ProgressDialog();
-            dialog.WindowTitle = "Processing";
-            dialog.Title = "Compressing Files";
-            dialog.DoWork += delegate(object sender2, DoWorkEventArgs e2)
+            ProgressDialog dialog = new ProgressDialog
             {
-                Run(settings, dialog);
+                WindowTitle = "Processing",
+                Title = "Compressing Files",
             };
-            dialog.RunWorkerCompleted += delegate(object sender2, RunWorkerCompletedEventArgs e2)
-            {
-                // The tool is finished doing what it needs to do. We can close it now.
-                this.Close();
-            };
+            dialog.DoWork += (sender2, e2) => Run(settings, dialog);
+            dialog.RunWorkerCompleted += (sender2, e2) => Close();
             dialog.RunWorkerAsync();
         }
     }
