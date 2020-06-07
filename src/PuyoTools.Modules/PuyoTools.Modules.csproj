@@ -10,8 +10,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Libraries\GimSharp\GimSharp.csproj" />
-    <ProjectReference Include="..\Libraries\VrSharp\VrSharp.csproj" />
+    <ProjectReference Include="..\GimSharp\GimSharp.csproj" />
+    <ProjectReference Include="..\VrSharp\VrSharp.csproj" />
   </ItemGroup>
 
 </Project>
