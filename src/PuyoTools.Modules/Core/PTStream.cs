@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace PuyoTools.Modules
@@ -134,7 +135,7 @@ namespace PuyoTools.Modules
             source.Position = oldPosition;
 
             // Now let's check to see if the stream contains a
-            return PTMethods.ArraysEqual<byte>(buffer, a);
+            return buffer.SequenceEqual(a);
         }
 
         /// <summary>

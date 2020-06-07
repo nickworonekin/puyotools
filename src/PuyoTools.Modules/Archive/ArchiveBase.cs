@@ -11,7 +11,6 @@ namespace PuyoTools.Modules.Archive
         /// Open an archive from a stream.
         /// </summary>
         /// <param name="source">The stream to read from.</param>
-        /// <param name="length">Number of bytes to read.</param>
         /// <returns>An ArchiveReader object.</returns>
         /// <remarks>You must keep the stream open for the duration of the ArchiveReader.</remarks>
         public abstract ArchiveReader Open(Stream source);

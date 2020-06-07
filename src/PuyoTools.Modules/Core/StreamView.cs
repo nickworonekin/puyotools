@@ -8,242 +8,265 @@ namespace PuyoTools.Modules
     /// </summary>
     public class StreamView : Stream
     {
-        private Stream baseStream; // The base stream
-        private long streamStart; // The starting offset of the stream
-        private long streamLength; // The length of the stream view
-
-        private bool disposed = false; // Is this StreamView disposed?
-
-        /// <summary>
-        /// Initializes a new instance of the StreamView class for the specified stream. 
-        /// The starting position of this StreamView is the current position of the specified stream.
-        /// The length is the number of bytes between the current position and the end of the stream.
-        /// </summary>
-        /// <param name="source">The stream to be read.</param>
-        public StreamView(Stream source) : this(source, (source.Length - source.Position)) { }
+        private bool disposed;
+        private readonly Stream baseStream;
+        private readonly long startInBaseStream;
+        private readonly long endInBaseStream;
+        private long positionInBaseStream;
 
         /// <summary>
-        /// Initializes a new instance of the StreamView class for the specified stream. 
-        /// The starting position of this StreamView is the current position of the specified stream.
+        /// Initializes a new instance of the <see cref="StreamView"/> class based on the specified stream.
         /// </summary>
-        /// <param name="source">The stream to be read.</param>
-        /// <param name="length">Number of bytes that can be accessed by this StreamView.</param>
-        public StreamView(Stream source, long length)
+        /// <param name="stream">The input stream.</param>
+        public StreamView(Stream stream)
+            : this(stream, stream.Length - stream.Position)
         {
-            if (source.Position + length > source.Length)
-            {
-                baseStream = null;
-                streamStart = -1;
-                streamLength = -1;
 
-                throw new ArgumentOutOfRangeException();
-            }
-
-            baseStream = source;
-            streamStart = source.Position;
-            streamLength = length;
         }
 
         /// <summary>
-        /// Initializes a new instance of the StreamView class for the specified stream at the specified offset.
+        /// Initializes a new instance of the <see cref="StreamView"/> class based on the specified region of a stream starting at its current position.
         /// </summary>
-        /// <param name="source">The stream to be read.</param>
-        /// <param name="offset">The starting position of this StreamView.</param>
-        /// <param name="length">Number of bytes that can be accessed by this StreamView.</param>
-        public StreamView(Stream source, long offset, long length)
+        /// <param name="stream">The input stream.</param>
+        /// <param name="length">The length of the stream in bytes.</param>
+        public StreamView(Stream stream, long length)
+            : this(stream, stream.Position, length)
         {
-            if (offset + length > source.Length)
-            {
-                baseStream = null;
-                streamStart = -1;
-                streamLength = -1;
 
-                throw new ArgumentOutOfRangeException();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="StreamView"/> class based on the specified region of a stream.
+        /// </summary>
+        /// <param name="stream">The input stream.</param>
+        /// <param name="offset">The offset into the input stream at which the stream begins.</param>
+        /// <param name="length">The length of the stream in bytes.</param>
+        public StreamView(Stream stream, long offset, long length)
+        {
+            if (stream == null)
+            {
+                throw new ArgumentNullException(nameof(stream));
+            }
+            if (offset < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(offset));
+            }
+            if (length < 0 || offset + length > stream.Length)
+            {
+                throw new ArgumentOutOfRangeException(nameof(length));
             }
 
-            source.Position = offset;
+            baseStream = stream;
+            startInBaseStream = offset;
+            endInBaseStream = offset + length;
+            positionInBaseStream = startInBaseStream;
 
-            baseStream = source;
-            streamStart = source.Position;
-            streamLength = length;
+            disposed = false;
         }
 
         /// <summary>
         /// Gets a value indicating whether the current stream supports reading.
         /// </summary>
-        public override bool CanRead
-        {
-            get { return baseStream.CanRead; }
-        }
+        public override bool CanRead => !disposed && baseStream.CanRead;
 
         /// <summary>
         /// Gets a value indicating whether the current stream supports seeking.
         /// </summary>
-        public override bool CanSeek
-        {
-            get { return baseStream.CanSeek; }
-        }
+        public override bool CanSeek => !disposed && baseStream.CanSeek;
 
         /// <summary>
-        /// Gets a value indicating whether the current stream supports writing. This will always return false.
+        /// Gets a value indicating whether the stream supports writing.
         /// </summary>
-        public override bool CanWrite
-        {
-            get { return false; }
-        }
+        public override bool CanWrite => false;
 
         /// <summary>
-        /// Does nothing.
-        /// </summary>
-        public override void Flush() { }
-
-        /// <summary>
-        /// Gets the length in bytes of the stream.
+        /// Gets the length of the stream in bytes.
         /// </summary>
         public override long Length
         {
-            get { return streamLength; }
+            get
+            {
+                ThrowIfDisposed();
+                
+                return endInBaseStream - startInBaseStream;
+            }
         }
 
         /// <summary>
-        /// Gets or sets the position within the current stream. The position cannot be outside the bounds of the stream.
+        /// Gets or sets the current position within the stream.
         /// </summary>
         public override long Position
         {
-            get { return baseStream.Position - streamStart; }
+            get
+            {
+                ThrowIfDisposed();
+
+                return positionInBaseStream - startInBaseStream;
+            }
             set
             {
-                if (value < 0 || value > streamLength)
+                ThrowIfDisposed();
+
+                if (value < 0)
                 {
-                    throw new ArgumentException("offset");
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 }
 
-                baseStream.Position = streamStart + value;
+                positionInBaseStream = startInBaseStream + value;
             }
         }
 
-        /// <summary>
-        /// Reads a sequence of bytes from the current stream and advances the position within the stream by the number of bytes read.
-        /// </summary>
-        /// <param name="array">An array of bytes. When this method returns, the buffer contains the specified byte array with the values between offset and (offset + count - 1) replaced by the bytes read from the current source. </param>
-        /// <param name="offset">The zero-based byte offset in buffer at which to begin storing the data read from the current stream. </param>
-        /// <param name="count">The maximum number of bytes to be read from the current stream. </param>
-        /// <returns>The total number of bytes read into the buffer. This can be less than the number of bytes requested if that many bytes are not currently available, or zero (0) if the end of the stream has been reached.</returns>
-        public override int Read(byte[] array, int offset, int count)
+        private void ThrowIfDisposed()
         {
-            if (baseStream.Position >= streamStart + streamLength)
+            if (disposed)
             {
-                count = 0;
+                throw new ObjectDisposedException(GetType().ToString());
             }
-            else if (baseStream.Position + count > streamStart + streamLength)
-            {
-                count = (int)(streamStart + streamLength - baseStream.Position);
-            }
-
-            return baseStream.Read(array, offset, count);
         }
 
         /// <summary>
-        /// Reads a byte from the stream and advances the position within the stream by one byte, or returns -1 if at the end of the stream.
+        /// This implementation always throws <see cref="NotSupportedException"/>.
         /// </summary>
-        /// <returns>The unsigned byte cast to an Int32, or -1 if at the end of the stream.</returns>
+        public override void Flush()
+        {
+            ThrowIfDisposed();
+            throw new NotSupportedException();
+        }
+
+        /// <summary>
+        /// Reads a byte from the current stream.
+        /// </summary>
+        /// <returns>The byte cast to a <see cref="int"/>, or -1 if the end of the stream has been reached.</returns>
         public override int ReadByte()
         {
-            if (baseStream.Position >= streamStart + streamLength)
+            ThrowIfDisposed();
+
+            if (positionInBaseStream <= endInBaseStream && positionInBaseStream != baseStream.Position)
+            {
+                baseStream.Seek(positionInBaseStream, SeekOrigin.Begin);
+            }
+
+            if (positionInBaseStream >= endInBaseStream)
             {
                 return -1;
             }
 
+            positionInBaseStream++;
             return baseStream.ReadByte();
         }
 
         /// <summary>
-        /// Sets the position within the current stream. The position cannot be outside the bounds of the stream.
+        /// Reads a block of bytes from the current stream and writes the data to a buffer.
         /// </summary>
-        /// <param name="offset">A byte offset relative to the origin parameter.</param>
-        /// <param name="origin">A value of type SeekOrigin indicating the reference point used to obtain the new position.</param>
-        /// <returns>The new position within the current stream.</returns>
+        /// <param name="buffer">When this method returns, contains the specified byte array with the values between offset and (<paramref name="offset"/> + <paramref name="count"/> - 1) replaced by the characters read from the current stream.</param>
+        /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at which to begin storing data from the current stream.</param>
+        /// <param name="count">The maximum number of bytes to read.</param>
+        /// <returns>The total number of bytes written into the buffer. This can be less than the number of bytes requested if that number of bytes are not currently available, or zero if the end of the stream is reached before any bytes are read.</returns>
+        public override int Read(byte[] buffer, int offset, int count)
+        {
+            ThrowIfDisposed();
+
+            if (positionInBaseStream <= endInBaseStream && positionInBaseStream != baseStream.Position)
+            {
+                baseStream.Seek(positionInBaseStream, SeekOrigin.Begin);
+            }
+
+            if (positionInBaseStream >= endInBaseStream)
+            {
+                return 0;
+            }
+            if (positionInBaseStream + count > endInBaseStream)
+            {
+                count = (int)(endInBaseStream - positionInBaseStream);
+            }
+
+            var bytesRead = baseStream.Read(buffer, offset, count);
+            positionInBaseStream += bytesRead;
+
+            return bytesRead;
+        }
+
+        /// <summary>
+        /// Sets the position within the current stream to the specified value.
+        /// </summary>
+        /// <param name="offset">The new position within the stream. This is relative to the <paramref name="origin"/> parameter, and can be positive or negative.</param>
+        /// <param name="origin">A value of type <see cref="SeekOrigin"/>, which acts as the seek reference point.</param>
+        /// <returns>The new position within the stream, calculated by combining the initial reference point and the offset.</returns>
         public override long Seek(long offset, SeekOrigin origin)
         {
+            ThrowIfDisposed();
+
             switch (origin)
             {
-                // Seek from the beginning of the stream
                 case SeekOrigin.Begin:
-                    if (offset < 0 || offset > streamLength)
                     {
-                        throw new ArgumentException("offset");
+                        if (offset < 0)
+                        {
+                            throw new ArgumentOutOfRangeException(nameof(offset));
+                        }
+
+                        positionInBaseStream = startInBaseStream + offset;
                     }
+                    break;
 
-                    return baseStream.Seek(streamStart + offset, SeekOrigin.Begin);
-
-                // Seek from the current position in the stream
                 case SeekOrigin.Current:
-                    if (baseStream.Position + offset < streamStart || baseStream.Position + offset > streamStart + streamLength)
                     {
-                        throw new ArgumentException("offset");
+                        if (positionInBaseStream + offset < startInBaseStream)
+                        {
+                            throw new ArgumentOutOfRangeException(nameof(offset));
+                        }
+
+                        positionInBaseStream += offset;
                     }
+                    break;
 
-                    return baseStream.Seek(offset, SeekOrigin.Current);
-
-                // Seek from the end of the stream
                 case SeekOrigin.End:
-                    if (offset < -streamLength || offset > 0)
                     {
-                        throw new ArgumentException("offset"); 
-                    }
+                        if (endInBaseStream + offset < startInBaseStream)
+                        {
+                            throw new ArgumentOutOfRangeException(nameof(offset));
+                        }
 
-                    return baseStream.Seek(streamStart + streamLength + offset, SeekOrigin.Begin);
+                        positionInBaseStream = endInBaseStream + offset;
+                    }
+                    break;
+
+                default:
+                    throw new ArgumentException(nameof(origin));
             }
 
-            return baseStream.Position - streamStart;
+            return positionInBaseStream - startInBaseStream;
         }
 
         /// <summary>
-        /// Throws a NotSupportedException.
+        /// This implementation always throws <see cref="NotSupportedException"/>.
         /// </summary>
-        /// <param name="value">Not used</param>
         public override void SetLength(long value)
         {
+            ThrowIfDisposed();
             throw new NotSupportedException();
         }
 
         /// <summary>
-        /// Throws a NotSupportedException.
+        /// This implementation always throws <see cref="NotSupportedException"/>.
         /// </summary>
-        /// <param name="buffer">Not used</param>
-        /// <param name="offset">Not used</param>
-        /// <param name="count">Not used</param>
         public override void Write(byte[] buffer, int offset, int count)
         {
+            ThrowIfDisposed();
             throw new NotSupportedException();
         }
 
         /// <summary>
-        /// Throws a NotSupportedException.
+        /// Releases the unmanaged resources used by the <see cref="StreamView"/> class and optionally releases the managed resources.
         /// </summary>
-        /// <param name="value">Not used</param>
-        public override void WriteByte(byte value)
-        {
-            throw new NotSupportedException();
-        }
-
-        /// <summary>
-        /// Dispose the StreamView.
-        /// </summary>
-        /// <param name="disposing">true to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
+        /// <param name="disposing"><see langword="true"/> to release both managed and unmanaged resources; <see langword="false"/> to release only unmanaged resources.</param>
         protected override void Dispose(bool disposing)
         {
-            if (!disposed)
+            if (disposing && !disposed)
             {
-                base.Dispose(disposing);
-
-                // Since we don't want to kill the baseStream, there's no need for disposing.
-                baseStream = null;
-                streamStart = -1;
-                streamLength = -1;
-
                 disposed = true;
             }
+            base.Dispose(disposing);
         }
     }
 }
