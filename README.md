@@ -37,7 +37,6 @@ The latest version is **[2.0.4](https://github.com/nickworonekin/puyotools/relea
 
 ### Textures:
   * GIM
-  * GMP
   * GVR
   * PVR
   * SVR

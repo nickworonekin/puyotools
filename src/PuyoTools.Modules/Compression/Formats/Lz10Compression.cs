@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 
 namespace PuyoTools.Modules.Compression
 {
@@ -167,8 +168,14 @@ namespace PuyoTools.Modules.Compression
         /// <returns>True if the data can be read, false otherwise.</returns>
         public static bool Identify(Stream source)
         {
-            return source.Length > 4
-                && PTStream.Contains(source, 0, new byte[] { 0x10 });
+            var startPosition = source.Position;
+
+            using (var reader = new BinaryReader(source, Encoding.UTF8, true))
+            {
+                return source.Length - startPosition > 5
+                    && reader.At(startPosition, x => x.ReadByte()) == 0x10
+                    && reader.At(startPosition + 4, x => x.ReadByte()) >> 5 == 0;
+            }
         }
     }
 }

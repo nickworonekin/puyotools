@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
+using System.Text;
 
 namespace PuyoTools.Modules.Compression
 {
@@ -7,6 +9,8 @@ namespace PuyoTools.Modules.Compression
     {
         // The CXLZ compression format is identical to the LZ10 compression format with the addition of
         // "CXLZ" at the beginning of the file.
+
+        private static readonly byte[] magicCode = { (byte)'C', (byte)'X', (byte)'L', (byte)'Z', 0x10 };
 
         /// <summary>
         /// Decompress data from a stream.
@@ -48,8 +52,13 @@ namespace PuyoTools.Modules.Compression
         /// <returns>True if the data can be read, false otherwise.</returns>
         public static new bool Identify(Stream source)
         {
-            return source.Length > 8
-                && PTStream.Contains(source, 0, new byte[] { (byte)'C', (byte)'X', (byte)'L', (byte)'Z', 0x10 });
+            var startPosition = source.Position;
+
+            using (var reader = new BinaryReader(source, Encoding.UTF8, true))
+            {
+                return source.Length - startPosition > 8
+                    && reader.At(startPosition, x => x.ReadBytes(magicCode.Length)).SequenceEqual(magicCode);
+            }
         }
     }
 }

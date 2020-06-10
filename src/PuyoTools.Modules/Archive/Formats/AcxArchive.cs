@@ -1,10 +1,14 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
+using System.Text;
 
 namespace PuyoTools.Modules.Archive
 {
     public class AcxArchive : ArchiveBase
     {
+        private static readonly byte[] magicCode = { 0, 0, 0, 0 };
+
         public override ArchiveReader Open(Stream source)
         {
             return new AcxArchiveReader(source);
@@ -22,8 +26,32 @@ namespace PuyoTools.Modules.Archive
         /// <returns>True if the data can be read, false otherwise.</returns>
         public static bool Identify(Stream source)
         {
-            return source.Length > 8
-                && PTStream.Contains(source, 0, new byte[] { 0, 0, 0, 0 });
+            var startPosition = source.Position;
+            var remainingLength = source.Length - startPosition;
+
+            using (var reader = new BinaryReader(source, Encoding.UTF8, true))
+            {
+                // Verify the magic code
+                if (!(remainingLength > 12
+                    && reader.At(startPosition, x => x.ReadBytes(magicCode.Length)).SequenceEqual(magicCode)))
+                {
+                    return false;
+                }
+
+                var numEntries = reader.At(startPosition + 4, x => x.ReadInt32(Endianess.Big));
+                var actualOffset = reader.At(startPosition + 8, x => x.ReadInt32(Endianess.Big));
+                var expectedOffset = 8 + (numEntries * 8);
+
+                // Verify the offset of the first file
+                if (remainingLength > expectedOffset
+                    && (actualOffset == expectedOffset
+                        || actualOffset % 2048 == 0))
+                {
+                    return true;
+                }
+
+                return false;
+            }
         }
     }
 

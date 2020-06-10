@@ -2,11 +2,15 @@
 using PuyoTools.Modules.Texture;
 using System;
 using System.IO;
+using System.Linq;
+using System.Text;
 
 namespace PuyoTools.Modules.Archive
 {
     public class TxdStorybookArchive : ArchiveBase
     {
+        private static readonly byte[] magicCode = { (byte)'T', (byte)'X', (byte)'A', (byte)'G' };
+
         public override ArchiveReader Open(Stream source)
         {
             return new TxdStorybookArchiveReader(source);
@@ -24,8 +28,13 @@ namespace PuyoTools.Modules.Archive
         /// <returns>True if the data can be read, false otherwise.</returns>
         public static bool Identify(Stream source)
         {
-            return source.Length > 16
-                && PTStream.Contains(source, 0, new byte[] { (byte)'T', (byte)'X', (byte)'A', (byte)'G' });
+            var startPosition = source.Position;
+
+            using (var reader = new BinaryReader(source, Encoding.UTF8, true))
+            {
+                return source.Length - startPosition > 16
+                    && reader.At(startPosition, x => x.ReadBytes(magicCode.Length)).SequenceEqual(magicCode);
+            }
         }
     }
 

@@ -1,12 +1,18 @@
 ﻿using System;
 using System.IO;
-
+using System.Linq;
+using System.Text;
 using PuyoTools.Modules.Texture;
 
 namespace PuyoTools.Modules.Archive
 {
     public class SntArchive : ArchiveBase
     {
+        private static readonly byte[] ps2PrimaryMagicCode = { (byte)'N', (byte)'S', (byte)'I', (byte)'F' };
+        private static readonly byte[] ps2SecondaryMagicCode = { (byte)'N', (byte)'S', (byte)'T', (byte)'L' };
+        private static readonly byte[] pspPrimaryMagicCode = { (byte)'N', (byte)'U', (byte)'I', (byte)'F' };
+        private static readonly byte[] pspSecondaryMagicCode = { (byte)'N', (byte)'U', (byte)'T', (byte)'L' };
+
         public override ArchiveReader Open(Stream source)
         {
             return new SntArchiveReader(source);
@@ -24,12 +30,32 @@ namespace PuyoTools.Modules.Archive
         /// <returns>True if the data can be read, false otherwise.</returns>
         public static bool Identify(Stream source)
         {
-            return source.Length > 36
-                && (PTStream.Contains(source, 0, new byte[] { (byte)'N', (byte)'U', (byte)'I', (byte)'F' })
-                && PTStream.Contains(source, 32, new byte[] { (byte)'N', (byte)'U', (byte)'T', (byte)'L' }))
-                || (PTStream.Contains(source, 0, new byte[] { (byte)'N', (byte)'S', (byte)'I', (byte)'F' })
-                && PTStream.Contains(source, 32, new byte[] { (byte)'N', (byte)'S', (byte)'T', (byte)'L' }))
-                && PTStream.ReadInt32At(source, source.Position + 8) == 1;
+            var startPosition = source.Position;
+
+            using (var reader = new BinaryReader(source, Encoding.UTF8, true))
+            {
+                if (!(source.Length - startPosition > 36
+                    && reader.At(startPosition + 8, x => x.ReadInt32()) == 1))
+                {
+                    return false;
+                }
+
+                // Verify PS2 magic code
+                if (reader.At(startPosition, x => x.ReadBytes(ps2PrimaryMagicCode.Length)).SequenceEqual(ps2PrimaryMagicCode)
+                    && reader.At(startPosition + 32, x => x.ReadBytes(ps2SecondaryMagicCode.Length)).SequenceEqual(ps2SecondaryMagicCode))
+                {
+                    return true;
+                }
+
+                // Verify PSP magic code
+                if (reader.At(startPosition, x => x.ReadBytes(pspPrimaryMagicCode.Length)).SequenceEqual(pspPrimaryMagicCode)
+                    && reader.At(startPosition + 32, x => x.ReadBytes(pspSecondaryMagicCode.Length)).SequenceEqual(pspSecondaryMagicCode))
+                {
+                    return true;
+                }
+
+                return false;
+            }
         }
     }
 

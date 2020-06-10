@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace PuyoTools.Modules.Compression
@@ -10,6 +12,8 @@ namespace PuyoTools.Modules.Compression
          * CNX decompression support by drx (Luke Zapart)
          * <thedrx@gmail.com>
          */
+
+        private static readonly byte[] magicCode = { (byte)'C', (byte)'N', (byte)'X', 0x2 };
 
         /// <summary>
         /// Decompress data from a stream.
@@ -290,9 +294,15 @@ namespace PuyoTools.Modules.Compression
         /// <returns>True if the data can be read, false otherwise.</returns>
         public static bool Identify(Stream source)
         {
-            return source.Length > 16
-                && PTStream.Contains(source, 0, new byte[] { (byte)'C', (byte)'N', (byte)'X', 0x2 })
-                && PTStream.ReadInt32BEAt(source, source.Position + 8) + 16 == source.Length;
+            var startPosition = source.Position;
+            var remainingLength = source.Length - startPosition;
+
+            using (var reader = new BinaryReader(source, Encoding.UTF8, true))
+            {
+                return remainingLength > 16
+                    && reader.At(startPosition, x => x.ReadBytes(magicCode.Length)).SequenceEqual(magicCode)
+                    && reader.At(startPosition + 8, x => x.ReadInt32(Endianess.Big)) == remainingLength - 16;
+            }
         }
     }
 }

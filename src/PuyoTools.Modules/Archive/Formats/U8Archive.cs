@@ -1,10 +1,14 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
+using System.Text;
 
 namespace PuyoTools.Modules.Archive
 {
     public class U8Archive : ArchiveBase
     {
+        private static readonly byte[] magicCode = { (byte)'U', 0xAA, (byte)'8', (byte)'-' };
+
         public override ArchiveReader Open(Stream source)
         {
             return new U8ArchiveReader(source);
@@ -22,8 +26,13 @@ namespace PuyoTools.Modules.Archive
         /// <returns>True if the data can be read, false otherwise.</returns>
         public static bool Identify(Stream source)
         {
-            return source.Length > 32
-                && PTStream.Contains(source, 0, new byte[] { (byte)'U', 0xAA, (byte)'8', (byte)'-' });
+            var startPosition = source.Position;
+
+            using (var reader = new BinaryReader(source, Encoding.UTF8, true))
+            {
+                return source.Length - startPosition > 32
+                    && reader.At(startPosition, x => x.ReadBytes(magicCode.Length)).SequenceEqual(magicCode);
+            }
         }
     }
 

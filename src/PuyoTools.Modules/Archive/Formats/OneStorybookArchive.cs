@@ -2,6 +2,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 
 namespace PuyoTools.Modules.Archive
 {
@@ -24,20 +25,25 @@ namespace PuyoTools.Modules.Archive
         /// <returns>True if the data can be read, false otherwise.</returns>
         public static bool Identify(Stream source)
         {
-            if (source.Length <= 16
-                || PTStream.ReadUInt32BEAt(source, 0x4) != 0x10)
+            var startPosition = source.Position;
+
+            using (var reader = new BinaryReader(source, Encoding.UTF8, true))
             {
-                return false;
+                if (!(source.Length - startPosition > 16
+                    && reader.At(startPosition, x => x.ReadUInt32(Endianess.Big)) == 0x10))
+                {
+                    return false;
+                }
+
+                var i = reader.At(startPosition + 0xC, x => x.ReadUInt32(Endianess.Big));
+
+                if (i != 0xFFFFFFFF && i != 0x00000000)
+                {
+                    return false;
+                }
+
+                return true;
             }
-
-            var i = PTStream.ReadUInt32BEAt(source, 0xC);
-
-            if (i != 0xFFFFFFFF && i != 0x00000000)
-            {
-                return false;
-            }
-
-            return true;
         }
     }
 

@@ -1,10 +1,14 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
+using System.Text;
 
 namespace PuyoTools.Modules.Archive
 {
     public class NarcArchive : ArchiveBase
     {
+        private static readonly byte[] magicCode = { (byte)'N', (byte)'A', (byte)'R', (byte)'C', 0xFE, 0xFF, 0x00, 0x01 };
+
         public override ArchiveReader Open(Stream source)
         {
             return new NarcArchiveReader(source);
@@ -22,9 +26,15 @@ namespace PuyoTools.Modules.Archive
         /// <returns>True if the data can be read, false otherwise.</returns>
         public static bool Identify(Stream source)
         {
-            return source.Length > 12
-                && PTStream.Contains(source, 0, new byte[] { (byte)'N', (byte)'A', (byte)'R', (byte)'C', 0xFE, 0xFF, 0x00, 0x01 })
-                && PTStream.ReadInt32At(source, source.Position + 8) == source.Length;
+            var startPosition = source.Position;
+            var remainingLength = source.Length - startPosition;
+
+            using (var reader = new BinaryReader(source, Encoding.UTF8, true))
+            {
+                return remainingLength > 12
+                    && reader.At(startPosition, x => x.ReadBytes(magicCode.Length)).SequenceEqual(magicCode)
+                    && reader.At(startPosition + 8, x => x.ReadInt32()) == remainingLength;
+            }
         }
     }
 

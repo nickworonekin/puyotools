@@ -1,10 +1,15 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
+using System.Text;
 
 namespace PuyoTools.Modules.Archive
 {
     public class GntArchive : ArchiveBase
     {
+        private static readonly byte[] primaryMagicCode = { (byte)'N', (byte)'G', (byte)'I', (byte)'F' };
+        private static readonly byte[] secondaryMagicCode = { (byte)'N', (byte)'G', (byte)'T', (byte)'L' };
+
         public override ArchiveReader Open(Stream source)
         {
             return new GntArchiveReader(source);
@@ -22,9 +27,14 @@ namespace PuyoTools.Modules.Archive
         /// <returns>True if the data can be read, false otherwise.</returns>
         public static bool Identify(Stream source)
         {
-            return source.Length > 36
-                && PTStream.Contains(source, 0, new byte[] { (byte)'N', (byte)'G', (byte)'I', (byte)'F' })
-                && PTStream.Contains(source, 32, new byte[] { (byte)'N', (byte)'G', (byte)'T', (byte)'L' });
+            var startPosition = source.Position;
+
+            using (var reader = new BinaryReader(source, Encoding.UTF8, true))
+            {
+                return source.Length - startPosition > 36
+                    && reader.At(startPosition, x => x.ReadBytes(primaryMagicCode.Length)).SequenceEqual(primaryMagicCode)
+                    && reader.At(startPosition + 32, x => x.ReadBytes(secondaryMagicCode.Length)).SequenceEqual(secondaryMagicCode);
+            }
         }
     }
 

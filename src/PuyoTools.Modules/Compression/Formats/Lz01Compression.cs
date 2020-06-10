@@ -1,10 +1,14 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
+using System.Text;
 
 namespace PuyoTools.Modules.Compression
 {
     public class Lz01Compression : CompressionBase
     {
+        private static readonly byte[] magicCode = { (byte)'L', (byte)'Z', (byte)'0', (byte)'1' };
+
         /// <summary>
         /// Decompress data from a stream.
         /// </summary>
@@ -178,9 +182,15 @@ namespace PuyoTools.Modules.Compression
         /// <returns>True if the data can be read, false otherwise.</returns>
         public static bool Identify(Stream source)
         {
-            return source.Length > 16
-                && PTStream.Contains(source, 0, new byte[] { (byte)'L', (byte)'Z', (byte)'0', (byte)'1' })
-                && PTStream.ReadInt32At(source, source.Position + 4) == source.Length;
+            var startPosition = source.Position;
+            var remainingLength = source.Length - startPosition;
+
+            using (var reader = new BinaryReader(source, Encoding.UTF8, true))
+            {
+                return remainingLength > 16
+                    && reader.At(startPosition, x => x.ReadBytes(magicCode.Length)).SequenceEqual(magicCode)
+                    && reader.At(startPosition + 4, x => x.ReadInt32()) == remainingLength;
+            }
         }
     }
 }
