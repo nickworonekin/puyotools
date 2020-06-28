@@ -5,12 +5,14 @@ using System.Text;
 
 namespace PuyoTools.Modules.Compression
 {
-    public class CxlzCompression : Lz10Compression
+    public class CxlzCompression : CompressionBase// : Lz10Compression
     {
         // The CXLZ compression format is identical to the LZ10 compression format with the addition of
         // "CXLZ" at the beginning of the file.
 
         private static readonly byte[] magicCode = { (byte)'C', (byte)'X', (byte)'L', (byte)'Z', 0x10 };
+
+        private static readonly Lz10Compression lz10Compression = new Lz10Compression();
 
         /// <summary>
         /// Decompress data from a stream.
@@ -21,7 +23,7 @@ namespace PuyoTools.Modules.Compression
         {
             source.Position += 4;
 
-            base.Decompress(source, destination);
+            lz10Compression.Decompress(source, destination);
         }
 
         /// <summary>
@@ -37,12 +39,9 @@ namespace PuyoTools.Modules.Compression
                 throw new Exception("Source is too large. CXLZ compression can only compress files smaller than 16MB.");
             }
 
-            destination.WriteByte((byte)'C');
-            destination.WriteByte((byte)'X');
-            destination.WriteByte((byte)'L');
-            destination.WriteByte((byte)'Z');
+            destination.Write(magicCode, 0, 4);
 
-            base.Compress(source, destination);
+            lz10Compression.Compress(source, destination);
         }
 
         /// <summary>
@@ -50,7 +49,7 @@ namespace PuyoTools.Modules.Compression
         /// </summary>
         /// <param name="source">The data to read.</param>
         /// <returns>True if the data can be read, false otherwise.</returns>
-        public static new bool Identify(Stream source)
+        public static bool Identify(Stream source)
         {
             var startPosition = source.Position;
 

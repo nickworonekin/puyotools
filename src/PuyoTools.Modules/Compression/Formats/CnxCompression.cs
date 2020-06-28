@@ -301,7 +301,7 @@ namespace PuyoTools.Modules.Compression
             {
                 return remainingLength > 16
                     && reader.At(startPosition, x => x.ReadBytes(magicCode.Length)).SequenceEqual(magicCode)
-                    && reader.At(startPosition + 8, x => x.ReadInt32(Endianess.Big)) == remainingLength - 16;
+                    && reader.At(startPosition + 8, x => x.ReadInt32BigEndian()) == remainingLength - 16;
             }
         }
     }

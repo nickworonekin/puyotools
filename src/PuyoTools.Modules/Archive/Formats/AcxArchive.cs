@@ -38,8 +38,8 @@ namespace PuyoTools.Modules.Archive
                     return false;
                 }
 
-                var numEntries = reader.At(startPosition + 4, x => x.ReadInt32(Endianess.Big));
-                var actualOffset = reader.At(startPosition + 8, x => x.ReadInt32(Endianess.Big));
+                var numEntries = reader.At(startPosition + 4, x => x.ReadInt32BigEndian());
+                var actualOffset = reader.At(startPosition + 8, x => x.ReadInt32BigEndian());
                 var expectedOffset = 8 + (numEntries * 8);
 
                 // Verify the offset of the first file

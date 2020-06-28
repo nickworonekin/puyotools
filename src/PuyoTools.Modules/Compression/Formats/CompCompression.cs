@@ -5,12 +5,14 @@ using System.Text;
 
 namespace PuyoTools.Modules.Compression
 {
-    public class CompCompression : Lz11Compression
+    public class CompCompression : CompressionBase
     {
         // The COMP compression format is identical to the LZ11 compression format with the addition of
         // "COMP" at the beginning of the file.
 
         private static readonly byte[] magicCode = { (byte)'C', (byte)'O', (byte)'M', (byte)'P', 0x11 };
+
+        private static readonly Lz11Compression lz11Compression = new Lz11Compression();
 
         /// <summary>
         /// Decompress data from a stream.
@@ -21,7 +23,7 @@ namespace PuyoTools.Modules.Compression
         {
             source.Position += 4;
 
-            base.Decompress(source, destination);
+            lz11Compression.Decompress(source, destination);
         }
 
         /// <summary>
@@ -31,18 +33,9 @@ namespace PuyoTools.Modules.Compression
         /// <param name="destination">The stream to write to.</param>
         public override void Compress(Stream source, Stream destination)
         {
-            // COMP compression can only handle files smaller than 16MB
-            if (source.Length - source.Position > 0xFFFFFF)
-            {
-                throw new Exception("Source is too large. COMP compression can only compress files smaller than 16MB.");
-            }
+            destination.Write(magicCode, 0, 4);
 
-            destination.WriteByte((byte)'C');
-            destination.WriteByte((byte)'O');
-            destination.WriteByte((byte)'M');
-            destination.WriteByte((byte)'P');
-
-            base.Compress(source, destination);
+            lz11Compression.Compress(source, destination);
         }
 
         /// <summary>
@@ -50,7 +43,7 @@ namespace PuyoTools.Modules.Compression
         /// </summary>
         /// <param name="source">The data to read.</param>
         /// <returns>True if the data can be read, false otherwise.</returns>
-        public static new bool Identify(Stream source)
+        public static bool Identify(Stream source)
         {
             var startPosition = source.Position;
 

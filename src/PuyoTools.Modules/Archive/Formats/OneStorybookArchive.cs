@@ -30,12 +30,12 @@ namespace PuyoTools.Modules.Archive
             using (var reader = new BinaryReader(source, Encoding.UTF8, true))
             {
                 if (!(source.Length - startPosition > 16
-                    && reader.At(startPosition, x => x.ReadUInt32(Endianess.Big)) == 0x10))
+                    && reader.At(startPosition, x => x.ReadUInt32BigEndian()) == 0x10))
                 {
                     return false;
                 }
 
-                var i = reader.At(startPosition + 0xC, x => x.ReadUInt32(Endianess.Big));
+                var i = reader.At(startPosition + 0xC, x => x.ReadUInt32BigEndian());
 
                 if (i != 0xFFFFFFFF && i != 0x00000000)
                 {
