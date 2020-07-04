@@ -1,6 +1,7 @@
 ﻿using PuyoTools.Modules.Compression;
 using PuyoTools.Modules.Texture;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -44,7 +45,7 @@ namespace PuyoTools.Modules.Archive
         public TxdStorybookArchiveReader(Stream source) : base(source)
         {
             var fileCount = PTStream.ReadInt32BEAt(source, 0x4);
-            entries = new ArchiveEntryCollection(this, fileCount);
+            entries = new List<ArchiveEntry>(fileCount);
 
             for (int i = 0; i < fileCount; i++)
             {
@@ -54,7 +55,7 @@ namespace PuyoTools.Modules.Archive
 
                 fileName = string.IsNullOrWhiteSpace(fileName) ? fileName : Path.ChangeExtension(fileName, "GVR");
 
-                entries.Add(startOffset + offset, length, fileName);
+                entries.Add(new ArchiveEntry(this, startOffset + offset, length, fileName));
             }
         }
 

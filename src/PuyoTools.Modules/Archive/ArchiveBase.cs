@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 
 namespace PuyoTools.Modules.Archive
@@ -82,7 +83,7 @@ namespace PuyoTools.Modules.Archive
         protected long startOffset;
 
         protected Stream archiveData;
-        protected ArchiveEntryCollection entries;
+        protected List<ArchiveEntry> entries;
 
         public ArchiveReader(Stream source)
         {
@@ -93,10 +94,11 @@ namespace PuyoTools.Modules.Archive
         /// <summary>
         /// Gets the collection of entries that are currently in the archive.
         /// </summary>
-        public ArchiveEntryCollection Entries
+        /*public ArchiveEntryCollection Entries
         {
             get { return entries; }
-        }
+        }*/
+        public ReadOnlyCollection<ArchiveEntry> Entries => entries.AsReadOnly();
 
         /// <summary>
         /// Retrieves the specified entry in the archive.
@@ -252,6 +254,8 @@ namespace PuyoTools.Modules.Archive
                 FileAdded(this, e);
             }
         }
+
+        internal Stream ArchiveStream => destination;
     }
 
     public class CannotAddFileToArchiveException : Exception { }

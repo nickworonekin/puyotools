@@ -246,5 +246,7 @@ namespace PuyoTools.Modules.Archive
         {
             return entries.GetEnumerator();
         }
+
+        internal List<ArchiveEntry> Items => entries;
     }
 }

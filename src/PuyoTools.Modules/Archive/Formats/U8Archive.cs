@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -55,7 +56,7 @@ namespace PuyoTools.Modules.Archive
             rootNode.DataOffset = PTStream.ReadUInt32BE(source);
             rootNode.Length = PTStream.ReadUInt32BE(source);
 
-            entries = new ArchiveEntryCollection(this, (int)rootNode.Length - 1);
+            entries = new List<ArchiveEntry>((int)rootNode.Length - 1);
             uint stringTableOffset = rootNodeOffset + (rootNode.Length * 12);
 
             // rootNode.Length is essentially how many files are contained in the archive, so we'll do just that
@@ -95,7 +96,7 @@ namespace PuyoTools.Modules.Archive
                 source.Position = oldPosition;
 
                 // Add this entry to the collection
-                entries.Add(startOffset + entryOffset, entryLength, entryFilename);
+                entries.Add(new ArchiveEntry(this, startOffset + entryOffset, entryLength, entryFilename));
             }
 
             // Set the position of the stream to the end of the file

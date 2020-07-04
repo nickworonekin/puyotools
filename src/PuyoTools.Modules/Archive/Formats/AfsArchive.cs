@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -44,7 +45,7 @@ namespace PuyoTools.Modules.Archive
             // Get the number of entries in the archive
             source.Position += 4;
             int numEntries = PTStream.ReadInt32(source);
-            entries = new ArchiveEntryCollection(this, numEntries);
+            entries = new List<ArchiveEntry>(numEntries);
 
             // Get the offset of the metadata
             source.Position += (numEntries * 8);
@@ -71,7 +72,7 @@ namespace PuyoTools.Modules.Archive
                 string entryFname = PTStream.ReadCString(source, 32);
 
                 // Add this entry to the collection
-                entries.Add(startOffset + entryOffset, entryLength, entryFname);
+                entries.Add(new ArchiveEntry(this, startOffset + entryOffset, entryLength, entryFname));
             }
 
             // Set the position of the stream to the end of the file

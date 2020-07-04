@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -54,7 +55,7 @@ namespace PuyoTools.Modules.Archive
 
             // Get the number of entries in the archive
             int numEntries = PTStream.ReadInt32(source);
-            entries = new ArchiveEntryCollection(this, numEntries);
+            entries = new List<ArchiveEntry>(numEntries);
 
             // Let's check to see if this is a Puyo Tetris PS3 NARC by checking the offset of the first file.
             // It seems that offsets are stored differently than a normal NARC.
@@ -107,7 +108,7 @@ namespace PuyoTools.Modules.Archive
                     }
 
                     // Add this entry to the collection
-                    entries.Add(startOffset + fimgOffset + 8 + entryOffset, entryLength, entryFname);
+                    entries.Add(new ArchiveEntry(this, startOffset + fimgOffset + 8 + entryOffset, entryLength, entryFname));
                 }
             }
             
@@ -142,7 +143,7 @@ namespace PuyoTools.Modules.Archive
                     }
 
                     // Add this entry to the collection
-                    entries.Add(startOffset + entryOffset, entryLength, entryFname);
+                    entries.Add(new ArchiveEntry(this, startOffset + entryOffset, entryLength, entryFname));
                 }
             }
 

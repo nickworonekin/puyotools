@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -94,7 +95,7 @@ namespace PuyoTools.Modules.Archive
 
             // Get the number of entries in the archive
             ushort numEntries = PTStream.ReadUInt16(source);
-            entries = new ArchiveEntryCollection(this, numEntries);
+            entries = new List<ArchiveEntry>(numEntries);
 
             // Read in all the entries
             for (int i = 0; i < numEntries; i++)
@@ -114,7 +115,7 @@ namespace PuyoTools.Modules.Archive
                 }
 
                 // Add this entry to the collection
-                entries.Add(startOffset + entryOffset, entryLength, entryFname);
+                entries.Add(new ArchiveEntry(this, startOffset + entryOffset, entryLength, entryFname) { Index = i });
 
                 entryOffset += entryLength;
             }
