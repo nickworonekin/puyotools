@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace PuyoTools.Modules
@@ -63,142 +64,75 @@ namespace PuyoTools.Modules
             return value;
         }
 
-        /// <summary>
-        /// Writes a two-byte signed integer using the specified endianess to the current stream and advances the stream position by two bytes.
-        /// </summary>
-        /// <param name="writer"></param>
-        /// <param name="value">The two-byte signed integer to write.</param>
-        /// <param name="endianess">The endianess to use.</param>
-        public static void Write(this BinaryWriter writer, short value, Endianess endianess)
-        {
-            if (endianess == Endianess.Big || (endianess == Endianess.Native && !BitConverter.IsLittleEndian))
-            {
-                value = BinaryPrimitives.ReverseEndianness(value);
-            }
+        /// <inheritdoc cref="BinaryWriter.Write(byte)"/>
+        /// <remarks>This method is an alias for <see cref="BinaryWriter.Write(byte)"/>.</remarks>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void WriteByte(this BinaryWriter writer, byte value) => writer.Write(value);
 
-            writer.Write(value);
-        }
+        /// <inheritdoc cref="BinaryWriter.Write(short)"/>
+        /// <remarks>This method is an alias for <see cref="BinaryWriter.Write(short)"/>.</remarks>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void WriteInt16(this BinaryWriter writer, short value) => writer.Write(value);
 
-        /// <summary>
-        /// Writes a four-byte signed integer using the specified endianess to the current stream and advances the stream position by four bytes.
-        /// </summary>
-        /// <param name="writer"></param>
-        /// <param name="value">The four-byte signed integer to write.</param>
-        /// <param name="endianess">The endianess to use.</param>
-        public static void Write(this BinaryWriter writer, int value, Endianess endianess)
-        {
-            if (endianess == Endianess.Big || (endianess == Endianess.Native && !BitConverter.IsLittleEndian))
-            {
-                value = BinaryPrimitives.ReverseEndianness(value);
-            }
+        /// <inheritdoc cref="BinaryWriter.Write(int)"/>
+        /// <remarks>This method is an alias for <see cref="BinaryWriter.Write(int)"/>.</remarks>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void WriteInt32(this BinaryWriter writer, int value) => writer.Write(value);
 
-            writer.Write(value);
-        }
+        /// <inheritdoc cref="BinaryWriter.Write(long)"/>
+        /// <remarks>This method is an alias for <see cref="BinaryWriter.Write(long)"/>.</remarks>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void WriteInt64(this BinaryWriter writer, long value) => writer.Write(value);
 
-        /// <summary>
-        /// Writes an eight-byte signed integer using the specified endianess to the current stream and advances the stream position by eight bytes.
-        /// </summary>
-        /// <param name="writer"></param>
-        /// <param name="value">The eight-byte signed integer to write.</param>
-        /// <param name="endianess">The endianess to use.</param>
-        public static void Write(this BinaryWriter writer, long value, Endianess endianess)
-        {
-            if (endianess == Endianess.Big || (endianess == Endianess.Native && !BitConverter.IsLittleEndian))
-            {
-                value = BinaryPrimitives.ReverseEndianness(value);
-            }
+        /// <inheritdoc cref="BinaryWriter.Write(ushort)"/>
+        /// <remarks>This method is an alias for <see cref="BinaryWriter.Write(short)"/>.</remarks>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void WriteUInt16(this BinaryWriter writer, ushort value) => writer.Write(value);
 
-            writer.Write(value);
-        }
+        /// <inheritdoc cref="BinaryWriter.Write(uint)"/>
+        /// <remarks>This method is an alias for <see cref="BinaryWriter.Write(int)"/>.</remarks>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void WriteUInt32(this BinaryWriter writer, uint value) => writer.Write(value);
 
-        /// <summary>
-        /// Writes a two-byte unsigned integer using the specified endianess to the current stream and advances the stream position by two bytes.
-        /// </summary>
-        /// <param name="writer"></param>
-        /// <param name="value">The two-byte unsigned integer to write.</param>
-        /// <param name="endianess">The endianess to use.</param>
-        public static void Write(this BinaryWriter writer, ushort value, Endianess endianess)
-        {
-            if (endianess == Endianess.Big || (endianess == Endianess.Native && !BitConverter.IsLittleEndian))
-            {
-                value = BinaryPrimitives.ReverseEndianness(value);
-            }
-
-            writer.Write(value);
-        }
-
-        /// <summary>
-        /// Writes a four-byte unsigned integer using the specified endianess to the current stream and advances the stream position by four bytes.
-        /// </summary>
-        /// <param name="writer"></param>
-        /// <param name="value">The four-byte unsigned integer to write.</param>
-        /// <param name="endianess">The endianess to use.</param>
-        public static void Write(this BinaryWriter writer, uint value, Endianess endianess)
-        {
-            if (endianess == Endianess.Big || (endianess == Endianess.Native && !BitConverter.IsLittleEndian))
-            {
-                value = BinaryPrimitives.ReverseEndianness(value);
-            }
-
-            writer.Write(value);
-        }
-
-        /// <summary>
-        /// Writes an eight-byte unsigned integer using the specified endianess to the current stream and advances the stream position by eight bytes.
-        /// </summary>
-        /// <param name="writer"></param>
-        /// <param name="value">The eight-byte unsigned integer to write.</param>
-        /// <param name="endianess">The endianess to use.</param>
-        public static void Write(this BinaryWriter writer, ulong value, Endianess endianess)
-        {
-            if (endianess == Endianess.Big || (endianess == Endianess.Native && !BitConverter.IsLittleEndian))
-            {
-                value = BinaryPrimitives.ReverseEndianness(value);
-            }
-
-            writer.Write(value);
-        }
+        /// <inheritdoc cref="BinaryWriter.Write(ulong)"/>
+        /// <remarks>This method is an alias for <see cref="BinaryWriter.Write(long)"/>.</remarks>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void WriteUInt64(this BinaryWriter writer, ulong value) => writer.Write(value);
 
         /// <summary>
         /// Writes a two-byte signed integer in big-endian format to the current stream and advances the stream position by two bytes.
         /// </summary>
-        /// <param name="writer"></param>
-        /// <param name="value">The two-byte signed integer to write.</param>
+        /// <inheritdoc cref="BinaryWriter.Write(short)"/>
         public static void WriteInt16BigEndian(this BinaryWriter writer, short value) => writer.Write(BinaryPrimitives.ReverseEndianness(value));
 
         /// <summary>
         /// Writes a four-byte signed integer in big-endian format to the current stream and advances the stream position by four bytes.
         /// </summary>
-        /// <param name="writer"></param>
-        /// <param name="value">The four-byte signed integer to write.</param>
+        /// <inheritdoc cref="BinaryWriter.Write(int)"/>
         public static void WriteInt32BigEndian(this BinaryWriter writer, int value) => writer.Write(BinaryPrimitives.ReverseEndianness(value));
 
         /// <summary>
         /// Writes an eight-byte signed integer in big-endian format to the current stream and advances the stream position by eight bytes.
         /// </summary>
-        /// <param name="writer"></param>
-        /// <param name="value">The eight-byte signed integer to write.</param>
+        /// <inheritdoc cref="BinaryWriter.Write(long)"/>
         public static void WriteInt64BigEndian(this BinaryWriter writer, long value) => writer.Write(BinaryPrimitives.ReverseEndianness(value));
 
         /// <summary>
         /// Writes a two-byte unsigned integer in big-endian format to the current stream and advances the stream position by two bytes.
         /// </summary>
-        /// <param name="writer"></param>
-        /// <param name="value">The two-byte unsigned integer to write.</param>
+        /// <inheritdoc cref="BinaryWriter.Write(ushort)"/>
         public static void WriteUInt16BigEndian(this BinaryWriter writer, ushort value) => writer.Write(BinaryPrimitives.ReverseEndianness(value));
 
         /// <summary>
         /// Writes a four-byte unsigned integer in big-endian format to the current stream and advances the stream position by four bytes.
         /// </summary>
-        /// <param name="writer"></param>
-        /// <param name="value">The four-byte unsigned integer to write.</param>
+        /// <inheritdoc cref="BinaryWriter.Write(uint)"/>
         public static void WriteUInt32BigEndian(this BinaryWriter writer, uint value) => writer.Write(BinaryPrimitives.ReverseEndianness(value));
 
         /// <summary>
         /// Writes an eight-byte unsigned integer in big-endian format to the current stream and advances the stream position by eight bytes.
         /// </summary>
-        /// <param name="writer"></param>
-        /// <param name="value">The eight-byte unsigned integer to write.</param>
+        /// <inheritdoc cref="BinaryWriter.Write(ulong)"/>
         public static void WriteUInt64BigEndian(this BinaryWriter writer, ulong value) => writer.Write(BinaryPrimitives.ReverseEndianness(value));
 
         /// <summary>
@@ -208,7 +142,7 @@ namespace PuyoTools.Modules
         /// <param name="value">The value to write.</param>
         /// <param name="count">The number of bytes to write.</param>
         /// <remarks><paramref name="value"/> will be truncated if the number of bytes is greater than <paramref name="count"/>.</remarks>
-        public static void Write(this BinaryWriter writer, string value, int count) => Write(writer, value, count, Encoding.UTF8);
+        public static void WriteString(this BinaryWriter writer, string value, int count) => WriteString(writer, value, count, Encoding.UTF8);
 
         /// <summary>
         /// Writes a string to this stream using the specified encoding, and advances the current position of the stream by the number of bytes specified in <paramref name="count"/>.
@@ -218,7 +152,7 @@ namespace PuyoTools.Modules
         /// <param name="count">The number of bytes to write.</param>
         /// <param name="encoding">The character encoding to use.</param>
         /// <remarks><paramref name="value"/> will be truncated if the number of bytes is greater than <paramref name="count"/>.</remarks>
-        public static void Write(this BinaryWriter writer, string value, int count, Encoding encoding)
+        public static void WriteString(this BinaryWriter writer, string value, int count, Encoding encoding)
         {
             var bytes = encoding.GetBytes(value);
             if (bytes.Length >= count)
@@ -228,7 +162,7 @@ namespace PuyoTools.Modules
             else
             {
                 writer.Write(bytes);
-                writer.Write(Enumerable.Repeat((byte)0, count - bytes.Length).ToArray());
+                writer.Write(new byte[count - bytes.Length]);
             }
         }
 

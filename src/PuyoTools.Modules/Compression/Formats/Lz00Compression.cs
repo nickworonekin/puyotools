@@ -18,7 +18,7 @@ namespace PuyoTools.Modules.Compression
         /// </summary>
         /// <param name="source">The stream to read from.</param>
         /// <param name="destination">The stream to write to.</param>
-        public override void Decompress(Stream source, Stream destination)
+        /*public override void Decompress(Stream source, Stream destination)
         {
             source.Position += 4;
 
@@ -92,6 +92,85 @@ namespace PuyoTools.Modules.Compression
                     flag >>= 1;
                 }
             }
+        }*/
+
+        public override void Decompress(Stream source, Stream destination)
+        {
+            using (var reader = new BinaryReader(source, Encoding.UTF8, true))
+            {
+                source.Position += 4;
+
+                // Get the source length, destination length, and encryption key
+                int sourceLength = reader.ReadInt32();
+
+                source.Position += 40;
+
+                int destinationLength = reader.ReadInt32();
+                uint key = reader.ReadUInt32();
+
+                source.Position += 8;
+
+                // Set the source, destination, and buffer pointers
+                int sourcePointer = 0x40;
+                int destinationPointer = 0x0;
+                int bufferPointer = 0xFEE;
+
+                // Initalize the buffer
+                byte[] buffer = new byte[0x1000];
+
+                // Start decompression
+                while (sourcePointer < sourceLength)
+                {
+                    byte flag = ReadByte(source, ref key);
+                    sourcePointer++;
+
+                    for (int i = 0; i < 8; i++)
+                    {
+                        if ((flag & 0x1) != 0) // Not compressed
+                        {
+                            byte value = Transform(reader.ReadByte(), ref key);
+                            sourcePointer++;
+
+                            destination.WriteByte(value);
+                            destinationPointer++;
+
+                            buffer[bufferPointer] = value;
+                            bufferPointer = (bufferPointer + 1) & 0xFFF;
+                        }
+                        else // Compressed
+                        {
+                            ushort matchPair = (ushort)(Transform(reader.ReadByte(), ref key) | (Transform(reader.ReadByte(), ref key) << 8));
+                            sourcePointer += 2;
+
+                            int matchOffset = matchPair & 0xFFF;
+                            int matchLength = (matchPair >> 12) + 3;
+
+                            for (int j = 0; j < matchLength; j++)
+                            {
+                                destination.WriteByte(buffer[(matchOffset + j) & 0xFFF]);
+                                destinationPointer++;
+
+                                buffer[bufferPointer] = buffer[(matchOffset + j) & 0xFFF];
+                                bufferPointer = (bufferPointer + 1) & 0xFFF;
+                            }
+                        }
+
+                        // Check to see if we reached the end of the source
+                        if (sourcePointer >= sourceLength)
+                        {
+                            break;
+                        }
+
+                        // Check to see if we wrote too much data to the destination
+                        if (destinationPointer > destinationLength)
+                        {
+                            throw new Exception("Too much data written to the destination.");
+                        }
+
+                        flag >>= 1;
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -101,19 +180,30 @@ namespace PuyoTools.Modules.Compression
         /// <param name="destination">The stream to write to.</param>
         public override void Compress(Stream source, Stream destination)
         {
-            long destinationStart = destination.Position;
+            var destinationStartPosition = destination.Position;
 
             // Get the source length, and read it in to an array
             int sourceLength = (int)(source.Length - source.Position);
             byte[] sourceArray = new byte[sourceLength];
-            source.Read(sourceArray, 0, sourceLength);
+            var totalSourceBytesRead = 0;
+            int sourceBytesRead;
+            do
+            {
+                sourceBytesRead = source.Read(sourceArray, totalSourceBytesRead, sourceLength - totalSourceBytesRead);
+                if (sourceBytesRead == 0)
+                {
+                    throw new IOException($"Unable to read all bytes in {nameof(source)}");
+                }
+                totalSourceBytesRead += sourceBytesRead;
+            }
+            while (totalSourceBytesRead < sourceLength);
 
             // Get the encryption key
-            uint key = (uint)(DateTime.Now - new DateTime(1970, 1, 1)).TotalSeconds;
+            // Since the original files appear to use the time the file was compressed (as Unix time), we will do the same.
+            uint key = (uint)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
             // Set the source and destination pointers
-            int sourcePointer      = 0x0;
-            int destinationPointer = 0x40;
+            int sourcePointer = 0x0;
 
             // Initalize the LZ dictionary
             LzBufferDictionary dictionary = new LzBufferDictionary();
@@ -121,25 +211,33 @@ namespace PuyoTools.Modules.Compression
             dictionary.SetBufferStart(0xFEE);
             dictionary.SetMaxMatchAmount(0xF + 3);
 
-            // Write out the header
-            // Magic code
-            destination.WriteByte((byte)'L');
-            destination.WriteByte((byte)'Z');
-            destination.WriteByte((byte)'0');
-            destination.WriteByte((byte)'0');
-            PTStream.WriteInt32(destination, 0); // Compressed length (will be filled in later)
-            PTStream.WriteInt32(destination, 0);
-            PTStream.WriteInt32(destination, 0);
-
-            PTStream.WriteCString(destination, Path.GetFileName(DestinationPath), 32, EncodingExtensions.ShiftJIS); // File name
-            PTStream.WriteInt32(destination, sourceLength); // Decompressed length
-            PTStream.WriteUInt32(destination, key); // Encryption key
-            PTStream.WriteInt32(destination, 0);
-            PTStream.WriteInt32(destination, 0);
-
-            // Start compression
-            using (MemoryStream buffer = new MemoryStream())
+            using (var writer = destination.AsBinaryWriter())
+            using (var buffer = new MemoryStream(16)) // Will never contain more than 16 bytes
+            using (var bufferWriter = new BinaryWriter(buffer))
             {
+                // Write out the header
+                // Magic code
+                writer.Write(magicCode);
+                writer.WriteInt32(0); // Compressed length (will be filled in later)
+                writer.WriteInt32(0);
+                writer.WriteInt32(0);
+
+                // Filename (or null bytes)
+                if (destination is FileStream fs)
+                {
+                    writer.WriteString(Path.GetFileName(fs.Name), 32, EncodingExtensions.ShiftJIS);
+                }
+                else
+                {
+                    writer.Write(new byte[32]); // Elements in array default to 0
+                }
+
+                writer.WriteInt32(sourceLength); // Decompressed length
+                writer.WriteUInt32(key); // Encryption key
+                writer.WriteInt32(0);
+                writer.WriteInt32(0);
+
+                // Start compression
                 while (sourcePointer < sourceLength)
                 {
                     byte flag = 0;
@@ -151,8 +249,7 @@ namespace PuyoTools.Modules.Compression
 
                         if (match[1] > 0) // There is a match
                         {
-                            buffer.WriteByte((byte)(match[0] & 0xFF));
-                            buffer.WriteByte((byte)(((match[0] & 0xF00) >> 4) | ((match[1] - 3) & 0xF)));
+                            bufferWriter.WriteUInt16((ushort)((match[0] & 0xFF) | (match[0] & 0xF00) << 4 | ((match[1] - 3) & 0xF) << 8));
 
                             dictionary.AddEntryRange(sourceArray, sourcePointer, match[1]);
 
@@ -162,7 +259,7 @@ namespace PuyoTools.Modules.Compression
                         {
                             flag |= (byte)(1 << i);
 
-                            buffer.WriteByte(sourceArray[sourcePointer]);
+                            bufferWriter.WriteByte(sourceArray[sourcePointer]);
 
                             dictionary.AddEntry(sourceArray, sourcePointer);
 
@@ -175,26 +272,23 @@ namespace PuyoTools.Modules.Compression
                     }
 
                     // Flush the buffer and write it to the destination stream
-                    WriteByte(destination, flag, ref key);
+                    writer.WriteByte(Transform(flag, ref key));
 
-                    buffer.Position = 0;
-                    while (buffer.Position < buffer.Length)
+                    // Loop through the buffer and encrypt the contents before writing it to the destination
+                    var backingBuffer = buffer.GetBuffer();
+                    for (var i = 0; i < buffer.Length; i++)
                     {
-                        byte value = PTStream.ReadByte(buffer);
-                        WriteByte(destination, value, ref key);
+                        backingBuffer[i] = Transform(backingBuffer[i], ref key);
                     }
 
-                    destinationPointer += (int)buffer.Length + 1;
-
+                    buffer.WriteTo(destination);
                     buffer.SetLength(0);
                 }
-            }
 
-            // Go back to the beginning of the file and write out the compressed length
-            long currentPosition = destination.Position;
-            destination.Position = destinationStart + 4;
-            PTStream.WriteInt32(destination, destinationPointer);
-            destination.Position = currentPosition;
+                // Go back to the beginning of the file and write out the compressed length
+                var destinationLength = (int)(destination.Position - destinationStartPosition);
+                writer.At(destinationStartPosition + 4, x => x.WriteInt32(destinationLength));
+            }
         }
 
         /// <summary>
@@ -207,7 +301,7 @@ namespace PuyoTools.Modules.Compression
             var startPosition = source.Position;
             var remainingLength = source.Length - startPosition;
 
-            using (var reader = new BinaryReader(source, Encoding.UTF8, true))
+            using (var reader = source.AsBinaryReader())
             {
                 return remainingLength > 64
                     && reader.At(startPosition, x => x.ReadBytes(magicCode.Length)).SequenceEqual(magicCode)
@@ -226,6 +320,20 @@ namespace PuyoTools.Modules.Compression
         }
 
         private byte Get(byte value, ref uint key)
+        {
+            // Generate a new key
+            uint x = (((((((key << 1) + key) << 5) - key) << 5) + key) << 7) - key;
+            x = (x << 6) - x;
+            x = (x << 4) - x;
+
+            key = ((x << 2) - x) + 12345;
+
+            // Now return the value since we have the key
+            uint t = (key >> 16) & 0x7FFF;
+            return (byte)(value ^ ((((t << 8) - t) >> 15)));
+        }
+
+        private byte Transform(byte value, ref uint key)
         {
             // Generate a new key
             uint x = (((((((key << 1) + key) << 5) - key) << 5) + key) << 7) - key;

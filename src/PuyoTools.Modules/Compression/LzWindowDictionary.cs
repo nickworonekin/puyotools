@@ -28,30 +28,30 @@ namespace PuyoTools.Modules.Compression
                 return new int[] { 0, 0 };
 
             // Start finding matches
-            int[] Match = new int[] { 0, 0 };
-            int MatchStart;
-            int MatchSize;
+            int[] match = new int[] { 0, 0 };
+            int matchStart;
+            int matchLength;
 
             for (int i = offsetList[decompressedData[offset]].Count - 1; i >= 0; i--)
             {
-                MatchStart = offsetList[decompressedData[offset]][i];
-                MatchSize = 1;
+                matchStart = offsetList[decompressedData[offset]][i];
+                matchLength = 1;
 
-                while (MatchSize < maxMatchAmount && MatchSize < windowLength && MatchStart + MatchSize < offset && offset + MatchSize < length && decompressedData[offset + MatchSize] == decompressedData[MatchStart + MatchSize])
-                    MatchSize++;
+                while (matchLength < maxMatchAmount && matchLength < windowLength && matchStart + matchLength < offset && offset + matchLength < length && decompressedData[offset + matchLength] == decompressedData[matchStart + matchLength])
+                    matchLength++;
 
-                if (MatchSize >= minMatchAmount && MatchSize > Match[1]) // This is a good match
+                if (matchLength >= minMatchAmount && matchLength > match[1]) // This is a good match
                 {
-                    Match = new int[] { (int)(offset - MatchStart), MatchSize };
+                    match = new int[] { (int)(offset - matchStart), matchLength };
 
-                    if (MatchSize == maxMatchAmount) // Don't look for more matches
+                    if (matchLength == maxMatchAmount) // Don't look for more matches
                         break;
                 }
             }
 
             // Return the match.
             // If no match was made, the distance & length pair will be zero
-            return Match;
+            return match;
         }
 
         // Slide the window

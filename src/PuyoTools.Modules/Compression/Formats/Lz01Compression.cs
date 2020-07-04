@@ -93,16 +93,26 @@ namespace PuyoTools.Modules.Compression
         /// <param name="destination">The stream to write to.</param>
         public override void Compress(Stream source, Stream destination)
         {
-            long destinationStart = destination.Position;
+            var destinationStartPosition = destination.Position;
 
             // Get the source length, and read it in to an array
             int sourceLength = (int)(source.Length - source.Position);
             byte[] sourceArray = new byte[sourceLength];
-            source.Read(sourceArray, 0, sourceLength);
+            var totalSourceBytesRead = 0;
+            int sourceBytesRead;
+            do
+            {
+                sourceBytesRead = source.Read(sourceArray, totalSourceBytesRead, sourceLength - totalSourceBytesRead);
+                if (sourceBytesRead == 0)
+                {
+                    throw new IOException($"Unable to read all bytes in {nameof(source)}");
+                }
+                totalSourceBytesRead += sourceBytesRead;
+            }
+            while (totalSourceBytesRead < sourceLength);
 
             // Set the source and destination pointers
             int sourcePointer = 0x0;
-            int destinationPointer = 0x10;
 
             // Initalize the LZ dictionary
             LzBufferDictionary dictionary = new LzBufferDictionary();
@@ -110,19 +120,18 @@ namespace PuyoTools.Modules.Compression
             dictionary.SetBufferStart(0xFEE);
             dictionary.SetMaxMatchAmount(0xF + 3);
 
-            // Write out the header
-            // Magic code
-            destination.WriteByte((byte)'L');
-            destination.WriteByte((byte)'Z');
-            destination.WriteByte((byte)'0');
-            destination.WriteByte((byte)'1');
-            PTStream.WriteInt32(destination, 0); // Compressed length (will be filled in later)
-            PTStream.WriteInt32(destination, sourceLength); // Decompressed length
-            PTStream.WriteInt32(destination, 0);
-
-            // Start compression
-            using (MemoryStream buffer = new MemoryStream())
+            using (var writer = destination.AsBinaryWriter())
+            using (var buffer = new MemoryStream(16)) // Will never contain more than 16 bytes
+            using (var bufferWriter = new BinaryWriter(buffer))
             {
+                // Write out the header
+                // Magic code
+                writer.Write(magicCode);
+                writer.WriteInt32(0); // Compressed length (will be filled in later)
+                writer.WriteInt32(sourceLength); // Decompressed length
+                writer.WriteInt32(0);
+
+                // Start compression
                 while (sourcePointer < sourceLength)
                 {
                     byte flag = 0;
@@ -134,8 +143,7 @@ namespace PuyoTools.Modules.Compression
 
                         if (match[1] > 0) // There is a match
                         {
-                            buffer.WriteByte((byte)(match[0] & 0xFF));
-                            buffer.WriteByte((byte)(((match[0] & 0xF00) >> 4) | ((match[1] - 3) & 0xF)));
+                            bufferWriter.WriteUInt16((ushort)((match[0] & 0xFF) | (match[0] & 0xF00) << 4 | ((match[1] - 3) & 0xF) << 8));
 
                             dictionary.AddEntryRange(sourceArray, sourcePointer, match[1]);
 
@@ -145,7 +153,7 @@ namespace PuyoTools.Modules.Compression
                         {
                             flag |= (byte)(1 << i);
 
-                            buffer.WriteByte(sourceArray[sourcePointer]);
+                            bufferWriter.WriteByte(sourceArray[sourcePointer]);
 
                             dictionary.AddEntry(sourceArray, sourcePointer);
 
@@ -158,21 +166,16 @@ namespace PuyoTools.Modules.Compression
                     }
 
                     // Flush the buffer and write it to the destination stream
-                    destination.WriteByte(flag);
+                    writer.WriteByte(flag);
 
                     buffer.WriteTo(destination);
-
-                    destinationPointer += (int)buffer.Length + 1;
-
                     buffer.SetLength(0);
                 }
-            }
 
-            // Go back to the beginning of the file and write out the compressed length
-            long currentPosition = destination.Position;
-            destination.Position = destinationStart + 4;
-            PTStream.WriteInt32(destination, destinationPointer);
-            destination.Position = currentPosition;
+                // Go back to the beginning of the file and write out the compressed length
+                var destinationLength = (int)(destination.Position - destinationStartPosition);
+                writer.At(destinationStartPosition + 4, x => x.WriteInt32(destinationLength));
+            }
         }
 
         /// <summary>
@@ -185,7 +188,7 @@ namespace PuyoTools.Modules.Compression
             var startPosition = source.Position;
             var remainingLength = source.Length - startPosition;
 
-            using (var reader = new BinaryReader(source, Encoding.UTF8, true))
+            using (var reader = source.AsBinaryReader())
             {
                 return remainingLength > 16
                     && reader.At(startPosition, x => x.ReadBytes(magicCode.Length)).SequenceEqual(magicCode)

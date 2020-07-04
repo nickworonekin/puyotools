@@ -42,6 +42,17 @@ namespace PuyoTools.Formats.Archives.WriterSettings
                 archive.HasFormats = hasFormatsCheckbox.Checked;
                 archive.HasDimensions = hasDimensionsCheckbox.Checked;
             }
+
+            // SVM archive
+            else if (module is SvmArchiveWriter)
+            {
+                SvmArchiveWriter archive = (SvmArchiveWriter)module;
+
+                archive.HasFilenames = hasFilenamesCheckbox.Checked;
+                archive.HasGlobalIndexes = hasGlobalIndexesCheckbox.Checked;
+                archive.HasFormats = hasFormatsCheckbox.Checked;
+                archive.HasDimensions = hasDimensionsCheckbox.Checked;
+            }
         }
     }
 }

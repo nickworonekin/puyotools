@@ -6,18 +6,18 @@ using PuyoTools.Modules.Texture;
 
 namespace PuyoTools.Modules.Archive
 {
-    public class PvmArchive : ArchiveBase
+    public class SvmArchive : ArchiveBase
     {
         private static readonly byte[] magicCode = { (byte)'P', (byte)'V', (byte)'M', (byte)'H' };
 
         public override ArchiveReader Open(Stream source)
         {
-            return new PvmArchiveReader(source);
+            return new SvmArchiveReader(source);
         }
 
         public override ArchiveWriter Create(Stream destination)
         {
-            return new PvmArchiveWriter(destination);
+            return new SvmArchiveWriter(destination);
         }
 
         /// <summary>
@@ -30,7 +30,7 @@ namespace PuyoTools.Modules.Archive
             var startPosition = source.Position;
             var remainingLength = source.Length - startPosition;
 
-            using (var reader = new BinaryReader(source, Encoding.UTF8, true))
+            using (var reader = source.AsBinaryReader())
             {
                 if (!(remainingLength > 12
                     && reader.At(startPosition, x => x.ReadBytes(magicCode.Length)).SequenceEqual(magicCode)))
@@ -39,7 +39,7 @@ namespace PuyoTools.Modules.Archive
                 }
 
                 // Since PVMs and SVMs have identical headers, we need to check the data format of the first texture in the archive.
-                // For PVRs, the data format will be < 0x60.
+                // For SVRs, the data format will be >= 0x60 and < 0x70.
                 var firstEntryOffset = reader.At(startPosition + 4, x => x.ReadInt32()) + 8;
 
                 if (remainingLength < firstEntryOffset + 16)
@@ -49,7 +49,7 @@ namespace PuyoTools.Modules.Archive
 
                 var dataFormat = reader.At(startPosition + firstEntryOffset + 0x9, x => x.ReadByte());
 
-                if (dataFormat < 0x60)
+                if (dataFormat >= 0x60 && dataFormat < 0x70)
                 {
                     return true;
                 }
@@ -60,12 +60,12 @@ namespace PuyoTools.Modules.Archive
     }
 
     #region Archive Reader
-    public class PvmArchiveReader : ArchiveReader
+    public class SvmArchiveReader : ArchiveReader
     {
         bool hasFilenames, hasFormats, hasDimensions, hasGlobalIndexes;
         int tableEntryLength, globalIndexOffset;
 
-        public PvmArchiveReader(Stream source) : base(source)
+        public SvmArchiveReader(Stream source) : base(source)
         {
             // The offset of the first entry
             source.Position += 4;
@@ -109,7 +109,7 @@ namespace PuyoTools.Modules.Archive
                 if (hasFilenames)
                 {
                     source.Position = startOffset + headerOffset + 2;
-                    entryFname = PTStream.ReadCString(source, 28) + ".pvr";
+                    entryFname = PTStream.ReadCString(source, 28) + ".svr";
                     headerOffset += tableEntryLength;
                 }
 
@@ -162,7 +162,7 @@ namespace PuyoTools.Modules.Archive
     #endregion
 
     #region Archive Writer
-    public class PvmArchiveWriter : ArchiveWriter
+    public class SvmArchiveWriter : ArchiveWriter
     {
         #region Settings
         /// <summary>
@@ -186,7 +186,7 @@ namespace PuyoTools.Modules.Archive
         public bool HasDimensions { get; set; }
         #endregion
 
-        public PvmArchiveWriter(Stream destination) : base(destination)
+        public SvmArchiveWriter(Stream destination) : base(destination)
         {
             // Set default settings
             HasFilenames = true;
@@ -205,8 +205,8 @@ namespace PuyoTools.Modules.Archive
         /// </remarks>
         public override void CreateEntry(Stream source, string entryName)
         {
-            // Only PVR textures can be added to a PVM archive. If this is not a PVR texture, throw an exception.
-            if (!PvrTexture.Identify(source))
+            // Only SVR textures can be added to a SVM archive. If this is not a SVR texture, throw an exception.
+            if (!SvrTexture.Identify(source))
             {
                 throw new CannotAddFileToArchiveException();
             }

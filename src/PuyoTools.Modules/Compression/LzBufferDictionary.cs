@@ -32,32 +32,32 @@ namespace PuyoTools.Modules.Compression
                 return new int[] { 0, 0 };
 
             // Start finding matches
-            int[] Match = new int[] { 0, 0 };
-            int MatchStart;
-            int MatchSize;
-            int BufferPos;
+            int[] match = new int[] { 0, 0 };
+            int matchStart;
+            int matchLength;
+            int bufferPosition;
 
             for (int i = offsetList[decompressedData[offset]].Count - 1; i >= 0; i--)
             {
-                MatchStart = offsetList[decompressedData[offset]][i];
-                BufferPos = (bufferStart + MatchStart) & (bufferSize - 1);
-                MatchSize = 1;
+                matchStart = offsetList[decompressedData[offset]][i];
+                bufferPosition = (bufferStart + matchStart) & (bufferSize - 1);
+                matchLength = 1;
 
-                while (MatchSize < maxMatchAmount && MatchSize < bufferSize && MatchStart + MatchSize < offset && offset + MatchSize < length && decompressedData[offset + MatchSize] == bufferData[(BufferPos + MatchSize) & (bufferSize - 1)])
-                    MatchSize++;
+                while (matchLength < maxMatchAmount && matchLength < bufferSize && matchStart + matchLength < offset && offset + matchLength < length && decompressedData[offset + matchLength] == bufferData[(bufferPosition + matchLength) & (bufferSize - 1)])
+                    matchLength++;
 
-                if (MatchSize >= minMatchAmount && MatchSize > Match[1]) // This is a good match
+                if (matchLength >= minMatchAmount && matchLength > match[1]) // This is a good match
                 {
-                    Match = new int[] { BufferPos, MatchSize };
+                    match = new int[] { bufferPosition, matchLength };
 
-                    if (MatchSize == maxMatchAmount) // Don't look for more matches
+                    if (matchLength == maxMatchAmount) // Don't look for more matches
                         break;
                 }
             }
 
             // Return the match.
             // If no match was made, the distance & length pair will be zero
-            return Match;
+            return match;
         }
 
         // Remove old entries

@@ -36,7 +36,7 @@ namespace PuyoTools.Modules.Compression
             // CXLZ compression can only handle files smaller than 16MB
             if (source.Length - source.Position > 0xFFFFFF)
             {
-                throw new Exception("Source is too large. CXLZ compression can only compress files smaller than 16MB.");
+                throw new Exception($"CXLZ compression can't be used to compress files larger than {0xFFFFFF:N0} bytes.");
             }
 
             destination.Write(magicCode, 0, 4);

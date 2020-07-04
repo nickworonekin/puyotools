@@ -84,7 +84,18 @@ namespace PuyoTools.Modules.Compression
             int sourceLength = (int)(source.Length - source.Position);
 
             byte[] sourceArray = new byte[sourceLength];
-            source.Read(sourceArray, 0, sourceLength);
+            var totalSourceBytesRead = 0;
+            int sourceBytesRead;
+            do
+            {
+                sourceBytesRead = source.Read(sourceArray, totalSourceBytesRead, sourceLength - totalSourceBytesRead);
+                if (sourceBytesRead == 0)
+                {
+                    throw new IOException($"Unable to read all bytes in {nameof(source)}");
+                }
+                totalSourceBytesRead += sourceBytesRead;
+            }
+            while (totalSourceBytesRead < sourceLength);
 
             byte bitPos = 0;
             byte controlByte = 0;
@@ -156,7 +167,7 @@ namespace PuyoTools.Modules.Compression
             var startPosition = source.Position;
             var remainingLength = source.Length - startPosition;
 
-            using (var reader = new BinaryReader(source, Encoding.UTF8, true))
+            using (var reader = source.AsBinaryReader())
             {
                 return remainingLength > 3
                     && (reader.At(startPosition, x => x.ReadByte()) & 0x1) == 1
