@@ -4,7 +4,7 @@ using System.IO;
 namespace PuyoTools.Modules
 {
     /// <summary>
-    /// Provides a read-only view of a portion of a stream.
+    /// Provides a read-only view over a portion of a stream.
     /// </summary>
     public class StreamView : Stream
     {

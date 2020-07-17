@@ -177,7 +177,9 @@ namespace PuyoTools.Modules.Compression
                 writer.Write(magicCode);
 
                 // Get the file extension, and adjust as necessary to get it as 3 bytes
-                var fileExtension = Path.GetExtension(SourcePath) ?? string.Empty;
+                var fileExtension = source is FileStream fs
+                    ? Path.GetExtension(fs.Name)
+                    : string.Empty;
                 writer.WriteString(fileExtension, 3);
 
                 writer.WriteByte(0x10);

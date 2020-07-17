@@ -82,9 +82,6 @@ namespace PuyoTools.GUI
 
                     using (FileStream source = File.OpenRead(file))
                     {
-                        // Set the source path (really only used for GIM textures at the current moment).
-                        texture.SourcePath = file;
-
                         // Set texture settings
                         ModuleSettingsControl settingsControl = settings.WriterSettingsControl;
                         if (settingsControl != null)

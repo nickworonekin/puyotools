@@ -41,7 +41,25 @@ namespace PuyoTools.Modules
 
         public static void CopyToPadded(Stream source, Stream destination, int blockSize, byte paddingByte)
         {
-            CopyPartToPadded(source, destination, (int)(source.Length - source.Position), blockSize, paddingByte);
+            //CopyPartToPadded(source, destination, (int)(source.Length - source.Position), blockSize, paddingByte);
+
+            var sourceLength = source.Length - source.Position;
+            source.CopyTo(destination);
+
+            if (sourceLength % blockSize == 0)
+            {
+                return;
+            }
+
+            var bytes = new byte[blockSize - (sourceLength % blockSize)];
+            if (paddingByte != default) // Only set the values if the padding byte isn't 0
+            {
+                for (var i = 0; i < bytes.Length; i++) // Shame we can't use Array.Fill
+                {
+                    bytes[i] = paddingByte;
+                }
+            }
+            destination.Write(bytes, 0, bytes.Length);
         }
 
         /// <summary>

@@ -196,26 +196,19 @@ namespace PuyoTools.Modules.Archive
             HasDimensions = true;
         }
 
-        /// <summary>
-        /// Creates an entry that has the specified data entry name in the archive.
-        /// </summary>
-        /// <param name="source">The data to be added to the archive.</param>
-        /// <param name="entryName">The name of the entry to be created.</param>
-        /// <remarks>
-        /// The file may be rejected from the archive. In this case, a CannotAddFileToArchiveException will be thrown.
-        /// </remarks>
-        public override void CreateEntry(Stream source, string entryName)
+        /// <inheritdoc/>
+        public override ArchiveEntry CreateEntry(Stream source, string entryName)
         {
             // Only PVR textures can be added to a PVM archive. If this is not a PVR texture, throw an exception.
             if (!PvrTexture.Identify(source))
             {
-                throw new CannotAddFileToArchiveException();
+                throw new FileRejectedException("PVM archives can only contain PVR textures.");
             }
 
-            base.CreateEntry(source, entryName);
+            return base.CreateEntry(source, entryName);
         }
 
-        public override void Flush()
+        protected override void WriteFile()
         {
             // Determine the length of each entry in the header
             // and the flags that indicate what is stored in the header
@@ -265,6 +258,9 @@ namespace PuyoTools.Modules.Archive
             // Now, let's add the entries
             for (int i = 0; i < entries.Count; i++)
             {
+                // Call the entry writing event
+                OnEntryWriting(new ArchiveEntryWritingEventArgs(entries[i]));
+
                 Stream entryData = entries[i].Open();
 
                 // We need to get some information about the texture.
@@ -309,8 +305,8 @@ namespace PuyoTools.Modules.Archive
                 entryOffset = destination.Position;
                 destination.Position = oldPosition;
 
-                // Call the file added event
-                OnFileAdded(EventArgs.Empty);
+                // Call the entry written event
+                OnEntryWritten(new ArchiveEntryWrittenEventArgs(entries[i]));
             }
         }
     }

@@ -9,9 +9,9 @@ using System.Windows.Forms;
 
 namespace PuyoTools.GUI
 {
-    public partial class FilesNotAddedDialog : Form
+    public partial class RejectedFilesDialog : Form
     {
-        public FilesNotAddedDialog(List<string> files)
+        public RejectedFilesDialog(List<string> files)
         {
             InitializeComponent();
 

@@ -61,7 +61,9 @@ namespace PuyoTools.Modules.Texture
             texture.HasMetadata = HasMetadata;
             if (texture.HasMetadata)
             {
-                texture.Metadata.OriginalFilename = Path.GetFileName(SourcePath);
+                texture.Metadata.OriginalFilename = source is FileStream fs
+                    ? Path.GetFileName(fs.Name)
+                    : string.Empty;
                 texture.Metadata.User = Environment.UserName;
                 texture.Metadata.Program = "Puyo Tools";
             }

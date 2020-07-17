@@ -98,7 +98,7 @@ namespace PuyoTools.Modules.Archive
             _prsCompression = new PrsCompression();
         }
 
-        public override void Flush()
+        protected override void WriteFile()
         {
             const int tableStartPtr = 0x10;
             int dataStartPtr = PTMethods.RoundUp(tableStartPtr + (entries.Count * 0x30), 0x10); // just to be safe
@@ -114,6 +114,9 @@ namespace PuyoTools.Modules.Archive
             {
                 for (int i = 0; i < entries.Count; i++)
                 {
+                    // Call the entry writing event
+                    OnEntryWriting(new ArchiveEntryWritingEventArgs(entries[i]));
+
                     var entry = entries[i];
                     var entryStream = entry.Open();
                     _prsCompression.Compress(entryStream, compressedStream);
@@ -137,7 +140,8 @@ namespace PuyoTools.Modules.Archive
                     compressedStream.Position = 0;
                     compressedStream.SetLength(0);
 
-                    OnFileAdded(EventArgs.Empty);
+                    // Call the entry written event
+                    OnEntryWritten(new ArchiveEntryWrittenEventArgs(entries[i]));
                 }
             }
         }

@@ -118,7 +118,7 @@ namespace PuyoTools.Modules.Archive
     {
         public U8ArchiveWriter(Stream destination) : base(destination) { }
 
-        public override void Flush()
+        protected override void WriteFile()
         {
             // The start of the archive
             long offset = destination.Position;
@@ -187,10 +187,13 @@ namespace PuyoTools.Modules.Archive
             // Write the file data
             for (int i = 0; i < entries.Count; i++)
             {
+                // Call the entry writing event
+                OnEntryWriting(new ArchiveEntryWritingEventArgs(entries[i]));
+
                 PTStream.CopyToPadded(entries[i].Open(), destination, 32, 0);
 
-                // Call the file added event
-                OnFileAdded(EventArgs.Empty);
+                // Call the entry written event
+                OnEntryWritten(new ArchiveEntryWrittenEventArgs(entries[i]));
             }
         }
     }

@@ -86,7 +86,7 @@ namespace PuyoTools.GUI
         private void Run(Settings settings, ProgressDialog dialog)
         {
             // Setup some stuff for the progress dialog
-            int numFilesAdded = 0;
+            int entryIndex = 0;
             string description = string.Format("Processing {0}", Path.GetFileName(settings.OutFilename));
 
             dialog.ReportProgress(0, description);
@@ -94,7 +94,7 @@ namespace PuyoTools.GUI
             // For some archives, the file needs to be a specific format. As such,
             // they may be rejected when trying to add them. We'll store such files in
             // this list to let the user know they could not be added.
-            List<string> FilesNotAdded = new List<string>();
+            List<string> rejectedFiles = new List<string>();
 
             // Create the stream we are going to write the archive to
             Stream destination;
@@ -110,68 +110,67 @@ namespace PuyoTools.GUI
             }
 
             // Create the archive
-            ArchiveWriter archive = settings.ArchiveFormat.GetCodec().Create(destination);
-
-            // Set archive settings
-            ModuleSettingsControl settingsControl = settings.WriterSettingsControl;
-            if (settingsControl != null)
+            using (ArchiveWriter archive = settings.ArchiveFormat.GetCodec().Create(destination))
             {
-                Action moduleSettingsAction = () => settingsControl.SetModuleSettings(archive);
-                settingsControl.Invoke(moduleSettingsAction);
-            }
-
-            // Add the file added event handler the archive
-            archive.FileAdded += delegate(object sender, EventArgs e)
-            {
-                numFilesAdded++;
-
-                //if (numFilesAdded == archive.NumberOfFiles)
-                if (numFilesAdded == archive.Entries.Count)
+                // Set archive settings
+                ModuleSettingsControl settingsControl = settings.WriterSettingsControl;
+                if (settingsControl != null)
                 {
-                    dialog.ReportProgress(100, "Finishing up");
+                    Action moduleSettingsAction = () => settingsControl.SetModuleSettings(archive);
+                    settingsControl.Invoke(moduleSettingsAction);
                 }
-                else
-                {
-                    dialog.ReportProgress(numFilesAdded * 100 / archive.Entries.Count, description + "\n\n" + string.Format("Adding {0} ({1:N0} of {2:N0})", Path.GetFileName(settings.FileEntries[numFilesAdded].SourceFile), numFilesAdded + 1, archive.Entries.Count));
-                }
-            };
 
-            // Add the files to the archive. We're going to do this in a try catch since
-            // sometimes an exception may be thrown (namely if the archive cannot contain
-            // the file the user is trying to add)
-            foreach (FileEntry entry in settings.FileEntries)
-            {
-                try
+                // Set up event handlers
+                archive.EntryWriting += (sender, e) =>
                 {
-                    archive.CreateEntryFromFile(entry.SourceFile, entry.FilenameInArchive);
+                    if (archive.Entries.Count == 1)
+                    {
+                        dialog.Description = description + "\n\n" + string.Format("Adding {0}", Path.GetFileName(e.Entry.Path));
+                    }
+                    else
+                    {
+                        dialog.Description = description + "\n\n" + string.Format("Adding {0} ({1:N0} of {2:N0})", Path.GetFileName(e.Entry.Path), entryIndex + 1, archive.Entries.Count);
+                    }
+                };
+
+                archive.EntryWritten += (sender, e) =>
+                {
+                    entryIndex++;
+
+                    dialog.ReportProgress(entryIndex * 100 / archive.Entries.Count, description);
+
+                    if (entryIndex == archive.Entries.Count)
+                    {
+                        dialog.ReportProgress(100, "Finishing up");
+                    }
+                };
+
+                // Add the files to the archive. We're going to do this in a try catch since
+                // sometimes an exception may be thrown (namely if the archive cannot contain
+                // the file the user is trying to add)
+                foreach (FileEntry entry in settings.FileEntries)
+                {
+                    try
+                    {
+                        archive.CreateEntryFromFile(entry.SourceFile, entry.FilenameInArchive);
+                    }
+                    catch (FileRejectedException)
+                    {
+                        rejectedFiles.Add(entry.SourceFile);
+                    }
                 }
-                catch (CannotAddFileToArchiveException)
+
+                // If rejectedFiles is not empty, then show a message to the user
+                // and ask them if they want to continue
+                if (rejectedFiles.Count > 0)
                 {
-                    FilesNotAdded.Add(entry.SourceFile);
+                    if (new RejectedFilesDialog(rejectedFiles).ShowDialog() != DialogResult.Yes)
+                    {
+                        destination.Close();
+                        return;
+                    }
                 }
             }
-
-            // If filesNotAdded is not empty, then show a message to the user
-            // and ask them if they want to continue
-            if (FilesNotAdded.Count > 0)
-            {
-                if (new FilesNotAddedDialog(FilesNotAdded).ShowDialog() != DialogResult.Yes)
-                {
-                    destination.Close();
-                    return;
-                }
-            }
-
-            if (archive.Entries.Count == 1)
-            {
-                dialog.Description = description + "\n\n" + string.Format("Adding {0}", Path.GetFileName(settings.FileEntries[numFilesAdded].SourceFile));
-            }
-            else
-            {
-                dialog.Description = description + "\n\n" + string.Format("Adding {0} ({1:N0} of {2:N0})", Path.GetFileName(settings.FileEntries[numFilesAdded].SourceFile), numFilesAdded + 1, archive.Entries.Count);
-            }
-
-            archive.Flush();
 
             // Do we want to compress this archive?
             if (settings.CompressionFormat != null)

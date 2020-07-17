@@ -142,7 +142,7 @@ namespace PuyoTools.Modules.Archive
             HasTimestamps = true;
         }
 
-        public override void Flush()
+        protected override void WriteFile()
         {
             // The start of the archive
             long offset = destination.Position;
@@ -184,10 +184,13 @@ namespace PuyoTools.Modules.Archive
             // Write out the file data for each entry
             for (int i = 0; i < entries.Count; i++)
             {
+                // Call the entry writing event
+                OnEntryWriting(new ArchiveEntryWritingEventArgs(entries[i]));
+
                 PTStream.CopyToPadded(entries[i].Open(), destination, blockSize, 0);
 
-                // Call the file added event
-                OnFileAdded(EventArgs.Empty);
+                // Call the entry written event
+                OnEntryWritten(new ArchiveEntryWrittenEventArgs(entries[i]));
             }
 
             // Write out the footer for the archive
@@ -196,17 +199,18 @@ namespace PuyoTools.Modules.Archive
                 PTStream.WriteCString(destination, entries[i].Name, 32);
 
                 // File timestamp
-                if (HasTimestamps && !String.IsNullOrEmpty(entries[i].Path) && File.Exists(entries[i].Path))
+                if (HasTimestamps && File.Exists(entries[i].Path))
                 {
                     // File exists, let's read in the file timestamp
                     FileInfo fileInfo = new FileInfo(entries[i].Path);
+                    var lastWriteTime = fileInfo.LastWriteTime;
 
-                    PTStream.WriteInt16(destination, (short)fileInfo.LastWriteTime.Year);
-                    PTStream.WriteInt16(destination, (short)fileInfo.LastWriteTime.Month);
-                    PTStream.WriteInt16(destination, (short)fileInfo.LastWriteTime.Day);
-                    PTStream.WriteInt16(destination, (short)fileInfo.LastWriteTime.Hour);
-                    PTStream.WriteInt16(destination, (short)fileInfo.LastWriteTime.Minute);
-                    PTStream.WriteInt16(destination, (short)fileInfo.LastWriteTime.Second);
+                    PTStream.WriteInt16(destination, (short)lastWriteTime.Year);
+                    PTStream.WriteInt16(destination, (short)lastWriteTime.Month);
+                    PTStream.WriteInt16(destination, (short)lastWriteTime.Day);
+                    PTStream.WriteInt16(destination, (short)lastWriteTime.Hour);
+                    PTStream.WriteInt16(destination, (short)lastWriteTime.Minute);
+                    PTStream.WriteInt16(destination, (short)lastWriteTime.Second);
                 }
                 else
                 {

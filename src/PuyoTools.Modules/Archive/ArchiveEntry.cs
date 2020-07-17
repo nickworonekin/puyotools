@@ -95,8 +95,9 @@ namespace PuyoTools.Modules.Archive
         }
 
         /// <summary>
-        /// Gets the zero-based index of the item within the <see cref="ArchiveEntryCollection"/>.
+        /// Gets the zero-based index of the item within the <see cref="ArchiveEntry"/> collection.
         /// </summary>
+        /// <remarks>This value is only set when <see cref="ArchiveReader"/> is an instance of <see cref="GvmArchive"/>, <see cref="PvmArchive"/>, or <see cref="SvmArchive"/>.</remarks>
         public int Index { get; internal set; }
 
         /// <summary>
@@ -128,7 +129,7 @@ namespace PuyoTools.Modules.Archive
         }
 
         /// <summary>
-        /// The file path for the entry (or blank if it is not known).
+        /// When this entry belongs to an <see cref="Archive.ArchiveWriter"/>, gets the absolute path of the file used to create this entry.
         /// </summary>
         public string Path
         {
@@ -158,95 +159,5 @@ namespace PuyoTools.Modules.Archive
             Read,
             Write,
         }
-    }
-
-    /// <summary>
-    /// A read-only collection of archive entries.
-    /// </summary>
-    public class ArchiveEntryCollection : IReadOnlyList<ArchiveEntry>
-    {
-        private ArchiveReader ownerReader; // Archive reader owner
-        private ArchiveWriter ownerWriter; // Archive writer owner
-
-        private List<ArchiveEntry> entries; // Archive entries
-
-        /// <summary>
-        /// Initalizes a new instance of the ArchiveEntryCollection class.
-        /// </summary>
-        /// <param name="owner">The ArchiveReader that owns this collection.</param>
-        /// <param name="numEntries">The total number of entries in the archive.</param>
-        public ArchiveEntryCollection(ArchiveReader owner, int numEntries)
-        {
-            ownerReader = owner;
-
-            entries = new List<ArchiveEntry>(numEntries);
-        }
-
-        /// <summary>
-        /// Initalizes a new instance of the ArchiveEntryCollection class.
-        /// </summary>
-        /// <param name="owner">The ArchiveWriter that owns this collection.</param>
-        internal ArchiveEntryCollection(ArchiveWriter owner)
-        {
-            ownerWriter = owner;
-
-            entries = new List<ArchiveEntry>();
-        }
-
-        /// <summary>
-        /// Gets the number of elements contained in the ArchiveEntryCollection.
-        /// </summary>
-        public int Count
-        {
-            get { return entries.Count; }
-        }
-
-        /// <summary>
-        /// Gets the element at the specified index.
-        /// </summary>
-        /// <param name="index">The zero-based index of the element to get.</param>
-        /// <returns>The element at the specified index.</returns>
-        public ArchiveEntry this[int index]
-        {
-            get { return entries[index]; }
-        }
-
-        /// <summary>
-        /// Adds an item to the ArchiveEntryCollection.
-        /// </summary>
-        /// <param name="item"></param>
-        internal void Add(ArchiveEntry item)
-        {
-            entries.Add(item);
-            entries[entries.Count - 1].Index = entries.Count - 1;
-        }
-
-        /// <summary>
-        /// Adds an item to the ArchiveEntryCollection.
-        /// </summary>
-        /// <param name="offset">The offset of the entry within the archive.</param>
-        /// <param name="length">The size of the entry within the archive.</param>
-        /// <param name="name">The file name of the entry.</param>
-        internal void Add(long offset, int length, string name)
-        {
-            entries.Add(new ArchiveEntry(ownerReader, offset, length, name));
-            entries[entries.Count - 1].Index = entries.Count - 1;
-        }
-
-        /// <summary>
-        /// Returns an enumerator that iterates through the collection.
-        /// </summary>
-        /// <returns>A IEnumerator that can be used to iterate through the collection.</returns>
-        public IEnumerator<ArchiveEntry> GetEnumerator()
-        {
-            return entries.GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return entries.GetEnumerator();
-        }
-
-        internal List<ArchiveEntry> Items => entries;
     }
 }

@@ -66,26 +66,19 @@ namespace PuyoTools.Modules.Archive
     {
         public TxdStorybookArchiveWriter(Stream destination) : base(destination) { }
 
-        /// <summary>
-        /// Creates an entry that has the specified data entry name in the archive.
-        /// </summary>
-        /// <param name="source">The data to be added to the archive.</param>
-        /// <param name="entryName">The name of the entry to be created.</param>
-        /// <remarks>
-        /// The file may be rejected from the archive. In this case, a CannotAddFileToArchiveException will be thrown.
-        /// </remarks>
-        public override void CreateEntry(Stream source, string entryName)
+        /// <inheritdoc/>
+        public override ArchiveEntry CreateEntry(Stream source, string entryName)
         {
-            // Only PVR textures can be added to a PVM archive. If this is not a PVR texture, throw an exception.
+            // Only GVR textures can be added to a Sonic Storybook TXD archive. If this is not a PVR texture, throw an exception.
             if (!GvrTexture.Identify(source))
             {
-                throw new CannotAddFileToArchiveException();
+                throw new FileRejectedException("Sonic Storybook TXD archives can only contain GVR textures.");
             }
 
-            base.CreateEntry(source, entryName.ToUpper());
+            return base.CreateEntry(source, entryName.ToUpper());
         }
 
-        public override void Flush()
+        protected override void WriteFile()
         {
             const int blockSize = 64;
             var offsetList = new int[entries.Count];
@@ -112,9 +105,14 @@ namespace PuyoTools.Modules.Archive
 
             for (int i = 0; i < entries.Count; i++)
             {
+                // Call the entry writing event
+                OnEntryWriting(new ArchiveEntryWritingEventArgs(entries[i]));
+
                 destination.Position = offsetList[i];
                 PTStream.CopyToPadded(entries[i].Open(), destination, blockSize, 0);
-                OnFileAdded(EventArgs.Empty);
+
+                // Call the entry written event
+                OnEntryWritten(new ArchiveEntryWrittenEventArgs(entries[i]));
             }
         }
     }

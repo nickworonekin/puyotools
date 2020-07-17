@@ -73,7 +73,7 @@ namespace PuyoTools.Modules.Archive
     {
         public GntArchiveWriter(Stream destination) : base(destination) { }
 
-        public override void Flush()
+        protected override void WriteFile()
         {
             // The start of the archive
             long offset = destination.Position;
@@ -136,10 +136,13 @@ namespace PuyoTools.Modules.Archive
             // Write out the file data for each entry
             for (int i = 0; i < entries.Count; i++)
             {
+                // Call the entry writing event
+                OnEntryWriting(new ArchiveEntryWritingEventArgs(entries[i]));
+
                 PTStream.CopyToPadded(entries[i].Open(), destination, 8, 0);
 
-                // Call the file added event
-                OnFileAdded(EventArgs.Empty);
+                // Call the entry written event
+                OnEntryWritten(new ArchiveEntryWrittenEventArgs(entries[i]));
             }
 
             // Pad before writing out the NOF0 chunk

@@ -158,7 +158,7 @@ namespace PuyoTools.Modules.Archive
     {
         public NarcArchiveWriter(Stream destination) : base(destination) { }
 
-        public override void Flush()
+        protected override void WriteFile()
         {
             throw new NotImplementedException();
         }

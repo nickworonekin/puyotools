@@ -11,11 +11,11 @@ namespace PuyoTools.Modules
         /// <summary>
         /// The source path of the file.
         /// </summary>
-        public string SourcePath = String.Empty;
+        //public string SourcePath = String.Empty;
 
         /// <summary>
         /// The destination path of the file.
         /// </summary>
-        public string DestinationPath = String.Empty;
+        //public string DestinationPath = String.Empty;
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace PuyoTools.GUI
 {
-    partial class FilesNotAddedDialog
+    partial class RejectedFilesDialog
     {
         /// <summary>
         /// Required designer variable.
