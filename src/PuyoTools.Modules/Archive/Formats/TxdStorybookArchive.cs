@@ -44,21 +44,22 @@ namespace PuyoTools.Modules.Archive
     {
         public TxdStorybookArchiveReader(Stream source) : base(source)
         {
-            var fileCount = PTStream.ReadInt32BEAt(source, 0x4);
+            source.Position += 6;
+
+            var fileCount = PTStream.ReadInt16BE(source);
             entries = new List<ArchiveEntry>(fileCount);
 
             for (int i = 0; i < fileCount; i++)
             {
-                var fileName = PTStream.ReadCStringAt(source, 0x10 + (i * 0x28), 32);
-                var offset = PTStream.ReadUInt32BEAt(source, 0x08 + (i * 0x28));
-                var length = PTStream.ReadInt32BEAt(source, 0x0C + (i * 0x28));
+                var offset = PTStream.ReadUInt32BE(source);
+                var length = PTStream.ReadInt32BE(source);
+                var fileName = PTStream.ReadCString(source, 32);
 
                 fileName = string.IsNullOrWhiteSpace(fileName) ? fileName : Path.ChangeExtension(fileName, "GVR");
 
                 entries.Add(new ArchiveEntry(this, startOffset + offset, length, fileName));
             }
         }
-
     }
     #endregion
 
@@ -69,7 +70,7 @@ namespace PuyoTools.Modules.Archive
         /// <inheritdoc/>
         public override ArchiveEntry CreateEntry(Stream source, string entryName)
         {
-            // Only GVR textures can be added to a Sonic Storybook TXD archive. If this is not a PVR texture, throw an exception.
+            // Only GVR textures can be added to a Sonic Storybook TXD archive. If this is not a GVR texture, throw an exception.
             if (!GvrTexture.Identify(source))
             {
                 throw new FileRejectedException("Sonic Storybook TXD archives can only contain GVR textures.");

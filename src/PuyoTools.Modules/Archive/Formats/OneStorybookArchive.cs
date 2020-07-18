@@ -31,13 +31,15 @@ namespace PuyoTools.Modules.Archive
             using (var reader = new BinaryReader(source, Encoding.UTF8, true))
             {
                 if (!(source.Length - startPosition > 16
-                    && reader.At(startPosition, x => x.ReadUInt32BigEndian()) == 0x10))
+                    && reader.At(startPosition + 0x4, x => x.ReadUInt32BigEndian()) == 0x10))
                 {
                     return false;
                 }
 
                 var i = reader.At(startPosition + 0xC, x => x.ReadUInt32BigEndian());
 
+                // 0 used for Sonic and the Secret Rings
+                // -1 used for Sonic and the Black Knight
                 if (i != 0xFFFFFFFF && i != 0x00000000)
                 {
                     return false;
@@ -51,41 +53,45 @@ namespace PuyoTools.Modules.Archive
     #region Archive Reader
     public class OneStorybookArchiveReader : ArchiveReader
     {
-        private PrsCompression _prsCompression;
+        //private PrsCompression _prsCompression;
 
         public OneStorybookArchiveReader(Stream source) : base(source)
         {
-            _prsCompression = new PrsCompression();
+            //_prsCompression = new PrsCompression();
 
             // Get the number of entries in the archive
             int numEntries = PTStream.ReadInt32BE(source);
             entries = new List<ArchiveEntry>(numEntries);
 
+            source.Position += 12;
+
             // Read in all the entries
             for (int i = 0; i < numEntries; i++)
             {
-                string entryFilename = PTStream.ReadCStringAt(source, 0x10 + (i * 0x30), 0x20);
+                string entryFilename = PTStream.ReadCString(source, 32);
 
-                source.Position = 0x34 + (i * 0x30);
+                source.Position += 4;
                 int entryOffset = PTStream.ReadInt32BE(source);
                 int entryLength = PTStream.ReadInt32BE(source);
+                source.Position += 4;
 
                 // Add this entry to the collection
-                entries.Add(new ArchiveEntry(this, startOffset + entryOffset, entryLength, entryFilename));
+                //entries.Add(new ArchiveEntry(this, startOffset + entryOffset, entryLength, entryFilename));
+                entries.Add(new OneStorybookArchiveEntry(this, startOffset + entryOffset, entryLength, entryFilename));
             }
 
             // Set the position of the stream to the end of the file
             source.Seek(0, SeekOrigin.End);
         }
 
-        public override Stream OpenEntry(ArchiveEntry entry)
+        /*public override Stream OpenEntry(ArchiveEntry entry)
         {
             archiveData.Seek(entry.Offset, SeekOrigin.Begin);
             var memoryStream = new MemoryStream();
             _prsCompression.Decompress(archiveData, memoryStream);
             memoryStream.Seek(0, SeekOrigin.Begin);
             return memoryStream;
-        }
+        }*/
     }
     #endregion
 

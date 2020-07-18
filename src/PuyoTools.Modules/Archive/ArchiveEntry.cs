@@ -9,10 +9,10 @@ namespace PuyoTools.Modules.Archive
     public class ArchiveEntry
     {
         private Mode mode; // Read/Write mode for this archive entry.
-        private ArchiveReader archiveReader; // The archive reader associated with this entry
+        protected ArchiveReader archiveReader; // The archive reader associated with this entry
         private ArchiveWriter archiveWriter; // The archive writer associated with this entry
-        private long offset; // The offset of the entry within the archive
-        private int length; // The size of the entry within the archive
+        protected long offset; // The offset of the entry within the archive
+        protected int length; // The size of the entry within the archive
         private string name; // The name of the entry within the archive
         private Stream data; // Stream data for the entry
         private string path; // The file path for the entry
@@ -98,15 +98,15 @@ namespace PuyoTools.Modules.Archive
         /// Gets the zero-based index of the item within the <see cref="ArchiveEntry"/> collection.
         /// </summary>
         /// <remarks>This value is only set when <see cref="ArchiveReader"/> is an instance of <see cref="GvmArchive"/>, <see cref="PvmArchive"/>, or <see cref="SvmArchive"/>.</remarks>
-        public int Index { get; internal set; }
+        //public int Index { get; internal set; }
 
         /// <summary>
         /// Gets the offset of the entry within the archive.
         /// </summary>
-        internal long Offset
+        /*internal long Offset
         {
             get { return offset; }
-        }
+        }*/
 
         /// <summary>
         /// Gets the size of the entry as stored in the archive.
@@ -140,7 +140,7 @@ namespace PuyoTools.Modules.Archive
         /// Opens the entry from the archive for reading only.
         /// </summary>
         /// <returns>The stream that represents the contents of the entry.</returns>
-        public Stream Open()
+        public virtual Stream Open()
         {
             if (mode == Mode.Write)
             {
@@ -148,7 +148,8 @@ namespace PuyoTools.Modules.Archive
                 return data;
             }
 
-            return archiveReader.OpenEntry(this);
+            //return archiveReader.OpenEntry(this);
+            return new StreamView(archiveReader.ArchiveStream, offset, length);
         }
 
         /// <summary>

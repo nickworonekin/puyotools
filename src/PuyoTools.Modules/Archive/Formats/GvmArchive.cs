@@ -44,7 +44,7 @@ namespace PuyoTools.Modules.Archive
         bool hasFilenames, hasFormats, hasDimensions, hasGlobalIndexes;
         int tableEntryLength, globalIndexOffset;
 
-        bool needToFix;
+        //bool needToFix;
 
         public GvmArchiveReader(Stream source) : base(source)
         {
@@ -90,11 +90,26 @@ namespace PuyoTools.Modules.Archive
                 {
                     source.Position = startOffset + headerOffset + 2;
                     entryFname = PTStream.ReadCString(source, 28) + ".gvr";
-                    headerOffset += tableEntryLength;
+                    //headerOffset += tableEntryLength;
                 }
 
+                uint? globalIndex = null;
+                if (hasGlobalIndexes)
+                {
+                    source.Position = startOffset + headerOffset + globalIndexOffset;
+                    globalIndex = PTStream.ReadUInt32(source);
+                }
+
+                headerOffset += tableEntryLength;
+
+                // Some Billy Hatcher textures have an oddity where the texture length is 16 more than what it
+                // actually should be. This seems to only effect the last texture of a GVM, and only some of them
+                // are affected. In that case, we will "fix" the GVRs in question.
+                var needToFix = i == entries.Count - 1 && entryOffset + entryOffset + entryLength > source.Length;
+
                 // Add this entry to the collection
-                entries.Add(new ArchiveEntry(this, startOffset + entryOffset, entryLength, entryFname) { Index = i });
+                //entries.Add(new ArchiveEntry(this, startOffset + entryOffset, entryLength, entryFname) { Index = i });
+                entries.Add(new GvmArchiveEntry(this, startOffset + entryOffset, entryLength, entryFname, globalIndex, needToFix));
 
                 entryOffset += entryLength;
             }
@@ -102,13 +117,13 @@ namespace PuyoTools.Modules.Archive
             // Some Billy Hatcher textures have an oddity where the texture length is 16 more than what it
             // actually should be. This seems to only effect the last texture of a GVM, and only some of them
             // are affected. In that case, we will "fix" the GVRs in question.
-            needToFix = (entryOffset > source.Length);
+            //needToFix = (entryOffset > source.Length);
 
             // Set the position of the stream to the end of the file
             source.Seek(0, SeekOrigin.End);
         }
             
-        public override Stream OpenEntry(ArchiveEntry entry)
+        /*public override Stream OpenEntry(ArchiveEntry entry)
         {
             // Some Billy Hatcher textures have an oddity where the texture length is 16 more than what it
             // actually should be. This seems to only effect the last texture of a GVM, and only some of them
@@ -167,7 +182,7 @@ namespace PuyoTools.Modules.Archive
             data.Position = 0;
 
             return data;
-        }
+        }*/
     }
     #endregion
 

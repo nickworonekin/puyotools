@@ -28,31 +28,18 @@ namespace PuyoTools.Modules.Archive
         public ReadOnlyCollection<ArchiveEntry> Entries => entries.AsReadOnly();
 
         /// <summary>
-        /// Opens the specified entry in the archive.
-        /// </summary>
-        /// <param name="entry">An archive entry.</param>
-        /// <returns>The stream that represents the contents of the entry.</returns>
-        public virtual Stream OpenEntry(ArchiveEntry entry)
-        {
-            if (entry == null || entry.ArchiveReader != this)
-            {
-                throw new ArgumentException("entry");
-            }
-
-            return new StreamView(archiveData, entry.Offset, entry.Length);
-        }
-
-        /// <summary>
         /// Extracts the specified entry to a file.
         /// </summary>
         /// <param name="entry">An archive entry.</param>
         /// <param name="path">The path to extract the file to.</param>
         public void ExtractToFile(ArchiveEntry entry, string path)
         {
-            using (Stream source = OpenEntry(entry), destination = File.Create(path))
+            using (Stream source = entry.Open()/*OpenEntry(entry)*/, destination = File.Create(path))
             {
                 source.CopyTo(destination);
             }
         }
+
+        internal Stream ArchiveStream => archiveData;
     }
 }

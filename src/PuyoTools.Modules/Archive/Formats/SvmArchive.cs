@@ -111,11 +111,21 @@ namespace PuyoTools.Modules.Archive
                 {
                     source.Position = startOffset + headerOffset + 2;
                     entryFname = PTStream.ReadCString(source, 28) + ".svr";
-                    headerOffset += tableEntryLength;
+                    //headerOffset += tableEntryLength;
                 }
 
+                uint? globalIndex = null;
+                if (hasGlobalIndexes)
+                {
+                    source.Position = startOffset + headerOffset + globalIndexOffset;
+                    globalIndex = PTStream.ReadUInt32(source);
+                }
+
+                headerOffset += tableEntryLength;
+
                 // Add this entry to the collection
-                entries.Add(new ArchiveEntry(this, startOffset + entryOffset, entryLength, entryFname) { Index = i });
+                //entries.Add(new ArchiveEntry(this, startOffset + entryOffset, entryLength, entryFname) { Index = i });
+                entries.Add(new PvmArchiveEntry(this, startOffset + entryOffset, entryLength, entryFname, globalIndex));
 
                 entryOffset += entryLength;
             }
@@ -124,7 +134,7 @@ namespace PuyoTools.Modules.Archive
             source.Seek(0, SeekOrigin.End);
         }
 
-        public override Stream OpenEntry(ArchiveEntry entry)
+        /*public override Stream OpenEntry(ArchiveEntry entry)
         {
             // If this archive does not contain any global indexes, then just return the data as is.
             if (!hasGlobalIndexes)
@@ -158,7 +168,7 @@ namespace PuyoTools.Modules.Archive
             data.Position = 0;
 
             return data;
-        }
+        }*/
     }
     #endregion
 
@@ -264,10 +274,10 @@ namespace PuyoTools.Modules.Archive
                 Stream entryData = entries[i].Open();
 
                 // We need to get some information about the texture.
-                // We already checked to make sure this texture is a PVR.
+                // We already checked to make sure this texture is a SVR.
                 // No need to check it again.
                 oldPosition = entryData.Position;
-                VrSharp.Pvr.PvrTexture texture = new VrSharp.Pvr.PvrTexture(entryData);
+                VrSharp.Svr.SvrTexture texture = new VrSharp.Svr.SvrTexture(entryData);
                 entryData.Position = oldPosition;
 
                 // Write out the entry number

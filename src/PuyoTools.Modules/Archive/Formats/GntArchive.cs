@@ -34,6 +34,7 @@ namespace PuyoTools.Modules.Archive
             {
                 return source.Length - startPosition > 36
                     && reader.At(startPosition, x => x.ReadBytes(primaryMagicCode.Length)).SequenceEqual(primaryMagicCode)
+                    && reader.At(startPosition + 8, x => x.ReadInt32BigEndian()) == 1 // Check so we don't mis-identify GNO archives from the Sonic Storybook games as GNT archives
                     && reader.At(startPosition + 32, x => x.ReadBytes(secondaryMagicCode.Length)).SequenceEqual(secondaryMagicCode);
             }
         }
