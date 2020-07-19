@@ -42,73 +42,87 @@ namespace PuyoTools.Modules.Archive
     {
         public U8ArchiveReader(Stream source) : base(source)
         {
-            // Read the archive header
-            source.Position += 4;
-            uint rootNodeOffset = PTStream.ReadUInt32BE(source);
-            uint nodesLength = PTStream.ReadUInt32BE(source);
-            uint dataOffset = PTStream.ReadUInt32BE(source);
-
-            // Go the root node
-            source.Position = startOffset + rootNodeOffset;
-            Node rootNode = new Node();
-            rootNode.Type = PTStream.ReadByte(source);
-            rootNode.NameOffset = (uint)(PTStream.ReadByte(source) << 24 | PTStream.ReadUInt16BE(source));
-            rootNode.DataOffset = PTStream.ReadUInt32BE(source);
-            rootNode.Length = PTStream.ReadUInt32BE(source);
-
-            entries = new List<ArchiveEntry>((int)rootNode.Length - 1);
-            uint stringTableOffset = rootNodeOffset + (rootNode.Length * 12);
-
-            // rootNode.Length is essentially how many files are contained in the archive, so we'll do just that
-            for (int i = 0; i < rootNode.Length - 1; i++)
+            using (var reader = source.AsBinaryReader())
             {
-                // Read in this node
-                Node node = new Node();
-                node.Type = PTStream.ReadByte(source);
-                node.NameOffset = (uint)(PTStream.ReadByte(source) << 24 | PTStream.ReadUInt16BE(source));
-                node.DataOffset = PTStream.ReadUInt32BE(source);
-                node.Length = PTStream.ReadUInt32BE(source);
+                // Read the archive header
+                source.Position += 4;
+                uint rootNodeOffset = reader.ReadUInt32BigEndian();
+                uint nodesLength = reader.ReadUInt32BigEndian();
+                uint dataOffset = reader.ReadUInt32BigEndian();
 
-                // Create the archive entry, then check what type of node it is
-                long entryOffset = 0;
-                int entryLength = 0;
-                string entryFilename;
+                // Only information that needs to be read from the root node is the last file index, which is the number of nodes the archive contains
+                // The number of files will likely be less than the number of nodes, which is ok.
+                source.Position = startOffset + rootNodeOffset + 8;
 
-                // A file node
-                if (node.Type == 0)
+                var numberOfNodes = reader.ReadUInt32BigEndian();
+
+                entries = new List<ArchiveEntry>((int)numberOfNodes);
+                uint stringTableOffset = rootNodeOffset + (numberOfNodes * 12);
+
+                // Create the root node, add it to the list of directory nodes, then set the current directory node to it.
+                var rootNode = new DirectoryEntry
                 {
-                    entryOffset = startOffset + node.DataOffset;
-                    entryLength = (int)node.Length;
+                    Name = string.Empty,
+                    Parent = null,
+                    LastNodeIndex = numberOfNodes,
+                };
+                var directoryNodes = new List<DirectoryEntry>
+                {
+                    rootNode,
+                };
+                var currentDirectoryNode = rootNode;
+
+                // Loop through the nodes
+                // Since we already read the root node, we will start the loop at 1
+                for (var i = 1; i < numberOfNodes; i++)
+                {
+                    // If we've reached the last node for this directory, go to the previous one in the list
+                    if (i == currentDirectoryNode.LastNodeIndex)
+                    {
+                        directoryNodes.Remove(currentDirectoryNode);
+                        currentDirectoryNode = directoryNodes.Last();
+                    }
+
+                    var nodeTypeAndNameOffset = reader.ReadUInt32BigEndian();
+                    var nodeType = nodeTypeAndNameOffset >> 24;
+                    var nameOffset = nodeTypeAndNameOffset & 0xFFFFFF;
+
+                    if (nodeTypeAndNameOffset >> 24 == 1)
+                    {
+                        // Directory node
+                        var directoryNode = new DirectoryEntry();
+                        directoryNode.Name = reader.At(startOffset + stringTableOffset + nameOffset, x => x.ReadNullTerminatedString());
+                        directoryNode.Parent = directoryNodes[reader.ReadInt32BigEndian()];
+                        directoryNode.LastNodeIndex = reader.ReadUInt32BigEndian();
+
+                        directoryNodes.Add(directoryNode);
+                        currentDirectoryNode = directoryNode;
+                    }
+                    else
+                    {
+                        // File node
+                        var entryName = $"{currentDirectoryNode.FullName}/{reader.At(startOffset + stringTableOffset + nameOffset, x => x.ReadNullTerminatedString())}";
+                        var entryOffset = reader.ReadInt32BigEndian();
+                        var entryLength = reader.ReadInt32BigEndian();
+
+                        // Add this entry to the collection
+                        entries.Add(new ArchiveEntry(this, startOffset + entryOffset, entryLength, entryName));
+                    }
                 }
 
-                // A directory node
-                // In its present state, Puyo Tools can't handle directories in archives.
-                // In the meantime, we'll just skip it
-                else if (node.Type == 1)
-                {
-                    continue;
-                }
-
-                // Get the filename for the entry
-                long oldPosition = source.Position;
-                source.Position = startOffset + stringTableOffset + node.NameOffset;
-                entryFilename = PTStream.ReadCString(source);
-                source.Position = oldPosition;
-
-                // Add this entry to the collection
-                entries.Add(new ArchiveEntry(this, startOffset + entryOffset, entryLength, entryFilename));
+                // Set the position of the stream to the end of the file
+                source.Seek(0, SeekOrigin.End);
             }
-
-            // Set the position of the stream to the end of the file
-            source.Seek(0, SeekOrigin.End);
         }
 
-        private struct Node
+        private class DirectoryEntry
         {
-            public byte Type;
-            public uint NameOffset;
-            public uint DataOffset;
-            public uint Length;
+            public DirectoryEntry Parent;
+            public string Name;
+            public string FullName => Parent?.Parent != null
+                ? $"{Parent.FullName}/{Name}"
+                : Name;
+            public uint LastNodeIndex;
         }
     }
     #endregion

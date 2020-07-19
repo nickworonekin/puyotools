@@ -120,13 +120,12 @@ namespace PuyoTools.Modules.Archive
             get { return length; }
         }
 
+        public string FullName => name;
+
         /// <summary>
         /// The file name of the entry.
         /// </summary>
-        public string Name
-        {
-            get { return name; }
-        }
+        public string Name => System.IO.Path.GetFileName(name);
 
         /// <summary>
         /// When this entry belongs to an <see cref="Archive.ArchiveWriter"/>, gets the absolute path of the file used to create this entry.

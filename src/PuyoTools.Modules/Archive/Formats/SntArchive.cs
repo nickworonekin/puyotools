@@ -41,16 +41,19 @@ namespace PuyoTools.Modules.Archive
                     return false;
                 }
 
+                var primaryMagicCode = reader.At(startPosition, x => x.ReadBytes(4));
+                var secondaryMagicCode = reader.At(startPosition + 32, x => x.ReadBytes(4));
+
                 // Verify PS2 magic code
-                if (reader.At(startPosition, x => x.ReadBytes(ps2PrimaryMagicCode.Length)).SequenceEqual(ps2PrimaryMagicCode)
-                    && reader.At(startPosition + 32, x => x.ReadBytes(ps2SecondaryMagicCode.Length)).SequenceEqual(ps2SecondaryMagicCode))
+                if (primaryMagicCode.SequenceEqual(ps2PrimaryMagicCode)
+                    && secondaryMagicCode.SequenceEqual(ps2SecondaryMagicCode))
                 {
                     return true;
                 }
 
                 // Verify PSP magic code
-                if (reader.At(startPosition, x => x.ReadBytes(pspPrimaryMagicCode.Length)).SequenceEqual(pspPrimaryMagicCode)
-                    && reader.At(startPosition + 32, x => x.ReadBytes(pspSecondaryMagicCode.Length)).SequenceEqual(pspSecondaryMagicCode))
+                if (primaryMagicCode.SequenceEqual(pspPrimaryMagicCode)
+                    && secondaryMagicCode.SequenceEqual(pspSecondaryMagicCode))
                 {
                     return true;
                 }

@@ -106,12 +106,6 @@ namespace PuyoTools.GUI
                             outPath = Path.Combine(Path.Combine(Path.GetDirectoryName(file), "Extracted Files"), Path.GetFileNameWithoutExtension(file));
                         }
 
-                        // Create the output directory if it does not exist
-                        if (!Directory.Exists(outPath))
-                        {
-                            Directory.CreateDirectory(outPath);
-                        }
-
                         // Now we can start extracting the files
                         for (int j = 0; j < archive.Entries.Count; j++)
                         {
@@ -144,7 +138,7 @@ namespace PuyoTools.GUI
                             else
                             {
                                 // Just use the filename as defined in the archive
-                                outName = entry.Name;
+                                outName = entry.FullName;
                             }
 
                             // Add the output filename to the entry filename list if we are extracting the archive's file structure.
@@ -210,8 +204,16 @@ namespace PuyoTools.GUI
                                 }
                             }
 
+                            var outFullPath = Path.Combine(outPath, outName);
+
+                            // Create the output directory if it does not exist
+                            if (!Directory.Exists(Path.GetDirectoryName(outFullPath)))
+                            {
+                                Directory.CreateDirectory(Path.GetDirectoryName(outFullPath));
+                            }
+
                             // Time to write out the file
-                            using (FileStream destination = File.Create(Path.Combine(outPath, outName)))
+                            using (FileStream destination = File.Create(outFullPath))
                             {
                                 entryData.CopyTo(destination);
                             }

@@ -44,111 +44,158 @@ namespace PuyoTools.Modules.Archive
     {
         public NarcArchiveReader(Stream source) : base(source)
         {
-            // Read the archive header
-            source.Position += 12;
-            ushort fatbOffset = PTStream.ReadUInt16(source); // Should always be 0x10
-
-            // Read the FATB chunk
-            source.Position = startOffset + fatbOffset + 4;
-            uint fntbOffset = fatbOffset + PTStream.ReadUInt32(source);
-            
-
-            // Get the number of entries in the archive
-            int numEntries = PTStream.ReadInt32(source);
-            entries = new List<ArchiveEntry>(numEntries);
-
-            // Let's check to see if this is a Puyo Tetris PS3 NARC by checking the offset of the first file.
-            // It seems that offsets are stored differently than a normal NARC.
-            bool isPs3Narc = (PTStream.ReadUInt32(source) == 0);
-
-            // This is a Puyo Tetris PS3 NARC.
-            if (isPs3Narc)
+            using (var reader = source.AsBinaryReader())
             {
-                // Read the FNTB chunk
-                source.Position = startOffset + fntbOffset + 4;
-                uint fimgOffset = fntbOffset + PTStream.ReadUInt32(source);
-                bool hasFilenames = (fimgOffset - fntbOffset != 16);
-                uint filenameOffset = fntbOffset + 8 + PTStream.ReadUInt32(source);
+                // Read the archive header
+                source.Position += 12;
 
-                // Read in all the entries
-                source.Position = startOffset + fatbOffset + 12;
-                for (int i = 0; i < numEntries; i++)
+                var headerLength = reader.ReadInt16();
+                var fatbPosition = headerLength;
+
+                // Read the FATB section
+                source.Position = startOffset + fatbPosition + 4;
+
+                var fatbLength = reader.ReadInt32();
+                var fntbPosition = fatbPosition + fatbLength;
+
+                // Get the number of entries in the archive
+                var numberOfEntries = reader.ReadInt32();
+                entries = new List<ArchiveEntry>(numberOfEntries);
+                var fileEntries = new List<FileEntry>(numberOfEntries);
+                for (var i = 0; i < numberOfEntries; i++)
                 {
-                    // Read the entry offset and length
-                    int entryOffset = PTStream.ReadInt32(source);
-                    int entryLength = PTStream.ReadInt32(source) - entryOffset;
-
-                    // Read the filename (if it has one)
-                    string entryFname = String.Empty;
-                    if (hasFilenames)
+                    var offset = reader.ReadInt32();
+                    var length = reader.ReadInt32() - offset;
+                    fileEntries.Add(new FileEntry
                     {
-                        long oldPosition = source.Position;
-                        source.Position = startOffset + filenameOffset;
-
-                        byte fnameLength = PTStream.ReadByte(source);
-
-                        // Puyo Tools can't handle directory names. Just skip over them for now.
-                        if ((fnameLength & 0x80) != 0)
-                        {
-                            // Go only up to fimgOffset to prevent an infinite loop
-                            // (though that should never happen for a properly formatted NARC).
-                            while ((fnameLength & 0x80) != 0 && filenameOffset < fimgOffset)
-                            {
-                                fnameLength &= 0x7F;
-                                filenameOffset += (uint)(fnameLength + 4);
-                                source.Position += fnameLength + 3;
-                                fnameLength = PTStream.ReadByte(source);
-                            }
-                        }
-
-                        entryFname = PTStream.ReadCString(source, fnameLength);
-                        filenameOffset += (uint)(fnameLength + 1);
-
-                        source.Position = oldPosition;
-                    }
-
-                    // Add this entry to the collection
-                    entries.Add(new ArchiveEntry(this, startOffset + fimgOffset + 8 + entryOffset, entryLength, entryFname));
+                        Offset = offset,
+                        Length = length,
+                        Name = string.Empty,
+                    });
                 }
-            }
-            
-            // This is a NDS NARC.
-            else
-            {
-                // Read the FNTB chunk
-                source.Position = startOffset + fntbOffset + 4;
-                bool hasFilenames = (PTStream.ReadUInt32(source) == 8);
-                uint filenameOffset = fntbOffset + 8 + PTStream.ReadUInt32(source);
 
-                // Read in all the entries
-                source.Position = startOffset + fatbOffset + 12;
-                for (int i = 0; i < numEntries; i++)
+                // Read the FNTB section
+                source.Position = fntbPosition + 4;
+
+                var fntbLength = reader.ReadInt32();
+                var fimgPosition = fntbPosition + fntbLength;
+
+                var hasFilenames = true;
+
+                // If the FNTB length is 16 or less, it's impossible for the entries to have filenames.
+                // This section will always be at least 16 bytes long, but technically it's only required to be at least 8 bytes long.
+                if (fntbLength <= 16)
                 {
-                    // Read the entry offset and length
-                    int entryOffset = PTStream.ReadInt32(source);
-                    int entryLength = PTStream.ReadInt32(source) - entryOffset;
+                    hasFilenames = false;
+                }
 
-                    // Read the filename (if it has one)
-                    string entryFname = String.Empty;
-                    if (hasFilenames)
+                var rootNameEntryOffset = reader.ReadInt32();
+
+                // If the root name entry offset is 4, then the entries don't have filenames.
+                if (rootNameEntryOffset == 4)
+                {
+                    hasFilenames = false;
+                }
+
+                if (hasFilenames)
+                {
+                    var rootFirstFileIndex = reader.ReadInt16();
+                    var rootDirectory = new DirectoryEntry
                     {
-                        long oldPosition = source.Position;
-                        source.Position = startOffset + filenameOffset;
+                        Name = string.Empty,
+                    };
 
-                        byte fnameLength = PTStream.ReadByte(source);
-                        entryFname = PTStream.ReadCString(source, fnameLength);
-                        filenameOffset += (uint)(fnameLength + 1);
+                    var directoryEntryCount = reader.ReadInt16(); // This includes the root directory
+                    var directoryEntries = new List<DirectoryEntry>(directoryEntryCount)
+                    {
+                        rootDirectory,
+                    };
 
-                        source.Position = oldPosition;
+                    // This NARC contains filenames and directory names, so read them
+                    for (var i = 1; i < directoryEntryCount; i++)
+                    {
+                        var nameEntryTableOffset = reader.ReadInt32();
+                        var firstFileIndex = reader.ReadInt16();
+                        var parentDirectoryIndex = reader.ReadInt16() & 0xFFF;
+
+                        directoryEntries.Add(new DirectoryEntry
+                        {
+                            Parent = directoryEntries[parentDirectoryIndex],
+                            NameEntryOffset = nameEntryTableOffset,
+                            FirstFileIndex = firstFileIndex,
+                        });
                     }
 
-                    // Add this entry to the collection
-                    entries.Add(new ArchiveEntry(this, startOffset + entryOffset, entryLength, entryFname));
+                    var currentDirectory = rootDirectory;
+                    var directoryIndex = 0;
+                    var fileIndex = 0;
+                    while (directoryIndex < directoryEntryCount)
+                    {
+                        var entryNameLength = reader.ReadByte();
+                        if ((entryNameLength & 0x80) != 0)
+                        {
+                            // This is a directory name entry
+                            var entryName = reader.ReadString(entryNameLength & 0x7F);
+                            var entryDirectoryIndex = reader.ReadInt16() & 0xFFF;
+                            var directoryEntry = directoryEntries[entryDirectoryIndex];
+
+                            directoryEntry.Name = entryName;
+                        }
+                        else if (entryNameLength != 0)
+                        {
+                            // This is a file name entry
+                            var entryName = reader.ReadString(entryNameLength);
+                            var fileEntry = fileEntries[fileIndex];
+
+                            fileEntry.Parent = directoryEntries[directoryIndex];
+                            fileEntry.Name = entryName;
+
+                            fileIndex++;
+                        }
+                        else
+                        {
+                            // This is the end of a directory
+                            directoryIndex++;
+                            if (directoryIndex >= directoryEntryCount)
+                            {
+                                break;
+                            }
+                            currentDirectory = directoryEntries[directoryIndex];
+                        }
+                    }
+                }
+
+                // Now create the ArchiveEntry instances from the FileEntry instances
+                foreach (var fileEntry in fileEntries)
+                {
+                    entries.Add(new ArchiveEntry(this, startOffset + fimgPosition + 8 + fileEntry.Offset, fileEntry.Length, fileEntry.FullName));
                 }
             }
 
             // Set the position of the stream to the end of the file
             source.Seek(0, SeekOrigin.End);
+        }
+
+        private class FileEntry
+        {
+            public DirectoryEntry Parent;
+            public int Offset;
+            public int Length;
+            public string Name;
+            public string FullName => Parent?.Parent != null
+                ? $"{Parent.FullName}/{Name}"
+                : Name;
+        }
+
+        private class DirectoryEntry
+        {
+            public DirectoryEntry Parent;
+            public int NameEntryOffset;
+            public int FirstFileIndex;
+            public string Name;
+            public string FullName => Parent?.Parent != null
+                ? $"{Parent.FullName}/{Name}"
+                : Name;
         }
     }
     #endregion

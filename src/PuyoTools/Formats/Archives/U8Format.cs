@@ -20,7 +20,7 @@ namespace PuyoTools.Formats.Archives
         /// </summary>
         internal static U8Format Instance { get; } = new U8Format();
 
-        public string Name => "U8";
+        public string Name => "U8 (Wii ARChive)";
 
         public string FileExtension => ".arc";
 

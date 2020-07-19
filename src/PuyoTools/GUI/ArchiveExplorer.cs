@@ -81,8 +81,8 @@ namespace PuyoTools.GUI
                 ArchiveInfo info = openedArchives.Peek();
 
                 // Seems like we need a palette for this texture. Let's try to find one.
-                string textureName = Path.GetFileNameWithoutExtension(filename) + format.PaletteFileExtension;
-                ArchiveEntry paletteEntry = info.Archive.Entries.FirstOrDefault(x => x.Name.Equals(textureName, StringComparison.OrdinalIgnoreCase));
+                string textureName = Path.ChangeExtension(filename, format.PaletteFileExtension);
+                ArchiveEntry paletteEntry = info.Archive.Entries.FirstOrDefault(x => x.FullName.Equals(textureName, StringComparison.OrdinalIgnoreCase));
 
                 // Let's see if we found the palette file. And if so, open it up.
                 // Due to the nature of how this works, we need to copy the palette data to another stream first
@@ -110,23 +110,36 @@ namespace PuyoTools.GUI
             // Add a blank row if this is not the top archive
             if (openedArchives.Count > 1) // Remember, we just added an entry
             {
-                listView.Items.Add(new ListViewItem(new string[] {
+                var listViewItem = new ListViewItem(new string[] {
                     "..",
                     "Parent Archive",
-                }));
-                listView.Items[0].Font = new Font(listView.Items[0].Font, FontStyle.Bold);
+                });
+                listViewItem.Font = new Font(listViewItem.Font, FontStyle.Bold);
+
+                listView.Items.Add(listViewItem);
             }
 
             for (int i = 0; i < info.Archive.Entries.Count; i++)
             {
                 ArchiveEntry entry = info.Archive.Entries[i];
 
-                listView.Items.Add(new ListViewItem(new string[] {
+                var listViewItem = new ListViewItem(new string[] {
                     (i + 1).ToString(),
-                    entry.Name,
+                    entry.FullName,
                     FormatFileLength(entry.Length),
                     entry.Length.ToString("N0"),
-                }));
+                });
+
+                if (entry.FullName == string.Empty)
+                {
+                    listViewItem.UseItemStyleForSubItems = false;
+
+                    var listViewSubItem = listViewItem.SubItems[1];
+                    listViewSubItem.Text = "Unnamed File";
+                    listViewSubItem.Font = new Font(listViewSubItem.Font, FontStyle.Italic);
+                }
+
+                listView.Items.Add(listViewItem);
             }
 
             // Display information about the archive
