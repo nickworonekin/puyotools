@@ -23,8 +23,6 @@ namespace PuyoTools.Modules.Texture
         /// </summary>
         public Stream PaletteStream { get; set; }
 
-        public int PaletteLength = -1;
-
         #region Decode Methods
         /// <summary>
         /// Decodes a texture from a stream.

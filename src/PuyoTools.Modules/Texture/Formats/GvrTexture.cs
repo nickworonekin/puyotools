@@ -7,7 +7,7 @@ using VrSharpGvrTexture = VrSharp.Gvr.GvrTexture;
 
 namespace PuyoTools.Modules.Texture
 {
-    public class GvrTexture : TextureBase
+    public class GvrTexture : TextureBase, ITextureHasExternalPalette
     {
         public GvrTexture()
         {
@@ -39,17 +39,9 @@ namespace PuyoTools.Modules.Texture
             {
                 if (PaletteStream != null)
                 {
-                    if (PaletteLength == -1)
-                    {
-                        texture.SetPalette(new GvpPalette(PaletteStream));
-                    }
-                    else
-                    {
-                        texture.SetPalette(new GvpPalette(PaletteStream, PaletteLength));
-                    }
+                    texture.SetPalette(new GvpPalette(PaletteStream));
 
                     PaletteStream = null;
-                    PaletteLength = -1;
                 }
                 else
                 {

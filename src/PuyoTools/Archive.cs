@@ -47,6 +47,7 @@ namespace PuyoTools
                 GntFormat.Instance,
                 GvmFormat.Instance,
                 MrgFormat.Instance,
+                NarcFormat.Instance,
                 OneStorybookFormat.Instance,
                 PvmFormat.Instance,
                 SntFormat.Instance,

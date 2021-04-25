@@ -39,6 +39,8 @@ namespace PuyoTools.Modules.Archive
                     return false;
                 }
 
+                // Since ACX archives don't have an easy way to identify them outside of their file extension,
+                // we'll check to see if the offset of the first file is where it's expected to be.
                 var numEntries = reader.At(startPosition + 4, x => x.ReadInt32BigEndian());
                 var actualOffset = reader.At(startPosition + 8, x => x.ReadInt32BigEndian());
                 var expectedOffset = 8 + (numEntries * 8);

@@ -7,7 +7,7 @@ using VrSharpSvrTexture = VrSharp.Svr.SvrTexture;
 
 namespace PuyoTools.Modules.Texture
 {
-    public class SvrTexture : TextureBase
+    public class SvrTexture : TextureBase, ITextureHasExternalPalette
     {
         public SvrTexture()
         {
@@ -36,17 +36,9 @@ namespace PuyoTools.Modules.Texture
             {
                 if (PaletteStream != null)
                 {
-                    if (PaletteLength == -1)
-                    {
-                        texture.SetPalette(new SvpPalette(PaletteStream));
-                    }
-                    else
-                    {
-                        texture.SetPalette(new SvpPalette(PaletteStream, PaletteLength));
-                    }
+                    texture.SetPalette(new SvpPalette(PaletteStream));
 
                     PaletteStream = null;
-                    PaletteLength = -1;
                 }
                 else
                 {

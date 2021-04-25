@@ -210,6 +210,65 @@ namespace PuyoTools.Modules.Archive
                 OnEntryWritten(new ArchiveEntryWrittenEventArgs(entries[i]));
             }
         }
+
+        private DirectoryEntry CreateHeiarchy()
+        {
+            var rootDirectory = new DirectoryEntry
+            {
+                Name = string.Empty,
+            };
+
+            foreach (var entry in entries)
+            {
+                var currentDirectory = rootDirectory;
+
+                var paths = entry.FullName.Split(new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries);
+                var pathIndex = 0;
+                for (; pathIndex < paths.Length - 1; pathIndex++)
+                {
+                    if (!currentDirectory.Directories.TryGetValue(paths[pathIndex], out var directory))
+                    {
+                        directory = new DirectoryEntry
+                        {
+                            Parent = currentDirectory,
+                            Name = paths[pathIndex],
+                        };
+                        currentDirectory.DirectoryEntries.Add(directory);
+                        currentDirectory.Directories.Add(directory.Name, directory);
+                    }
+
+                    currentDirectory = directory;
+                }
+
+                var fileEntry = new FileEntry
+                {
+                    Entry = entry,
+                    Name = paths[pathIndex],
+                    Length = entry.Length,
+                };
+                currentDirectory.FileEntries.Add(fileEntry);
+            }
+
+            return rootDirectory;
+        }
+
+        private class FileEntry
+        {
+            public ArchiveEntry Entry;
+            public string Name;
+            public int Offset;
+            public int Length;
+        }
+
+        private class DirectoryEntry
+        {
+            public DirectoryEntry Parent;
+            public string Name;
+            public uint LastNodeIndex;
+            public readonly List<DirectoryEntry> DirectoryEntries = new List<DirectoryEntry>();
+            public readonly List<FileEntry> FileEntries = new List<FileEntry>();
+            public readonly Dictionary<string, DirectoryEntry> Directories = new Dictionary<string, DirectoryEntry>(StringComparer.OrdinalIgnoreCase);
+        }
     }
     #endregion
 }

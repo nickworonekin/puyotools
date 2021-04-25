@@ -33,7 +33,7 @@ namespace PuyoTools.Modules.Texture
             bool canHaveMipmaps = (dataFormatBox.SelectedIndex == 4 || dataFormatBox.SelectedIndex == 5 || dataFormatBox.SelectedIndex == 9);
 
             // Set the palette format
-            if (paletteFormatBox.Enabled)
+            if (hasPaletteFormat)
             {
                 switch (paletteFormatBox.SelectedIndex)
                 {

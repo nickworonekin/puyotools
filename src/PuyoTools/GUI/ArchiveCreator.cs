@@ -78,6 +78,29 @@ namespace PuyoTools.GUI
             }
         }
 
+        private void AddFiles(IEnumerable<string> files, string rootPath)
+        {
+            var rootPathUri = new Uri(rootPath + Path.DirectorySeparatorChar);
+
+            foreach (string file in files)
+            {
+                FileEntry fileEntry = new FileEntry();
+                fileEntry.SourceFile = file;
+                fileEntry.Filename = Path.GetFileName(file);
+                fileEntry.FilenameInArchive = rootPathUri.MakeRelativeUri(new Uri(file)).ToString();
+
+                ListViewItem item = new ListViewItem(new string[] {
+                    (listView.Items.Count + 1).ToString(),
+                    fileEntry.Filename,
+                    fileEntry.FilenameInArchive,
+                });
+
+                item.Tag = fileEntry;
+
+                listView.Items.Add(item);
+            }
+        }
+
         private void EnableRunButton()
         {
             runButton.Enabled = (listView.Items.Count > 0 && archiveFormatBox.SelectedIndex > 0);
@@ -225,11 +248,13 @@ namespace PuyoTools.GUI
             {
                 if (MessageBox.Show("Include files within subdirectories?", "Subdirectories", MessageBoxButtons.YesNo) == DialogResult.Yes)
                 {
-                    AddFiles(Directory.GetFiles(fbd.SelectedPath, "*.*", SearchOption.AllDirectories));
+                    //AddFiles(Directory.GetFiles(fbd.SelectedPath, "*.*", SearchOption.AllDirectories), fbd.SelectedPath);
+                    AddFiles(Directory.EnumerateFiles(fbd.SelectedPath, "*", SearchOption.AllDirectories));
                 }
                 else
                 {
-                    AddFiles(Directory.GetFiles(fbd.SelectedPath));
+                    //AddFiles(Directory.GetFiles(fbd.SelectedPath));
+                    AddFiles(Directory.EnumerateFiles(fbd.SelectedPath));
                 }
 
                 EnableRunButton();

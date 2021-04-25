@@ -102,8 +102,7 @@ namespace PuyoTools.GUI
                             using (FileStream paletteData = File.OpenRead(paletteName))
                             {
                                 texture.PaletteStream = paletteData;
-                                texture.PaletteLength = (int)paletteData.Length;
-                                texture.Read(source, textureData, (int)source.Length);
+                                texture.Read(source, textureData);
                             }
 
                             // Delete the palette file if the user chose to delete the source texture

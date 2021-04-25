@@ -285,8 +285,7 @@ namespace PuyoTools.GUI
                                         {
                                             TextureBase texture = textureEntry.Format.GetCodec();
                                             texture.PaletteStream = inPaletteStream;
-                                            texture.PaletteLength = (int)inPaletteStream.Length;
-                                            texture.Read(inTextureStream, outTextureStream, (int)inTextureStream.Length);
+                                            texture.Read(inTextureStream, outTextureStream);
                                         }
                                     }
 

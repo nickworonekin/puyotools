@@ -121,7 +121,7 @@ namespace PuyoTools.Modules.Compression
                 // Start decompression
                 while (sourcePointer < sourceLength)
                 {
-                    byte flag = ReadByte(source, ref key);
+                    byte flag = Transform(reader.ReadByte(), ref key);
                     sourcePointer++;
 
                     for (int i = 0; i < 8; i++)
@@ -139,11 +139,11 @@ namespace PuyoTools.Modules.Compression
                         }
                         else // Compressed
                         {
-                            ushort matchPair = (ushort)(Transform(reader.ReadByte(), ref key) | (Transform(reader.ReadByte(), ref key) << 8));
+                            ushort matchPair = Transform(reader.ReadUInt16(), ref key);
                             sourcePointer += 2;
 
-                            int matchOffset = matchPair & 0xFFF;
-                            int matchLength = (matchPair >> 12) + 3;
+                            int matchOffset = ((matchPair >> 4) & 0xF00) | (matchPair & 0xFF);
+                            int matchLength = ((matchPair >> 8) & 0xF) + 3;
 
                             for (int j = 0; j < matchLength; j++)
                             {
@@ -309,30 +309,6 @@ namespace PuyoTools.Modules.Compression
             }
         }
 
-        private byte ReadByte(Stream source, ref uint key)
-        {
-            return Get(PTStream.ReadByte(source), ref key);
-        }
-
-        private void WriteByte(Stream destination, byte value, ref uint key)
-        {
-            destination.WriteByte(Get(value, ref key));
-        }
-
-        private byte Get(byte value, ref uint key)
-        {
-            // Generate a new key
-            uint x = (((((((key << 1) + key) << 5) - key) << 5) + key) << 7) - key;
-            x = (x << 6) - x;
-            x = (x << 4) - x;
-
-            key = ((x << 2) - x) + 12345;
-
-            // Now return the value since we have the key
-            uint t = (key >> 16) & 0x7FFF;
-            return (byte)(value ^ ((((t << 8) - t) >> 15)));
-        }
-
         private byte Transform(byte value, ref uint key)
         {
             // Generate a new key
@@ -345,6 +321,11 @@ namespace PuyoTools.Modules.Compression
             // Now return the value since we have the key
             uint t = (key >> 16) & 0x7FFF;
             return (byte)(value ^ ((((t << 8) - t) >> 15)));
+        }
+
+        private ushort Transform(ushort value, ref uint key)
+        {
+            return (ushort)(Transform((byte)(value & 0xFF), ref key) | (Transform((byte)(value >> 8), ref key) << 8));
         }
     }
 }
