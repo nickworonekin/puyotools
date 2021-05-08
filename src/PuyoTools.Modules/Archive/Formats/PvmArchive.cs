@@ -104,14 +104,14 @@ namespace PuyoTools.Modules.Archive
         MdlnChunk = (1 << 4),
 
         /// <summary>
-        /// Specifies a CONV chunk is present, which contains the name of the converter used to convert textures to PVR.
-        /// </summary>
-        ConvChunk = (1 << 5),
-
-        /// <summary>
         /// Specifies a PVMI chunk is present, which contains the original filenames of the textures converted to PVR.
         /// </summary>
-        PvmiChunk = (1 << 6),
+        PvmiChunk = (1 << 5),
+
+        /// <summary>
+        /// Specifies a CONV chunk is present, which contains the name of the converter used to convert textures to PVR.
+        /// </summary>
+        ConvChunk = (1 << 6),
 
         /// <summary>
         /// Specifies IMGC chunks are present, which contains the original data of the textures converted to PVR.
