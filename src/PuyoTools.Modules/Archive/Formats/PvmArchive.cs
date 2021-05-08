@@ -10,6 +10,7 @@ namespace PuyoTools.Modules.Archive
     public class PvmArchive : ArchiveBase
     {
         private static readonly byte[] magicCode = { (byte)'P', (byte)'V', (byte)'M', (byte)'H' };
+        private static readonly byte[] pvrtMagicCode = { (byte)'P', (byte)'V', (byte)'R', (byte)'T' };
 
         public override ArchiveReader Open(Stream source)
         {
@@ -43,9 +44,23 @@ namespace PuyoTools.Modules.Archive
                 // For PVRs, the data format will be < 0x60.
                 var firstEntryOffset = reader.At(startPosition + 4, x => x.ReadInt32()) + 8;
 
-                if (remainingLength < firstEntryOffset + 16)
+                // Get the actual offset of the first texture.
+                while (true)
                 {
-                    return false;
+                    if (remainingLength < firstEntryOffset + 16)
+                    {
+                        return false;
+                    }
+
+                    var chunkIdentifier = reader.At(startPosition + firstEntryOffset, x => x.ReadBytes(4));
+                    var chunkLength = reader.At(startPosition + firstEntryOffset + 4, x => x.ReadInt32()) + 8;
+
+                    if (chunkIdentifier.SequenceEqual(pvrtMagicCode))
+                    {
+                        break;
+                    }
+
+                    firstEntryOffset += chunkLength;
                 }
 
                 var dataFormat = reader.At(startPosition + firstEntryOffset + 0x9, x => x.ReadByte());
@@ -60,74 +75,136 @@ namespace PuyoTools.Modules.Archive
         }
     }
 
+    [Flags]
+    internal enum PvmFlags : ushort
+    {
+        /// <summary>
+        /// Specifies global indexes are provided.
+        /// </summary>
+        GlobalIndexes = (1 << 0),
+
+        /// <summary>
+        /// Specifies texture dimensions are provided within the entry table.
+        /// </summary>
+        Dimensions = (1 << 1),
+
+        /// <summary>
+        /// Specifies pixel and data formats are provided within the entry table.
+        /// </summary>
+        Formats = (1 << 2),
+
+        /// <summary>
+        /// Specifies filenames are present within the entry table.
+        /// </summary>
+        Filenames = (1 << 3),
+
+        /// <summary>
+        /// Specifies an MDLN chunk is present, which contains the filenames of the models associated with this PVM.
+        /// </summary>
+        MdlnChunk = (1 << 4),
+
+        /// <summary>
+        /// Specifies a CONV chunk is present, which contains the name of the converter used to convert textures to PVR.
+        /// </summary>
+        ConvChunk = (1 << 5),
+
+        /// <summary>
+        /// Specifies a PVMI chunk is present, which contains the original filenames of the textures converted to PVR.
+        /// </summary>
+        PvmiChunk = (1 << 6),
+
+        /// <summary>
+        /// Specifies IMGC chunks are present, which contains the original data of the textures converted to PVR.
+        /// </summary>
+        ImgcChunks = (1 << 7),
+
+        /// <summary>
+        /// Specifies PVRT chunks are present.
+        /// </summary>
+        PvrtChunks = (1 << 8),
+    }
+
     #region Archive Reader
     public class PvmArchiveReader : ArchiveReader
     {
+        private static readonly byte[] pvrtMagicCode = { (byte)'P', (byte)'V', (byte)'R', (byte)'T' };
+
         bool hasFilenames, hasFormats, hasDimensions, hasGlobalIndexes;
         int tableEntryLength, globalIndexOffset;
 
         public PvmArchiveReader(Stream source) : base(source)
         {
-            // The offset of the first entry
-            source.Position += 4;
-            int entryOffset = PTStream.ReadInt32(source) + 8;
-            int headerOffset = 0xC;
-
-            // Read what properties this archive stores for each texture
-            byte properties  = PTStream.ReadByte(source);
-            hasFilenames     = (properties & (1 << 3)) > 0;
-            hasFormats       = (properties & (1 << 2)) > 0;
-            hasDimensions    = (properties & (1 << 1)) > 0;
-            hasGlobalIndexes = (properties & (1 << 0)) > 0;
-            source.Position++;
-
-            // Determine the size of each entry in the entry table
-            tableEntryLength = 2;
-            if (hasFilenames)  tableEntryLength += 28;
-            if (hasFormats)    tableEntryLength += 2;
-            if (hasDimensions) tableEntryLength += 2;
-
-            if (hasGlobalIndexes)
+            using (var reader = source.AsBinaryReader())
             {
-                globalIndexOffset = tableEntryLength;
-                tableEntryLength += 4;
-            }
+                // The offset of the first entry
+                source.Position += 4;
+                int entryOffset = reader.ReadInt32() + 8;
+                int headerOffset = 0xC;
 
-            // Get the number of entries in the archive
-            ushort numEntries = PTStream.ReadUInt16(source);
-            entries = new List<ArchiveEntry>(numEntries);
+                // Read what properties this archive stores for each texture
+                PvmFlags properties = (PvmFlags)reader.ReadUInt16();
+                hasFilenames = (properties & PvmFlags.Filenames) != 0;
+                hasFormats = (properties & PvmFlags.Formats) != 0;
+                hasDimensions = (properties & PvmFlags.Dimensions) != 0;
+                hasGlobalIndexes = (properties & PvmFlags.GlobalIndexes) != 0;
 
-            // Read in all the entries
-            for (int i = 0; i < numEntries; i++)
-            {
-                // We need to need to determine the offset based on the length,
-                // which is stored in the texture data.
-                // We already have the entry offset
-                source.Position = startOffset + entryOffset + 4;
-                int entryLength = PTStream.ReadInt32(source) + 8;
+                // Determine the size of each entry in the entry table
+                tableEntryLength = 2;
+                if (hasFilenames) tableEntryLength += 28;
+                if (hasFormats) tableEntryLength += 2;
+                if (hasDimensions) tableEntryLength += 2;
 
-                string entryFname = String.Empty;
-                if (hasFilenames)
-                {
-                    source.Position = startOffset + headerOffset + 2;
-                    entryFname = PTStream.ReadCString(source, 28) + ".pvr";
-                    //headerOffset += tableEntryLength;
-                }
-
-                uint? globalIndex = null;
                 if (hasGlobalIndexes)
                 {
-                    source.Position = startOffset + headerOffset + globalIndexOffset;
-                    globalIndex = PTStream.ReadUInt32(source);
+                    globalIndexOffset = tableEntryLength;
+                    tableEntryLength += 4;
                 }
 
-                headerOffset += tableEntryLength;
+                // Get the number of entries in the archive
+                ushort numEntries = reader.ReadUInt16();
+                entries = new List<ArchiveEntry>(numEntries);
 
-                // Add this entry to the collection
-                //entries.Add(new ArchiveEntry(this, startOffset + entryOffset, entryLength, entryFname) { Index = i });
-                entries.Add(new PvmArchiveEntry(this, startOffset + entryOffset, entryLength, entryFname, globalIndex));
+                // Read in all the entries
+                for (int i = 0; i < numEntries;)
+                {
+                    // Verify if the current chunk contains texture data. If not, skip over it.
+                    var chunkIdentifier = reader.At(startOffset + entryOffset, x => x.ReadBytes(4));
+                    var chunkLength = reader.At(startOffset + entryOffset + 4, x => x.ReadInt32()) + 8;
 
-                entryOffset += entryLength;
+                    if (!chunkIdentifier.SequenceEqual(pvrtMagicCode))
+                    {
+                        entryOffset += chunkLength;
+                        continue;
+                    }
+
+                    // We need to need to determine the offset based on the length,
+                    // which is stored in the texture data.
+                    // We already have the entry offset
+                    source.Position = startOffset + entryOffset + 4;
+                    int entryLength = reader.ReadInt32() + 8;
+
+                    string entryName = string.Empty;
+                    if (hasFilenames)
+                    {
+                        entryName = reader.At(startOffset + headerOffset + 2, x => x.ReadString(28)) + ".pvr";
+                        //headerOffset += tableEntryLength;
+                    }
+
+                    uint? globalIndex = null;
+                    if (hasGlobalIndexes)
+                    {
+                        globalIndex = reader.At(startOffset + headerOffset + globalIndexOffset, x => x.ReadUInt32());
+                    }
+
+                    headerOffset += tableEntryLength;
+
+                    // Add this entry to the collection
+                    //entries.Add(new ArchiveEntry(this, startOffset + entryOffset, entryLength, entryFname) { Index = i });
+                    entries.Add(new PvmArchiveEntry(this, startOffset + entryOffset, entryLength, entryName, globalIndex));
+
+                    entryOffset += entryLength;
+                    i++;
+                }
             }
 
             // Set the position of the stream to the end of the file
