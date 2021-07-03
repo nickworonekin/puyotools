@@ -179,6 +179,8 @@ namespace VrSharp.Svr
                         dataFormat = SvrDataFormat.Index4Argb8Rectangle;
                     }
                 }
+
+                this.dataFormat = dataFormat;
             }
 
             else if (dataFormat == SvrDataFormat.Index8Rgb5a3Rectangle || dataFormat == SvrDataFormat.Index8Rgb5a3Square ||
@@ -206,6 +208,8 @@ namespace VrSharp.Svr
                         dataFormat = SvrDataFormat.Index8Argb8Rectangle;
                     }
                 }
+
+                this.dataFormat = dataFormat;
             }
 
             if (dataCodec.PaletteEntries != 0)
