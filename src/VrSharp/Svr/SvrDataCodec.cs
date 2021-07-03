@@ -126,11 +126,11 @@ namespace VrSharp.Svr
                         int offset = GetSwizzledOffset4(x, y, width, height);
                         byte entry = (byte)(input[(y * width) + x] & 0x0F);
                         if (IsSwizzled)
-                            entry = (byte)((output[offset] & (0x0F << ((y >> 1) & 0x01) * 4)) | (entry << ((~(y >> 1) & 0x01) * 4)));
+                            entry = (byte)((output[offset] & (0x0F << (~(y >> 1) & 0x01) * 4)) | (entry << (((y >> 1) & 0x01) * 4)));
                         else
-                            entry = (byte)((output[offset] & (0x0F << (x & 0x01) * 4)) | (entry << ((~x & 0x01) * 4)));
+                            entry = (byte)((output[offset] & (0x0F << (~x & 0x01) * 4)) | (entry << ((x & 0x01) * 4)));
 
-                        output[GetSwizzledOffset4(x, y, width, height)] = entry;
+                        output[offset] = entry;
                     }
                 }
 
@@ -272,11 +272,11 @@ namespace VrSharp.Svr
                         int offset = GetSwizzledOffset4(x, y, width, height);
                         byte entry = (byte)(input[(y * width) + x] & 0x0F);
                         if (IsSwizzled)
-                            entry = (byte)((output[offset] & (0x0F << ((y >> 1) & 0x01) * 4)) | (entry << ((~(y >> 1) & 0x01) * 4)));
+                            entry = (byte)((output[offset] & (0x0F << (~(y >> 1) & 0x01) * 4)) | (entry << (((y >> 1) & 0x01) * 4)));
                         else
-                            entry = (byte)((output[offset] & (0x0F << (x & 0x01) * 4)) | (entry << ((~x & 0x01) * 4)));
+                            entry = (byte)((output[offset] & (0x0F << (~x & 0x01) * 4)) | (entry << ((x & 0x01) * 4)));
 
-                        output[GetSwizzledOffset4(x, y, width, height)] = entry;
+                        output[offset] = entry;
                     }
                 }
 
