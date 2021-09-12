@@ -34,11 +34,19 @@ namespace PuyoTools.Modules.Texture
             // if we do not have one defined
             if (texture.NeedsExternalPalette)
             {
-                if (PaletteStream != null)
-                {
-                    texture.SetPalette(new SvpPalette(PaletteStream));
+                var eventArgs = new ExternalPaletteRequiredEventArgs();
+                ExternalPaletteRequired?.Invoke(this, eventArgs);
 
-                    PaletteStream = null;
+                if (eventArgs.Palette != null)
+                {
+                    texture.SetPalette(new SvpPalette(eventArgs.Palette));
+
+                    if (eventArgs.CloseAfterRead)
+                    {
+                        eventArgs.Palette.Close();
+                    }
+
+                    //PaletteStream = null;
                 }
                 else
                 {
@@ -48,6 +56,9 @@ namespace PuyoTools.Modules.Texture
 
             texture.Save(destination);
         }
+
+        /// <inheritdoc/>
+        public event EventHandler<ExternalPaletteRequiredEventArgs> ExternalPaletteRequired;
 
         #region Writer Settings
         /// <summary>
@@ -87,7 +98,7 @@ namespace PuyoTools.Modules.Texture
                 texture.GlobalIndex = GlobalIndex;
             }
 
-            // If we have an external palette file, save it
+            /*// If we have an external palette file, save it
             if (texture.NeedsExternalPalette)
             {
                 needsExternalPalette = true;
@@ -98,10 +109,20 @@ namespace PuyoTools.Modules.Texture
             else
             {
                 needsExternalPalette = false;
-            }
+            }*/
 
             texture.Save(destination);
+
+            // If we have an external palette file, save it
+            if (texture.NeedsExternalPalette)
+            {
+                var paletteStream = texture.PaletteEncoder.ToStream();
+                ExternalPaletteCreated?.Invoke(this, new ExternalPaletteCreatedEventArgs(paletteStream));
+            }
         }
+
+        /// <inheritdoc/>
+        public event EventHandler<ExternalPaletteCreatedEventArgs> ExternalPaletteCreated;
 
         /// <summary>
         /// Returns if this codec can read the data in <paramref name="source"/>.

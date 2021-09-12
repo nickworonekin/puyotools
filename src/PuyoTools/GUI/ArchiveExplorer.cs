@@ -71,12 +71,39 @@ namespace PuyoTools.GUI
 
             long oldPosition = data.Position;
 
+            void OnExternalPaletteRequired(object sender, ExternalPaletteRequiredEventArgs e)
+            {
+                ArchiveInfo info = openedArchives.Peek();
+
+                // Seems like we need a palette for this texture. Let's try to find one.
+                string textureName = Path.ChangeExtension(filename, format.PaletteFileExtension);
+                ArchiveEntry paletteEntry = info.Archive.Entries.FirstOrDefault(x => x.FullName.Equals(textureName, StringComparison.OrdinalIgnoreCase));
+
+                // Let's see if we found the palette file. And if so, open it up.
+                // Due to the nature of how this works, we need to copy the palette data to another stream first
+                if (paletteEntry != null)
+                {
+                    Stream entryData = paletteEntry.Open();
+
+                    // Get the palette data (we may need to copy over the data to another stream)
+                    Stream paletteData = new MemoryStream();
+                    entryData.CopyTo(paletteData);
+                    paletteData.Position = 0;
+                    e.Palette = paletteData;
+                }
+            }
+
             try
             {
-                viewer.OpenTexture(data, filename, format);
+                viewer.OpenTexture(data, filename, format,
+                    OnExternalPaletteRequired);
                 viewer.Show();
             }
-            catch (TextureNeedsPaletteException)
+            catch
+            {
+                // Do nothing.
+            }
+            /*catch (TextureNeedsPaletteException)
             {
                 ArchiveInfo info = openedArchives.Peek();
 
@@ -100,7 +127,7 @@ namespace PuyoTools.GUI
                     viewer.OpenTexture(data, filename, paletteData, format);
                     viewer.Show();
                 }
-            }
+            }*/
         }
 
         private void Populate(ArchiveInfo info)

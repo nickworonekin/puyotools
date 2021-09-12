@@ -187,6 +187,8 @@ namespace PuyoTools.GUI
                                     }
                                     catch (TextureNeedsPaletteException)
                                     {
+                                        entryData.Position = 0;
+
                                         // Uh oh, looks like we need a palette.
                                         // What we are going to do is add it to textureFileQueue, then convert it
                                         // after we extract all of the files.
@@ -279,12 +281,27 @@ namespace PuyoTools.GUI
                                             continue;
                                         }
 
-                                        // Ok, now we can load the palette data and try to convert it.
+                                        /*// Ok, now we can load the palette data and try to convert it.
                                         using (FileStream inPaletteStream = File.OpenRead(paletteName),
                                         outTextureStream = File.Create(textureOutName))
                                         {
                                             TextureBase texture = textureEntry.Format.GetCodec();
                                             texture.PaletteStream = inPaletteStream;
+                                            texture.Read(inTextureStream, outTextureStream);
+                                        }*/
+
+                                        // Ok, now we can load the palette data and try to convert it.
+                                        using (FileStream outTextureStream = File.Create(textureOutName))
+                                        {
+                                            TextureBase texture = textureEntry.Format.GetCodec();
+                                            if (texture is ITextureHasExternalPalette textureWithExternalPalette)
+                                            {
+                                                textureWithExternalPalette.ExternalPaletteRequired += (sender, e) =>
+                                                {
+                                                    e.Palette = File.OpenRead(paletteName);
+                                                    e.CloseAfterRead = true;
+                                                };
+                                            }
                                             texture.Read(inTextureStream, outTextureStream);
                                         }
                                     }

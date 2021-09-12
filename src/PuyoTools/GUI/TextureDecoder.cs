@@ -81,13 +81,50 @@ namespace PuyoTools.GUI
 
                         // Alright, let's decode the texture now
                         TextureBase texture = format.GetCodec();
+
+                        // Events
+                        if (texture is ITextureHasExternalPalette textureWithExternalPalette)
+                        {
+                            textureWithExternalPalette.ExternalPaletteRequired += (sender, e) =>
+                            {
+                                // It appears that we need to load an external palette.
+                                // Let's get the filename for this palette file, see if it exists, and load it in
+                                string paletteName = Path.ChangeExtension(file, format.PaletteFileExtension);
+
+                                if (!File.Exists(paletteName))
+                                {
+                                    // If the palette file doesn't exist, just skip over this texture.
+                                    return;
+                                }
+
+                                // Copy the palette data to another stream so we can safely delete the data.
+                                var paletteMemoryStream = new MemoryStream();
+                                using (FileStream paletteFileStream = File.OpenRead(paletteName))
+                                {
+                                    paletteFileStream.CopyTo(paletteMemoryStream);
+                                }
+                                paletteMemoryStream.Position = 0;
+
+                                e.Palette = paletteMemoryStream;
+
+                                // Delete the palette file if the user chose to delete the source texture
+                                if (settings.DeleteSource)
+                                {
+                                    File.Delete(paletteName);
+                                }
+                            };
+                        }
+
                         try
                         {
                             texture.Read(source, textureData, (int)source.Length);
                         }
                         catch (TextureNeedsPaletteException)
                         {
-                            // It appears that we need to load an external palette.
+                            // Just skip over this texture.
+                            continue;
+
+                            /*// It appears that we need to load an external palette.
                             // Let's get the filename for this palette file, see if it exists, and load it in
                             string paletteName = Path.Combine(Path.GetDirectoryName(file), Path.GetFileNameWithoutExtension(file)) + format.PaletteFileExtension;
 
@@ -109,7 +146,7 @@ namespace PuyoTools.GUI
                             if (settings.DeleteSource)
                             {
                                 File.Delete(paletteName);
-                            }
+                            }*/
                         }
                     }
 

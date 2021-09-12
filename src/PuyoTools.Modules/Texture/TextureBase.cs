@@ -21,7 +21,7 @@ namespace PuyoTools.Modules.Texture
         /// If decoding, sets the palette data for the texture.
         /// If encoding, this will hold the palette data if NeedsExternalPalette is true and after the texture has been encoded.
         /// </summary>
-        public Stream PaletteStream { get; set; }
+        //public Stream PaletteStream { get; set; }
 
         #region Decode Methods
         /// <summary>

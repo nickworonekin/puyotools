@@ -38,15 +38,22 @@ namespace PuyoTools.GUI
             copyToolStripMenuItem.Enabled = false;
         }
 
-        internal void OpenTexture(Stream data, string filename, ITextureFormat format)
+        internal void OpenTexture(Stream data, string filename, ITextureFormat format,
+            EventHandler<ExternalPaletteRequiredEventArgs> onExternalPaletteRequired = null)
         {
             Bitmap textureBitmap;
-            format.GetCodec().Read(data, out textureBitmap);
+
+            var texture = format.GetCodec();
+            if (texture is ITextureHasExternalPalette textureWithExternalPalette)
+            {
+                textureWithExternalPalette.ExternalPaletteRequired += onExternalPaletteRequired;
+            }
+            texture.Read(data, out textureBitmap);
 
             DisplayTexture(textureBitmap, filename, format);
         }
 
-        internal void OpenTexture(Stream data, string filename, Stream paletteData, ITextureFormat format)
+        /*internal void OpenTexture(Stream data, string filename, Stream paletteData, ITextureFormat format)
         {
             Bitmap textureBitmap;
 
@@ -55,7 +62,7 @@ namespace PuyoTools.GUI
             texture.Read(data, out textureBitmap);
 
             DisplayTexture(textureBitmap, filename, format);
-        }
+        }*/
 
         private void DisplayTexture(Bitmap textureBitmap, string filename, ITextureFormat format)
         {
@@ -155,12 +162,30 @@ namespace PuyoTools.GUI
                     }
                 }
 
+                void OnExternalPaletteRequired(object sender2, ExternalPaletteRequiredEventArgs e2)
+                {
+                    // Seems like we need a palette for this texture. Let's try to find one.
+                    string paletteName = Path.Combine(Path.GetDirectoryName(ofd.FileName), Path.GetFileNameWithoutExtension(ofd.FileName)) + textureFormat.PaletteFileExtension;
+
+                    if (File.Exists(paletteName))
+                    {
+                        // Looks like the palette file exists. Let's load that for the texture
+                        e2.Palette = File.OpenRead(paletteName);
+                        e2.CloseAfterRead = true;
+                    }
+                }
+
                 // This is a texture. Let's open it.
                 try
                 {
-                    OpenTexture(textureStream, ofd.SafeFileName, textureFormat);
+                    OpenTexture(textureStream, ofd.SafeFileName, textureFormat,
+                        OnExternalPaletteRequired);
                 }
-                catch (TextureNeedsPaletteException)
+                catch
+                {
+                    // Do nothing.
+                }
+                /*catch (TextureNeedsPaletteException)
                 {
                     // Seems like we need a palette for this texture. Let's try to find one.
                     string paletteName = Path.Combine(Path.GetDirectoryName(ofd.FileName), Path.GetFileNameWithoutExtension(ofd.FileName)) + textureFormat.PaletteFileExtension;
@@ -179,7 +204,7 @@ namespace PuyoTools.GUI
                         // Can't load the palette, so close the texture.
                         textureStream.Close();
                     }
-                }
+                }*/
             }
         }
 

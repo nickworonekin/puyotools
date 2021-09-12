@@ -79,6 +79,18 @@ namespace PuyoTools.GUI
 
                     // Run it through the texture encoder.
                     TextureBase texture = settings.TextureFormat.GetCodec();
+                    
+                    // Events
+                    if (texture is ITextureHasExternalPalette textureWithExternalPalette)
+                    {
+                        textureWithExternalPalette.ExternalPaletteCreated += (sender, e) =>
+                        {
+                            using (FileStream destination = File.Create(Path.Combine(outPath, Path.ChangeExtension(outFname, settings.TextureFormat.PaletteFileExtension))))
+                            {
+                                e.Palette.CopyTo(destination);
+                            }
+                        };
+                    }
 
                     using (FileStream source = File.OpenRead(file))
                     {
@@ -116,7 +128,7 @@ namespace PuyoTools.GUI
                         buffer.WriteTo(destination);
                     }
 
-                    // Write out the palette file (if one was created along with the texture).
+                    /*// Write out the palette file (if one was created along with the texture).
                     if (texture.PaletteStream != null)
                     {
                         using (FileStream destination = File.Create(Path.Combine(outPath, Path.ChangeExtension(outFname, settings.TextureFormat.PaletteFileExtension))))
@@ -124,7 +136,7 @@ namespace PuyoTools.GUI
                             texture.PaletteStream.Position = 0;
                             texture.PaletteStream.CopyTo(destination);
                         }
-                    }
+                    }*/
 
                     // Delete the source if the user chose to
                     if (settings.DeleteSource)

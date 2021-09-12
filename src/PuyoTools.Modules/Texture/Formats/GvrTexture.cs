@@ -37,11 +37,19 @@ namespace PuyoTools.Modules.Texture
             // if we do not have one defined
             if (texture.NeedsExternalPalette)
             {
-                if (PaletteStream != null)
-                {
-                    texture.SetPalette(new GvpPalette(PaletteStream));
+                var eventArgs = new ExternalPaletteRequiredEventArgs();
+                OnExternalPaletteRequired(eventArgs);
 
-                    PaletteStream = null;
+                if (eventArgs.Palette != null)
+                {
+                    texture.SetPalette(new GvpPalette(eventArgs.Palette));
+
+                    if (eventArgs.CloseAfterRead)
+                    {
+                        eventArgs.Palette.Close();
+                    }
+
+                    //PaletteStream = null;
                 }
                 else
                 {
@@ -51,6 +59,11 @@ namespace PuyoTools.Modules.Texture
 
             texture.Save(destination);
         }
+
+        /// <inheritdoc/>
+        public event EventHandler<ExternalPaletteRequiredEventArgs> ExternalPaletteRequired;
+
+        protected virtual void OnExternalPaletteRequired(ExternalPaletteRequiredEventArgs e) => ExternalPaletteRequired?.Invoke(this, e);
 
         #region Writer Settings
         /// <summary>
@@ -128,7 +141,7 @@ namespace PuyoTools.Modules.Texture
             texture.HasMipmaps = HasMipmaps;
             texture.NeedsExternalPalette = needsExternalPalette;
 
-            // If we have an external palette file, save it
+            /*// If we have an external palette file, save it
             if (texture.NeedsExternalPalette)
             {
                 needsExternalPalette = true;
@@ -139,10 +152,22 @@ namespace PuyoTools.Modules.Texture
             else
             {
                 needsExternalPalette = false;
-            }
+            }*/
 
             texture.Save(destination);
+
+            // If we have an external palette file, save it
+            if (texture.NeedsExternalPalette)
+            {
+                var paletteStream = texture.PaletteEncoder.ToStream();
+                OnExternalPaletteCreated(new ExternalPaletteCreatedEventArgs(paletteStream));
+            }
         }
+
+        /// <inheritdoc/>
+        public event EventHandler<ExternalPaletteCreatedEventArgs> ExternalPaletteCreated;
+
+        protected virtual void OnExternalPaletteCreated(ExternalPaletteCreatedEventArgs e) => ExternalPaletteCreated?.Invoke(this, e);
 
         /// <summary>
         /// Returns if this codec can read the data in <paramref name="source"/>.
