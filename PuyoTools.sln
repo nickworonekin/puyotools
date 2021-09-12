@@ -3,15 +3,24 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30114.105
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PuyoTools.App.UI", "src\PuyoTools.App.UI\PuyoTools.App.UI.csproj", "{7578281C-3030-4640-A7E3-5AD83C598694}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PuyoTools.App.UI", "src\PuyoTools.App.UI\PuyoTools.App.UI.csproj", "{7578281C-3030-4640-A7E3-5AD83C598694}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GimSharp", "src\GimSharp\GimSharp.csproj", "{18707752-78B4-4735-AE5A-4261AD5C06EE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GimSharp", "src\GimSharp\GimSharp.csproj", "{18707752-78B4-4735-AE5A-4261AD5C06EE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VrSharp", "src\VrSharp\VrSharp.csproj", "{A8E274F4-0D8E-4EAB-A5B2-7B40BC922534}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VrSharp", "src\VrSharp\VrSharp.csproj", "{A8E274F4-0D8E-4EAB-A5B2-7B40BC922534}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PuyoTools.Modules", "src\PuyoTools.Modules\PuyoTools.Modules.csproj", "{E5D36FFB-A89F-4F4D-928C-87FC863B4C6C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PuyoTools.Modules", "src\PuyoTools.Modules\PuyoTools.Modules.csproj", "{E5D36FFB-A89F-4F4D-928C-87FC863B4C6C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PuyoTools.App.Cli", "src\PuyoTools.App.Cli\PuyoTools.App.Cli.csproj", "{CC122AA1-0B6C-468E-B965-2E92DF061709}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "PuyoTools.App.Shared", "src\PuyoTools.App.Shared\PuyoTools.App.Shared.shproj", "{CB957E9E-4CAE-4BA5-A2D8-8BE6F93DD681}"
 EndProject
 Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		src\PuyoTools.App.Shared\PuyoTools.App.Shared.projitems*{7578281c-3030-4640-a7e3-5ad83c598694}*SharedItemsImports = 5
+		src\PuyoTools.App.Shared\PuyoTools.App.Shared.projitems*{cb957e9e-4cae-4ba5-a2d8-8be6f93dd681}*SharedItemsImports = 13
+		src\PuyoTools.App.Shared\PuyoTools.App.Shared.projitems*{cc122aa1-0b6c-468e-b965-2e92df061709}*SharedItemsImports = 5
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -33,6 +42,10 @@ Global
 		{E5D36FFB-A89F-4F4D-928C-87FC863B4C6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E5D36FFB-A89F-4F4D-928C-87FC863B4C6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E5D36FFB-A89F-4F4D-928C-87FC863B4C6C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CC122AA1-0B6C-468E-B965-2E92DF061709}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CC122AA1-0B6C-468E-B965-2E92DF061709}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CC122AA1-0B6C-468E-B965-2E92DF061709}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CC122AA1-0B6C-468E-B965-2E92DF061709}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

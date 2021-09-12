@@ -5,6 +5,7 @@
     <TargetFramework>net472</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationIcon>Resources/ProgramIcon.ico</ApplicationIcon>
+    <AssemblyName>PuyoTools</AssemblyName>
     <VersionPrefix>2.1.0</VersionPrefix>
     <VersionSuffix>dev</VersionSuffix>
   </PropertyGroup>
@@ -61,5 +62,7 @@
       <LastGenOutput>BitmapResources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
+
+  <Import Project="..\PuyoTools.App.Shared\PuyoTools.App.Shared.projitems" Label="Shared" />
 
 </Project>
