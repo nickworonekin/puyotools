@@ -9,26 +9,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PuyoTools.Formats.Archives
+namespace PuyoTools.App.Formats.Archives
 {
     /// <inheritdoc/>
-    internal class PvmFormat : IArchiveFormat
+    internal partial class PvmFormat : IArchiveFormat
     {
-        private PvmFormat() { }
-
-        /// <summary>
-        /// Gets the current instance.
-        /// </summary>
-        internal static PvmFormat Instance { get; } = new PvmFormat();
-
-        public string Name => "PVM";
-
-        public string FileExtension => ".pvm";
-
-        public ArchiveBase GetCodec() => new PvmArchive();
-
         public ModuleSettingsControl GetModuleSettingsControl() => new PvmWriterSettings();
-
-        public bool Identify(Stream source, string filename) => PvmArchive.Identify(source);
     }
 }

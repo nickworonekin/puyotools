@@ -9,26 +9,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PuyoTools.Formats.Archives
+namespace PuyoTools.App.Formats.Archives
 {
     /// <inheritdoc/>
-    internal class AfsFormat : IArchiveFormat
+    internal partial class AfsFormat : IArchiveFormat
     {
-        private AfsFormat() { }
-
-        /// <summary>
-        /// Gets the current instance.
-        /// </summary>
-        internal static AfsFormat Instance { get; } = new AfsFormat();
-
-        public string Name => "AFS";
-
-        public string FileExtension => ".afs";
-
-        public ArchiveBase GetCodec() => new AfsArchive();
-
         public ModuleSettingsControl GetModuleSettingsControl() => new AfsWriterSettings();
-
-        public bool Identify(Stream source, string filename) => AfsArchive.Identify(source);
     }
 }

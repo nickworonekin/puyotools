@@ -9,16 +9,22 @@ using System.Windows.Forms;
 using PuyoTools.GUI;
 using PuyoTools.Modules;
 using PuyoTools.Modules.Archive;
+using PuyoTools.App.Formats.Archives;
 
 namespace PuyoTools.Formats.Archives.WriterSettings
 {
-    public partial class AfsWriterSettings : ModuleSettingsControl
+    public partial class AfsWriterSettings : ModuleSettingsControl, IArchiveFormatOptions
     {
         public AfsWriterSettings()
         {
             InitializeComponent();
 
             blockSizeBox.SelectedIndex = 0;
+        }
+
+        public void MapTo(ArchiveWriter obj)
+        {
+            SetModuleSettings(obj);
         }
 
         public override void SetModuleSettings(IModule module)

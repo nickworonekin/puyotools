@@ -9,26 +9,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PuyoTools.Formats.Archives
+namespace PuyoTools.App.Formats.Archives
 {
     /// <inheritdoc/>
-    internal class GvmFormat : IArchiveFormat
+    internal partial class GvmFormat : IArchiveFormat
     {
-        private GvmFormat() { }
-
-        /// <summary>
-        /// Gets the current instance.
-        /// </summary>
-        internal static GvmFormat Instance { get; } = new GvmFormat();
-
-        public string Name => "GVM";
-
-        public string FileExtension => ".gvm";
-
-        public ArchiveBase GetCodec() => new GvmArchive();
-
         public ModuleSettingsControl GetModuleSettingsControl() => new PvmWriterSettings();
-
-        public bool Identify(Stream source, string filename) => GvmArchive.Identify(source);
     }
 }

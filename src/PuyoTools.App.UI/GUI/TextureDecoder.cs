@@ -9,8 +9,11 @@ using System.Drawing.Imaging;
 using System.IO;
 
 using PuyoTools.Modules.Texture;
-using PuyoTools.Formats.Compression;
-using PuyoTools.Formats.Textures;
+using PuyoTools.App.Formats.Textures;
+using PuyoTools.App;
+using PuyoTools.App.Formats.Compression;
+using PuyoTools.App.Tools;
+using System.Threading.Tasks;
 
 namespace PuyoTools.GUI
 {
@@ -52,7 +55,7 @@ namespace PuyoTools.GUI
                         Stream source = inStream;
 
                         // Get the format of the texture
-                        format = Texture.GetFormat(source, Path.GetFileName(file));
+                        format = TextureFactory.GetFormat(source, Path.GetFileName(file));
                         if (format == null)
                         {
                             // Maybe it's compressed? Let's check.
@@ -60,7 +63,7 @@ namespace PuyoTools.GUI
                             if (settings.DecodeCompressedTextures)
                             {
                                 // Get the compression format, if it is compressed that is.
-                                ICompressionFormat compressionFormat = Compression.GetFormat(source, Path.GetFileName(file));
+                                ICompressionFormat compressionFormat = CompressionFactory.GetFormat(source, Path.GetFileName(file));
                                 if (compressionFormat != null)
                                 {
                                     // Ok, it appears to be compressed. Let's decompress it, and then check the format again
@@ -68,7 +71,7 @@ namespace PuyoTools.GUI
                                     compressionFormat.GetCodec().Decompress(inStream, source);
 
                                     source.Position = 0;
-                                    format = Texture.GetFormat(source, Path.GetFileName(file));
+                                    format = TextureFactory.GetFormat(source, Path.GetFileName(file));
                                 }
                             }
 
@@ -192,12 +195,12 @@ namespace PuyoTools.GUI
             public bool DeleteSource;
         }
 
-        private void runButton_Click(object sender, EventArgs e)
+        private async void runButton_Click(object sender, EventArgs e)
         {
             // Disable the form
             Enabled = false;
 
-            // Set up the settings we will be using for this
+            /*// Set up the settings we will be using for this
             Settings settings = new Settings
             {
                 DecodeCompressedTextures = decodeCompressedTexturesButton.Checked,
@@ -213,7 +216,43 @@ namespace PuyoTools.GUI
             };
             dialog.DoWork += (sender2, e2) => Run(settings, dialog);
             dialog.RunWorkerCompleted += (sender2, e2) => Close();
-            dialog.RunWorkerAsync();
+            dialog.RunWorkerAsync();*/
+
+            // Create options in the format the tool uses
+            var toolOptions = new TextureDecoderOptions
+            {
+                DecodeCompressedTextures = decodeCompressedTexturesButton.Checked,
+                OutputToSourceDirectory = outputToSourceDirButton.Checked,
+                DeleteSource = deleteSourceButton.Checked,
+            };
+
+            // Create the progress dialog and handler
+            var progressDialog = new ProgressDialog
+            {
+                WindowTitle = "Processing",
+                Title = "Decoding Textures",
+            };
+
+            var progress = new Progress<ToolProgress>(x =>
+            {
+                if (fileList.Count == 1)
+                {
+                    progressDialog.ReportProgress(x.Index * 100 / fileList.Count, string.Format("Processing {0}", Path.GetFileName(x.File)));
+                }
+                else
+                {
+                    progressDialog.ReportProgress(x.Index * 100 / fileList.Count, string.Format("Processing {0} ({1:N0} of {2:N0})", Path.GetFileName(x.File), x.Index + 1, fileList.Count));
+                }
+            });
+
+            progressDialog.Show();
+
+            // Execute the tool
+            await Task.Run(() => PuyoTools.App.Tools.TextureDecoder.Execute(fileList, toolOptions, progress));
+
+            // Close the dialogs
+            progressDialog.Close();
+            Close();
         }
     }
 }

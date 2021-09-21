@@ -13,8 +13,10 @@ using PuyoTools.Modules.Compression;
 
 using Ookii.Dialogs.WinForms;
 using System.Linq;
-using PuyoTools.Formats.Compression;
-using PuyoTools.Formats.Archives;
+using PuyoTools.App.Tools;
+using PuyoTools.App.Formats.Archives;
+using System.Threading.Tasks;
+using PuyoTools.App.Formats.Compression;
 
 namespace PuyoTools.GUI
 {
@@ -48,12 +50,12 @@ namespace PuyoTools.GUI
 
             // Fill the archive format box
             archiveFormatBox.SelectedIndex = 0;
-            archiveFormatBox.Items.AddRange(Archive.WriterFormats.ToArray());
+            archiveFormatBox.Items.AddRange(ArchiveFactory.WriterFormats.ToArray());
             archiveFormatBox.DisplayMember = nameof(IArchiveFormat.Name);
 
             // Fill the compression format box
             compressionFormatBox.SelectedIndex = 0;
-            compressionFormatBox.Items.AddRange(Compression.EncoderFormats.ToArray());
+            compressionFormatBox.Items.AddRange(CompressionFactory.EncoderFormats.ToArray());
             compressionFormatBox.DisplayMember = nameof(ICompressionFormat.Name);
         }
 
@@ -347,7 +349,7 @@ namespace PuyoTools.GUI
             }
         }
 
-        private void runButton_Click(object sender, EventArgs e)
+        private async void runButton_Click(object sender, EventArgs e)
         {
             // Get the format of the archive the user wants to create
             IArchiveFormat archiveFormat = (IArchiveFormat)archiveFormatBox.SelectedItem;
@@ -363,7 +365,7 @@ namespace PuyoTools.GUI
                 // Disable the form
                 Enabled = false;
 
-                var settings = new Settings
+                /*var settings = new Settings
                 {
                     ArchiveFormat = archiveFormat,
                     OutFilename = sfd.FileName,
@@ -393,7 +395,66 @@ namespace PuyoTools.GUI
                 };
                 dialog.DoWork += (sender2, e2) => Run(settings, dialog);
                 dialog.RunWorkerCompleted += (sender2, e2) => Close();
-                dialog.RunWorkerAsync();
+                dialog.RunWorkerAsync();*/
+
+                var files = listView.Items
+                    .Cast<ListViewItem>()
+                    .Select(x => (FileEntry)x.Tag)
+                    .Select(x => new ArchiveCreatorFileEntry
+                    {
+                        Filename = x.Filename,
+                        FilenameInArchive = x.FilenameInArchive,
+                        SourceFile = x.SourceFile,
+                    })
+                    .ToList();
+                var outputPath = sfd.FileName;
+
+                // Create options in the format the tool uses
+                var toolOptions = new ArchiveCreatorOptions
+                {
+                    CompressionFormat = compressionFormatBox.SelectedIndex != 0
+                        ? (ICompressionFormat)compressionFormatBox.SelectedItem
+                        : null,
+                };
+
+                // Get the format specific options
+                var formatOptions = writerSettingsControlsCache.TryGetValue(archiveFormat, out var writerSettingsControl)
+                        ? (IArchiveFormatOptions)writerSettingsControl
+                        : null;
+
+                // Create the progress dialog and handler
+                var progressDialog = new ProgressDialog
+                {
+                    WindowTitle = "Processing",
+                    Title = "ncoding Textures",
+                };
+
+                var progress = new Progress<ToolProgress>(x =>
+                {
+                    if (fileList.Count == 1)
+                    {
+                        progressDialog.ReportProgress(x.Index * 100 / files.Count, string.Format("Processing {0}", Path.GetFileName(x.File)));
+                    }
+                    else
+                    {
+                        progressDialog.ReportProgress(x.Index * 100 / files.Count, string.Format("Processing {0} ({1:N0} of {2:N0})", Path.GetFileName(x.File), x.Index + 1, files.Count));
+                    }
+                });
+
+                progressDialog.Show();
+
+                // Execute the tool
+                await Task.Run(() => PuyoTools.App.Tools.ArchiveCreator.Execute(
+                    archiveFormat,
+                    files,
+                    outputPath,
+                    toolOptions,
+                    formatOptions,
+                    progress));
+
+                // Close the dialogs
+                progressDialog.Close();
+                Close();
             }
         }
 

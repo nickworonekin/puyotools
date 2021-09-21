@@ -3,17 +3,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using PuyoTools.Formats.Compression;
-using PuyoTools.Modules.Compression;
 
-namespace PuyoTools
+namespace PuyoTools.App.Formats.Compression
 {
-    public static class Compression
+    public static class CompressionFactory
     {
         private static readonly List<ICompressionFormat> decoderFormats;
         private static readonly List<ICompressionFormat> encoderFormats;
 
-        static Compression()
+        static CompressionFactory()
         {
             // Compression formats that can be used to decompress files.
             decoderFormats = new List<ICompressionFormat>()

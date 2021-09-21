@@ -1,4 +1,4 @@
-﻿namespace PuyoTools.Formats.Textures.WriterSettings
+﻿namespace PuyoTools.App.Formats.Textures.WriterSettings
 {
     partial class GimWriterSettings
     {

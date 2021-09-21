@@ -39,7 +39,7 @@ namespace PuyoTools {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("PuyoTools.IconResources", typeof(IconResources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("PuyoTools.App.UI.IconResources", typeof(IconResources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

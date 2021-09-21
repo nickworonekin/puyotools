@@ -8,8 +8,10 @@ using System.Windows.Forms;
 using System.IO;
 
 using PuyoTools.Modules.Compression;
-using PuyoTools.Formats.Compression;
 using System.Linq;
+using PuyoTools.App.Formats.Compression;
+using PuyoTools.App.Tools;
+using System.Threading.Tasks;
 
 namespace PuyoTools.GUI
 {
@@ -25,7 +27,7 @@ namespace PuyoTools.GUI
 
             // Fill the compression format box
             compressionFormatBox.SelectedIndex = 0;
-            compressionFormatBox.Items.AddRange(Compression.EncoderFormats.ToArray());
+            compressionFormatBox.Items.AddRange(CompressionFactory.EncoderFormats.ToArray());
             compressionFormatBox.DisplayMember = nameof(ICompressionFormat.Name);
         }
 
@@ -108,12 +110,12 @@ namespace PuyoTools.GUI
             public bool DeleteSourceFile;
         }
 
-        private void runButton_Click(object sender, EventArgs e)
+        private async void runButton_Click(object sender, EventArgs e)
         {
             // Disable the form
             Enabled = false;
 
-            // Set up the settings we will be using for this
+            /*// Set up the settings we will be using for this
             Settings settings = new Settings
             {
                 CompressionFormat = (ICompressionFormat)compressionFormatBox.SelectedItem,
@@ -129,7 +131,45 @@ namespace PuyoTools.GUI
             };
             dialog.DoWork += (sender2, e2) => Run(settings, dialog);
             dialog.RunWorkerCompleted += (sender2, e2) => Close();
-            dialog.RunWorkerAsync();
+            dialog.RunWorkerAsync();*/
+
+            // Get the compression format
+            var compressionFormat = (ICompressionFormat)compressionFormatBox.SelectedItem;
+
+            // Create options in the format the tool uses
+            var toolOptions = new CompressionCompressorOptions
+            {
+                OverwriteSourceFile = overwriteSourceFileCheckbox.Checked,
+                DeleteSourceFile = deleteSourceFileCheckbox.Checked,
+            };
+
+            // Create the progress dialog and handler
+            var progressDialog = new ProgressDialog
+            {
+                WindowTitle = "Processing",
+                Title = "Encoding Textures",
+            };
+
+            var progress = new Progress<ToolProgress>(x =>
+            {
+                if (fileList.Count == 1)
+                {
+                    progressDialog.ReportProgress(x.Index * 100 / fileList.Count, string.Format("Processing {0}", Path.GetFileName(x.File)));
+                }
+                else
+                {
+                    progressDialog.ReportProgress(x.Index * 100 / fileList.Count, string.Format("Processing {0} ({1:N0} of {2:N0})", Path.GetFileName(x.File), x.Index + 1, fileList.Count));
+                }
+            });
+
+            progressDialog.Show();
+
+            // Execute the tool
+            await Task.Run(() => CompressionCompressor.Execute(compressionFormat, fileList, toolOptions, progress));
+
+            // Close the dialogs
+            progressDialog.Close();
+            Close();
         }
     }
 }

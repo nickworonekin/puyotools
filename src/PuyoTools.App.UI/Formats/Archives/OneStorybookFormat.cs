@@ -8,26 +8,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PuyoTools.Formats.Archives
+namespace PuyoTools.App.Formats.Archives
 {
     /// <inheritdoc/>
-    internal class OneStorybookFormat : IArchiveFormat
+    internal partial class OneStorybookFormat : IArchiveFormat
     {
-        private OneStorybookFormat() { }
-
-        /// <summary>
-        /// Gets the current instance.
-        /// </summary>
-        internal static OneStorybookFormat Instance { get; } = new OneStorybookFormat();
-
-        public string Name => "ONE (Sonic Storybook series)";
-
-        public string FileExtension => ".one";
-
-        public ArchiveBase GetCodec() => new OneStorybookArchive();
-
         public ModuleSettingsControl GetModuleSettingsControl() => null;
-
-        public bool Identify(Stream source, string filename) => OneStorybookArchive.Identify(source);
     }
 }

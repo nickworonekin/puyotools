@@ -1,4 +1,4 @@
-﻿namespace PuyoTools.Modules.Texture
+﻿namespace PuyoTools.App.Formats.Textures.WriterSettings
 {
     partial class PvrWriterSettings
     {

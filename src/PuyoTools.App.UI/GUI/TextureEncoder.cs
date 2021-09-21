@@ -10,9 +10,12 @@ using System.IO;
 using PuyoTools.Modules;
 using PuyoTools.Modules.Compression;
 using PuyoTools.Modules.Texture;
-using PuyoTools.Formats.Compression;
-using PuyoTools.Formats.Textures;
+using PuyoTools.App.Formats.Compression;
+using PuyoTools.App.Formats.Textures;
 using System.Linq;
+using PuyoTools.App.Tools;
+using System.Threading.Tasks;
+using PuyoTools.App;
 
 namespace PuyoTools.GUI
 {
@@ -29,12 +32,12 @@ namespace PuyoTools.GUI
 
             // Fill the texture format box
             textureFormatBox.SelectedIndex = 0;
-            textureFormatBox.Items.AddRange(Texture.EncoderFormats.ToArray());
+            textureFormatBox.Items.AddRange(TextureFactory.EncoderFormats.ToArray());
             textureFormatBox.DisplayMember = nameof(ITextureFormat.Name);
 
             // Fill the compression format box
             compressionFormatBox.SelectedIndex = 0;
-            compressionFormatBox.Items.AddRange(Compression.EncoderFormats.ToArray());
+            compressionFormatBox.Items.AddRange(CompressionFactory.EncoderFormats.ToArray());
             compressionFormatBox.DisplayMember = nameof(ICompressionFormat.Name);
         }
 
@@ -170,7 +173,7 @@ namespace PuyoTools.GUI
             EnableRunButton();
         }
 
-        private void runButton_Click(object sender, EventArgs e)
+        private async void runButton_Click(object sender, EventArgs e)
         {
             // Disable the form
             Enabled = false;
@@ -178,7 +181,7 @@ namespace PuyoTools.GUI
             // Get the format of the texture the user wants to create
             ITextureFormat textureFormat = (ITextureFormat)textureFormatBox.SelectedItem;
 
-            // Set the settings for the tool
+            /*// Set the settings for the tool
             Settings settings = new Settings
             {
                 TextureFormat = textureFormat,
@@ -200,7 +203,50 @@ namespace PuyoTools.GUI
             };
             dialog.DoWork += (sender2, e2) => Run(settings, dialog);
             dialog.RunWorkerCompleted += (sender2, e2) => Close();
-            dialog.RunWorkerAsync();
+            dialog.RunWorkerAsync();*/
+
+            // Create options in the format the tool uses
+            var toolOptions = new TextureEncoderOptions
+            {
+                OutputToSourceDirectory = outputToSourceDirButton.Checked,
+                DeleteSource = deleteSourceButton.Checked,
+                CompressionFormat = compressionFormatBox.SelectedIndex != 0
+                    ? (ICompressionFormat)compressionFormatBox.SelectedItem
+                    : null,
+            };
+
+            // Get the format specific options
+            var formatOptions = writerSettingsControlsCache.TryGetValue(textureFormat, out var writerSettingsControl)
+                    ? (ITextureFormatOptions)writerSettingsControl
+                    : null;
+
+            // Create the progress dialog and handler
+            var progressDialog = new ProgressDialog
+            {
+                WindowTitle = "Processing",
+                Title = "Encoding Textures",
+            };
+
+            var progress = new Progress<ToolProgress>(x =>
+            {
+                if (fileList.Count == 1)
+                {
+                    progressDialog.ReportProgress(x.Index * 100 / fileList.Count, string.Format("Processing {0}", Path.GetFileName(x.File)));
+                }
+                else
+                {
+                    progressDialog.ReportProgress(x.Index * 100 / fileList.Count, string.Format("Processing {0} ({1:N0} of {2:N0})", Path.GetFileName(x.File), x.Index + 1, fileList.Count));
+                }
+            });
+
+            progressDialog.Show();
+
+            // Execute the tool
+            await Task.Run(() => PuyoTools.App.Tools.TextureEncoder.Execute(textureFormat, fileList, toolOptions, formatOptions, progress));
+
+            // Close the dialogs
+            progressDialog.Close();
+            Close();
         }
 
         private struct Settings

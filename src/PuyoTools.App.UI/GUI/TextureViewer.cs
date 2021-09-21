@@ -10,8 +10,9 @@ using System.IO;
 using System.Drawing.Imaging;
 
 using PuyoTools.Modules.Texture;
-using PuyoTools.Formats.Textures;
-using PuyoTools.Formats.Compression;
+using PuyoTools.App.Formats.Textures;
+using PuyoTools.App;
+using PuyoTools.App.Formats.Compression;
 
 namespace PuyoTools.GUI
 {
@@ -126,12 +127,12 @@ namespace PuyoTools.GUI
                 // Let's determine first if it is a texture
                 ITextureFormat textureFormat;
 
-                textureFormat = Texture.GetFormat(textureStream, ofd.SafeFileName);
+                textureFormat = TextureFactory.GetFormat(textureStream, ofd.SafeFileName);
 
                 if (textureFormat == null)
                 {
                     // It's not a texture. Maybe it's compressed?
-                    ICompressionFormat compressionFormat = Compression.GetFormat(textureStream, ofd.SafeFileName);
+                    ICompressionFormat compressionFormat = CompressionFactory.GetFormat(textureStream, ofd.SafeFileName);
                     if (compressionFormat != null)
                     {
                         // The file is compressed! Let's decompress it and then try to determine if it is a texture
@@ -141,7 +142,7 @@ namespace PuyoTools.GUI
                         decompressedData.Position = 0;
 
                         // Now with this decompressed data, let's determine if it is a texture
-                        textureFormat = Texture.GetFormat(decompressedData, ofd.SafeFileName);
+                        textureFormat = TextureFactory.GetFormat(decompressedData, ofd.SafeFileName);
 
                         if (textureFormat != null)
                         {

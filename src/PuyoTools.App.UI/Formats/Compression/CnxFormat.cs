@@ -7,22 +7,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PuyoTools.Formats.Compression
+namespace PuyoTools.App.Formats.Compression
 {
     /// <inheritdoc/>
-    internal class CnxFormat : ICompressionFormat
+    internal partial class CnxFormat : ICompressionFormat
     {
-        private CnxFormat() { }
-
-        /// <summary>
-        /// Gets the current instance.
-        /// </summary>
-        internal static CnxFormat Instance { get; } = new CnxFormat();
-
-        public string Name => "CNX";
-
-        public CompressionBase GetCodec() => new CnxCompression();
-
-        public bool Identify(Stream source, string filename) => CnxCompression.Identify(source);
     }
 }

@@ -11,10 +11,12 @@ using GimSharp;
 using PuyoTools.GUI;
 using PuyoTools.Modules;
 using GimTexture = PuyoTools.Modules.Texture.GimTexture;
+using PuyoTools.App.Formats.Textures;
+using PuyoTools.Modules.Texture;
 
-namespace PuyoTools.Formats.Textures.WriterSettings
+namespace PuyoTools.App.Formats.Textures.WriterSettings
 {
-    public partial class GimWriterSettings : ModuleSettingsControl
+    public partial class GimWriterSettings : ModuleSettingsControl, ITextureFormatOptions
     {
         public GimWriterSettings()
         {
@@ -24,6 +26,11 @@ namespace PuyoTools.Formats.Textures.WriterSettings
             dataFormatBox.SelectedIndex = 0;
 
             DataFormatBox_SelectedIndexChanged(null, null);
+        }
+
+        public void MapTo(TextureBase obj)
+        {
+            SetModuleSettings(obj);
         }
 
         public override void SetModuleSettings(IModule module)

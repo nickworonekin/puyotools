@@ -8,26 +8,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PuyoTools.Formats.Archives
+namespace PuyoTools.App.Formats.Archives
 {
     /// <inheritdoc/>
-    internal class GntFormat : IArchiveFormat
+    internal partial class GntFormat : IArchiveFormat
     {
-        private GntFormat() { }
-
-        /// <summary>
-        /// Gets the current instance.
-        /// </summary>
-        internal static GntFormat Instance { get; } = new GntFormat();
-
-        public string Name => "GNT";
-
-        public string FileExtension => ".gnt";
-
-        public ArchiveBase GetCodec() => new GntArchive();
-
         public ModuleSettingsControl GetModuleSettingsControl() => null;
-
-        public bool Identify(Stream source, string filename) => GntArchive.Identify(source);
     }
 }

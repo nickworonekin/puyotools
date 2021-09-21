@@ -3,17 +3,17 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using PuyoTools.Formats.Textures;
+using PuyoTools.App.Formats.Textures;
 using PuyoTools.Modules.Texture;
 
-namespace PuyoTools
+namespace PuyoTools.App
 {
-    public static class Texture
+    public static class TextureFactory
     {
         private static readonly List<ITextureFormat> decoderFormats;
         private static readonly List<ITextureFormat> encoderFormats;
 
-        static Texture()
+        static TextureFactory()
         {
             // Texture formats that can be used to read textures.
             decoderFormats = new List<ITextureFormat>

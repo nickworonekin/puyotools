@@ -1,4 +1,5 @@
-﻿using PuyoTools.GUI;
+﻿using PuyoTools.App.Formats.Textures.WriterSettings;
+using PuyoTools.GUI;
 using PuyoTools.Modules.Texture;
 using System;
 using System.Collections.Generic;
@@ -7,28 +8,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PuyoTools.Formats.Textures
+namespace PuyoTools.App.Formats.Textures
 {
     /// <inheritdoc/>
-    internal class SvrFormat : ITextureFormat
+    internal partial class SvrFormat : ITextureFormat
     {
-        private SvrFormat() { }
-
-        /// <summary>
-        /// Gets the current instance.
-        /// </summary>
-        internal static SvrFormat Instance { get; } = new SvrFormat();
-
-        public string Name => "SVR";
-
-        public string FileExtension => ".svr";
-
-        public string PaletteFileExtension => ".svp";
-
-        public TextureBase GetCodec() => new SvrTexture();
-
         public ModuleSettingsControl GetModuleSettingsControl() => new SvrWriterSettings();
-
-        public bool Identify(Stream source, string filename) => SvrTexture.Identify(source);
     }
 }

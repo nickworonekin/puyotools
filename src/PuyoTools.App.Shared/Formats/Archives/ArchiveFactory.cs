@@ -5,19 +5,17 @@ using System.IO;
 using PuyoTools.Modules;
 using PuyoTools.Modules.Archive;
 
-using PuyoTools.GUI;
-using PuyoTools.Formats.Archives;
 using System.Linq;
 
-namespace PuyoTools
+namespace PuyoTools.App.Formats.Archives
 {
-    public static class Archive
+    public static class ArchiveFactory
     {
         private static readonly List<IArchiveFormat> readerFormats;
         private static readonly List<IArchiveFormat> writerFormats;
 
         // Initalize the archive format dictionary
-        static Archive()
+        static ArchiveFactory()
         {
             // Archive formats that can be used to read archives.
             readerFormats = new List<IArchiveFormat>
@@ -80,7 +78,7 @@ namespace PuyoTools
         }
 
         /// <summary>
-        /// Gets a collection of <see cref="ITextureFormat"/> that can be used to write archive data.
+        /// Gets a collection of <see cref="IArchiveFormat"/> that can be used to write archive data.
         /// </summary>
         internal static IEnumerable<IArchiveFormat> WriterFormats => writerFormats.AsReadOnly();
     }

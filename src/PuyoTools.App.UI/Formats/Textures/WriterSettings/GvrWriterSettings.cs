@@ -9,10 +9,14 @@ using System.Windows.Forms;
 
 using VrSharp.Gvr;
 using PuyoTools.GUI;
+using PuyoTools.App.Formats.Textures;
+using PuyoTools.Modules.Texture;
+using PuyoTools.Modules;
+using GvrTexture = PuyoTools.Modules.Texture.GvrTexture;
 
-namespace PuyoTools.Modules.Texture
+namespace PuyoTools.App.Formats.Textures.WriterSettings
 {
-    public partial class GvrWriterSettings : ModuleSettingsControl
+    public partial class GvrWriterSettings : ModuleSettingsControl, ITextureFormatOptions
     {
         public GvrWriterSettings()
         {
@@ -23,6 +27,11 @@ namespace PuyoTools.Modules.Texture
             gbixTypeBox.SelectedIndex = 0;
 
             DataFormatBox_SelectedIndexChanged(null, null);
+        }
+
+        public void MapTo(TextureBase obj)
+        {
+            SetModuleSettings(obj);
         }
 
         public override void SetModuleSettings(IModule module)

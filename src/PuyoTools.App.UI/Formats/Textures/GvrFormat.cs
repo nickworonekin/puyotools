@@ -1,4 +1,5 @@
-﻿using PuyoTools.GUI;
+﻿using PuyoTools.App.Formats.Textures.WriterSettings;
+using PuyoTools.GUI;
 using PuyoTools.Modules.Texture;
 using System;
 using System.Collections.Generic;
@@ -7,28 +8,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PuyoTools.Formats.Textures
+namespace PuyoTools.App.Formats.Textures
 {
     /// <inheritdoc/>
-    internal class GvrFormat : ITextureFormat
+    internal partial class GvrFormat : ITextureFormat
     {
-        private GvrFormat() { }
-
-        /// <summary>
-        /// Gets the current instance.
-        /// </summary>
-        internal static GvrFormat Instance { get; } = new GvrFormat();
-
-        public string Name => "GVR";
-
-        public string FileExtension => ".gvr";
-
-        public string PaletteFileExtension => ".gvp";
-
-        public TextureBase GetCodec() => new GvrTexture();
-
         public ModuleSettingsControl GetModuleSettingsControl() => new GvrWriterSettings();
-
-        public bool Identify(Stream source, string filename) => GvrTexture.Identify(source);
     }
 }

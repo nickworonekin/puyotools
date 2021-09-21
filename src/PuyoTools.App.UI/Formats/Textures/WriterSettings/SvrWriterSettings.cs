@@ -9,10 +9,14 @@ using System.Windows.Forms;
 
 using VrSharp.Svr;
 using PuyoTools.GUI;
+using PuyoTools.App.Formats.Textures;
+using PuyoTools.Modules.Texture;
+using PuyoTools.Modules;
+using SvrTexture = PuyoTools.Modules.Texture.SvrTexture;
 
-namespace PuyoTools.Modules.Texture
+namespace PuyoTools.App.Formats.Textures.WriterSettings
 {
-    public partial class SvrWriterSettings : ModuleSettingsControl
+    public partial class SvrWriterSettings : ModuleSettingsControl, ITextureFormatOptions
     {
         public SvrWriterSettings()
         {
@@ -20,6 +24,11 @@ namespace PuyoTools.Modules.Texture
 
             pixelFormatBox.SelectedIndex = 0;
             dataFormatBox.SelectedIndex = 0;
+        }
+
+        public void MapTo(TextureBase obj)
+        {
+            SetModuleSettings(obj);
         }
 
         public override void SetModuleSettings(IModule module)

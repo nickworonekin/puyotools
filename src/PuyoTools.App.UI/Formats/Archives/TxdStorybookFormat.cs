@@ -8,26 +8,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PuyoTools.Formats.Archives
+namespace PuyoTools.App.Formats.Archives
 {
     /// <inheritdoc/>
-    internal class TxdStorybookFormat : IArchiveFormat
+    internal partial class TxdStorybookFormat : IArchiveFormat
     {
-        private TxdStorybookFormat() { }
-
-        /// <summary>
-        /// Gets the current instance.
-        /// </summary>
-        internal static TxdStorybookFormat Instance { get; } = new TxdStorybookFormat();
-
-        public string Name => "TXD (Sonic Storybook series)";
-
-        public string FileExtension => ".txd";
-
-        public ArchiveBase GetCodec() => new TxdStorybookArchive();
-
         public ModuleSettingsControl GetModuleSettingsControl() => null;
-
-        public bool Identify(Stream source, string filename) => TxdStorybookArchive.Identify(source);
     }
 }

@@ -11,9 +11,12 @@ using System.IO;
 using PuyoTools.Modules;
 using PuyoTools.Modules.Archive;
 using PuyoTools.Modules.Texture;
-using PuyoTools.Formats.Compression;
-using PuyoTools.Formats.Archives;
-using PuyoTools.Formats.Textures;
+using PuyoTools.App.Formats.Textures;
+using PuyoTools.App;
+using PuyoTools.App.Tools;
+using System.Threading.Tasks;
+using PuyoTools.App.Formats.Archives;
+using PuyoTools.App.Formats.Compression;
 
 namespace PuyoTools.GUI
 {
@@ -59,7 +62,7 @@ namespace PuyoTools.GUI
                         Stream source = inStream;
 
                         // Get the format of the archive
-                        format = Archive.GetFormat(source, Path.GetFileName(file));
+                        format = ArchiveFactory.GetFormat(source, Path.GetFileName(file));
                         if (format == null)
                         {
                             // Maybe it's compressed? Let's check.
@@ -67,7 +70,7 @@ namespace PuyoTools.GUI
                             if (settings.DecompressSourceArchive)
                             {
                                 // Get the compression format, if it is compressed that is.
-                                ICompressionFormat compressionFormat = Compression.GetFormat(source, Path.GetFileName(file));
+                                ICompressionFormat compressionFormat = CompressionFactory.GetFormat(source, Path.GetFileName(file));
                                 if (compressionFormat != null)
                                 {
                                     // Ok, it appears to be compressed. Let's decompress it, and then check the format again
@@ -75,7 +78,7 @@ namespace PuyoTools.GUI
                                     compressionFormat.GetCodec().Decompress(inStream, source);
 
                                     source.Position = 0;
-                                    format = Archive.GetFormat(source, Path.GetFileName(file));
+                                    format = ArchiveFactory.GetFormat(source, Path.GetFileName(file));
                                 }
                             }
 
@@ -152,7 +155,7 @@ namespace PuyoTools.GUI
                             if (settings.DecompressExtractedFiles)
                             {
                                 // Get the compression format, if it is compressed that is.
-                                ICompressionFormat compressionFormat = Compression.GetFormat(entryData, entry.Name);
+                                ICompressionFormat compressionFormat = CompressionFactory.GetFormat(entryData, entry.Name);
                                 if (compressionFormat != null)
                                 {
                                     // Ok, it appears to be compressed. Let's decompress it, and then edit the entry
@@ -168,7 +171,7 @@ namespace PuyoTools.GUI
                             if (settings.ConvertExtractedTextures)
                             {
                                 // Get the texture format, if it is a texture that is.
-                                ITextureFormat textureFormat = Texture.GetFormat(entryData, entry.Name);
+                                ITextureFormat textureFormat = TextureFactory.GetFormat(entryData, entry.Name);
                                 if (textureFormat != null)
                                 {
                                     // Ok, it appears to be a texture. We're going to attempt to convert it here.
@@ -224,7 +227,7 @@ namespace PuyoTools.GUI
                             entryData.Position = 0;
                             if (settings.ExtractExtractedArchives)
                             {
-                                IArchiveFormat archiveFormat = Archive.GetFormat(entryData, entry.Name);
+                                IArchiveFormat archiveFormat = ArchiveFactory.GetFormat(entryData, entry.Name);
                                 if (archiveFormat != null)
                                 {
                                     // It appears to be an archive. Let's add it to the file list
@@ -365,12 +368,12 @@ namespace PuyoTools.GUI
             public string Filename;
         }
 
-        private void runButton_Click(object sender, EventArgs e)
+        private async void runButton_Click(object sender, EventArgs e)
         {
             // Disable the form
             Enabled = false;
 
-            // Set up the settings we will be using for this
+            /*// Set up the settings we will be using for this
             Settings settings = new Settings();
             settings.DecompressSourceArchive = decompressSourceArchiveCheckbox.Checked;
             settings.ExtractToSourceDirectory = extractToSourceDirCheckbox.Checked;
@@ -392,7 +395,53 @@ namespace PuyoTools.GUI
             };
             dialog.DoWork += (sender2, e2) => Run(settings, dialog);
             dialog.RunWorkerCompleted += (sender2, e2) => Close();
-            dialog.RunWorkerAsync();
+            dialog.RunWorkerAsync();*/
+
+            // Create options in the format the tool uses
+            var toolOptions = new ArchiveExtractorOptions
+            {
+                DecompressSourceArchive = decompressSourceArchiveCheckbox.Checked,
+                ExtractToSourceDirectory = extractToSourceDirCheckbox.Checked,
+                ExtractToSameNameDirectory = extractToSameNameDirCheckbox.Checked,
+                ExtractFileStructure = extractFileStructureCheckbox.Checked,
+                DeleteSourceArchive = deleteSourceArchiveCheckbox.Checked,
+                DecompressExtractedFiles = decompressExtractedFilesCheckbox.Checked,
+                FileNumberAsFilename = fileNumberAsFilenameCheckbox.Checked,
+                PrependFileNumber = prependFileNumberCheckbox.Checked,
+                ExtractExtractedArchives = extractExtractedArchivesCheckbox.Checked,
+                ConvertExtractedTextures = convertExtractedTexturesCheckbox.Checked,
+            };
+            toolOptions.ExtractToSameNameDirectory = toolOptions.ExtractToSameNameDirectory && !toolOptions.ExtractToSourceDirectory;
+            toolOptions.DeleteSourceArchive = toolOptions.DeleteSourceArchive || toolOptions.ExtractToSameNameDirectory;
+            toolOptions.PrependFileNumber = toolOptions.PrependFileNumber && !toolOptions.FileNumberAsFilename;
+
+            // Create the progress dialog and handler
+            var progressDialog = new ProgressDialog
+            {
+                WindowTitle = "Processing",
+                Title = "Extracting Archives",
+            };
+
+            var progress = new Progress<ToolProgress>(x =>
+            {
+                if (fileList.Count == 1)
+                {
+                    progressDialog.ReportProgress(x.Index * 100 / fileList.Count, string.Format("Processing {0}", Path.GetFileName(x.File)));
+                }
+                else
+                {
+                    progressDialog.ReportProgress(x.Index * 100 / fileList.Count, string.Format("Processing {0} ({1:N0} of {2:N0})", Path.GetFileName(x.File), x.Index + 1, fileList.Count));
+                }
+            });
+
+            progressDialog.Show();
+
+            // Execute the tool
+            await Task.Run(() => PuyoTools.App.Tools.ArchiveExtractor.Execute(fileList, toolOptions, progress));
+
+            // Close the dialogs
+            progressDialog.Close();
+            Close();
         }
     }
 }

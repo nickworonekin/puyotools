@@ -9,5 +9,55 @@
     <Import_RootNamespace>PuyoTools.App</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Formats\Archives\AcxFormat.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Formats\Archives\AfsFormat.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Formats\Archives\ArchiveFactory.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Formats\Archives\GntFormat.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Formats\Archives\GvmFormat.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Formats\Archives\IArchiveFormat.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Formats\Archives\IArchiveFormatOptions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Formats\Archives\MrgFormat.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Formats\Archives\NarcFormat.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Formats\Archives\OneStorybookFormat.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Formats\Archives\OneUnleashedFormat.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Formats\Archives\PvmFormat.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Formats\Archives\SntFormat.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Formats\Archives\SpkFormat.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Formats\Archives\SvmFormat.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Formats\Archives\TexFormat.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Formats\Archives\TxdStorybookFormat.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Formats\Archives\U8Format.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Formats\Compression\CnxFormat.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Formats\Compression\CompFormat.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Formats\Compression\CompressionFactory.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Formats\Compression\CxlzFormat.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Formats\Compression\ICompressionFormat.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Formats\Compression\Lz00Format.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Formats\Compression\Lz01Format.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Formats\Compression\Lz10Format.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Formats\Compression\Lz11Format.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Formats\Compression\PrsFormat.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Formats\Textures\GimFormat.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Formats\Textures\GvrFormat.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Formats\Textures\ITextureFormat.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Formats\Textures\ITextureFormatOptions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Formats\Textures\PvrFormat.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Formats\Textures\SvrFormat.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Formats\Textures\TextureFactory.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IMappable.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tools\ArchiveCreator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tools\ArchiveCreatorFileEntry.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tools\ArchiveCreatorOptions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tools\TextureDecoder.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tools\TextureDecoderOptions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tools\ArchiveExtractor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tools\ArchiveExtractorOptions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tools\CompressionCompressor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tools\CompressionCompressorOptions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tools\CompressionDecompressor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tools\CompressionDecompressorOptions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tools\TextureEncoder.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tools\TextureEncoderOptions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tools\ToolProgress.cs" />
   </ItemGroup>
 </Project>

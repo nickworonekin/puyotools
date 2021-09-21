@@ -13,9 +13,10 @@ using PuyoTools.Modules.Archive;
 using PuyoTools.Modules.Texture;
 
 using Ookii.Dialogs.WinForms;
-using PuyoTools.Formats.Archives;
-using PuyoTools.Formats.Textures;
-using PuyoTools.Formats.Compression;
+using PuyoTools.App.Formats.Textures;
+using PuyoTools.App;
+using PuyoTools.App.Formats.Archives;
+using PuyoTools.App.Formats.Compression;
 
 namespace PuyoTools.GUI
 {
@@ -217,7 +218,7 @@ namespace PuyoTools.GUI
                 // Let's determine first if it is an archive
                 IArchiveFormat archiveFormat;
 
-                archiveFormat = Archive.GetFormat(archiveStream, ofd.SafeFileName);
+                archiveFormat = ArchiveFactory.GetFormat(archiveStream, ofd.SafeFileName);
                 if (archiveFormat != null)
                 {
                     // This is an archive. Let's open it.
@@ -231,7 +232,7 @@ namespace PuyoTools.GUI
                 }
 
                 // It's not an archive. Maybe it's compressed?
-                ICompressionFormat compressionFormat = Compression.GetFormat(archiveStream, ofd.SafeFileName);
+                ICompressionFormat compressionFormat = CompressionFactory.GetFormat(archiveStream, ofd.SafeFileName);
                 if (compressionFormat != null)
                 {
                     // The file is compressed! Let's decompress it and then try to determine if it is an archive
@@ -240,7 +241,7 @@ namespace PuyoTools.GUI
                     decompressedData.Position = 0;
 
                     // Now with this decompressed data, let's determine if it is an archive
-                    archiveFormat = Archive.GetFormat(decompressedData, ofd.SafeFileName);
+                    archiveFormat = ArchiveFactory.GetFormat(decompressedData, ofd.SafeFileName);
                     if (archiveFormat != null)
                     {
                         // This is an archive. Let's open it.
@@ -289,7 +290,7 @@ namespace PuyoTools.GUI
             IArchiveFormat archiveFormat;
             ITextureFormat textureFormat;
 
-            archiveFormat = Archive.GetFormat(entryData, entry.Name);
+            archiveFormat = ArchiveFactory.GetFormat(entryData, entry.Name);
             if (archiveFormat != null)
             {
                 // This is an archive. Let's open it.
@@ -298,7 +299,7 @@ namespace PuyoTools.GUI
                 return;
             }
 
-            textureFormat = Texture.GetFormat(entryData, entry.Name);
+            textureFormat = TextureFactory.GetFormat(entryData, entry.Name);
             if (textureFormat != null)
             {
                 // This is a texture. Let's attempt to open it up in the texture viewer
@@ -308,7 +309,7 @@ namespace PuyoTools.GUI
             }
 
             // It's not an archive or a texture. Maybe it's compressed?
-            ICompressionFormat compressionFormat = Compression.GetFormat(entryData, entry.Name);
+            ICompressionFormat compressionFormat = CompressionFactory.GetFormat(entryData, entry.Name);
             if (compressionFormat != null)
             {
                 // The file is compressed! Let's decompress it and then try to determine if it is an archive or a texture
@@ -317,7 +318,7 @@ namespace PuyoTools.GUI
                 decompressedData.Position = 0;
 
                 // Now with this decompressed data, let's determine if it is an archive or a texture
-                archiveFormat = Archive.GetFormat(decompressedData, entry.Name);
+                archiveFormat = ArchiveFactory.GetFormat(decompressedData, entry.Name);
                 if (archiveFormat != null)
                 {
                     // This is an archive. Let's open it.
@@ -326,7 +327,7 @@ namespace PuyoTools.GUI
                     return;
                 }
 
-                textureFormat = Texture.GetFormat(decompressedData, entry.Name);
+                textureFormat = TextureFactory.GetFormat(decompressedData, entry.Name);
                 if (textureFormat != null)
                 {
                     // This is a texture. Let's attempt to open it up in the texture viewer

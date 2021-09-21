@@ -9,14 +9,20 @@ using System.Windows.Forms;
 using PuyoTools.GUI;
 using PuyoTools.Modules;
 using PuyoTools.Modules.Archive;
+using PuyoTools.App.Formats.Archives;
 
 namespace PuyoTools.Formats.Archives.WriterSettings
 {
-    public partial class PvmWriterSettings : ModuleSettingsControl
+    public partial class PvmWriterSettings : ModuleSettingsControl, IArchiveFormatOptions
     {
         public PvmWriterSettings()
         {
             InitializeComponent();
+        }
+
+        public void MapTo(ArchiveWriter obj)
+        {
+            SetModuleSettings(obj);
         }
 
         public override void SetModuleSettings(IModule module)

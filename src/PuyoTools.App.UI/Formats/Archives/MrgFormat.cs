@@ -8,26 +8,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PuyoTools.Formats.Archives
+namespace PuyoTools.App.Formats.Archives
 {
     /// <inheritdoc/>
-    internal class MrgFormat : IArchiveFormat
+    internal partial class MrgFormat : IArchiveFormat
     {
-        private MrgFormat() { }
-
-        /// <summary>
-        /// Gets the current instance.
-        /// </summary>
-        internal static MrgFormat Instance { get; } = new MrgFormat();
-
-        public string Name => "MRG (Puyo Puyo Fever 2)";
-
-        public string FileExtension => ".mrg";
-
-        public ArchiveBase GetCodec() => new MrgArchive();
-
         public ModuleSettingsControl GetModuleSettingsControl() => null;
-
-        public bool Identify(Stream source, string filename) => MrgArchive.Identify(source);
     }
 }
