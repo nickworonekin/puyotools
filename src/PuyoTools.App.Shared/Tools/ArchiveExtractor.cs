@@ -21,7 +21,7 @@ namespace PuyoTools.App.Tools
             {
                 string file = files[i];
 
-                progress?.Report(new ToolProgress(file, i));
+                progress?.Report(new ToolProgress((double)i / files.Count, file));
 
                 // Let's open the file.
                 // But, we're going to do this in a try catch in case any errors happen.
@@ -122,6 +122,8 @@ namespace PuyoTools.App.Tools
                                 // Just use the filename as defined in the archive
                                 outName = entry.FullName;
                             }
+
+                            progress?.Report(new ArchiveEntryProgress((double)j / archive.Entries.Count, outName));
 
                             // Add the output filename to the entry filename list if we are extracting the archive's file structure.
                             if (entryFilenames != null)

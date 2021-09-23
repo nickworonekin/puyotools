@@ -424,14 +424,7 @@ namespace PuyoTools.GUI
 
             var progress = new Progress<ToolProgress>(x =>
             {
-                if (fileList.Count == 1)
-                {
-                    progressDialog.ReportProgress(x.Index * 100 / fileList.Count, string.Format("Processing {0}", Path.GetFileName(x.File)));
-                }
-                else
-                {
-                    progressDialog.ReportProgress(x.Index * 100 / fileList.Count, string.Format("Processing {0} ({1:N0} of {2:N0})", Path.GetFileName(x.File), x.Index + 1, fileList.Count));
-                }
+                progressDialog.ReportProgress((int)(x.Progress * 100), $"Processing {Path.GetFileName(x.File)} ({x.Progress:P0})");
             });
 
             progressDialog.Show();

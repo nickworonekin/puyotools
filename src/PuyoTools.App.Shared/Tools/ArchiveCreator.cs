@@ -20,7 +20,7 @@ namespace PuyoTools.App.Tools
         {
             // Setup some stuff for the progress dialog
             int entryIndex = 0;
-            progress?.Report(new ToolProgress(outputPath, entryIndex));
+            progress?.Report(new ToolProgress((double)entryIndex / files.Count, outputPath));
 
             // For some archives, the file needs to be a specific format. As such,
             // they may be rejected when trying to add them. We'll store such files in

@@ -12,14 +12,14 @@ namespace PuyoTools.App.Tools
         public string File { get; }
 
         /// <summary>
-        /// Gets the zero-based index of the file currently being processed by the tool.
+        /// Gets the progress of the tool (0 to 1).
         /// </summary>
-        public int Index { get; }
+        public double Progress { get; }
 
-        public ToolProgress(string file, int index)
+        public ToolProgress(double progress, string file)
         {
+            Progress = progress;
             File = file;
-            Index = index;
         }
     }
 }

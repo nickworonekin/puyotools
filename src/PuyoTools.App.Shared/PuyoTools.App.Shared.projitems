@@ -48,6 +48,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Tools\ArchiveCreator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Tools\ArchiveCreatorFileEntry.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Tools\ArchiveCreatorOptions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tools\ArchiveEntryProgress.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Tools\TextureDecoder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Tools\TextureDecoderOptions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Tools\ArchiveExtractor.cs" />

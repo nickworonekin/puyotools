@@ -22,7 +22,7 @@ namespace PuyoTools.App.Tools
                 string file = files[i];
 
                 // Report progress.
-                progress?.Report(new ToolProgress(file, i));
+                progress?.Report(new ToolProgress((double)i / files.Count, file));
 
                 // Let's open the file.
                 // But, we're going to do this in a try catch in case any errors happen.
