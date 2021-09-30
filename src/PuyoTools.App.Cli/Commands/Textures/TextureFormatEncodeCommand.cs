@@ -32,7 +32,7 @@ namespace PuyoTools.App.Cli.Commands.Textures
             Handler = CommandHandler.Create<TextureFormatEncodeOptions, IConsole>(Execute);
         }
 
-        private void Execute(TextureFormatEncodeOptions options, IConsole console)
+        protected void Execute(TextureFormatEncodeOptions options, IConsole console)
         {
             // Get the files to process by the tool
             var matcher = new Matcher();

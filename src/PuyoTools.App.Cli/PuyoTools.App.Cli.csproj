@@ -12,6 +12,7 @@
   <Import Project="..\PuyoTools.App.Shared\PuyoTools.App.Shared.projitems" Label="Shared" />
 
   <ItemGroup>
+    <PackageReference Include="FormatWith" Version="3.0.1" />
     <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" Version="5.0.0" />
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.21308.1" />
   </ItemGroup>

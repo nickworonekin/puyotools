@@ -11,6 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="FormatWith" Version="3.0.1" />
     <PackageReference Include="Ookii.Dialogs.WinForms" Version="1.1.0" />
   </ItemGroup>
 
@@ -31,15 +32,9 @@
     <Compile Update="Formats\Textures\WriterSettings\GvrWriterSettings.cs" />
     <Compile Update="Formats\Textures\WriterSettings\PvrWriterSettings.cs" />
     <Compile Update="Formats\Textures\WriterSettings\SvrWriterSettings.cs" />
-    <Compile Update="GUI\AboutPuyoTools.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Update="GUI\MainWindow.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Update="GUI\ModuleSettingsControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
+    <Compile Update="GUI\AboutPuyoTools.cs" />
+    <Compile Update="GUI\MainWindow.cs" />
+    <Compile Update="GUI\ModuleSettingsControl.cs" />
     <Compile Update="IconResources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

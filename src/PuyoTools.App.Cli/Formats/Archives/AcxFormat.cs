@@ -15,6 +15,6 @@ namespace PuyoTools.App.Formats.Archives
     {
         public string CommandName => "acx";
 
-        public ArchiveFormatCreateCommand GetCreateCommand() => new ArchiveFormatCreateCommand(this);
+        public ArchiveFormatCreateCommand GetCreateCommand() => new AcxArchiveCreateCommand(this);
     }
 }

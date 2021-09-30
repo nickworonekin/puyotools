@@ -14,6 +14,6 @@ namespace PuyoTools.App.Formats.Textures
     {
         public string CommandName => "svr";
 
-        public TextureFormatEncodeCommand GetEncodeCommand() => new TextureFormatEncodeCommand(this);
+        public TextureFormatEncodeCommand GetEncodeCommand() => new SvrTextureEncodeCommand(this);
     }
 }

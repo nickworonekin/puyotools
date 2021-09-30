@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.FileSystemGlobbing;
 using Microsoft.Extensions.FileSystemGlobbing.Abstractions;
 using PuyoTools.App.Formats.Archives;
+using PuyoTools.App.Formats.Compression;
 using PuyoTools.App.Tools;
 using System;
 using System.Collections.Generic;
@@ -32,11 +33,13 @@ namespace PuyoTools.App.Cli.Commands.Archives
             {
                 IsRequired = true,
             });
+            AddOption(new Option<string>("--compress", "Compress the archive")
+                .FromAmong(CompressionFactory.EncoderFormats.Select(x => x.CommandName).ToArray()));
 
             Handler = CommandHandler.Create<ArchiveCreateOptions, IConsole>(Execute);
         }
 
-        private void Execute(ArchiveCreateOptions options, IConsole console)
+        protected void Execute(ArchiveCreateOptions options, IConsole console)
         {
             // Get the files to process by the tool
             var matcher = new Matcher();
@@ -60,6 +63,9 @@ namespace PuyoTools.App.Cli.Commands.Archives
             // Create options in the format the tool uses
             var toolOptions = new ArchiveCreatorOptions
             {
+                CompressionFormat = options.Compress is not null
+                    ? CompressionFactory.EncoderFormats.FirstOrDefault(x => x.CommandName == options.Compress)
+                    : null,
             };
 
             // Create the progress handler (only if the quiet option is not set)

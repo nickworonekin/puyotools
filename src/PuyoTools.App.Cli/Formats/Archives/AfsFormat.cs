@@ -15,6 +15,6 @@ namespace PuyoTools.App.Formats.Archives
     {
         public string CommandName => "afs";
 
-        public ArchiveFormatCreateCommand GetCreateCommand() => new ArchiveFormatCreateCommand(this);
+        public ArchiveFormatCreateCommand GetCreateCommand() => new AfsArchiveCreateCommand(this);
     }
 }

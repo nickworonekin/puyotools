@@ -15,6 +15,6 @@ namespace PuyoTools.App.Formats.Archives
     {
         public string CommandName => "snt";
 
-        public ArchiveFormatCreateCommand GetCreateCommand() => new ArchiveFormatCreateCommand(this);
+        public ArchiveFormatCreateCommand GetCreateCommand() => new SntArchiveCreateCommand(this);
     }
 }

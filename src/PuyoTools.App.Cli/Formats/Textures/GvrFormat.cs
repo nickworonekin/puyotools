@@ -14,6 +14,6 @@ namespace PuyoTools.App.Formats.Textures
     {
         public string CommandName => "gvr";
 
-        public TextureFormatEncodeCommand GetEncodeCommand() => new TextureFormatEncodeCommand(this);
+        public TextureFormatEncodeCommand GetEncodeCommand() => new GvrTextureEncodeCommand(this);
     }
 }

@@ -1,0 +1,34 @@
+﻿using PuyoTools.App.Formats.Textures;
+using PuyoTools.Modules.Texture;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using VrSharp.Gvr;
+using GvrTexture = PuyoTools.Modules.Texture.GvrTexture;
+
+namespace PuyoTools.App.Cli.Commands.Textures
+{
+    class GvrTextureEncodeOptions : TextureFormatEncodeOptions, ITextureFormatOptions
+    {
+        public GvrPixelFormat PaletteFormat { get; set; }
+
+        public GvrDataFormat DataFormat { get; set; }
+
+        public uint? GlobalIndex { get; set; }
+
+        public bool Gcix { get; set; }
+
+        public void MapTo(TextureBase obj)
+        {
+            var texture = (GvrTexture)obj;
+
+            texture.PaletteFormat = PaletteFormat;
+            texture.DataFormat = DataFormat;
+            texture.GbixType = Gcix ? GvrGbixType.Gcix : GvrGbixType.Gbix;
+            texture.HasGlobalIndex = GlobalIndex.HasValue;
+            texture.GlobalIndex = GlobalIndex ?? default;
+        }
+    }
+}

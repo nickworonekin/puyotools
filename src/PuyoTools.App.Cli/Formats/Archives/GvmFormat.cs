@@ -15,6 +15,6 @@ namespace PuyoTools.App.Formats.Archives
     {
         public string CommandName => "gvm";
 
-        public ArchiveFormatCreateCommand GetCreateCommand() => new ArchiveFormatCreateCommand(this);
+        public ArchiveFormatCreateCommand GetCreateCommand() => new GvmArchiveCreateCommand(this);
     }
 }

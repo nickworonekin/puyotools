@@ -13,5 +13,7 @@ namespace PuyoTools.App.Cli.Commands.Archives
         public string[] Exclude { get; set; }
 
         public string Output { get; set; }
+
+        public string Compress { get; set; }
     }
 }
