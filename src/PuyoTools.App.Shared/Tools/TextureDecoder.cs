@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading;
 
 namespace PuyoTools.App.Tools
 {
@@ -13,7 +14,8 @@ namespace PuyoTools.App.Tools
         public static void Execute(
             IList<string> files,
             TextureDecoderOptions options,
-            IProgress<ToolProgress> progress = null)
+            IProgress<ToolProgress> progress = null,
+            CancellationToken cancellationToken = default)
         {
             for (int i = 0; i < files.Count; i++)
             {

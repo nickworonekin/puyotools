@@ -11,5 +11,9 @@ namespace PuyoTools.App.Cli.Commands.Archives
         public string[] Input { get; set; }
 
         public string[] Exclude { get; set; }
+
+        public bool Decompress { get; set; }
+
+        public bool Verbose { get; set; }
     }
 }

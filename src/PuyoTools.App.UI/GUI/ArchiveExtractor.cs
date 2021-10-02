@@ -422,9 +422,16 @@ namespace PuyoTools.GUI
                 Title = "Extracting Archives",
             };
 
-            var progress = new Progress<ToolProgress>(x =>
+            var progress = new Progress<ArchiveExtractorProgress>(x =>
             {
-                progressDialog.ReportProgress((int)(x.Progress * 100), $"Processing {Path.GetFileName(x.File)} ({x.Progress:P0})");
+                if (x.Entry != null) // An archive entry is being extracted
+                {
+                    progressDialog.ReportProgress((int)(x.Progress * 100), $"Processing {Path.GetFileName(x.File)} ({x.Progress:P0})\n\nExtracting {x.Entry}");
+                }
+                else
+                {
+                    progressDialog.ReportProgress((int)(x.Progress * 100), $"Processing {Path.GetFileName(x.File)} ({x.Progress:P0})");
+                }
             });
 
             progressDialog.Show();

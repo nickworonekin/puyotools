@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Text;
+using System.Threading;
 
 namespace PuyoTools.App.Tools
 {
@@ -16,7 +17,8 @@ namespace PuyoTools.App.Tools
             string outputPath,
             ArchiveCreatorOptions options,
             IArchiveFormatOptions formatOptions,
-            IProgress<ToolProgress> progress = null)
+            IProgress<ToolProgress> progress = null,
+            CancellationToken cancellationToken = default)
         {
             // Setup some stuff for the progress dialog
             int entryIndex = 0;

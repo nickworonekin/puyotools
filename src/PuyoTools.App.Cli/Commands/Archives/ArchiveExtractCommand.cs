@@ -23,6 +23,8 @@ namespace PuyoTools.App.Cli.Commands.Archives
                 IsRequired = true,
             });
             AddOption(new Option<string[]>("--exclude", "Archives to exclude from being extracted (pattern matching supported)."));
+            AddOption(new Option("--decompress", "Extract compressed archives"));
+            AddOption(new Option("--verbose", "Show verbose output for archives being extracted"));
 
             Handler = CommandHandler.Create<ArchiveExtractOptions, IConsole>(Execute);
         }
@@ -45,18 +47,22 @@ namespace PuyoTools.App.Cli.Commands.Archives
             // Create options in the format the tool uses
             var toolOptions = new ArchiveExtractorOptions
             {
+                DecompressSourceArchive = options.Decompress,
             };
 
             // Create the progress handler (only if the quiet option is not set)
-            var progress = new Progress<ToolProgress>(x =>
+            var progress = new ConsoleProgress<ArchiveExtractorProgress>(x =>
             {
-                if (x is ArchiveEntryProgress) // No need to cast as the same properties are used
+                if (x.Entry is not null) // An archive entry is being extracted
                 {
-                    console.Out.WriteLine($"-- Extracting {x.File} ... ({x.Progress:P0})");
+                    if (options.Verbose)
+                    {
+                        console.Out.Write($"-- Extracting {x.Entry} ... ({x.Progress:P0})\n");
+                    }
                 }
                 else
                 {
-                    console.Out.WriteLine($"Processing {x.File} ... ({x.Progress:P0})");
+                    console.Out.Write($"Processing {x.File} ... ({x.Progress:P0})\n");
                 }
             });
 

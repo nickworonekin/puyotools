@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading;
 
 namespace PuyoTools.App.Tools
 {
@@ -15,13 +16,14 @@ namespace PuyoTools.App.Tools
         public static void Execute(
             IList<string> files,
             ArchiveExtractorOptions options,
-            IProgress<ToolProgress> progress = null)
+            IProgress<ArchiveExtractorProgress> progress = null,
+            CancellationToken cancellationToken = default)
         {
             for (int i = 0; i < files.Count; i++)
             {
                 string file = files[i];
 
-                progress?.Report(new ToolProgress((double)i / files.Count, file));
+                progress?.Report(new ArchiveExtractorProgress((double)i / files.Count, file));
 
                 // Let's open the file.
                 // But, we're going to do this in a try catch in case any errors happen.
@@ -123,7 +125,7 @@ namespace PuyoTools.App.Tools
                                 outName = entry.FullName;
                             }
 
-                            progress?.Report(new ArchiveEntryProgress((double)j / archive.Entries.Count, outName));
+                            progress?.Report(new ArchiveExtractorProgress(((double)i / files.Count) + (1.0 / files.Count * ((double)j / archive.Entries.Count)), file, outName));
 
                             // Add the output filename to the entry filename list if we are extracting the archive's file structure.
                             if (entryFilenames != null)
