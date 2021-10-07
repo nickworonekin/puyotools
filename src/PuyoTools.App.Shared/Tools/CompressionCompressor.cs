@@ -9,10 +9,19 @@ namespace PuyoTools.App.Tools
 {
     class CompressionCompressor
     {
-        public static void Execute(
+        private readonly ICompressionFormat format;
+        private readonly CompressionCompressorOptions options;
+
+        public CompressionCompressor(
             ICompressionFormat format,
+            CompressionCompressorOptions options)
+        {
+            this.format = format;
+            this.options = options;
+        }
+
+        public void Execute(
             IList<string> files,
-            CompressionCompressorOptions options,
             IProgress<ToolProgress> progress = null,
             CancellationToken cancellationToken = default)
         {

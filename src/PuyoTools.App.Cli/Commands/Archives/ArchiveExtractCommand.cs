@@ -51,7 +51,7 @@ namespace PuyoTools.App.Cli.Commands.Archives
             };
 
             // Create the progress handler (only if the quiet option is not set)
-            var progress = new ConsoleProgress<ArchiveExtractorProgress>(x =>
+            var progress = new SynchronousProgress<ArchiveExtractorProgress>(x =>
             {
                 if (x.Entry is not null) // An archive entry is being extracted
                 {
@@ -67,7 +67,8 @@ namespace PuyoTools.App.Cli.Commands.Archives
             });
 
             // Execute the tool
-            ArchiveExtractor.Execute(files, toolOptions, progress);
+            var tool = new ArchiveExtractor(toolOptions);
+            tool.Execute(files, progress);
         }
     }
 }

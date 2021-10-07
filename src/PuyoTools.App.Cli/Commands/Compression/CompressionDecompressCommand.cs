@@ -53,13 +53,14 @@ namespace PuyoTools.App.Cli.Commands.Compression
             };
 
             // Create the progress handler (only if the quiet option is not set)
-            var progress = new ConsoleProgress<ToolProgress>(x =>
+            var progress = new SynchronousProgress<ToolProgress>(x =>
             {
                 console.Out.WriteLine($"Processing {x.File} ... ({x.Progress:P0})");
             });
 
             // Execute the tool
-            CompressionDecompressor.Execute(files, toolOptions, progress);
+            var tool = new CompressionDecompressor(toolOptions);
+            tool.Execute(files, progress);
         }
     }
 }

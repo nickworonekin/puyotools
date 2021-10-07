@@ -11,9 +11,15 @@ namespace PuyoTools.App.Tools
 {
     class TextureDecoder
     {
-        public static void Execute(
+        private readonly TextureDecoderOptions options;
+
+        public TextureDecoder(TextureDecoderOptions options)
+        {
+            this.options = options;
+        }
+
+        public void Execute(
             IList<string> files,
-            TextureDecoderOptions options,
             IProgress<ToolProgress> progress = null,
             CancellationToken cancellationToken = default)
         {

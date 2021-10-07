@@ -241,7 +241,8 @@ namespace PuyoTools.GUI
             progressDialog.Show();
 
             // Execute the tool
-            await Task.Run(() => PuyoTools.App.Tools.TextureDecoder.Execute(fileList, toolOptions, progress));
+            var tool = new PuyoTools.App.Tools.TextureDecoder(toolOptions);
+            await Task.Run(() => tool.Execute(fileList, progress));
 
             // Close the dialogs
             progressDialog.Close();

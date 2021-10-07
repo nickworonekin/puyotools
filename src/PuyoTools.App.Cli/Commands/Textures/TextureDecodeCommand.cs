@@ -54,13 +54,14 @@ namespace PuyoTools.App.Cli.Commands.Textures
             };
 
             // Create the progress handler (only if the quiet option is not set)
-            var progress = new ConsoleProgress<ToolProgress>(x =>
+            var progress = new SynchronousProgress<ToolProgress>(x =>
             {
                 console.Out.WriteLine($"Processing {x.File} ... ({x.Progress:P0})");
             });
 
             // Execute the tool
-            TextureDecoder.Execute(files, toolOptions, progress);
+            var tool = new TextureDecoder(toolOptions);
+            tool.Execute(files, progress);
         }
     }
 }

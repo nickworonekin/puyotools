@@ -9,9 +9,15 @@ namespace PuyoTools.App.Tools
 {
     class CompressionDecompressor
     {
-        public static void Execute(
+        private readonly CompressionDecompressorOptions options;
+
+        public CompressionDecompressor(CompressionDecompressorOptions options)
+        {
+            this.options = options;
+        }
+
+        public void Execute(
             IList<string> files,
-            CompressionDecompressorOptions options,
             IProgress<ToolProgress> progress = null,
             CancellationToken cancellationToken = default)
         {

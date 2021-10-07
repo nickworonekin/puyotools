@@ -69,19 +69,14 @@ namespace PuyoTools.App.Cli.Commands.Archives
             };
 
             // Create the progress handler (only if the quiet option is not set)
-            var progress = new ConsoleProgress<ToolProgress>(x =>
+            var progress = new SynchronousProgress<ToolProgress>(x =>
             {
                 console.Out.WriteLine($"Processing {x.File} ... ({x.Progress:P0})");
             });
 
             // Execute the tool
-            ArchiveCreator.Execute(
-                format,
-                files,
-                options.Output,
-                toolOptions,
-                options as IArchiveFormatOptions,
-                progress);
+            var tool = new ArchiveCreator(format, toolOptions, options as IArchiveFormatOptions);
+            tool.Execute(files, options.Output, progress);
         }
     }
 }

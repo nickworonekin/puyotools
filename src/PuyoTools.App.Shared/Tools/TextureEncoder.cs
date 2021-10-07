@@ -11,11 +11,26 @@ namespace PuyoTools.App.Tools
 {
     class TextureEncoder
     {
-        public static void Execute(
+        private readonly ITextureFormat format;
+        private readonly TextureEncoderOptions options;
+        private readonly ITextureFormatOptions formatOptions;
+
+        private readonly SynchronizationContext synchronizationContext;
+
+        public TextureEncoder(
             ITextureFormat format,
-            IList<string> files,
             TextureEncoderOptions options,
-            ITextureFormatOptions formatOptions,
+            ITextureFormatOptions formatOptions)
+        {
+            this.format = format;
+            this.options = options;
+            this.formatOptions = formatOptions;
+
+            synchronizationContext = SynchronizationContext.Current ?? new SynchronizationContext();
+        }
+
+        public void Execute(
+            IList<string> files,
             IProgress<ToolProgress> progress = null,
             CancellationToken cancellationToken = default)
         {
@@ -70,14 +85,7 @@ namespace PuyoTools.App.Tools
                         }*/
                         if (formatOptions != null)
                         {
-                            if (formatOptions is ISynchronizeInvoke invoker && invoker.InvokeRequired)
-                            {
-                                invoker.Invoke((Action)(() => formatOptions.MapTo(texture)), null);
-                            }
-                            else
-                            {
-                                formatOptions.MapTo(texture);
-                            }
+                            synchronizationContext.Send(new SendOrPostCallback(state => formatOptions.MapTo(texture)), null);
                         }
 
                         texture.Write(source, buffer, (int)source.Length);

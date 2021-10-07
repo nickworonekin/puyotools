@@ -437,13 +437,8 @@ namespace PuyoTools.GUI
                 progressDialog.Show();
 
                 // Execute the tool
-                await Task.Run(() => PuyoTools.App.Tools.ArchiveCreator.Execute(
-                    archiveFormat,
-                    files,
-                    outputPath,
-                    toolOptions,
-                    formatOptions,
-                    progress));
+                var tool = new PuyoTools.App.Tools.ArchiveCreator(archiveFormat, toolOptions, formatOptions);
+                await Task.Run(() => tool.Execute(files, outputPath, progress));
 
                 // Close the dialogs
                 progressDialog.Close();

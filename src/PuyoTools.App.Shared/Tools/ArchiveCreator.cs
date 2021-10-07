@@ -11,12 +11,27 @@ namespace PuyoTools.App.Tools
 {
     class ArchiveCreator
     {
-        public static void Execute(
+        private readonly IArchiveFormat format;
+        private readonly ArchiveCreatorOptions options;
+        private readonly IArchiveFormatOptions formatOptions;
+
+        private readonly SynchronizationContext synchronizationContext;
+
+        public ArchiveCreator(
             IArchiveFormat format,
+            ArchiveCreatorOptions options,
+            IArchiveFormatOptions formatOptions)
+        {
+            this.format = format;
+            this.options = options;
+            this.formatOptions = formatOptions;
+
+            synchronizationContext = SynchronizationContext.Current ?? new SynchronizationContext();
+        }
+
+        public void Execute(
             IList<ArchiveCreatorFileEntry> files,
             string outputPath,
-            ArchiveCreatorOptions options,
-            IArchiveFormatOptions formatOptions,
             IProgress<ToolProgress> progress = null,
             CancellationToken cancellationToken = default)
         {
@@ -54,14 +69,7 @@ namespace PuyoTools.App.Tools
                 }*/
                 if (formatOptions != null)
                 {
-                    if (formatOptions is ISynchronizeInvoke invoker && invoker.InvokeRequired)
-                    {
-                        invoker.Invoke((Action)(() => formatOptions.MapTo(archive)), null);
-                    }
-                    else
-                    {
-                        formatOptions.MapTo(archive);
-                    }
+                    synchronizationContext.Send(new SendOrPostCallback(state => formatOptions.MapTo(archive)), null);
                 }
 
                 // Set up event handlers

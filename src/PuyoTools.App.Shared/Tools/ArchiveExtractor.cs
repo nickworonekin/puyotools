@@ -13,9 +13,15 @@ namespace PuyoTools.App.Tools
 {
     class ArchiveExtractor
     {
-        public static void Execute(
+        private readonly ArchiveExtractorOptions options;
+
+        public ArchiveExtractor(ArchiveExtractorOptions options)
+        {
+            this.options = options;
+        }
+
+        public void Execute(
             IList<string> files,
-            ArchiveExtractorOptions options,
             IProgress<ArchiveExtractorProgress> progress = null,
             CancellationToken cancellationToken = default)
         {

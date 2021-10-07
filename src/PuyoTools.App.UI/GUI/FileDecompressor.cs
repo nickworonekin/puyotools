@@ -143,7 +143,8 @@ namespace PuyoTools.GUI
             progressDialog.Show();
 
             // Execute the tool
-            await Task.Run(() => CompressionDecompressor.Execute(fileList, toolOptions, progress));
+            var tool = new CompressionDecompressor(toolOptions);
+            await Task.Run(() => tool.Execute(fileList, progress));
 
             // Close the dialogs
             progressDialog.Close();

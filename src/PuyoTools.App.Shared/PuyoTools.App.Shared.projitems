@@ -9,6 +9,7 @@
     <Import_RootNamespace>PuyoTools.App</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)SynchronousProgress.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formats\Archives\AcxFormat.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formats\Archives\AfsFormat.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formats\Archives\ArchiveFactory.cs" />
