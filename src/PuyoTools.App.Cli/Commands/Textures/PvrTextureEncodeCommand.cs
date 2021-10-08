@@ -27,6 +27,7 @@ namespace PuyoTools.App.Cli.Commands.Textures
             {
                 Arity = ArgumentArity.ZeroOrOne,
             });
+            AddOption(new Option("--rle-compression", "RLE compression (PVZ) for Puyo Puyo Fever."));
 
             Handler = CommandHandler.Create<PvrTextureEncodeOptions, IConsole>(Execute);
         }

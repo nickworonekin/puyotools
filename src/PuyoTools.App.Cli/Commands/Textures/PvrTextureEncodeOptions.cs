@@ -18,6 +18,8 @@ namespace PuyoTools.App.Cli.Commands.Textures
 
         public uint? GlobalIndex { get; set; }
 
+        public bool RleCompression { get; set; }
+
         public void MapTo(TextureBase obj)
         {
             var texture = (PvrTexture)obj;
@@ -26,6 +28,9 @@ namespace PuyoTools.App.Cli.Commands.Textures
             texture.DataFormat = DataFormat;
             texture.HasGlobalIndex = GlobalIndex.HasValue;
             texture.GlobalIndex = GlobalIndex ?? default;
+            texture.CompressionFormat = RleCompression
+                ? PvrCompressionFormat.Rle
+                : PvrCompressionFormat.None;
         }
     }
 }
