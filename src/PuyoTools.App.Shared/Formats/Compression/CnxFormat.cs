@@ -1,5 +1,5 @@
-﻿using PuyoTools.Modules;
-using PuyoTools.Modules.Compression;
+﻿using PuyoTools.Core;
+using PuyoTools.Core.Compression;
 using System;
 using System.Collections.Generic;
 using System.IO;

@@ -4,7 +4,7 @@ using System.IO;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
-namespace PuyoTools.Modules
+namespace PuyoTools.Core
 {
     public static class BinaryReaderExtensions
     {

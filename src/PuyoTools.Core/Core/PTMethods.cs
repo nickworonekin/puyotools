@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace PuyoTools.Modules
+namespace PuyoTools.Core
 {
     public static class PTMethods
     {

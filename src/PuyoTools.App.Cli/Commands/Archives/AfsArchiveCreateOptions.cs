@@ -1,5 +1,5 @@
 ﻿using PuyoTools.App.Formats.Archives;
-using PuyoTools.Modules.Archive;
+using PuyoTools.Core.Archive;
 using System;
 using System.Collections.Generic;
 using System.Linq;

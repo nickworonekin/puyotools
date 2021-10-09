@@ -1,7 +1,7 @@
 ﻿using PuyoTools.Formats.Archives.WriterSettings;
 using PuyoTools.GUI;
-using PuyoTools.Modules;
-using PuyoTools.Modules.Archive;
+using PuyoTools.Core;
+using PuyoTools.Core.Archive;
 using System;
 using System.Collections.Generic;
 using System.IO;

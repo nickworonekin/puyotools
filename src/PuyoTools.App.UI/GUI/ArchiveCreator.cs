@@ -7,9 +7,9 @@ using System.Text;
 using System.Windows.Forms;
 using System.IO;
 
-using PuyoTools.Modules;
-using PuyoTools.Modules.Archive;
-using PuyoTools.Modules.Compression;
+using PuyoTools.Core;
+using PuyoTools.Core.Archive;
+using PuyoTools.Core.Compression;
 
 using Ookii.Dialogs.WinForms;
 using System.Linq;

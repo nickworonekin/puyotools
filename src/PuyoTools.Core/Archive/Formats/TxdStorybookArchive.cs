@@ -1,12 +1,12 @@
-﻿using PuyoTools.Modules.Compression;
-using PuyoTools.Modules.Texture;
+﻿using PuyoTools.Core.Compression;
+using PuyoTools.Core.Texture;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace PuyoTools.Modules.Archive
+namespace PuyoTools.Core.Archive
 {
     public class TxdStorybookArchive : ArchiveBase
     {

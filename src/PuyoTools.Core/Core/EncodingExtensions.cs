@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace PuyoTools.Modules
+namespace PuyoTools.Core
 {
     internal static class EncodingExtensions
     {

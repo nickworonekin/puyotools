@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\PuyoTools.Core\PuyoTools.Modules.csproj" />
+    <ProjectReference Include="..\PuyoTools.Core\PuyoTools.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

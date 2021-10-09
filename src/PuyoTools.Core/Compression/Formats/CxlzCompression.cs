@@ -3,7 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace PuyoTools.Modules.Compression
+namespace PuyoTools.Core.Compression
 {
     public class CxlzCompression : CompressionBase// : Lz10Compression
     {

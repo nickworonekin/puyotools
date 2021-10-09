@@ -1,12 +1,12 @@
 ﻿using GimSharp;
 using PuyoTools.App.Formats.Textures;
-using PuyoTools.Modules.Texture;
+using PuyoTools.Core.Texture;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using GimTexture = PuyoTools.Modules.Texture.GimTexture;
+using GimTexture = PuyoTools.Core.Texture.GimTexture;
 
 namespace PuyoTools.App.Cli.Commands.Textures
 {

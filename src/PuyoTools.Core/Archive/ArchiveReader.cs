@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Text;
 
-namespace PuyoTools.Modules.Archive
+namespace PuyoTools.Core.Archive
 {
     public abstract class ArchiveReader : IModule
     {

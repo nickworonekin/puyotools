@@ -1,8 +1,8 @@
 ﻿using PuyoTools.App.Formats.Archives;
 using PuyoTools.App.Formats.Compression;
 using PuyoTools.App.Formats.Textures;
-using PuyoTools.Modules.Archive;
-using PuyoTools.Modules.Texture;
+using PuyoTools.Core.Archive;
+using PuyoTools.Core.Texture;
 using System;
 using System.Collections.Generic;
 using System.IO;

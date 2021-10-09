@@ -4,7 +4,7 @@ using System.IO;
 using GimSharp;
 using GimSharpGimTexture = GimSharp.GimTexture;
 
-namespace PuyoTools.Modules.Texture
+namespace PuyoTools.Core.Texture
 {
     public class GimTexture : TextureBase
     {

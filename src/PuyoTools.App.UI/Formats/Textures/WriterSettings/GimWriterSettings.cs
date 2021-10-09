@@ -9,10 +9,10 @@ using System.Windows.Forms;
 
 using GimSharp;
 using PuyoTools.GUI;
-using PuyoTools.Modules;
-using GimTexture = PuyoTools.Modules.Texture.GimTexture;
+using PuyoTools.Core;
+using GimTexture = PuyoTools.Core.Texture.GimTexture;
 using PuyoTools.App.Formats.Textures;
-using PuyoTools.Modules.Texture;
+using PuyoTools.Core.Texture;
 
 namespace PuyoTools.App.Formats.Textures.WriterSettings
 {

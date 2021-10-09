@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace PuyoTools.Modules
+namespace PuyoTools.Core
 {
     /// <summary>
     /// Provides a read-only view over a portion of a stream.

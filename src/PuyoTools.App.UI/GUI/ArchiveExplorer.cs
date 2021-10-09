@@ -8,9 +8,9 @@ using System.Text;
 using System.Windows.Forms;
 using System.IO;
 
-using PuyoTools.Modules;
-using PuyoTools.Modules.Archive;
-using PuyoTools.Modules.Texture;
+using PuyoTools.Core;
+using PuyoTools.Core.Archive;
+using PuyoTools.Core.Texture;
 
 using Ookii.Dialogs.WinForms;
 using PuyoTools.App.Formats.Textures;

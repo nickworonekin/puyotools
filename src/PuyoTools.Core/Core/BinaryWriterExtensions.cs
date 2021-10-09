@@ -5,7 +5,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace PuyoTools.Modules
+namespace PuyoTools.Core
 {
     public static class BinaryWriterExtensions
     {

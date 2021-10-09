@@ -3,7 +3,7 @@
 // Implementation from .NET source code:
 // https://github.com/dotnet/corert/blob/master/src/System.Private.CoreLib/shared/System/Buffers/Binary/Reader.cs
 
-namespace PuyoTools.Modules
+namespace PuyoTools.Core
 {
     /// <summary>
     /// Reads bytes as primitives with specific endianness

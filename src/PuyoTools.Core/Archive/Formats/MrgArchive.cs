@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace PuyoTools.Modules.Archive
+namespace PuyoTools.Core.Archive
 {
     public class MrgArchive : ArchiveBase
     {

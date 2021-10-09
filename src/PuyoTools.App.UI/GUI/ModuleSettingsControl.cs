@@ -6,7 +6,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using PuyoTools.Modules;
+using PuyoTools.Core;
 
 namespace PuyoTools.GUI
 {

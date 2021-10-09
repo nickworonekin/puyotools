@@ -3,7 +3,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 
-namespace PuyoTools.Modules.Texture
+namespace PuyoTools.Core.Texture
 {
     public abstract class TextureBase : ModuleBase
     {

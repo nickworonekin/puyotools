@@ -1,4 +1,4 @@
-﻿using PuyoTools.Modules.Archive;
+﻿using PuyoTools.Core.Archive;
 using System;
 using System.Collections.Generic;
 using System.Text;

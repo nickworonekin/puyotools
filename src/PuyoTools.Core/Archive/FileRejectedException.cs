@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace PuyoTools.Modules.Archive
+namespace PuyoTools.Core.Archive
 {
     public class FileRejectedException : Exception
     {

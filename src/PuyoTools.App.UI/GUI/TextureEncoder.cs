@@ -7,9 +7,9 @@ using System.Text;
 using System.Windows.Forms;
 using System.IO;
 
-using PuyoTools.Modules;
-using PuyoTools.Modules.Compression;
-using PuyoTools.Modules.Texture;
+using PuyoTools.Core;
+using PuyoTools.Core.Compression;
+using PuyoTools.Core.Texture;
 using PuyoTools.App.Formats.Compression;
 using PuyoTools.App.Formats.Textures;
 using System.Linq;

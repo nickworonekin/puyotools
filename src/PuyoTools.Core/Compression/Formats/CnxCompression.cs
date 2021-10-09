@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace PuyoTools.Modules.Compression
+namespace PuyoTools.Core.Compression
 {
     public class CnxCompression : CompressionBase
     {

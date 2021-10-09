@@ -2,7 +2,7 @@
 using System.IO;
 using System.Text;
 
-namespace PuyoTools.Modules.Compression
+namespace PuyoTools.Core.Compression
 {
     public class Lz11Compression : CompressionBase
     {

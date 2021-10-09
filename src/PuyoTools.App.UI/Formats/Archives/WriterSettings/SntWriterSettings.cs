@@ -7,8 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using PuyoTools.GUI;
-using PuyoTools.Modules;
-using PuyoTools.Modules.Archive;
+using PuyoTools.Core;
+using PuyoTools.Core.Archive;
 using PuyoTools.App.Formats.Archives;
 
 namespace PuyoTools.Formats.Archives.WriterSettings

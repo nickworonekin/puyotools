@@ -4,7 +4,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using PuyoTools.App.Formats.Textures;
-using PuyoTools.Modules.Texture;
+using PuyoTools.Core.Texture;
 
 namespace PuyoTools.App
 {

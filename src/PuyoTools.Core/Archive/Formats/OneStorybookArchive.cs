@@ -1,11 +1,11 @@
-﻿using PuyoTools.Modules.Compression;
+﻿using PuyoTools.Core.Compression;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
 
-namespace PuyoTools.Modules.Archive
+namespace PuyoTools.Core.Archive
 {
     public class OneStorybookArchive : ArchiveBase
     {

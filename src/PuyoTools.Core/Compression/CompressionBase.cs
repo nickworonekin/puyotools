@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace PuyoTools.Modules.Compression
+namespace PuyoTools.Core.Compression
 {
     public abstract class CompressionBase : ModuleBase
     {

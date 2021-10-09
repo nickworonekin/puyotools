@@ -7,7 +7,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.IO;
 
-using PuyoTools.Modules.Compression;
+using PuyoTools.Core.Compression;
 using System.Linq;
 using PuyoTools.App.Formats.Compression;
 using PuyoTools.App.Tools;

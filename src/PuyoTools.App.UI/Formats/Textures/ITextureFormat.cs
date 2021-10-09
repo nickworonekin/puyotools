@@ -1,5 +1,5 @@
 ﻿using PuyoTools.GUI;
-using PuyoTools.Modules.Texture;
+using PuyoTools.Core.Texture;
 using System;
 using System.Collections.Generic;
 using System.IO;

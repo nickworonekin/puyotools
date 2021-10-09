@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace PuyoTools.Modules
+namespace PuyoTools.Core
 {
     public interface IModule { }
 

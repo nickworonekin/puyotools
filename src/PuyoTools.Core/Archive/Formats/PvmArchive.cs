@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using PuyoTools.Modules.Texture;
+using PuyoTools.Core.Texture;
 
-namespace PuyoTools.Modules.Archive
+namespace PuyoTools.Core.Archive
 {
     public class PvmArchive : ArchiveBase
     {

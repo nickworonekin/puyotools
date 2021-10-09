@@ -9,9 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GimSharp", "src\GimSharp\Gi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VrSharp", "src\VrSharp\VrSharp.csproj", "{A8E274F4-0D8E-4EAB-A5B2-7B40BC922534}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PuyoTools.Modules", "src\PuyoTools.Core\PuyoTools.Modules.csproj", "{E5D36FFB-A89F-4F4D-928C-87FC863B4C6C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PuyoTools.Core", "src\PuyoTools.Core\PuyoTools.Core.csproj", "{E5D36FFB-A89F-4F4D-928C-87FC863B4C6C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PuyoTools.App.Cli", "src\PuyoTools.App.Cli\PuyoTools.App.Cli.csproj", "{CC122AA1-0B6C-468E-B965-2E92DF061709}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PuyoTools.App.Cli", "src\PuyoTools.App.Cli\PuyoTools.App.Cli.csproj", "{CC122AA1-0B6C-468E-B965-2E92DF061709}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "PuyoTools.App.Shared", "src\PuyoTools.App.Shared\PuyoTools.App.Shared.shproj", "{CB957E9E-4CAE-4BA5-A2D8-8BE6F93DD681}"
 EndProject
