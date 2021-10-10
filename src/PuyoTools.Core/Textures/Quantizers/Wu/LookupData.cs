@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace nQuant
+namespace PuyoTools.Core.Textures.Quantizers.Wu
 {
     public class LookupData
     {

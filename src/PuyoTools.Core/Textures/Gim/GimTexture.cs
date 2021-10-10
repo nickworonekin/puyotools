@@ -2,10 +2,11 @@
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace GimSharp
+namespace PuyoTools.Core.Textures.Gim
 {
     public class GimTexture
     {
@@ -515,7 +516,7 @@ namespace GimSharp
         public static bool Is(byte[] source, int offset, int length)
         {
             if (length > 24 && 
-                PTMethods.Contains(source, offset + 0x00, Encoding.UTF8.GetBytes("MIG.00.1PSP")) &&
+                source.Skip(offset).Take(11).SequenceEqual(Encoding.UTF8.GetBytes("MIG.00.1PSP")) &&
                 BitConverter.ToUInt32(source, offset + 0x14) == length - 16)
                 return true;
 

@@ -5,7 +5,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Runtime.InteropServices;
 
-using nQuant;
+using PuyoTools.Core.Textures.Quantizers.Wu;
 
 namespace VrSharp
 {

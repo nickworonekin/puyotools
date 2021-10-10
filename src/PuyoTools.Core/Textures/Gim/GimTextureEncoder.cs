@@ -5,9 +5,9 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 
-using nQuant;
+using PuyoTools.Core.Textures.Quantizers.Wu;
 
-namespace GimSharp
+namespace PuyoTools.Core.Textures.Gim
 {
     public class GimTextureEncoder
     {
@@ -341,7 +341,7 @@ namespace GimSharp
             {
                 MemoryStream textureStream = EncodeTexture();
                 textureStream.Position = 0;
-                PTStream.CopyTo(textureStream, destination);
+                textureStream.CopyTo(destination);
             }
         }
 
@@ -358,7 +358,7 @@ namespace GimSharp
 
             MemoryStream textureStream = EncodeTexture();
             textureStream.Position = 0;
-            PTStream.CopyTo(textureStream, destination);
+            textureStream.CopyTo(destination);
         }
 
         // Encodes a texture
@@ -416,6 +416,7 @@ namespace GimSharp
                 metadataChunkLength;
 
             MemoryStream destination = new MemoryStream(textureLength);
+            var writer = new BinaryWriter(destination);
 
             // Write the GIM header
             PTStream.WriteCString(destination, "MIG.00.1PSP", 12);
@@ -521,10 +522,10 @@ namespace GimSharp
                 PTStream.WriteInt32(destination, metadataChunkLength);
                 PTStream.WriteUInt32(destination, 16);
 
-                PTStream.WriteCString(destination, metadata.OriginalFilename);
-                PTStream.WriteCString(destination, metadata.User);
-                PTStream.WriteCString(destination, metadata.Timestamp);
-                PTStream.WriteCString(destination, metadata.Program);
+                writer.WriteNullTerminatedString(metadata.OriginalFilename);
+                writer.WriteNullTerminatedString(metadata.User);
+                writer.WriteNullTerminatedString(metadata.Timestamp);
+                writer.WriteNullTerminatedString(metadata.Program);
             }
             return destination;
         }

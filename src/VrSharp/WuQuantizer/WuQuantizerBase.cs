@@ -5,7 +5,7 @@ using System.Drawing.Imaging;
 using System.Linq;
 using System.Runtime.InteropServices;
 
-namespace nQuant
+namespace PuyoTools.Core.Textures.Quantizers.Wu
 {
     public abstract class WuQuantizerBase
     {

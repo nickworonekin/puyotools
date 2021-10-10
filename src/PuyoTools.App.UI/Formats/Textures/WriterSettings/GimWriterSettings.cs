@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
-using GimSharp;
+using PuyoTools.Core.Textures.Gim;
 using PuyoTools.GUI;
 using PuyoTools.Core;
 using GimTexture = PuyoTools.Core.Textures.GimTexture;

@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 
-namespace nQuant
+namespace PuyoTools.Core.Textures.Quantizers.Wu
 {
     public interface IWuQuantizer
     {

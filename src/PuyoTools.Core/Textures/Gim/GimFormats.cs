@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GimSharp
+namespace PuyoTools.Core.Textures.Gim
 {
     // Gim Palette Formats
     public enum GimPaletteFormat : byte

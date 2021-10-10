@@ -1,8 +1,8 @@
 ﻿using System;
 using System.IO;
 
-using GimSharp;
-using GimSharpGimTexture = GimSharp.GimTexture;
+using PuyoTools.Core.Textures.Gim;
+using GimSharpGimTexture = PuyoTools.Core.Textures.Gim.GimTexture;
 
 namespace PuyoTools.Core.Textures
 {

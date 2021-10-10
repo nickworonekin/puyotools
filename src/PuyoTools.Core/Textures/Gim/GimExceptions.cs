@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GimSharp
+namespace PuyoTools.Core.Textures.Gim
 {
     public class TextureNotInitalizedException : Exception
     {

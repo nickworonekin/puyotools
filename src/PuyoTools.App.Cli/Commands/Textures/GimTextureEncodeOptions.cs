@@ -1,4 +1,4 @@
-﻿using GimSharp;
+﻿using PuyoTools.Core.Textures.Gim;
 using PuyoTools.App.Formats.Textures;
 using PuyoTools.Core.Textures;
 using System;

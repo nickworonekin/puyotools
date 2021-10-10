@@ -1,4 +1,4 @@
-namespace nQuant
+namespace PuyoTools.Core.Textures.Quantizers.Wu
 {
     internal struct CubeCut
     {

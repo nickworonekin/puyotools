@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 
-namespace nQuant
+namespace PuyoTools.Core.Textures.Quantizers.Wu
 {
     public class WuQuantizer : WuQuantizerBase, IWuQuantizer
     {

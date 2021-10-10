@@ -5,8 +5,6 @@ VisualStudioVersion = 16.0.30114.105
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PuyoTools.App.UI", "src\PuyoTools.App.UI\PuyoTools.App.UI.csproj", "{7578281C-3030-4640-A7E3-5AD83C598694}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GimSharp", "src\GimSharp\GimSharp.csproj", "{18707752-78B4-4735-AE5A-4261AD5C06EE}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VrSharp", "src\VrSharp\VrSharp.csproj", "{A8E274F4-0D8E-4EAB-A5B2-7B40BC922534}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PuyoTools.Core", "src\PuyoTools.Core\PuyoTools.Core.csproj", "{E5D36FFB-A89F-4F4D-928C-87FC863B4C6C}"
@@ -30,10 +28,6 @@ Global
 		{7578281C-3030-4640-A7E3-5AD83C598694}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7578281C-3030-4640-A7E3-5AD83C598694}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7578281C-3030-4640-A7E3-5AD83C598694}.Release|Any CPU.Build.0 = Release|Any CPU
-		{18707752-78B4-4735-AE5A-4261AD5C06EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{18707752-78B4-4735-AE5A-4261AD5C06EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{18707752-78B4-4735-AE5A-4261AD5C06EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{18707752-78B4-4735-AE5A-4261AD5C06EE}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A8E274F4-0D8E-4EAB-A5B2-7B40BC922534}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A8E274F4-0D8E-4EAB-A5B2-7B40BC922534}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A8E274F4-0D8E-4EAB-A5B2-7B40BC922534}.Release|Any CPU.ActiveCfg = Release|Any CPU
