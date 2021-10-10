@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace VrSharp
+namespace PuyoTools.Core.Textures
 {
     public class TextureNotInitalizedException : Exception
     {

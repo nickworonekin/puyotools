@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using VrSharp.Gvr;
+using PuyoTools.Core.Textures.Gvr;
 using GvrTexture = PuyoTools.Core.Textures.GvrTexture;
 
 namespace PuyoTools.App.Cli.Commands.Textures

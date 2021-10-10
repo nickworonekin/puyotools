@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace VrSharp.Gvr
+namespace PuyoTools.Core.Textures.Gvr
 {
     // Gvr Pixel Formats
     public enum GvrPixelFormat : byte

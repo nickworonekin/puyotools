@@ -1,8 +1,9 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 
-namespace VrSharp.Svr
+namespace PuyoTools.Core.Textures.Svr
 {
     public class SvpPalette : VpPalette
     {
@@ -88,7 +89,7 @@ namespace VrSharp.Svr
         public static bool Is(byte[] source, int offset, int length)
         {
             if (length >= 16 &&
-                PTMethods.Contains(source, offset + 0x00, Encoding.UTF8.GetBytes("PVPL")) &&
+                source.Skip(offset).Take(4).SequenceEqual(Encoding.UTF8.GetBytes("PVPL")) &&
                 BitConverter.ToUInt32(source, offset + 0x04) == length - 8)
                 return true;
 

@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
-using VrSharp.Pvr;
+using PuyoTools.Core.Textures.Pvr;
 using PuyoTools.GUI;
 using PuyoTools.App.Formats.Textures;
 using PuyoTools.Core.Textures;

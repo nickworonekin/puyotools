@@ -1,9 +1,9 @@
 ﻿using System;
 using System.IO;
 
-using VrSharp;
-using VrSharp.Gvr;
-using VrSharpGvrTexture = VrSharp.Gvr.GvrTexture;
+using PuyoTools.Core.Textures;
+using PuyoTools.Core.Textures.Gvr;
+using VrSharpGvrTexture = PuyoTools.Core.Textures.Gvr.GvrTexture;
 
 namespace PuyoTools.Core.Textures
 {

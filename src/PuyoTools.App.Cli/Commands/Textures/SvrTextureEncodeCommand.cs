@@ -6,7 +6,7 @@ using System.CommandLine.Invocation;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using VrSharp.Svr;
+using PuyoTools.Core.Textures.Svr;
 
 namespace PuyoTools.App.Cli.Commands.Textures
 {

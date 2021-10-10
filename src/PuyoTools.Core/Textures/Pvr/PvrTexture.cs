@@ -1,7 +1,8 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 
-namespace VrSharp.Pvr
+namespace PuyoTools.Core.Textures.Pvr
 {
     public class PvrTexture : VrTexture
     {
@@ -112,17 +113,17 @@ namespace VrSharp.Pvr
             }
 
             // Determine the offsets of the GBIX (if present) and PVRT header chunks.
-            if (PTMethods.Contains(encodedData, 0x00, gbixFourCC))
+            if (encodedData.Take(gbixFourCC.Length).SequenceEqual(gbixFourCC))
             {
                 gbixOffset = 0x00;
                 pvrtOffset = 0x08 + BitConverter.ToInt32(encodedData, gbixOffset + 4);
             }
-            else if (PTMethods.Contains(encodedData, 0x04, gbixFourCC))
+            else if (encodedData.Skip(0x4).Take(gbixFourCC.Length).SequenceEqual(gbixFourCC))
             {
                 gbixOffset = 0x04;
                 pvrtOffset = 0x0C + BitConverter.ToInt32(encodedData, gbixOffset + 4);
             }
-            else if (PTMethods.Contains(encodedData, 0x04, pvrtFourCC))
+            else if (encodedData.Skip(0x4).Take(pvrtFourCC.Length).SequenceEqual(pvrtFourCC))
             {
                 gbixOffset = -1;
                 pvrtOffset = 0x04;
@@ -293,7 +294,7 @@ namespace VrSharp.Pvr
         /// <returns>True if the header is PVRT and it passes validation, false otherwise.</returns>
         private static bool IsValidPvrt(byte[] source, int offset, int length)
         {
-            return PTMethods.Contains(source, offset, pvrtFourCC)
+            return source.Skip(offset).Take(pvrtFourCC.Length).SequenceEqual(pvrtFourCC)
                 && source[offset + 0x09] < 0x60
                 && BitConverter.ToUInt32(source, offset + 0x04) == length - 8;
         }
@@ -308,7 +309,7 @@ namespace VrSharp.Pvr
         /// <returns>True if the header is GBIX and it passes validation, false otherwise.</returns>
         private static bool IsValidGbix(byte[] source, int offset, int length)
         {
-            if (!PTMethods.Contains(source, offset, gbixFourCC))
+            if (!source.Skip(offset).Take(gbixFourCC.Length).SequenceEqual(gbixFourCC))
             {
                 return false;
             }

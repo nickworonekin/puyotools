@@ -2,7 +2,7 @@
 using System.Drawing;
 using System.IO;
 
-namespace VrSharp.Pvr
+namespace PuyoTools.Core.Textures.Pvr
 {
     public class PvrTextureEncoder : VrTextureEncoder
     {

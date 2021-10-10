@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace VrSharp
+namespace PuyoTools.Core.Textures
 {
     public abstract class VpPalette
     {

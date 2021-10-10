@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace VrSharp.Svr
+namespace PuyoTools.Core.Textures.Svr
 {
     // Svr Pixel Formats
     public enum SvrPixelFormat : byte

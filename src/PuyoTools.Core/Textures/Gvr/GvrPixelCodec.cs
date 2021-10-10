@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace VrSharp.Gvr
+namespace PuyoTools.Core.Textures.Gvr
 {
     public abstract class GvrPixelCodec : VrPixelCodec
     {
@@ -50,7 +50,7 @@ namespace VrSharp.Gvr
 
             public override void DecodePixel(byte[] source, int sourceIndex, byte[] destination, int destinationIndex)
             {
-                ushort pixel = PTMethods.ToUInt16BE(source, sourceIndex);
+                ushort pixel = BinaryPrimitives.ReverseEndianness(BitConverter.ToUInt16(source, sourceIndex));
 
                 destination[destinationIndex + 3] = 0xFF;
                 destination[destinationIndex + 2] = (byte)(((pixel >> 11) & 0x1F) * 0xFF / 0x1F);
@@ -87,7 +87,7 @@ namespace VrSharp.Gvr
 
             public override void DecodePixel(byte[] source, int sourceIndex, byte[] destination, int destinationIndex)
             {
-                ushort pixel = PTMethods.ToUInt16BE(source, sourceIndex);
+                ushort pixel = BinaryPrimitives.ReverseEndianness(BitConverter.ToUInt16(source, sourceIndex));
 
                 if ((pixel & 0x8000) != 0) // Rgb555
                 {

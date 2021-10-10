@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Text;
 
-namespace VrSharp.Svr
+namespace PuyoTools.Core.Textures.Svr
 {
     public class SvrTexture : VrTexture
     {
@@ -86,7 +87,7 @@ namespace VrSharp.Svr
             }
 
             // Determine the offsets of the GBIX (if present) and PVRT header chunks.
-            if (PTMethods.Contains(encodedData, 0, Encoding.UTF8.GetBytes("GBIX")))
+            if (encodedData.Take(4).SequenceEqual(Encoding.UTF8.GetBytes("GBIX")))
             {
                 gbixOffset = 0x00;
                 pvrtOffset = 0x10;
@@ -164,24 +165,24 @@ namespace VrSharp.Svr
         {
             // GBIX and PVRT
             if (length >= 0x20 &&
-                PTMethods.Contains(source, offset + 0x00, Encoding.UTF8.GetBytes("GBIX")) &&
-                PTMethods.Contains(source, offset + 0x10, Encoding.UTF8.GetBytes("PVRT")) &&
+                source.Skip(offset).Take(4).SequenceEqual(Encoding.UTF8.GetBytes("GBIX")) &&
+                source.Skip(offset + 0x10).Take(4).SequenceEqual(Encoding.UTF8.GetBytes("PVRT")) &&
                 source[offset + 0x19] >= 0x60 && source[offset + 0x19] < 0x70)
             {
                 // Some SVR files have an extra byte at the end for seemingly no reason.
-                UInt32 expected_length = BitConverter.ToUInt32(source, offset + 0x14);
-                if (expected_length == length - 24 || expected_length == length - 24 - 1)
+                uint expectedLength = BitConverter.ToUInt32(source, offset + 0x14);
+                if (expectedLength == length - 24 || expectedLength == length - 24 - 1)
                     return true;
             }
 
             // PVRT (and no GBIX chunk)
             else if (length >= 0x10 &&
-                PTMethods.Contains(source, offset + 0x00, Encoding.UTF8.GetBytes("PVRT")) &&
+                source.Skip(offset).Take(4).SequenceEqual(Encoding.UTF8.GetBytes("PVRT")) &&
                 source[offset + 0x09] >= 0x60 && source[offset + 0x09] < 0x70)
             {
                 // Some SVR files have an extra byte at the end for seemingly no reason.
-                UInt32 expected_length = BitConverter.ToUInt32(source, offset + 0x04);
-                if (expected_length == length - 8 || expected_length == length - 8 - 1)
+                uint expectedLength = BitConverter.ToUInt32(source, offset + 0x04);
+                if (expectedLength == length - 8 || expectedLength == length - 8 - 1)
                     return true;
             }
 

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace VrSharp.Svr
+namespace PuyoTools.Core.Textures.Svr
 {
     public abstract class SvrPixelCodec : VrPixelCodec
     {

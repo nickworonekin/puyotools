@@ -1,8 +1,9 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 
-namespace VrSharp.Gvr
+namespace PuyoTools.Core.Textures.Gvr
 {
     public class GvpPalette : VpPalette
     {
@@ -71,7 +72,7 @@ namespace VrSharp.Gvr
             if (pixelCodec == null) return false;
 
             // Get the number of colors contained in the palette
-            paletteEntries = PTMethods.ToUInt16BE(encodedData, 0x0E);
+            paletteEntries = BinaryPrimitives.ReverseEndianness(BitConverter.ToUInt16(encodedData, 0x0E));
 
             return true;
         }
@@ -88,7 +89,7 @@ namespace VrSharp.Gvr
         public static bool Is(byte[] source, int offset, int length)
         {
             if (length >= 16 &&
-                PTMethods.Contains(source, offset + 0x00, Encoding.UTF8.GetBytes("GVPL")) &&
+                source.Skip(offset).Take(4).SequenceEqual(Encoding.UTF8.GetBytes("GVPL")) &&
                 BitConverter.ToUInt32(source, offset + 0x04) == length - 8)
                 return true;
 

@@ -4,7 +4,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Runtime.InteropServices;
 
-namespace VrSharp
+namespace PuyoTools.Core.Textures
 {
     public abstract class VrTexture
     {

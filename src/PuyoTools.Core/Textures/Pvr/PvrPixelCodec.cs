@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Drawing;
 
-namespace VrSharp.Pvr
+namespace PuyoTools.Core.Textures.Pvr
 {
     public abstract class PvrPixelCodec : VrPixelCodec
     {

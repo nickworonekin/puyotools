@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace VrSharp
+namespace PuyoTools.Core.Textures
 {
     #region Pixel Codec
     // Base codec for the pixel codecs

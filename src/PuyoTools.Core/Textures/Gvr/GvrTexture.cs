@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Text;
 
-namespace VrSharp.Gvr
+namespace PuyoTools.Core.Textures.Gvr
 {
     public class GvrTexture : VrTexture
     {
@@ -122,8 +123,8 @@ namespace VrSharp.Gvr
             }
 
             // Determine the offsets of the GBIX/GCIX (if present) and GCIX header chunks.
-            if (PTMethods.Contains(encodedData, 0, Encoding.UTF8.GetBytes("GBIX")) ||
-                PTMethods.Contains(encodedData, 0, Encoding.UTF8.GetBytes("GCIX")))
+            if (encodedData.Take(4).SequenceEqual(Encoding.UTF8.GetBytes("GBIX")) ||
+                encodedData.Take(4).SequenceEqual(Encoding.UTF8.GetBytes("GCIX")))
             {
                 gbixOffset = 0x00;
                 pvrtOffset = 0x10;
@@ -137,7 +138,7 @@ namespace VrSharp.Gvr
             // Read the global index (if it is present). If it is not present, just set it to 0.
             if (gbixOffset != -1)
             {
-                globalIndex = PTMethods.ToUInt32BE(encodedData, gbixOffset + 0x08);
+                globalIndex = BinaryPrimitives.ReverseEndianness(BitConverter.ToUInt32(encodedData, gbixOffset + 0x08));
             }
             else
             {
@@ -145,8 +146,8 @@ namespace VrSharp.Gvr
             }
 
             // Read information about the texture
-            textureWidth  = PTMethods.ToUInt16BE(encodedData, pvrtOffset + 0x0C);
-            textureHeight = PTMethods.ToUInt16BE(encodedData, pvrtOffset + 0x0E);
+            textureWidth  = BinaryPrimitives.ReverseEndianness(BitConverter.ToUInt16(encodedData, pvrtOffset + 0x0C));
+            textureHeight = BinaryPrimitives.ReverseEndianness(BitConverter.ToUInt16(encodedData, pvrtOffset + 0x0E));
 
             pixelFormat = (GvrPixelFormat)(encodedData[pvrtOffset + 0x0A] >> 4); // Only the first 4 bits matter
             dataFlags   = (GvrDataFlags)(encodedData[pvrtOffset + 0x0A] & 0x0F); // Only the last 4 bits matter
@@ -246,21 +247,21 @@ namespace VrSharp.Gvr
         {
             // GBIX and GVRT
             if (length >= 32 &&
-                PTMethods.Contains(source, offset + 0x00, Encoding.UTF8.GetBytes("GBIX")) &&
-                PTMethods.Contains(source, offset + 0x10, Encoding.UTF8.GetBytes("GVRT")) &&
+                source.Skip(offset).Take(4).SequenceEqual(Encoding.UTF8.GetBytes("GBIX")) &&
+                source.Skip(offset + 0x10).Take(4).SequenceEqual(Encoding.UTF8.GetBytes("GVRT")) &&
                 BitConverter.ToUInt32(source, offset + 0x14) == length - 24)
                 return true;
 
             // GCIX and GVRT
             else if (length >= 32 &&
-                PTMethods.Contains(source, offset + 0x00, Encoding.UTF8.GetBytes("GCIX")) &&
-                PTMethods.Contains(source, offset + 0x10, Encoding.UTF8.GetBytes("GVRT")) &&
+                source.Skip(offset).Take(4).SequenceEqual(Encoding.UTF8.GetBytes("GCIX")) &&
+                source.Skip(offset + 0x10).Take(4).SequenceEqual(Encoding.UTF8.GetBytes("GVRT")) &&
                 BitConverter.ToUInt32(source, offset + 0x14) == length - 24)
                 return true;
 
             // GVRT (and no GBIX or GCIX chunk)
             else if (length > 16 &&
-                PTMethods.Contains(source, offset + 0x00, Encoding.UTF8.GetBytes("GVRT")) &&
+                source.Skip(offset).Take(4).SequenceEqual(Encoding.UTF8.GetBytes("GVRT")) &&
                 BitConverter.ToUInt32(source, offset + 0x04) == length - 8)
                 return true;
 

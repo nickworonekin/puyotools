@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace VrSharp.Gvr
+namespace PuyoTools.Core.Textures.Gvr
 {
     public abstract class GvrDataCodec : VrDataCodec
     {
@@ -310,7 +310,7 @@ namespace VrSharp.Gvr
                         {
                             for (int x2 = 0; x2 < 4; x2++)
                             {
-                                ushort pixel = PTMethods.ToUInt16BE(input, offset);
+                                ushort pixel = BinaryPrimitives.ReverseEndianness(BitConverter.ToUInt16(input, offset));
 
                                 //output[((((y + y2) * width) + (x + x2)) * 4) + 3] = 0xFF;
                                 //output[((((y + y2) * width) + (x + x2)) * 4) + 2] = (byte)(((pixel >> 11) & 0x1F) << 11);
@@ -351,7 +351,7 @@ namespace VrSharp.Gvr
                                 //pixel |= (ushort)(((input[((((y + y2) * width) + (x + x2)) * 4) + 1] * 0x3F / 0xFF) & 0x3F) << 5);
                                 //pixel |= (ushort)(((input[((((y + y2) * width) + (x + x2)) * 4) + 0] * 0x1F / 0xFF) & 0x1F) << 0);
 
-                                PTMethods.GetBytesBE(pixel).CopyTo(output, offset);
+                                BitConverter.GetBytes(BinaryPrimitives.ReverseEndianness(pixel)).CopyTo(output, offset);
                                 offset += 2;
                             }
                         }
@@ -389,7 +389,7 @@ namespace VrSharp.Gvr
                         {
                             for (int x2 = 0; x2 < 4; x2++)
                             {
-                                ushort pixel = PTMethods.ToUInt16BE(input, offset);
+                                ushort pixel = BinaryPrimitives.ReverseEndianness(BitConverter.ToUInt16(input, offset));
 
                                 if ((pixel & 0x8000) != 0) // Rgb555
                                 {
@@ -460,7 +460,7 @@ namespace VrSharp.Gvr
                                     //pixel |= (ushort)(((input[((((y + y2) * width) + (x + x2)) * 4) + 0] * 0x1F / 0xFF) & 0x1F) << 0);
                                 }
 
-                                PTMethods.GetBytesBE(pixel).CopyTo(output, offset);
+                                BitConverter.GetBytes(BinaryPrimitives.ReverseEndianness(pixel)).CopyTo(output, offset);
                                 offset += 2;
                             }
                         }
@@ -732,8 +732,8 @@ namespace VrSharp.Gvr
                             for (int x2 = 0; x2 < 8; x2 += 4)
                             {
                                 // Get the first two colors
-                                pixel[0] = PTMethods.ToUInt16BE(input, offset);
-                                pixel[1] = PTMethods.ToUInt16BE(input, offset + 2);
+                                pixel[0] = BinaryPrimitives.ReverseEndianness(BitConverter.ToUInt16(input, offset));
+                                pixel[1] = BinaryPrimitives.ReverseEndianness(BitConverter.ToUInt16(input, offset + 2));
 
                                 palette[0][3] = 0xFF;
                                 palette[0][2] = (byte)(((pixel[0] >> 11) & 0x1F) * 0xFF / 0x1F);

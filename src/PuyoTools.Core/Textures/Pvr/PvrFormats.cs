@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace VrSharp.Pvr
+namespace PuyoTools.Core.Textures.Pvr
 {
     // Pvr Pixel Formats
     public enum PvrPixelFormat : byte

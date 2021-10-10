@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace VrSharp
+namespace PuyoTools.Core.Textures
 {
     public abstract class VpPaletteEncoder
     {
@@ -53,7 +53,7 @@ namespace VrSharp
             {
                 MemoryStream paletteStream = EncodePalette();
                 paletteStream.Position = 0;
-                PTStream.CopyTo(paletteStream, destination);
+                paletteStream.CopyTo(destination);
             }
         }
 
@@ -65,7 +65,7 @@ namespace VrSharp
         {
             MemoryStream paletteStream = EncodePalette();
             paletteStream.Position = 0;
-            PTStream.CopyTo(paletteStream, destination);
+            paletteStream.CopyTo(destination);
         }
         #endregion
 

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace VrSharp.Svr
+namespace PuyoTools.Core.Textures.Svr
 {
     public class SvpPaletteEncoder : VpPaletteEncoder
     {

@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 
 using PuyoTools.Core.Textures.Quantizers.Wu;
 
-namespace VrSharp
+namespace PuyoTools.Core.Textures
 {
     public abstract class VrTextureEncoder
     {
@@ -232,7 +232,7 @@ namespace VrSharp
             {
                 MemoryStream textureStream = EncodeTexture();
                 textureStream.Position = 0;
-                PTStream.CopyTo(textureStream, destination);
+                textureStream.CopyTo(destination);
             }
         }
 
@@ -249,7 +249,7 @@ namespace VrSharp
 
             MemoryStream textureStream = EncodeTexture();
             textureStream.Position = 0;
-            PTStream.CopyTo(textureStream, destination);
+            textureStream.CopyTo(destination);
         }
 
         // Encodes a texture
