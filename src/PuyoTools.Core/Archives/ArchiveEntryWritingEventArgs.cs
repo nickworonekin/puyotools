@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace PuyoTools.Core.Archive
+namespace PuyoTools.Core.Archives
 {
     /// <summary>
     /// Provides data for the <see cref="ArchiveEntryWritingEventHandler"/> event.

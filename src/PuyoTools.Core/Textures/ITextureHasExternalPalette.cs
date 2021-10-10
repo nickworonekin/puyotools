@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace PuyoTools.Core.Texture
+namespace PuyoTools.Core.Textures
 {
     /// <summary>
     /// Represents a texture that may require the use of an external palette file.

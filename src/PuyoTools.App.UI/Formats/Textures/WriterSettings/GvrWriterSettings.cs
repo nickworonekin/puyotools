@@ -10,9 +10,9 @@ using System.Windows.Forms;
 using VrSharp.Gvr;
 using PuyoTools.GUI;
 using PuyoTools.App.Formats.Textures;
-using PuyoTools.Core.Texture;
+using PuyoTools.Core.Textures;
 using PuyoTools.Core;
-using GvrTexture = PuyoTools.Core.Texture.GvrTexture;
+using GvrTexture = PuyoTools.Core.Textures.GvrTexture;
 
 namespace PuyoTools.App.Formats.Textures.WriterSettings
 {

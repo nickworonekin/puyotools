@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using PuyoTools.Core.Texture;
+using PuyoTools.Core.Textures;
 
-namespace PuyoTools.Core.Archive
+namespace PuyoTools.Core.Archives
 {
     public class SvmArchive : ArchiveBase
     {

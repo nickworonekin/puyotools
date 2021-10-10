@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 
-namespace PuyoTools.Core.Archive
+namespace PuyoTools.Core.Archives
 {
     public abstract class ArchiveBase : ModuleBase
     {

@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Text;
 
-namespace PuyoTools.Core.Archive
+namespace PuyoTools.Core.Archives
 {
     public abstract class ArchiveWriter : IDisposable, IModule
     {

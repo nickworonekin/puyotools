@@ -5,7 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 
-namespace PuyoTools.Core.Archive
+namespace PuyoTools.Core.Archives
 {
     public class OneStorybookArchive : ArchiveBase
     {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace PuyoTools.Core.Texture
+namespace PuyoTools.Core.Textures
 {
     public class ExternalPaletteRequiredEventArgs : EventArgs
     {

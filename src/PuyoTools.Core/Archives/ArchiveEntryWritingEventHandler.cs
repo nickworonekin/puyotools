@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace PuyoTools.Core.Archive
+namespace PuyoTools.Core.Archives
 {
     /// <summary>
     /// Represents a method that will handle the archive entry writing event.

@@ -9,7 +9,7 @@ using System.IO;
 
 using PuyoTools.Core;
 using PuyoTools.Core.Compression;
-using PuyoTools.Core.Texture;
+using PuyoTools.Core.Textures;
 using PuyoTools.App.Formats.Compression;
 using PuyoTools.App.Formats.Textures;
 using System.Linq;

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 
-namespace PuyoTools.Core.Archive
+namespace PuyoTools.Core.Archives
 {
     public class ArchiveEntry
     {
@@ -128,7 +128,7 @@ namespace PuyoTools.Core.Archive
         public string Name => System.IO.Path.GetFileName(name);
 
         /// <summary>
-        /// When this entry belongs to an <see cref="Archive.ArchiveWriter"/>, gets the absolute path of the file used to create this entry.
+        /// When this entry belongs to an <see cref="Archives.ArchiveWriter"/>, gets the absolute path of the file used to create this entry.
         /// </summary>
         public string Path
         {

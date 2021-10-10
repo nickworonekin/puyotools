@@ -9,7 +9,7 @@ using System.Windows.Forms;
 using System.IO;
 using System.Drawing.Imaging;
 
-using PuyoTools.Core.Texture;
+using PuyoTools.Core.Textures;
 using PuyoTools.App.Formats.Textures;
 using PuyoTools.App;
 using PuyoTools.App.Formats.Compression;

@@ -5,7 +5,7 @@ using VrSharp;
 using VrSharp.Pvr;
 using VrSharpPvrTexture = VrSharp.Pvr.PvrTexture;
 
-namespace PuyoTools.Core.Texture
+namespace PuyoTools.Core.Textures
 {
     public class PvrTexture : TextureBase, ITextureHasExternalPalette
     {

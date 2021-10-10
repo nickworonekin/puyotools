@@ -1,12 +1,12 @@
 ﻿using PuyoTools.App.Formats.Textures;
-using PuyoTools.Core.Texture;
+using PuyoTools.Core.Textures;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using VrSharp.Gvr;
-using GvrTexture = PuyoTools.Core.Texture.GvrTexture;
+using GvrTexture = PuyoTools.Core.Textures.GvrTexture;
 
 namespace PuyoTools.App.Cli.Commands.Textures
 {

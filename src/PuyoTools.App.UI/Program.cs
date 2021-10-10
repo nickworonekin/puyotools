@@ -1,7 +1,7 @@
 ﻿using PuyoTools.GUI;
-using PuyoTools.Core.Archive;
+using PuyoTools.Core.Archives;
 using PuyoTools.Core.Compression;
-using PuyoTools.Core.Texture;
+using PuyoTools.Core.Textures;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;

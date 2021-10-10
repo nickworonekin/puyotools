@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 
 using PuyoTools.Core;
-using PuyoTools.Core.Archive;
+using PuyoTools.Core.Archives;
 
 using System.Linq;
 
