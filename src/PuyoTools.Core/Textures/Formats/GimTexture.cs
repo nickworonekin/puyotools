@@ -2,7 +2,6 @@
 using System.IO;
 
 using PuyoTools.Core.Textures.Gim;
-using GimSharpGimTexture = PuyoTools.Core.Textures.Gim.GimTexture;
 
 namespace PuyoTools.Core.Textures
 {
@@ -25,8 +24,8 @@ namespace PuyoTools.Core.Textures
         /// <param name="length">Number of bytes to read.</param>
         public override void Read(Stream source, Stream destination)
         {
-            // Reading GIM textures is done through GimSharp, so just pass it to that
-            GimSharpGimTexture texture = new GimSharpGimTexture(source);
+            // Reading GIM textures is done through the GIM texture decoder, so just pass it to that
+            GimTextureDecoder texture = new GimTextureDecoder(source);
 
             texture.Save(destination);
         }
@@ -50,7 +49,7 @@ namespace PuyoTools.Core.Textures
 
         public override void Write(Stream source, Stream destination)
         {
-            // Writing GIM textures is done through GimSharp, so just pass it to that
+            // Writing GIM textures is done through GIM texture encoder, so just pass it to that
             GimTextureEncoder texture = new GimTextureEncoder(source, PaletteFormat, DataFormat);
 
             if (!texture.Initalized)
@@ -76,6 +75,6 @@ namespace PuyoTools.Core.Textures
         /// </summary>
         /// <param name="source">The data to read.</param>
         /// <returns>True if the data can be read, false otherwise.</returns>
-        public static bool Identify(Stream source) => GimSharpGimTexture.Is(source);
+        public static bool Identify(Stream source) => GimTextureDecoder.Is(source);
     }
 }
