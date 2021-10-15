@@ -79,6 +79,8 @@ namespace PuyoTools.Core.Textures
         }
 
         // Palette
+        public byte[] Palette { get; set; }
+
         protected byte[][] palette;
         public void SetPalette(byte[] palette, int offset, int numEntries)
         {

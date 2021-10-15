@@ -6,7 +6,7 @@ using System.Text;
 
 namespace PuyoTools.Core.Textures.Gvr
 {
-    public class GvrTexture : VrTexture
+    public class GvrTextureDecoder : VrTexture
     {
         #region Texture Properties
         /// <summary>
@@ -85,13 +85,13 @@ namespace PuyoTools.Core.Textures.Gvr
         /// Open a GVR texture from a file.
         /// </summary>
         /// <param name="file">Filename of the file that contains the texture data.</param>
-        public GvrTexture(string file) : base(file) { }
+        public GvrTextureDecoder(string file) : base(file) { }
 
         /// <summary>
         /// Open a GVR texture from a byte array.
         /// </summary>
         /// <param name="source">Byte array that contains the texture data.</param>
-        public GvrTexture(byte[] source) : base(source) { }
+        public GvrTextureDecoder(byte[] source) : base(source) { }
 
         /// <summary>
         /// Open a GVR texture from a byte array.
@@ -99,20 +99,20 @@ namespace PuyoTools.Core.Textures.Gvr
         /// <param name="source">Byte array that contains the texture data.</param>
         /// <param name="offset">Offset of the texture in the array.</param>
         /// <param name="length">Number of bytes to read.</param>
-        public GvrTexture(byte[] source, int offset, int length) : base(source, offset, length) { }
+        public GvrTextureDecoder(byte[] source, int offset, int length) : base(source, offset, length) { }
 
         /// <summary>
         /// Open a GVR texture from a stream.
         /// </summary>
         /// <param name="source">Stream that contains the texture data.</param>
-        public GvrTexture(Stream source) : base(source) { }
+        public GvrTextureDecoder(Stream source) : base(source) { }
 
         /// <summary>
         /// Open a GVR texture from a stream.
         /// </summary>
         /// <param name="source">Stream that contains the texture data.</param>
         /// <param name="length">Number of bytes to read.</param>
-        public GvrTexture(Stream source, int length) : base(source, length) { }
+        public GvrTextureDecoder(Stream source, int length) : base(source, length) { }
 
         protected override void Initalize()
         {

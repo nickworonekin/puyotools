@@ -325,7 +325,7 @@ namespace PuyoTools.Core.Textures.Pvr
 
                                 for (int i = 0; i < 4; i++)
                                 {
-                                    destination[destinationIndex] = palette[index][i];
+                                    destination[destinationIndex] = Palette[(index * 4) + i];
                                     destinationIndex++;
                                 }
                             }
@@ -425,7 +425,7 @@ namespace PuyoTools.Core.Textures.Pvr
 
                                 for (int i = 0; i < 4; i++)
                                 {
-                                    destination[destinationIndex] = palette[index][i];
+                                    destination[destinationIndex] = Palette[(index * 4) + i];
                                     destinationIndex++;
                                 }
                             }

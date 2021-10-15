@@ -128,6 +128,10 @@ namespace PuyoTools.Core.Textures
         #endregion
 
         #region Constructors & Initalizers
+        internal VrTexture()
+        {
+        }
+
         // Open a texture from a file.
         public VrTexture(string file)
         {

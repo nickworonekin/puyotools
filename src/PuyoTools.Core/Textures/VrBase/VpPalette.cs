@@ -103,6 +103,10 @@ namespace PuyoTools.Core.Textures
             }
         }
 
+        protected VpPalette()
+        {
+        }
+
         protected abstract bool Initalize();
 
         /// <summary>

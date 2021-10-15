@@ -3,7 +3,6 @@ using System.IO;
 
 using PuyoTools.Core.Textures;
 using PuyoTools.Core.Textures.Svr;
-using VrSharpSvrTexture = PuyoTools.Core.Textures.Svr.SvrTexture;
 
 namespace PuyoTools.Core.Textures
 {
@@ -27,15 +26,15 @@ namespace PuyoTools.Core.Textures
         /// <param name="length">Number of bytes to read.</param>
         public override void Read(Stream source, Stream destination)
         {
-            // Reading SVR textures is done through VrSharp, so just pass it to that
-            VrSharpSvrTexture texture = new VrSharpSvrTexture(source);
+            // Reading SVR textures is done through the SVR texture decoder, so just pass it to that
+            SvrTextureDecoder texture = new SvrTextureDecoder(source);
 
             // Check to see if this texture requires an external palette and throw an exception
             // if we do not have one defined
             if (texture.NeedsExternalPalette)
             {
                 var eventArgs = new ExternalPaletteRequiredEventArgs();
-                ExternalPaletteRequired?.Invoke(this, eventArgs);
+                OnExternalPaletteRequired(eventArgs);
 
                 if (eventArgs.Palette != null)
                 {
@@ -45,8 +44,6 @@ namespace PuyoTools.Core.Textures
                     {
                         eventArgs.Palette.Close();
                     }
-
-                    //PaletteStream = null;
                 }
                 else
                 {
@@ -59,6 +56,8 @@ namespace PuyoTools.Core.Textures
 
         /// <inheritdoc/>
         public event EventHandler<ExternalPaletteRequiredEventArgs> ExternalPaletteRequired;
+
+        protected virtual void OnExternalPaletteRequired(ExternalPaletteRequiredEventArgs e) => ExternalPaletteRequired?.Invoke(this, e);
 
         #region Writer Settings
         /// <summary>
@@ -84,7 +83,7 @@ namespace PuyoTools.Core.Textures
 
         public override void Write(Stream source, Stream destination)
         {
-            // Writing SVR textures is done through VrSharp, so just pass it to that
+            // Writing SVR textures is done through the SVR texture encoder, so just pass it to that
             SvrTextureEncoder texture = new SvrTextureEncoder(source, PixelFormat, DataFormat);
 
             if (!texture.Initalized)
@@ -98,37 +97,26 @@ namespace PuyoTools.Core.Textures
                 texture.GlobalIndex = GlobalIndex;
             }
 
-            /*// If we have an external palette file, save it
-            if (texture.NeedsExternalPalette)
-            {
-                needsExternalPalette = true;
-
-                PaletteStream = new MemoryStream();
-                texture.PaletteEncoder.Save(PaletteStream);
-            }
-            else
-            {
-                needsExternalPalette = false;
-            }*/
-
             texture.Save(destination);
 
             // If we have an external palette file, save it
             if (texture.NeedsExternalPalette)
             {
                 var paletteStream = texture.PaletteEncoder.ToStream();
-                ExternalPaletteCreated?.Invoke(this, new ExternalPaletteCreatedEventArgs(paletteStream));
+                OnExternalPaletteCreated(new ExternalPaletteCreatedEventArgs(paletteStream));
             }
         }
 
         /// <inheritdoc/>
         public event EventHandler<ExternalPaletteCreatedEventArgs> ExternalPaletteCreated;
 
+        protected virtual void OnExternalPaletteCreated(ExternalPaletteCreatedEventArgs e) => ExternalPaletteCreated?.Invoke(this, e);
+
         /// <summary>
         /// Returns if this codec can read the data in <paramref name="source"/>.
         /// </summary>
         /// <param name="source">The data to read.</param>
         /// <returns>True if the data can be read, false otherwise.</returns>
-        public static bool Identify(Stream source) => VrSharpSvrTexture.Is(source);
+        public static bool Identify(Stream source) => SvrTextureDecoder.Is(source);
     }
 }

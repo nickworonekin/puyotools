@@ -6,7 +6,7 @@ using System.Text;
 
 namespace PuyoTools.Core.Textures.Svr
 {
-    public class SvrTexture : VrTexture
+    public class SvrTextureDecoder : VrTexture
     {
         #region Texture Properties
         /// <summary>
@@ -49,13 +49,13 @@ namespace PuyoTools.Core.Textures.Svr
         /// Open a SVR texture from a file.
         /// </summary>
         /// <param name="file">Filename of the file that contains the texture data.</param>
-        public SvrTexture(string file) : base(file) { }
+        public SvrTextureDecoder(string file) : base(file) { }
 
         /// <summary>
         /// Open a SVR texture from a byte array.
         /// </summary>
         /// <param name="source">Byte array that contains the texture data.</param>
-        public SvrTexture(byte[] source) : base(source) { }
+        public SvrTextureDecoder(byte[] source) : base(source) { }
 
         /// <summary>
         /// Open a SVR texture from a byte array.
@@ -63,20 +63,20 @@ namespace PuyoTools.Core.Textures.Svr
         /// <param name="source">Byte array that contains the texture data.</param>
         /// <param name="offset">Offset of the texture in the array.</param>
         /// <param name="length">Number of bytes to read.</param>
-        public SvrTexture(byte[] source, int offset, int length) : base(source, offset, length) { }
+        public SvrTextureDecoder(byte[] source, int offset, int length) : base(source, offset, length) { }
 
         /// <summary>
         /// Open a SVR texture from a stream.
         /// </summary>
         /// <param name="source">Stream that contains the texture data.</param>
-        public SvrTexture(Stream source) : base(source) { }
+        public SvrTextureDecoder(Stream source) : base(source) { }
 
         /// <summary>
         /// Open a SVR texture from a stream.
         /// </summary>
         /// <param name="source">Stream that contains the texture data.</param>
         /// <param name="length">Number of bytes to read.</param>
-        public SvrTexture(Stream source, int length) : base(source, length) { }
+        public SvrTextureDecoder(Stream source, int length) : base(source, length) { }
 
         protected override void Initalize()
         {

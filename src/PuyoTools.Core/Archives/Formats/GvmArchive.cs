@@ -291,7 +291,7 @@ namespace PuyoTools.Core.Archives
                 // We already checked to make sure this texture is a GVR.
                 // No need to check it again.
                 oldPosition = entryData.Position;
-                PuyoTools.Core.Textures.Gvr.GvrTexture texture = new PuyoTools.Core.Textures.Gvr.GvrTexture(entryData);
+                PuyoTools.Core.Textures.Gvr.GvrTextureDecoder texture = new PuyoTools.Core.Textures.Gvr.GvrTextureDecoder(entryData);
                 entryData.Position = oldPosition;
 
                 // Write out the entry number

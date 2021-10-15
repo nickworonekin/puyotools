@@ -3,7 +3,6 @@ using System.IO;
 
 using PuyoTools.Core.Textures;
 using PuyoTools.Core.Textures.Gvr;
-using VrSharpGvrTexture = PuyoTools.Core.Textures.Gvr.GvrTexture;
 
 namespace PuyoTools.Core.Textures
 {
@@ -30,8 +29,8 @@ namespace PuyoTools.Core.Textures
         /// <param name="length">Number of bytes to read.</param>
         public override void Read(Stream source, Stream destination)
         {
-            // Reading GVR textures is done through VrSharp, so just pass it to that
-            VrSharpGvrTexture texture = new VrSharpGvrTexture(source);
+            // Reading GVR textures is done through the GVR texture decoder, so just pass it to that
+            GvrTextureDecoder texture = new GvrTextureDecoder(source);
 
             // Check to see if this texture requires an external palette and throw an exception
             // if we do not have one defined
@@ -48,8 +47,6 @@ namespace PuyoTools.Core.Textures
                     {
                         eventArgs.Palette.Close();
                     }
-
-                    //PaletteStream = null;
                 }
                 else
                 {
@@ -123,7 +120,7 @@ namespace PuyoTools.Core.Textures
 
         public override void Write(Stream source, Stream destination)
         {
-            // Writing GVR textures is done through VrSharp, so just pass it to that
+            // Writing GVR textures is done through the GVR texture encoder, so just pass it to that
             GvrTextureEncoder texture = new GvrTextureEncoder(source, PaletteFormat, DataFormat);
 
             if (!texture.Initalized)
@@ -140,19 +137,6 @@ namespace PuyoTools.Core.Textures
 
             texture.HasMipmaps = HasMipmaps;
             texture.NeedsExternalPalette = needsExternalPalette;
-
-            /*// If we have an external palette file, save it
-            if (texture.NeedsExternalPalette)
-            {
-                needsExternalPalette = true;
-
-                PaletteStream = new MemoryStream();
-                texture.PaletteEncoder.Save(PaletteStream);
-            }
-            else
-            {
-                needsExternalPalette = false;
-            }*/
 
             texture.Save(destination);
 
@@ -174,6 +158,6 @@ namespace PuyoTools.Core.Textures
         /// </summary>
         /// <param name="source">The data to read.</param>
         /// <returns>True if the data can be read, false otherwise.</returns>
-        public static bool Identify(Stream source) => VrSharpGvrTexture.Is(source);
+        public static bool Identify(Stream source) => GvrTextureDecoder.Is(source);
     }
 }

@@ -12,7 +12,7 @@ namespace PuyoTools.Core.Textures.Gim
     {
         #region Fields
         private GimPixelCodec paletteCodec; // Palette codec
-        private GimDataCodec pixelCodec;   // Pixel codec
+        private GimDataCodec pixelCodec;    // Pixel codec
 
         private ushort paletteEntries; // Number of entries in the palette
 

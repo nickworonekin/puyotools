@@ -3,7 +3,6 @@ using System.IO;
 
 using PuyoTools.Core.Textures;
 using PuyoTools.Core.Textures.Pvr;
-using VrSharpPvrTexture = PuyoTools.Core.Textures.Pvr.PvrTexture;
 
 namespace PuyoTools.Core.Textures
 {
@@ -29,30 +28,29 @@ namespace PuyoTools.Core.Textures
         /// <param name="length">Number of bytes to read.</param>
         public override void Read(Stream source, Stream destination)
         {
-            // Reading PVR textures is done through VrSharp, so just pass it to that
-            VrSharpPvrTexture texture = new VrSharpPvrTexture(source);
+            // Reading PVR textures is done through the PVR texture decoder, so just pass it to that
+            PvrTextureDecoder texture = new PvrTextureDecoder(source);
 
             // Check to see if this texture requires an external palette and throw an exception
             // if we do not have one defined
             if (texture.NeedsExternalPalette)
             {
                 var eventArgs = new ExternalPaletteRequiredEventArgs();
-                ExternalPaletteRequired?.Invoke(this, eventArgs);
+                OnExternalPaletteRequired(eventArgs);
 
                 if (eventArgs.Palette != null)
                 {
-                    texture.SetPalette(new PvpPalette(eventArgs.Palette));
+                    texture.Palette = new PvrPalette(eventArgs.Palette);
 
                     if (eventArgs.CloseAfterRead)
                     {
                         eventArgs.Palette.Close();
                     }
-
-                    //PaletteStream = null;
                 }
                 else
                 {
-                    throw new TextureNeedsPaletteException();
+                    texture.Palette = new PvrGrayscalePalette();
+                    //throw new TextureNeedsPaletteException();
                 }
             }
 
@@ -61,6 +59,8 @@ namespace PuyoTools.Core.Textures
 
         /// <inheritdoc/>
         public event EventHandler<ExternalPaletteRequiredEventArgs> ExternalPaletteRequired;
+
+        protected virtual void OnExternalPaletteRequired(ExternalPaletteRequiredEventArgs e) => ExternalPaletteRequired?.Invoke(this, e);
 
         #region Writer Settings
         /// <summary>
@@ -104,7 +104,7 @@ namespace PuyoTools.Core.Textures
 
         public override void Write(Stream source, Stream destination)
         {
-            // Writing PVR textures is done through VrSharp, so just pass it to that
+            // Writing PVR textures is done through the PVR texture encoder, so just pass it to that
             PvrTextureEncoder texture = new PvrTextureEncoder(source, PixelFormat, DataFormat);
 
             if (!texture.Initalized)
@@ -120,37 +120,26 @@ namespace PuyoTools.Core.Textures
                 texture.GlobalIndex = GlobalIndex;
             }
 
-            /*// If we have an external palette file, save it
-            if (texture.NeedsExternalPalette)
-            {
-                needsExternalPalette = true;
-
-                PaletteStream = new MemoryStream();
-                texture.PaletteEncoder.Save(PaletteStream);
-            }
-            else
-            {
-                needsExternalPalette = false;
-            }*/
-
             texture.Save(destination);
 
             // If we have an external palette file, save it
             if (texture.NeedsExternalPalette)
             {
                 var paletteStream = texture.PaletteEncoder.ToStream();
-                ExternalPaletteCreated?.Invoke(this, new ExternalPaletteCreatedEventArgs(paletteStream));
+                OnExternalPaletteCreated(new ExternalPaletteCreatedEventArgs(paletteStream));
             }
         }
 
         /// <inheritdoc/>
         public event EventHandler<ExternalPaletteCreatedEventArgs> ExternalPaletteCreated;
 
+        protected virtual void OnExternalPaletteCreated(ExternalPaletteCreatedEventArgs e) => ExternalPaletteCreated?.Invoke(this, e);
+
         /// <summary>
         /// Returns if this codec can read the data in <paramref name="source"/>.
         /// </summary>
         /// <param name="source">The data to read.</param>
         /// <returns>True if the data can be read, false otherwise.</returns>
-        public static bool Identify(Stream source) => VrSharpPvrTexture.Is(source);
+        public static bool Identify(Stream source) => PvrTextureDecoder.Is(source);
     }
 }

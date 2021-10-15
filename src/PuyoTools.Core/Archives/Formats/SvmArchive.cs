@@ -277,7 +277,7 @@ namespace PuyoTools.Core.Archives
                 // We already checked to make sure this texture is a SVR.
                 // No need to check it again.
                 oldPosition = entryData.Position;
-                PuyoTools.Core.Textures.Svr.SvrTexture texture = new PuyoTools.Core.Textures.Svr.SvrTexture(entryData);
+                PuyoTools.Core.Textures.Svr.SvrTextureDecoder texture = new PuyoTools.Core.Textures.Svr.SvrTextureDecoder(entryData);
                 entryData.Position = oldPosition;
 
                 // Write out the entry number

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
+using System.Text;
 
 namespace PuyoTools.Core.Textures.Pvr
 {
@@ -9,6 +11,54 @@ namespace PuyoTools.Core.Textures.Pvr
         // Rle Compression
         public class Rle : PvrCompressionCodec
         {
+            public void Compress(Stream source, Stream destination, PvrPixelCodec pixelCodec, PvrDataCodec dataCodec)
+            {
+                var bytesPerPixel = dataCodec.Bpp / 8;
+
+                using (var reader = new BinaryReader(source, Encoding.UTF8, true))
+                using (var writer = new BinaryWriter(destination, Encoding.UTF8, true))
+                {
+                    var currentPixel = reader.ReadBytes(bytesPerPixel);
+                    var count = 1;
+
+                    while (source.Position < source.Length)
+                    {
+                        var pixel = reader.ReadBytes(bytesPerPixel);
+
+                        if (count == 256 || !pixel.SequenceEqual(currentPixel))
+                        {
+                            writer.Write(currentPixel);
+                            writer.WriteByte((byte)(count - 1));
+                        }
+
+                        for (var i = 0; i < count; i++)
+                        {
+                            writer.Write(pixel);
+                        }
+                    }
+                }
+            }
+
+            public override void Decompress(Stream source, Stream destination, PvrPixelCodec pixelCodec, PvrDataCodec dataCodec)
+            {
+                var bytesPerPixel = dataCodec.Bpp / 8;
+
+                using (var reader = new BinaryReader(source, Encoding.UTF8, true))
+                using (var writer = new BinaryWriter(destination, Encoding.UTF8, true))
+                {
+                    while (source.Position < source.Length)
+                    {
+                        var pixel = reader.ReadBytes(bytesPerPixel);
+                        var count = reader.ReadByte() + 1;
+
+                        for (var i = 0; i < count; i++)
+                        {
+                            writer.Write(pixel);
+                        }
+                    }
+                }
+            }
+
             public override byte[] Decompress(byte[] input, int DataOffset, VrPixelCodec PixelCodec, VrDataCodec DataCodec)
             {
                 byte[] output     = new byte[BitConverter.ToUInt32(input, 0x00)];
@@ -97,6 +147,10 @@ namespace PuyoTools.Core.Textures.Pvr
             }
         }
         #endregion
+
+        public virtual void Decompress(Stream source, Stream destination, PvrPixelCodec pixelCodec, PvrDataCodec dataCodec)
+        {
+        }
 
         public abstract byte[] Decompress(byte[] input, int DataOffset, VrPixelCodec PixelCodec, VrDataCodec DataCodec);
         public abstract byte[] Compress(byte[] input, int DataOffset, VrPixelCodec PixelCodec, VrDataCodec DataCodec);
