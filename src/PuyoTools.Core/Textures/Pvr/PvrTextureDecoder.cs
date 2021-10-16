@@ -24,7 +24,8 @@ namespace PuyoTools.Core.Textures.Pvr
         private byte[] paletteData;
         private byte[] textureData;
 
-        private byte[] decodedData;
+        private byte[] decodedPaletteData;
+        private byte[] decodedTextureData;
         #endregion
 
         #region Texture Properties
@@ -229,7 +230,7 @@ namespace PuyoTools.Core.Textures.Pvr
                 {
                     mipmaps[i] = new PvrMipmapDecoder(
                         this,
-                        reader.ReadBytes(size * size * dataCodec.Bpp / 8),
+                        reader.ReadBytes(Math.Max(size * size * dataCodec.Bpp / 8, 1)),
                         size,
                         size);
                 }
@@ -328,7 +329,12 @@ namespace PuyoTools.Core.Textures.Pvr
 
             if (paletteData != null) // The texture contains an embedded palette
             {
-                dataCodec.SetPalette(paletteData, 0, paletteEntries);
+                if (decodedPaletteData is null)
+                {
+                    decodedPaletteData = DecodePalette();
+                }
+
+                dataCodec.Palette = decodedPaletteData;
             }
 
             return dataCodec.Decode(textureData, 0, width, height);
@@ -340,12 +346,12 @@ namespace PuyoTools.Core.Textures.Pvr
         /// <returns>The pixel data as a byte array.</returns>
         public byte[] GetPixelData()
         {
-            if (decodedData == null)
+            if (decodedTextureData == null)
             {
-                decodedData = DecodeTexture();
+                decodedTextureData = DecodeTexture();
             }
 
-            return decodedData;
+            return decodedTextureData;
         }
         #endregion
 
@@ -384,6 +390,25 @@ namespace PuyoTools.Core.Textures.Pvr
             }
         }
         private PvrPalette palette;
+
+        private byte[] DecodePalette()
+        {
+            var decodedPaletteData = new byte[paletteEntries * 4];
+
+            var bytesPerPixel = pixelCodec.Bpp / 8;
+            var sourceIndex = 0;
+            var destinationIndex = 0;
+
+            for (var i = 0; i < paletteEntries; i++)
+            {
+                pixelCodec.DecodePixel(paletteData, sourceIndex, decodedPaletteData, destinationIndex);
+
+                sourceIndex += bytesPerPixel;
+                destinationIndex += 4;
+            }
+
+            return decodedPaletteData;
+        }
         #endregion
 
         #region Texture Check

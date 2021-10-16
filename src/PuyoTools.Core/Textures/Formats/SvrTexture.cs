@@ -38,7 +38,7 @@ namespace PuyoTools.Core.Textures
 
                 if (eventArgs.Palette != null)
                 {
-                    texture.SetPalette(new SvpPalette(eventArgs.Palette));
+                    texture.Palette = new SvrPalette(eventArgs.Palette);
 
                     if (eventArgs.CloseAfterRead)
                     {
@@ -47,7 +47,8 @@ namespace PuyoTools.Core.Textures
                 }
                 else
                 {
-                    throw new TextureNeedsPaletteException();
+                    texture.Palette = new SvrGrayscalePalette();
+                    //throw new TextureNeedsPaletteException();
                 }
             }
 

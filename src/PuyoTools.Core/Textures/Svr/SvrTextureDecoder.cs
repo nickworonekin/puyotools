@@ -1,47 +1,61 @@
 ﻿using System;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace PuyoTools.Core.Textures.Svr
 {
-    public class SvrTextureDecoder : VrTexture
+    public class SvrTextureDecoder
     {
+        #region Fields
+        private SvrPixelCodec pixelCodec; // Pixel codec
+        private SvrDataCodec dataCodec;   // Data codec
+
+        protected int paletteEntries; // Number of palette entries in the palette data
+
+        private static readonly byte[] gbixMagicCode = { (byte)'G', (byte)'B', (byte)'I', (byte)'X' };
+        private static readonly byte[] pvrtMagicCode = { (byte)'P', (byte)'V', (byte)'R', (byte)'T' };
+
+        private byte[] paletteData;
+        private byte[] textureData;
+
+        private byte[] decodedPaletteData;
+        private byte[] decodedTextureData;
+        #endregion
+
         #region Texture Properties
         /// <summary>
-        /// The texture's pixel format.
+        /// Gets the width.
         /// </summary>
-        public SvrPixelFormat PixelFormat
-        {
-            get
-            {
-                if (!initalized)
-                {
-                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
-                }
-
-                return pixelFormat;
-            }
-        }
-        private SvrPixelFormat pixelFormat;
+        public int Width { get; private set; }
 
         /// <summary>
-        /// The texture's data format.
+        /// Gets the height.
         /// </summary>
-        public SvrDataFormat DataFormat
-        {
-            get
-            {
-                if (!initalized)
-                {
-                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
-                }
+        public int Height { get; private set; }
 
-                return dataFormat;
-            }
-        }
-        private SvrDataFormat dataFormat;
+        /// <summary>
+        /// Gets the pixel format.
+        /// </summary>
+        public SvrPixelFormat PixelFormat { get; private set; }
+
+        /// <summary>
+        /// Gets the data format.
+        /// </summary>
+        public SvrDataFormat DataFormat { get; private set; }
+
+        /// <summary>
+        /// Gets the global index, or <see langword="null"/> if no global index exists.
+        /// </summary>
+        public uint? GlobalIndex { get; private set; }
+
+        /// <summary>
+        /// Gets the position of the PVRT chunk.
+        /// </summary>
+        internal long PvrtPosition { get; private set; }
         #endregion
 
         #region Constructors & Initalizers
@@ -49,36 +63,24 @@ namespace PuyoTools.Core.Textures.Svr
         /// Open a SVR texture from a file.
         /// </summary>
         /// <param name="file">Filename of the file that contains the texture data.</param>
-        public SvrTextureDecoder(string file) : base(file) { }
-
-        /// <summary>
-        /// Open a SVR texture from a byte array.
-        /// </summary>
-        /// <param name="source">Byte array that contains the texture data.</param>
-        public SvrTextureDecoder(byte[] source) : base(source) { }
-
-        /// <summary>
-        /// Open a SVR texture from a byte array.
-        /// </summary>
-        /// <param name="source">Byte array that contains the texture data.</param>
-        /// <param name="offset">Offset of the texture in the array.</param>
-        /// <param name="length">Number of bytes to read.</param>
-        public SvrTextureDecoder(byte[] source, int offset, int length) : base(source, offset, length) { }
+        public SvrTextureDecoder(string file)
+        {
+            using (var stream = File.OpenRead(file))
+            {
+                Initialize(stream);
+            }
+        }
 
         /// <summary>
         /// Open a SVR texture from a stream.
         /// </summary>
         /// <param name="source">Stream that contains the texture data.</param>
-        public SvrTextureDecoder(Stream source) : base(source) { }
+        public SvrTextureDecoder(Stream source)
+        {
+            Initialize(source);
+        }
 
-        /// <summary>
-        /// Open a SVR texture from a stream.
-        /// </summary>
-        /// <param name="source">Stream that contains the texture data.</param>
-        /// <param name="length">Number of bytes to read.</param>
-        public SvrTextureDecoder(Stream source, int length) : base(source, length) { }
-
-        protected override void Initalize()
+        /*protected override void Initalize()
         {
             // Check to see if what we are dealing with is a SVR texture
             if (!Is(encodedData))
@@ -139,96 +141,257 @@ namespace PuyoTools.Core.Textures.Svr
             }
 
             initalized = true;
+        }*/
+
+        private void Initialize(Stream source)
+        {
+            // Check to see if what we are dealing with is a PVR texture
+            if (!Is(source))
+            {
+                throw new NotAValidTextureException("This is not a valid PVR texture.");
+            }
+
+            var startPosition = source.Position;
+            var reader = new BinaryReader(source);
+
+            // Read the GBIX header (if present).
+            if (reader.At(startPosition, x => x.ReadBytes(gbixMagicCode.Length).SequenceEqual(gbixMagicCode)))
+            {
+                source.Position += 4; // 0x04
+
+                // Get the length of the GBIX header
+                var gbixLength = reader.ReadInt32() + 8;
+
+                // Read the global index
+                GlobalIndex = reader.ReadUInt32();
+
+                source.Position = startPosition + gbixLength;
+            }
+
+            source.Position += 8; // 0x08
+
+            // Get the pixel & data formats
+            PixelFormat = (SvrPixelFormat)reader.ReadByte();
+            DataFormat = (SvrDataFormat)reader.ReadByte();
+
+            // Get the texture dimensions
+            source.Position += 2; // 0x0C
+            Width = reader.ReadUInt16();
+            Height = reader.ReadUInt16();
+
+            // Get the codecs and make sure we can decode using them
+            pixelCodec = SvrPixelCodec.GetPixelCodec(PixelFormat);
+            dataCodec = SvrDataCodec.GetDataCodec(DataFormat);
+
+            // If we don't have a known pixel or data codec for these formats, that's ok.
+            // This will allow the properties to be read if the user doesn't want to decode this texture.
+            // The exception will be thrown when the texture is being decoded.
+            if (pixelCodec is null || dataCodec is null)
+            {
+                return;
+            }
+
+            dataCodec.PixelCodec = pixelCodec;
+
+            // Get the number of palette entries.
+            paletteEntries = dataCodec.PaletteEntries;
+
+            // Read the palette data (if present).
+            if (dataCodec.PaletteEntries != 0 && !dataCodec.NeedsExternalPalette)
+            {
+                paletteData = reader.ReadBytes(paletteEntries * pixelCodec.Bpp / 8);
+            }
+
+            // Read the texture data
+            textureData = reader.ReadBytes(Width * Height * dataCodec.Bpp / 8);
+        }
+        #endregion
+
+        #region Texture Retrieval
+        /// <summary>
+        /// Saves the decoded texture to the specified file as a PNG.
+        /// </summary>
+        /// <param name="file">Name of the file to save the data to.</param>
+        public void Save(string file)
+        {
+            using (var stream = File.OpenWrite(file))
+            {
+                Save(stream);
+            }
+        }
+
+        /// <summary>
+        /// Saves the decoded texture to the specified stream as a PNG.
+        /// </summary>
+        /// <param name="destination">The stream to save the texture to.</param>
+        public void Save(Stream destination)
+        {
+            var pixelData = GetPixelData();
+
+            Bitmap img = new Bitmap(Width, Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            BitmapData bitmapData = img.LockBits(new Rectangle(0, 0, img.Width, img.Height), ImageLockMode.WriteOnly, img.PixelFormat);
+            Marshal.Copy(pixelData, 0, bitmapData.Scan0, pixelData.Length);
+            img.UnlockBits(bitmapData);
+
+            img.Save(destination, ImageFormat.Png);
+        }
+
+        // Decodes a texture
+        private byte[] DecodeTexture()
+        {
+            return DecodeTexture(textureData, Width, Height);
+        }
+
+        internal byte[] DecodeTexture(byte[] textureData, int width, int height)
+        {
+            // Verify that a pixel and data codec have been set.
+            if (pixelCodec is null)
+            {
+                throw new CannotDecodeTextureException($"Pixel format {PixelFormat:X2} is invalid or not supported for decoding.");
+            }
+            if (dataCodec is null)
+            {
+                throw new CannotDecodeTextureException($"Data format {DataFormat:X2} is invalid or not supported for decoding.");
+            }
+
+            if (paletteData != null) // The texture contains an embedded palette
+            {
+                if (decodedPaletteData is null)
+                {
+                    decodedPaletteData = DecodePalette();
+                }
+
+                dataCodec.Palette = decodedPaletteData;
+            }
+
+            return dataCodec.Decode(textureData, 0, width, height);
+        }
+
+        /// <summary>
+        /// Decodes the texture and returns the pixel data.
+        /// </summary>
+        /// <returns>The pixel data as a byte array.</returns>
+        public byte[] GetPixelData()
+        {
+            if (decodedTextureData == null)
+            {
+                decodedTextureData = DecodeTexture();
+            }
+
+            return decodedTextureData;
         }
         #endregion
 
         #region Palette
         /// <summary>
-        /// Set the palette data from an external palette file.
+        /// Gets if an external palette file is needed to decode.
         /// </summary>
-        /// <param name="palette">A SvpPalette object</param>
-        public void SetPalette(SvpPalette palette)
+        /// <returns></returns>
+        public bool NeedsExternalPalette => dataCodec?.NeedsExternalPalette == true;
+
+        /// <summary>
+        /// Gets or sets the palette used when decoding.
+        /// </summary>
+        /// <remarks>This property must be set when <see cref="NeedsExternalPalette"/> is <see langword="true"/> and is ignored when <see langword="false"/>.</remarks>
+        public SvrPalette Palette
         {
-            SetPalette((VpPalette)palette);
+            get => palette;
+            set
+            {
+                palette = value;
+
+                // No need to actually update the data codec if a external palette isn't needed.
+                if (!NeedsExternalPalette)
+                {
+                    return;
+                }
+
+                if (palette is SvrGrayscalePalette grayscalePalette)
+                {
+                    dataCodec.Palette = grayscalePalette.GetPaletteData(dataCodec);
+                }
+                else
+                {
+                    dataCodec.Palette = palette.GetPaletteData();
+                }
+            }
+        }
+        private SvrPalette palette;
+
+        private byte[] DecodePalette()
+        {
+            var decodedPaletteData = new byte[paletteEntries * 4];
+
+            var bytesPerPixel = pixelCodec.Bpp / 8;
+            var sourceIndex = 0;
+            var destinationIndex = 0;
+
+            for (var i = 0; i < paletteEntries; i++)
+            {
+                pixelCodec.DecodePixel(paletteData, sourceIndex, decodedPaletteData, destinationIndex);
+
+                sourceIndex += bytesPerPixel;
+                destinationIndex += 4;
+            }
+
+            return decodedPaletteData;
         }
         #endregion
 
         #region Texture Check
         /// <summary>
-        /// Determines if this is a SVR texture.
+        /// Checks for the PVRT header and validates it.
         /// </summary>
-        /// <param name="source">Byte array containing the data.</param>
-        /// <param name="offset">The offset in the byte array to start at.</param>
-        /// <param name="length">Length of the data (in bytes).</param>
-        /// <returns>True if this is a SVR texture, false otherwise.</returns>
-        public static bool Is(byte[] source, int offset, int length)
+        /// <param name="reader">The data to check.</param>
+        /// <param name="startPosition">The position in <paramref name="reader"/> to start checking at.</param>
+        /// <returns>True if validation passes, false otherwise.</returns>
+        private static bool IsValidPvrt(BinaryReader reader, long startPosition)
         {
-            // GBIX and PVRT
-            if (length >= 0x20 &&
-                source.Skip(offset).Take(4).SequenceEqual(Encoding.UTF8.GetBytes("GBIX")) &&
-                source.Skip(offset + 0x10).Take(4).SequenceEqual(Encoding.UTF8.GetBytes("PVRT")) &&
-                source[offset + 0x19] >= 0x60 && source[offset + 0x19] < 0x70)
-            {
-                // Some SVR files have an extra byte at the end for seemingly no reason.
-                uint expectedLength = BitConverter.ToUInt32(source, offset + 0x14);
-                if (expectedLength == length - 24 || expectedLength == length - 24 - 1)
-                    return true;
-            }
+            var remainingLength = reader.BaseStream.Length - startPosition;
 
-            // PVRT (and no GBIX chunk)
-            else if (length >= 0x10 &&
-                source.Skip(offset).Take(4).SequenceEqual(Encoding.UTF8.GetBytes("PVRT")) &&
-                source[offset + 0x09] >= 0x60 && source[offset + 0x09] < 0x70)
-            {
-                // Some SVR files have an extra byte at the end for seemingly no reason.
-                uint expectedLength = BitConverter.ToUInt32(source, offset + 0x04);
-                if (expectedLength == length - 8 || expectedLength == length - 8 - 1)
-                    return true;
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// Determines if this is a SVR texture.
-        /// </summary>
-        /// <param name="source">Byte array containing the data.</param>
-        /// <returns>True if this is a SVR texture, false otherwise.</returns>
-        public static bool Is(byte[] source)
-        {
-            return Is(source, 0, source.Length);
-        }
-
-        /// <summary>
-        /// Determines if this is a SVR texture.
-        /// </summary>
-        /// <param name="source">The stream to read from. The stream position is not changed.</param>
-        /// <param name="length">Number of bytes to read.</param>
-        /// <returns>True if this is a SVR texture, false otherwise.</returns>
-        public static bool Is(Stream source, int length)
-        {
-            // If the length is < 16, then there is no way this is a valid texture.
-            if (length < 16)
+            // Check the remaining length and the magic code
+            if (!(remainingLength > 16
+                && reader.At(startPosition, x => x.ReadBytes(pvrtMagicCode.Length).SequenceEqual(pvrtMagicCode))))
             {
                 return false;
             }
 
-            // Let's see if we should check 16 bytes or 32 bytes
-            int amountToRead = 0;
-            if (length < 32)
+            // Check the expected length. For SVRs, they sometimes have an extra byte at the end of the file.
+            var pvrtLength = reader.At(startPosition + 0x4, x => x.ReadUInt32());
+            if (!(pvrtLength == remainingLength - 8 || pvrtLength == remainingLength - 9))
             {
-                amountToRead = 16;
-            }
-            else
-            {
-                amountToRead = 32;
+                return false;
             }
 
-            byte[] buffer = new byte[amountToRead];
-            source.Read(buffer, 0, amountToRead);
-            source.Position -= amountToRead;
+            // Check the data format.
+            var dataFormat = reader.At(startPosition + 0x9, x => x.ReadByte());
+            if (!(dataFormat >= 0x60 && dataFormat < 0x70))
+            {
+                return false;
+            }
 
-            return Is(buffer, 0, length);
+            return true;
+        }
+
+        /// <summary>
+        /// Checks for the GBIX and PVRT headers and validates them.
+        /// </summary>
+        /// <param name="reader">The data to check.</param>
+        /// <param name="startPosition">The position in <paramref name="reader"/> to start checking at.</param>
+        /// <returns>True if validation passes, false otherwise.</returns>
+        private static bool IsValidGbixAndPvrt(BinaryReader reader, long startPosition)
+        {
+            var remainingLength = reader.BaseStream.Length - startPosition;
+
+            if (!(remainingLength > 12
+                && reader.At(startPosition, x => x.ReadBytes(gbixMagicCode.Length).SequenceEqual(gbixMagicCode))))
+            {
+                return false;
+            }
+
+            var gbixLength = reader.At(startPosition + 0x4, x => x.ReadInt32()) + 8;
+
+            return IsValidPvrt(reader, startPosition + gbixLength);
         }
 
         /// <summary>
@@ -238,7 +401,13 @@ namespace PuyoTools.Core.Textures.Svr
         /// <returns>True if this is a SVR texture, false otherwise.</returns>
         public static bool Is(Stream source)
         {
-            return Is(source, (int)(source.Length - source.Position));
+            var startPosition = source.Position;
+
+            using (var reader = new BinaryReader(source, Encoding.UTF8, true))
+            {
+                return IsValidGbixAndPvrt(reader, startPosition) // PVRT with GBIX
+                    || IsValidPvrt(reader, startPosition); // PVRT only
+            }
         }
 
         /// <summary>

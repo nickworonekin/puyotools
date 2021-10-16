@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using PuyoTools.Core.Textures;
+using PuyoTools.Core.Textures.Svr;
 
 namespace PuyoTools.Core.Archives
 {
@@ -277,7 +278,7 @@ namespace PuyoTools.Core.Archives
                 // We already checked to make sure this texture is a SVR.
                 // No need to check it again.
                 oldPosition = entryData.Position;
-                PuyoTools.Core.Textures.Svr.SvrTextureDecoder texture = new PuyoTools.Core.Textures.Svr.SvrTextureDecoder(entryData);
+                SvrTextureDecoder texture = new SvrTextureDecoder(entryData);
                 entryData.Position = oldPosition;
 
                 // Write out the entry number
@@ -296,19 +297,19 @@ namespace PuyoTools.Core.Archives
                 if (HasDimensions)
                 {
                     ushort dimensions = 0;
-                    dimensions |= (ushort)(((byte)Math.Log(texture.TextureWidth, 2) - 2) & 0xF);
-                    dimensions |= (ushort)((((byte)Math.Log(texture.TextureHeight, 2) - 2) & 0xF) << 4);
+                    dimensions |= (ushort)(((byte)Math.Log(texture.Width, 2) - 2) & 0xF);
+                    dimensions |= (ushort)((((byte)Math.Log(texture.Height, 2) - 2) & 0xF) << 4);
                     PTStream.WriteUInt16(destination, dimensions);
                 }
                 if (HasGlobalIndexes)
                 {
-                    PTStream.WriteUInt32(destination, texture.GlobalIndex);
+                    PTStream.WriteUInt32(destination, texture.GlobalIndex ?? 0);
                 }
 
                 // Now write out the entry information
                 oldPosition = destination.Position;
                 destination.Position = entryOffset;
-                entryData.Position += texture.PvrtOffset;
+                entryData.Position += texture.PvrtPosition;
 
                 PTStream.CopyToPadded(entryData, destination, 16, 0);
 

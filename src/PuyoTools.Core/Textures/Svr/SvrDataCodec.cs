@@ -84,7 +84,6 @@ namespace PuyoTools.Core.Textures.Svr
             public override byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)
             {
                 byte[] output   = new byte[width * height * 4];
-                byte[][] clut    = palette;
                 int StartOffset = offset;
                 bool IsSwizzled = (width >= 128 && height >= 128);
 
@@ -101,10 +100,10 @@ namespace PuyoTools.Core.Textures.Svr
                         else
                             entry = (byte)((entry >> (x & 0x01) * 4) & 0x0F);
 
-                        output[(((y * width) + x) * 4) + 3] = clut[entry][3];
-                        output[(((y * width) + x) * 4) + 2] = clut[entry][2];
-                        output[(((y * width) + x) * 4) + 1] = clut[entry][1];
-                        output[(((y * width) + x) * 4) + 0] = clut[entry][0];
+                        output[(((y * width) + x) * 4) + 3] = Palette[(entry * 4) + 3];
+                        output[(((y * width) + x) * 4) + 2] = Palette[(entry * 4) + 2];
+                        output[(((y * width) + x) * 4) + 1] = Palette[(entry * 4) + 1];
+                        output[(((y * width) + x) * 4) + 0] = Palette[(entry * 4) + 0];
 
                         if ((x & 0x01) != 0)
                             offset++;
@@ -166,7 +165,6 @@ namespace PuyoTools.Core.Textures.Svr
             public override byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)
             {
                 byte[] output   = new byte[width * height * 4];
-                byte[][] clut    = palette;
                 int StartOffset = offset;
 
                 for (int y = 0; y < height; y++)
@@ -176,10 +174,10 @@ namespace PuyoTools.Core.Textures.Svr
                         byte entry = input[StartOffset + GetSwizzledOffset8(x, y, width, height)];
                         entry      = (byte)((entry & 0xE7) | ((entry & 0x10) >> 1) | ((entry & 0x08) << 1));
 
-                        output[(((y * width) + x) * 4) + 3] = clut[entry][3];
-                        output[(((y * width) + x) * 4) + 2] = clut[entry][2];
-                        output[(((y * width) + x) * 4) + 1] = clut[entry][1];
-                        output[(((y * width) + x) * 4) + 0] = clut[entry][0];
+                        output[(((y * width) + x) * 4) + 3] = Palette[(entry * 4) + 3];
+                        output[(((y * width) + x) * 4) + 2] = Palette[(entry * 4) + 2];
+                        output[(((y * width) + x) * 4) + 1] = Palette[(entry * 4) + 1];
+                        output[(((y * width) + x) * 4) + 0] = Palette[(entry * 4) + 0];
 
                         offset++;
                     }
@@ -230,7 +228,6 @@ namespace PuyoTools.Core.Textures.Svr
             public override byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)
             {
                 byte[] output   = new byte[width * height * 4];
-                byte[][] clut    = palette;
                 int StartOffset = offset;
                 bool IsSwizzled = (width >= 128 && height >= 128);
 
@@ -247,10 +244,10 @@ namespace PuyoTools.Core.Textures.Svr
                         else
                             entry = (byte)((entry >> (x & 0x01) * 4) & 0x0F);
 
-                        output[(((y * width) + x) * 4) + 3] = clut[entry][3];
-                        output[(((y * width) + x) * 4) + 2] = clut[entry][2];
-                        output[(((y * width) + x) * 4) + 1] = clut[entry][1];
-                        output[(((y * width) + x) * 4) + 0] = clut[entry][0];
+                        output[(((y * width) + x) * 4) + 3] = Palette[(entry * 4) + 3];
+                        output[(((y * width) + x) * 4) + 2] = Palette[(entry * 4) + 2];
+                        output[(((y * width) + x) * 4) + 1] = Palette[(entry * 4) + 1];
+                        output[(((y * width) + x) * 4) + 0] = Palette[(entry * 4) + 0];
 
                         if ((x & 0x01) != 0)
                             offset++;
@@ -307,7 +304,6 @@ namespace PuyoTools.Core.Textures.Svr
             public override byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)
             {
                 byte[] output   = new byte[width * height * 4];
-                byte[][] clut    = palette;
                 int StartOffset = offset;
 
                 for (int y = 0; y < height; y++)
@@ -317,10 +313,10 @@ namespace PuyoTools.Core.Textures.Svr
                         byte entry = input[StartOffset + GetSwizzledOffset8(x, y, width, height)];
                         entry      = (byte)((entry & 0xE7) | ((entry & 0x10) >> 1) | ((entry & 0x08) << 1));
 
-                        output[(((y * width) + x) * 4) + 3] = clut[entry][3];
-                        output[(((y * width) + x) * 4) + 2] = clut[entry][2];
-                        output[(((y * width) + x) * 4) + 1] = clut[entry][1];
-                        output[(((y * width) + x) * 4) + 0] = clut[entry][0];
+                        output[(((y * width) + x) * 4) + 3] = Palette[(entry * 4) + 3];
+                        output[(((y * width) + x) * 4) + 2] = Palette[(entry * 4) + 2];
+                        output[(((y * width) + x) * 4) + 1] = Palette[(entry * 4) + 1];
+                        output[(((y * width) + x) * 4) + 0] = Palette[(entry * 4) + 0];
 
                         offset++;
                     }
