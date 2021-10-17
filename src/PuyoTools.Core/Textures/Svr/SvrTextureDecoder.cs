@@ -145,10 +145,10 @@ namespace PuyoTools.Core.Textures.Svr
 
         private void Initialize(Stream source)
         {
-            // Check to see if what we are dealing with is a PVR texture
+            // Check to see if what we are dealing with is a SVR texture
             if (!Is(source))
             {
-                throw new NotAValidTextureException("This is not a valid PVR texture.");
+                throw new NotAValidTextureException("This is not a valid SVR texture.");
             }
 
             var startPosition = source.Position;
@@ -167,6 +167,8 @@ namespace PuyoTools.Core.Textures.Svr
 
                 source.Position = startPosition + gbixLength;
             }
+
+            PvrtPosition = source.Position;
 
             source.Position += 8; // 0x08
 

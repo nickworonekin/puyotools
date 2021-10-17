@@ -41,7 +41,7 @@ namespace PuyoTools.Core.Textures
 
                 if (eventArgs.Palette != null)
                 {
-                    texture.SetPalette(new GvpPalette(eventArgs.Palette));
+                    texture.Palette = new GvrPalette(eventArgs.Palette);
 
                     if (eventArgs.CloseAfterRead)
                     {
@@ -50,7 +50,8 @@ namespace PuyoTools.Core.Textures
                 }
                 else
                 {
-                    throw new TextureNeedsPaletteException();
+                    texture.Palette = new GvrGrayscalePalette();
+                    //throw new TextureNeedsPaletteException();
                 }
             }
 

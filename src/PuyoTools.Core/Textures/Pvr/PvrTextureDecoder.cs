@@ -359,7 +359,6 @@ namespace PuyoTools.Core.Textures.Pvr
         /// <summary>
         /// Gets if an external palette file is needed to decode.
         /// </summary>
-        /// <returns></returns>
         public bool NeedsExternalPalette => dataCodec?.NeedsExternalPalette == true;
 
         /// <summary>

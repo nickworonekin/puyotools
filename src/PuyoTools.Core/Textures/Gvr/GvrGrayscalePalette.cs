@@ -2,22 +2,22 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace PuyoTools.Core.Textures.Svr
+namespace PuyoTools.Core.Textures.Gvr
 {
     /// <summary>
-    /// A grayscale palette that can be used to decode a SVR texture when the external palette file is not known.
+    /// A grayscale palette that can be used to decode a GVR texture when the external palette file is not known.
     /// </summary>
-    public class SvrGrayscalePalette : SvrPalette
+    public class GvrGrayscalePalette : GvrPalette
     {
         /// <summary>
         /// Throws a <see cref="NotSupportedException"/>.
         /// </summary>
-        public override SvrPixelFormat PixelFormat => throw new NotSupportedException();
+        public override GvrPixelFormat PaletteFormat => throw new NotSupportedException();
 
         /// <summary>
         /// Throws a <see cref="NotSupportedException"/>.
         /// </summary>
-        /// <remarks>To get the palette data, see <see cref="GetPaletteData(SvrDataCodec)"/>.</remarks>
+        /// <remarks>To get the palette data, see <see cref="GetPaletteData(GvrDataCodec)"/>.</remarks>
         public override byte[] GetPaletteData()
         {
             throw new NotSupportedException();
@@ -28,7 +28,7 @@ namespace PuyoTools.Core.Textures.Svr
         /// </summary>
         /// <param name="dataCodec">The data codec this palette will be used for.</param>
         /// <returns>The palette data as a byte array.</returns>
-        public byte[] GetPaletteData(SvrDataCodec dataCodec)
+        public byte[] GetPaletteData(GvrDataCodec dataCodec)
         {
             var count = dataCodec.PaletteEntries;
             var palette = new byte[count * 4];

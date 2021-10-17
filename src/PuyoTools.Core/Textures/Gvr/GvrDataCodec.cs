@@ -567,7 +567,6 @@ namespace PuyoTools.Core.Textures.Gvr
             public override byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)
             {
                 byte[] output = new byte[width * height * 4];
-                byte[][] clut  = palette;
 
                 for (int y = 0; y < height; y += 8)
                 {
@@ -579,10 +578,10 @@ namespace PuyoTools.Core.Textures.Gvr
                             {
                                 byte entry = (byte)((input[offset] >> ((~x2 & 0x01) * 4)) & 0x0F);
 
-                                output[((((y + y2) * width) + (x + x2)) * 4) + 3] = clut[entry][3];
-                                output[((((y + y2) * width) + (x + x2)) * 4) + 2] = clut[entry][2];
-                                output[((((y + y2) * width) + (x + x2)) * 4) + 1] = clut[entry][1];
-                                output[((((y + y2) * width) + (x + x2)) * 4) + 0] = clut[entry][0];
+                                output[((((y + y2) * width) + (x + x2)) * 4) + 3] = Palette[(entry * 4) + 3];
+                                output[((((y + y2) * width) + (x + x2)) * 4) + 2] = Palette[(entry * 4) + 2];
+                                output[((((y + y2) * width) + (x + x2)) * 4) + 1] = Palette[(entry * 4) + 1];
+                                output[((((y + y2) * width) + (x + x2)) * 4) + 0] = Palette[(entry * 4) + 0];
 
                                 if ((x2 & 0x01) != 0)
                                     offset++;
@@ -646,7 +645,6 @@ namespace PuyoTools.Core.Textures.Gvr
             public override byte[] Decode(byte[] input, int offset, int width, int height, VrPixelCodec PixelCodec)
             {
                 byte[] output = new byte[width * height * 4];
-                byte[][] clut  = palette;
 
                 for (int y = 0; y < height; y += 4)
                 {
@@ -656,10 +654,10 @@ namespace PuyoTools.Core.Textures.Gvr
                         {
                             for (int x2 = 0; x2 < 8; x2++)
                             {
-                                output[((((y + y2) * width) + (x + x2)) * 4) + 3] = clut[input[offset]][3];
-                                output[((((y + y2) * width) + (x + x2)) * 4) + 2] = clut[input[offset]][2];
-                                output[((((y + y2) * width) + (x + x2)) * 4) + 1] = clut[input[offset]][1];
-                                output[((((y + y2) * width) + (x + x2)) * 4) + 0] = clut[input[offset]][0];
+                                output[((((y + y2) * width) + (x + x2)) * 4) + 3] = Palette[(input[offset] * 4) + 3];
+                                output[((((y + y2) * width) + (x + x2)) * 4) + 2] = Palette[(input[offset] * 4) + 2];
+                                output[((((y + y2) * width) + (x + x2)) * 4) + 1] = Palette[(input[offset] * 4) + 1];
+                                output[((((y + y2) * width) + (x + x2)) * 4) + 0] = Palette[(input[offset] * 4) + 0];
 
                                 offset++;
                             }

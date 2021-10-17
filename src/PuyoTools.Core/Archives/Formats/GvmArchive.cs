@@ -304,25 +304,25 @@ namespace PuyoTools.Core.Archives
                 }
                 if (HasFormats)
                 {
-                    destination.WriteByte((byte)(((byte)texture.PixelFormat << 4) | ((byte)texture.DataFlags & 0xF)));
-                    destination.WriteByte((byte)texture.DataFormat);
+                    destination.WriteByte((byte)(((byte)texture.PaletteFormat << 4) | ((byte)texture.Flags & 0xF)));
+                    destination.WriteByte((byte)texture.PixelFormat);
                 }
                 if (HasDimensions)
                 {
                     ushort dimensions = 0;
-                    dimensions |= (ushort)(((byte)Math.Log(texture.TextureWidth, 2) - 2) & 0xF);
-                    dimensions |= (ushort)((((byte)Math.Log(texture.TextureHeight, 2) - 2) & 0xF) << 4);
+                    dimensions |= (ushort)(((byte)Math.Log(texture.Width, 2) - 2) & 0xF);
+                    dimensions |= (ushort)((((byte)Math.Log(texture.Height, 2) - 2) & 0xF) << 4);
                     PTStream.WriteUInt16BE(destination, dimensions);
                 }
                 if (HasGlobalIndexes)
                 {
-                    PTStream.WriteUInt32BE(destination, texture.GlobalIndex);
+                    PTStream.WriteUInt32BE(destination, texture.GlobalIndex ?? 0);
                 }
 
                 // Now write out the entry information
                 oldPosition = destination.Position;
                 destination.Position = entryOffset;
-                entryData.Position += texture.PvrtOffset;
+                entryData.Position += texture.GvrtPosition;
 
                 PTStream.CopyToPadded(entryData, destination, 16, 0);
 

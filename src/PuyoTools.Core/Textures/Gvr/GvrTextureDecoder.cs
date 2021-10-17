@@ -1,83 +1,73 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace PuyoTools.Core.Textures.Gvr
 {
-    public class GvrTextureDecoder : VrTexture
+    public class GvrTextureDecoder
     {
+        private GvrPixelCodec paletteCodec; // Palette codec
+        private GvrDataCodec pixelCodec;    // Pixel codec
+
+        protected int paletteEntries; // Number of palette entries in the palette data
+
+        private static readonly byte[] gbixMagicCode = { (byte)'G', (byte)'B', (byte)'I', (byte)'X' };
+        private static readonly byte[] gcixMagicCode = { (byte)'G', (byte)'C', (byte)'I', (byte)'X' };
+        private static readonly byte[] gvrtMagicCode = { (byte)'G', (byte)'V', (byte)'R', (byte)'T' };
+
+        private byte[] paletteData;
+        private byte[] textureData;
+
+        private byte[] decodedPaletteData;
+        private byte[] decodedTextureData;
+
         #region Texture Properties
         /// <summary>
-        /// The texture's pixel format. This only applies to palettized textures.
+        /// Gets the width.
         /// </summary>
-        public GvrPixelFormat PixelFormat
-        {
-            get
-            {
-                if (!initalized)
-                {
-                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
-                }
-
-                return pixelFormat;
-            }
-        }
-        private GvrPixelFormat pixelFormat;
+        public int Width { get; private set; }
 
         /// <summary>
-        /// The texture's data flags. Can contain one or more of the following:
-        /// <para>- GvrDataFlags.Mipmaps</para>
-        /// <para>- GvrDataFlags.ExternalPalette</para>
-        /// <para>- GvrDataFlags.InternalPalette</para>
+        /// Gets the height.
         /// </summary>
-        public GvrDataFlags DataFlags
-        {
-            get
-            {
-                if (!initalized)
-                {
-                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
-                }
-
-                return dataFlags;
-            }
-        }
-        private GvrDataFlags dataFlags;
+        public int Height { get; private set; }
 
         /// <summary>
-        /// The texture's data format.
+        /// Gets the palette format, or <see langword="null"/> if a palette is not used.
         /// </summary>
-        public GvrDataFormat DataFormat
-        {
-            get
-            {
-                if (!initalized)
-                {
-                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
-                }
-
-                return dataFormat;
-            }
-        }
-        private GvrDataFormat dataFormat;
+        public GvrPixelFormat? PaletteFormat { get; private set; }
 
         /// <summary>
-        /// Returns if the texture contains mipmaps.
+        /// Gets the flags.
         /// </summary>
-        public override bool HasMipmaps
-        {
-            get
-            {
-                if (!initalized)
-                {
-                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
-                }
+        public GvrDataFlags Flags { get; private set; }
 
-                return (dataCodec.PaletteEntries == 0 && (dataFlags & GvrDataFlags.Mipmaps) != 0);
-            }
-        }
+        /// <summary>
+        /// Gets the pixel format.
+        /// </summary>
+        public GvrDataFormat PixelFormat { get; private set; }
+
+        /// <summary>
+        /// Gets the global index, or <see langword="null"/> if no global index exists.
+        /// </summary>
+        public uint? GlobalIndex { get; private set; }
+
+        /// <summary>
+        /// Gets the position of the GVRT chunk.
+        /// </summary>
+        internal long GvrtPosition { get; private set; }
+
+        /// <summary>
+        /// Gets the mipmaps, or an empty collection if there are none.
+        /// </summary>
+        /// <remarks>The collection is ordered by mipmap size in descending order.</remarks>
+        public ReadOnlyCollection<GvrMipmapDecoder> Mipmaps => Array.AsReadOnly(mipmaps);
+        private GvrMipmapDecoder[] mipmaps = Array.Empty<GvrMipmapDecoder>();
         #endregion
 
         #region Constructors & Initalizers
@@ -85,229 +75,307 @@ namespace PuyoTools.Core.Textures.Gvr
         /// Open a GVR texture from a file.
         /// </summary>
         /// <param name="file">Filename of the file that contains the texture data.</param>
-        public GvrTextureDecoder(string file) : base(file) { }
-
-        /// <summary>
-        /// Open a GVR texture from a byte array.
-        /// </summary>
-        /// <param name="source">Byte array that contains the texture data.</param>
-        public GvrTextureDecoder(byte[] source) : base(source) { }
-
-        /// <summary>
-        /// Open a GVR texture from a byte array.
-        /// </summary>
-        /// <param name="source">Byte array that contains the texture data.</param>
-        /// <param name="offset">Offset of the texture in the array.</param>
-        /// <param name="length">Number of bytes to read.</param>
-        public GvrTextureDecoder(byte[] source, int offset, int length) : base(source, offset, length) { }
+        public GvrTextureDecoder(string file)
+        {
+            using (var stream = File.OpenRead(file))
+            {
+                Initialize(stream);
+            }
+        }
 
         /// <summary>
         /// Open a GVR texture from a stream.
         /// </summary>
         /// <param name="source">Stream that contains the texture data.</param>
-        public GvrTextureDecoder(Stream source) : base(source) { }
+        public GvrTextureDecoder(Stream source)
+        {
+            Initialize(source);
+        }
 
-        /// <summary>
-        /// Open a GVR texture from a stream.
-        /// </summary>
-        /// <param name="source">Stream that contains the texture data.</param>
-        /// <param name="length">Number of bytes to read.</param>
-        public GvrTextureDecoder(Stream source, int length) : base(source, length) { }
-
-        protected override void Initalize()
+        private void Initialize(Stream source)
         {
             // Check to see if what we are dealing with is a GVR texture
-            if (!Is(encodedData))
+            if (!Is(source))
             {
                 throw new NotAValidTextureException("This is not a valid GVR texture.");
             }
 
-            // Determine the offsets of the GBIX/GCIX (if present) and GCIX header chunks.
-            if (encodedData.Take(4).SequenceEqual(Encoding.UTF8.GetBytes("GBIX")) ||
-                encodedData.Take(4).SequenceEqual(Encoding.UTF8.GetBytes("GCIX")))
+            var startPosition = source.Position;
+            var reader = new BinaryReader(source);
+
+            // Read the GBIX/GCIX header (if present).
+            if (IsGbixOrGcix(reader, startPosition))
             {
-                gbixOffset = 0x00;
-                pvrtOffset = 0x10;
-            }
-            else
-            {
-                gbixOffset = -1;
-                pvrtOffset = 0x00;
+                source.Position += 4; // 0x04
+
+                // Get the length of the GBIX/GCIX header
+                var gbixLength = reader.ReadInt32() + 8;
+
+                // Read the global index
+                GlobalIndex = reader.ReadUInt32BigEndian();
+
+                source.Position = startPosition + gbixLength;
             }
 
-            // Read the global index (if it is present). If it is not present, just set it to 0.
-            if (gbixOffset != -1)
-            {
-                globalIndex = BinaryPrimitives.ReverseEndianness(BitConverter.ToUInt32(encodedData, gbixOffset + 0x08));
-            }
-            else
-            {
-                globalIndex = 0;
-            }
+            GvrtPosition = source.Position;
 
-            // Read information about the texture
-            textureWidth  = BinaryPrimitives.ReverseEndianness(BitConverter.ToUInt16(encodedData, pvrtOffset + 0x0C));
-            textureHeight = BinaryPrimitives.ReverseEndianness(BitConverter.ToUInt16(encodedData, pvrtOffset + 0x0E));
+            source.Position += 10; // 0x0A
 
-            pixelFormat = (GvrPixelFormat)(encodedData[pvrtOffset + 0x0A] >> 4); // Only the first 4 bits matter
-            dataFlags   = (GvrDataFlags)(encodedData[pvrtOffset + 0x0A] & 0x0F); // Only the last 4 bits matter
-            dataFormat  = (GvrDataFormat)encodedData[pvrtOffset + 0x0B];
+            // Get the flags and the pixel format.
+            var paletteFormatAndFlags = reader.ReadByte();
+            Flags = (GvrDataFlags)(paletteFormatAndFlags & 0xF); // Flags uses the lower 4 bits
+            PixelFormat = (GvrDataFormat)reader.ReadByte();
+
+            // Get the texture dimensions
+            Width = reader.ReadUInt16BigEndian();
+            Height = reader.ReadUInt16BigEndian();
 
             // Get the codecs and make sure we can decode using them
-            dataCodec = GvrDataCodec.GetDataCodec(dataFormat);
+            pixelCodec = GvrDataCodec.GetDataCodec(PixelFormat);
 
-            // We need a pixel codec if this is a palettized texture
-            if (dataCodec != null && dataCodec.PaletteEntries != 0)
+            // If we don't have a known pixel codec for this format, that's ok.
+            // This will allow the properties to be read if the user doesn't want to decode this texture.
+            // The exception will be thrown when the texture is being decoded.
+            if (pixelCodec is null)
             {
-                pixelCodec = GvrPixelCodec.GetPixelCodec(pixelFormat);
+                return;
+            }
 
-                if (pixelCodec != null)
+            // Get the palette format and codec if a palette is used.
+            if (pixelCodec.PaletteEntries != 0)
+            {
+                PaletteFormat = (GvrPixelFormat)(paletteFormatAndFlags >> 4); // Palette format uses the upper 4 bits
+                paletteCodec = GvrPixelCodec.GetPixelCodec(PaletteFormat.Value);
+
+                // If we don't have a known palette codec for this format, that's ok.
+                // This will allow the properties to be read if the user doesn't want to decode this texture.
+                // The exception will be thrown when the texture is being decoded.
+                if (paletteCodec is null)
                 {
-                    dataCodec.PixelCodec = pixelCodec;
-                    canDecode = true;
+                    return;
+                }
+
+                pixelCodec.PixelCodec = paletteCodec;
+            }
+
+            // Get the number of palette entries.
+            paletteEntries = pixelCodec.PaletteEntries;
+
+            // Read the palette data (if present).
+            if (pixelCodec.PaletteEntries != 0 && Flags.HasFlag(GvrDataFlags.InternalPalette))
+            {
+                paletteData = reader.ReadBytes(paletteEntries * paletteCodec.Bpp / 8);
+            }
+
+            // Read the texture data
+            textureData = reader.ReadBytes(Width * Height * pixelCodec.Bpp / 8);
+
+            // If the texture contains mipmaps, read them into the texture mipmap data array.
+            // Mipmaps are stored in order from largest to smallest.
+            if (Flags.HasFlag(GvrDataFlags.Mipmaps))
+            {
+                // The mipmap array only stores the smaller mipmaps, not the full-size texture.
+                mipmaps = new GvrMipmapDecoder[(int)Math.Log(Width, 2)];
+
+                for (int i = 0, size = Width >> 1; i < mipmaps.Length; i++, size >>= 1)
+                {
+                    mipmaps[i] = new GvrMipmapDecoder(
+                        this,
+                        reader.ReadBytes(Math.Max(size * size * pixelCodec.Bpp / 8, 32)),
+                        size,
+                        size);
                 }
             }
-            else
-            {
-                pixelFormat = GvrPixelFormat.Unknown;
+        }
+        #endregion
 
-                if (dataCodec != null)
+        #region Texture Retrieval
+        /// <summary>
+        /// Saves the decoded texture to the specified file as a PNG.
+        /// </summary>
+        /// <param name="file">Name of the file to save the data to.</param>
+        public void Save(string file)
+        {
+            using (var stream = File.OpenWrite(file))
+            {
+                Save(stream);
+            }
+        }
+
+        /// <summary>
+        /// Saves the decoded texture to the specified stream as a PNG.
+        /// </summary>
+        /// <param name="destination">The stream to save the texture to.</param>
+        public void Save(Stream destination)
+        {
+            var pixelData = GetPixelData();
+
+            Bitmap img = new Bitmap(Width, Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            BitmapData bitmapData = img.LockBits(new Rectangle(0, 0, img.Width, img.Height), ImageLockMode.WriteOnly, img.PixelFormat);
+            Marshal.Copy(pixelData, 0, bitmapData.Scan0, pixelData.Length);
+            img.UnlockBits(bitmapData);
+
+            img.Save(destination, ImageFormat.Png);
+        }
+
+        // Decodes a texture
+        private byte[] DecodeTexture()
+        {
+            return DecodeTexture(textureData, Width, Height);
+        }
+
+        internal byte[] DecodeTexture(byte[] textureData, int width, int height)
+        {
+            // Verify that a palette codec (if required) and pixel codec have been set.
+            if (pixelCodec is null)
+            {
+                throw new CannotDecodeTextureException($"Pixel format {PixelFormat:X2} is invalid or not supported for decoding.");
+            }
+            if (paletteCodec is null && pixelCodec.PaletteEntries != 0)
+            {
+                throw new CannotDecodeTextureException($"Palette format {PaletteFormat:X2} is invalid or not supported for decoding.");
+            }
+
+            if (paletteData != null) // The texture contains an embedded palette
+            {
+                if (decodedPaletteData is null)
                 {
-                    canDecode = true;
+                    decodedPaletteData = DecodePalette();
                 }
+
+                pixelCodec.Palette = decodedPaletteData;
             }
 
-            // Set the palette and data offsets
-            paletteEntries = dataCodec.PaletteEntries;
-            if (!canDecode || paletteEntries == 0 || (paletteEntries != 0 && (dataFlags & GvrDataFlags.ExternalPalette) != 0))
+            return pixelCodec.Decode(textureData, 0, width, height);
+        }
+
+        /// <summary>
+        /// Decodes the texture and returns the pixel data.
+        /// </summary>
+        /// <returns>The pixel data as a byte array.</returns>
+        public byte[] GetPixelData()
+        {
+            if (decodedTextureData == null)
             {
-                paletteOffset = -1;
-                dataOffset = pvrtOffset + 0x10;
-            }
-            else
-            {
-                paletteOffset = pvrtOffset + 0x10;
-                dataOffset = paletteOffset + (paletteEntries * (pixelCodec.Bpp >> 3));
+                decodedTextureData = DecodeTexture();
             }
 
-            // If the texture contains mipmaps, gets the offsets of them
-            if (canDecode && paletteEntries == 0 && (dataFlags & GvrDataFlags.Mipmaps) != 0)
-            {
-                mipmapOffsets = new int[(int)Math.Log(textureWidth, 2) + 1];
-
-                int mipmapOffset = 0;
-                for (int i = 0, size = textureWidth; i < mipmapOffsets.Length; i++, size >>= 1)
-                {
-                    mipmapOffsets[i] = mipmapOffset;
-                    mipmapOffset += Math.Max(size * size * (dataCodec.Bpp >> 3), 32);
-                }
-            }
-
-            initalized = true;
+            return decodedTextureData;
         }
         #endregion
 
         #region Palette
         /// <summary>
-        /// Set the palette data from an external palette file.
+        /// Gets if an external palette file is needed to decode.
         /// </summary>
-        /// <param name="clut">A GvpPalette object</param>
-        public void SetPalette(GvpPalette palette)
-        {
-            SetPalette((VpPalette)palette);
-        }
+        public bool NeedsExternalPalette => paletteEntries != 0 && Flags.HasFlag(GvrDataFlags.ExternalPalette);
 
         /// <summary>
-        /// Returns if the texture needs an external clut file.
+        /// Gets or sets the palette used when decoding.
         /// </summary>
-        /// <returns></returns>
-        public override bool NeedsExternalPalette
+        /// <remarks>This property must be set when <see cref="NeedsExternalPalette"/> is <see langword="true"/> and is ignored when <see langword="false"/>.</remarks>
+        public GvrPalette Palette
         {
-            get
+            get => palette;
+            set
             {
-                if (!initalized)
+                palette = value;
+
+                // No need to actually update the data codec if a external palette isn't needed.
+                if (!NeedsExternalPalette)
                 {
-                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
+                    return;
                 }
 
-                return (paletteEntries != 0 && (dataFlags & GvrDataFlags.ExternalPalette) != 0);
+                if (palette is GvrGrayscalePalette grayscalePalette)
+                {
+                    pixelCodec.Palette = grayscalePalette.GetPaletteData(pixelCodec);
+                }
+                else
+                {
+                    pixelCodec.Palette = palette.GetPaletteData();
+                }
             }
+        }
+        private GvrPalette palette;
+
+        private byte[] DecodePalette()
+        {
+            var decodedPaletteData = new byte[paletteEntries * 4];
+
+            var bytesPerPixel = paletteCodec.Bpp / 8;
+            var sourceIndex = 0;
+            var destinationIndex = 0;
+
+            for (var i = 0; i < paletteEntries; i++)
+            {
+                paletteCodec.DecodePixel(paletteData, sourceIndex, decodedPaletteData, destinationIndex);
+
+                sourceIndex += bytesPerPixel;
+                destinationIndex += 4;
+            }
+
+            return decodedPaletteData;
         }
         #endregion
 
         #region Texture Check
         /// <summary>
-        /// Determines if this is a GVR texture.
+        /// Returns if the data at the specified position is equal to GBIX or GCIX.
         /// </summary>
-        /// <param name="source">Byte array containing the data.</param>
-        /// <param name="offset">The offset in the byte array to start at.</param>
-        /// <param name="length">Length of the data (in bytes).</param>
-        /// <returns>True if this is a GVR texture, false otherwise.</returns>
-        public static bool Is(byte[] source, int offset, int length)
+        /// <param name="reader">The data to check.</param>
+        /// <param name="startPosition">The position in <paramref name="reader"/> to start checking at. If <see langword="null"/>, the current position is used.</param>
+        /// <returns></returns>
+        private static bool IsGbixOrGcix(BinaryReader reader, long? startPosition = null)
         {
-            // GBIX and GVRT
-            if (length >= 32 &&
-                source.Skip(offset).Take(4).SequenceEqual(Encoding.UTF8.GetBytes("GBIX")) &&
-                source.Skip(offset + 0x10).Take(4).SequenceEqual(Encoding.UTF8.GetBytes("GVRT")) &&
-                BitConverter.ToUInt32(source, offset + 0x14) == length - 24)
-                return true;
+            startPosition = startPosition ?? reader.BaseStream.Position;
+            var remainingLength = reader.BaseStream.Length - startPosition;
 
-            // GCIX and GVRT
-            else if (length >= 32 &&
-                source.Skip(offset).Take(4).SequenceEqual(Encoding.UTF8.GetBytes("GCIX")) &&
-                source.Skip(offset + 0x10).Take(4).SequenceEqual(Encoding.UTF8.GetBytes("GVRT")) &&
-                BitConverter.ToUInt32(source, offset + 0x14) == length - 24)
-                return true;
-
-            // GVRT (and no GBIX or GCIX chunk)
-            else if (length > 16 &&
-                source.Skip(offset).Take(4).SequenceEqual(Encoding.UTF8.GetBytes("GVRT")) &&
-                BitConverter.ToUInt32(source, offset + 0x04) == length - 8)
-                return true;
-
-            return false;
-        }
-
-        /// <summary>
-        /// Determines if this is a GVR texture.
-        /// </summary>
-        /// <param name="source">Byte array containing the data.</param>
-        /// <returns>True if this is a GVR texture, false otherwise.</returns>
-        public static bool Is(byte[] source)
-        {
-            return Is(source, 0, source.Length);
-        }
-
-        /// <summary>
-        /// Determines if this is a GVR texture.
-        /// </summary>
-        /// <param name="source">The stream to read from. The stream position is not changed.</param>
-        /// <param name="length">Number of bytes to read.</param>
-        /// <returns>True if this is a GVR texture, false otherwise.</returns>
-        public static bool Is(Stream source, int length)
-        {
-            // If the length is < 16, then there is no way this is a valid texture.
-            if (length < 16)
+            if (!(remainingLength > 4))
             {
                 return false;
             }
 
-            // Let's see if we should check 16 bytes or 32 bytes
-            int amountToRead = 0;
-            if (length < 32)
+            var magicCode = reader.At(reader.BaseStream.Position, x => x.ReadBytes(gbixMagicCode.Length)); // OK to use the GBIX length
+
+            return magicCode.SequenceEqual(gbixMagicCode)
+                || magicCode.SequenceEqual(gcixMagicCode);
+        }
+
+        /// <summary>
+        /// Checks for the GVRT header and validates it.
+        /// </summary>
+        /// <param name="reader">The data to check.</param>
+        /// <param name="startPosition">The position in <paramref name="reader"/> to start checking at.</param>
+        /// <returns>True if validation passes, false otherwise.</returns>
+        private static bool IsValidGvrt(BinaryReader reader, long startPosition)
+        {
+            var remainingLength = reader.BaseStream.Length - startPosition;
+
+            return remainingLength > 16
+                && reader.At(startPosition, x => x.ReadBytes(gvrtMagicCode.Length).SequenceEqual(gvrtMagicCode))
+                && reader.At(startPosition + 0x4, x => x.ReadUInt32()) == remainingLength - 8;
+        }
+
+        /// <summary>
+        /// Checks for the GBIX/GCIX and GVRT headers and validates them.
+        /// </summary>
+        /// <param name="reader">The data to check.</param>
+        /// <param name="startPosition">The position in <paramref name="reader"/> to start checking at.</param>
+        /// <returns>True if validation passes, false otherwise.</returns>
+        private static bool IsValidGbixAndGvrt(BinaryReader reader, long startPosition)
+        {
+            var remainingLength = reader.BaseStream.Length - startPosition;
+
+            if (!(remainingLength > 12
+                && IsGbixOrGcix(reader, startPosition)))
             {
-                amountToRead = 16;
-            }
-            else
-            {
-                amountToRead = 32;
+                return false;
             }
 
-            byte[] buffer = new byte[amountToRead];
-            source.Read(buffer, 0, amountToRead);
-            source.Position -= amountToRead;
+            var gbixLength = reader.At(startPosition + 0x4, x => x.ReadInt32()) + 8;
 
-            return Is(buffer, 0, length);
+            return IsValidGvrt(reader, startPosition + gbixLength);
         }
 
         /// <summary>
@@ -317,7 +385,13 @@ namespace PuyoTools.Core.Textures.Gvr
         /// <returns>True if this is a GVR texture, false otherwise.</returns>
         public static bool Is(Stream source)
         {
-            return Is(source, (int)(source.Length - source.Position));
+            var startPosition = source.Position;
+
+            using (var reader = new BinaryReader(source, Encoding.UTF8, true))
+            {
+                return IsValidGbixAndGvrt(reader, startPosition) // PVRT with GBIX/GCIX
+                    || IsValidGvrt(reader, startPosition); // PVRT only
+            }
         }
 
         /// <summary>
