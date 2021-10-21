@@ -142,6 +142,10 @@ namespace PuyoTools.Core.Textures
             Initalize(source);
         }
 
+        protected VrTextureEncoder()
+        {
+        }
+
         private void Initalize(Bitmap source)
         {
             // Make sure this bitmap's dimensions are valid

@@ -11,7 +11,7 @@ namespace PuyoTools.Core.Textures.Pvr
         // Rle Compression
         public class Rle : PvrCompressionCodec
         {
-            public void Compress(Stream source, Stream destination, PvrPixelCodec pixelCodec, PvrDataCodec dataCodec)
+            public override void Compress(Stream source, Stream destination, PvrPixelCodec pixelCodec, PvrDataCodec dataCodec)
             {
                 var bytesPerPixel = dataCodec.Bpp / 8;
 
@@ -29,13 +29,18 @@ namespace PuyoTools.Core.Textures.Pvr
                         {
                             writer.Write(currentPixel);
                             writer.WriteByte((byte)(count - 1));
-                        }
 
-                        for (var i = 0; i < count; i++)
+                            currentPixel = pixel;
+                            count = 1;
+                        }
+                        else
                         {
-                            writer.Write(pixel);
+                            count++;
                         }
                     }
+
+                    writer.Write(currentPixel);
+                    writer.WriteByte((byte)(count - 1));
                 }
             }
 
@@ -147,6 +152,10 @@ namespace PuyoTools.Core.Textures.Pvr
             }
         }
         #endregion
+
+        public virtual void Compress(Stream source, Stream destination, PvrPixelCodec pixelCodec, PvrDataCodec dataCodec)
+        {
+        }
 
         public virtual void Decompress(Stream source, Stream destination, PvrPixelCodec pixelCodec, PvrDataCodec dataCodec)
         {

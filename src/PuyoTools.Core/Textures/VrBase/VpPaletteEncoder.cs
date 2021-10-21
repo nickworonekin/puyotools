@@ -20,6 +20,10 @@ namespace PuyoTools.Core.Textures
             paletteEntries = numColors;
             this.pixelCodec = pixelCodec;
         }
+
+        protected VpPaletteEncoder()
+        {
+        }
         #endregion
 
         #region Palette Retrieval

@@ -1,9 +1,9 @@
-﻿using System;
+﻿using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Png;
+using SixLabors.ImageSharp.PixelFormats;
+using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Text;
 
 namespace PuyoTools.Core.Textures.Pvr
@@ -55,14 +55,8 @@ namespace PuyoTools.Core.Textures.Pvr
         /// <param name="destination">The stream to save the texture to.</param>
         public void Save(Stream destination)
         {
-            var pixelData = GetPixelData();
-
-            Bitmap img = new Bitmap(Width, Height, PixelFormat.Format32bppArgb);
-            BitmapData bitmapData = img.LockBits(new Rectangle(0, 0, img.Width, img.Height), ImageLockMode.WriteOnly, img.PixelFormat);
-            Marshal.Copy(pixelData, 0, bitmapData.Scan0, pixelData.Length);
-            img.UnlockBits(bitmapData);
-
-            img.Save(destination, ImageFormat.Png);
+            var image = Image.LoadPixelData<Bgra32>(GetPixelData(), Width, Height);
+            image.Save(destination, new PngEncoder());
         }
 
         // Decodes a texture

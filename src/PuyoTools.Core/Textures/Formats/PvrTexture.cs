@@ -107,25 +107,26 @@ namespace PuyoTools.Core.Textures
             // Writing PVR textures is done through the PVR texture encoder, so just pass it to that
             PvrTextureEncoder texture = new PvrTextureEncoder(source, PixelFormat, DataFormat);
 
-            if (!texture.Initalized)
-            {
-                throw new TextureNotInitalizedException("Unable to initalize texture.");
-            }
-
             texture.CompressionFormat = compressionFormat;
 
-            texture.HasGlobalIndex = HasGlobalIndex;
-            if (texture.HasGlobalIndex)
-            {
-                texture.GlobalIndex = GlobalIndex;
-            }
+            texture.GlobalIndex = HasGlobalIndex
+                ? GlobalIndex
+                : (uint?)null;
 
             texture.Save(destination);
 
             // If we have an external palette file, save it
-            if (texture.NeedsExternalPalette)
+            /*if (texture.NeedsExternalPalette)
             {
                 var paletteStream = texture.PaletteEncoder.ToStream();
+                OnExternalPaletteCreated(new ExternalPaletteCreatedEventArgs(paletteStream));
+            }*/
+            if (texture.NeedsExternalPalette)
+            {
+                var paletteStream = new MemoryStream();
+                texture.Palette.Save(paletteStream);
+                paletteStream.Position = 0;
+
                 OnExternalPaletteCreated(new ExternalPaletteCreatedEventArgs(paletteStream));
             }
         }

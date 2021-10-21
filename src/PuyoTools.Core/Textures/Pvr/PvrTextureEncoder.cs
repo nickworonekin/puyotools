@@ -1,75 +1,78 @@
-﻿using System;
-using System.Drawing;
+﻿using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.Processing.Processors.Quantization;
+using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace PuyoTools.Core.Textures.Pvr
 {
-    public class PvrTextureEncoder : VrTextureEncoder
+    public class PvrTextureEncoder
     {
         #region Fields
-        private PvrCompressionCodec compressionCodec;   // Compression codec
+        private PvrPixelCodec pixelCodec; // Pixel codec
+        private PvrDataCodec dataCodec;   // Data codec
+        private PvrCompressionCodec compressionCodec; // Compression Codec
+
+        private int paletteEntries; // Number of palette entries in the palette data
+
+        private static readonly byte[] gbixMagicCode = { (byte)'G', (byte)'B', (byte)'I', (byte)'X' };
+        private static readonly byte[] pvrtMagicCode = { (byte)'P', (byte)'V', (byte)'R', (byte)'T' };
+
+        private byte[] encodedPaletteData;
+        private byte[] encodedTextureData;
+        private byte[][] encodedMipmapData;
+
+        private Image<Bgra32> sourceImage;
         #endregion
 
         #region Texture Properties
         /// <summary>
-        /// The texture's compression format. The default value is PvrCompressionFormat.None.
+        /// Gets the width.
+        /// </summary>
+        public int Width { get; private set; }
+
+        /// <summary>
+        /// Gets the height.
+        /// </summary>
+        public int Height { get; private set; }
+
+        /// <summary>
+        /// Gets the pixel format.
+        /// </summary>
+        public PvrPixelFormat PixelFormat { get; private set; }
+
+        /// <summary>
+        /// Gets the data format.
+        /// </summary>
+        public PvrDataFormat DataFormat { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the compression format.
         /// </summary>
         public PvrCompressionFormat CompressionFormat
         {
-            get
-            {
-                if (!initalized)
-                {
-                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
-                }
-
-                return compressionFormat;
-            }
+            get => compressionFormat;
             set
             {
-                if (!initalized)
+                if (!Enum.IsDefined(typeof(PvrCompressionFormat), value))
                 {
-                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
+                    throw new CannotDecodeTextureException($"Unknown compression format {value}.");
                 }
 
                 compressionFormat = value;
+                compressionCodec = PvrCompressionCodec.GetCompressionCodec(compressionFormat);
             }
         }
-        protected PvrCompressionFormat compressionFormat;
+        private PvrCompressionFormat compressionFormat = PvrCompressionFormat.None;
 
         /// <summary>
-        /// The texture's pixel format.
+        /// Gets or sets the global index. If <see langword="null"/>, the GBIX header will not be written.
         /// </summary>
-        public PvrPixelFormat PixelFormat
-        {
-            get
-            {
-                if (!initalized)
-                {
-                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
-                }
-
-                return pixelFormat;
-            }
-        }
-        private PvrPixelFormat pixelFormat;
-
-        /// <summary>
-        /// The texture's data format.
-        /// </summary>
-        public PvrDataFormat DataFormat
-        {
-            get
-            {
-                if (!initalized)
-                {
-                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
-                }
-
-                return dataFormat;
-            }
-        }
-        private PvrDataFormat dataFormat;
+        public uint? GlobalIndex { get; set; }
         #endregion
 
         #region Constructors & Initalizers
@@ -79,43 +82,11 @@ namespace PuyoTools.Core.Textures.Pvr
         /// <param name="file">Filename of the file that contains the texture data.</param>
         /// <param name="pixelFormat">Pixel format to encode the texture to.</param>
         /// <param name="dataFormat">Data format to encode the texture to.</param>
-        public PvrTextureEncoder(string file, PvrPixelFormat pixelFormat, PvrDataFormat dataFormat) : base(file)
+        public PvrTextureEncoder(string file, PvrPixelFormat pixelFormat, PvrDataFormat dataFormat)
         {
-            if (decodedBitmap != null)
+            using (var stream = File.OpenRead(file))
             {
-                initalized = Initalize(pixelFormat, dataFormat);
-            }
-        }
-
-        /// <summary>
-        /// Opens a texture to encode from a byte array.
-        /// </summary>
-        /// <param name="source">Byte array that contains the texture data.</param>
-        /// <param name="pixelFormat">Pixel format to encode the texture to.</param>
-        /// <param name="dataFormat">Data format to encode the texture to.</param>
-        public PvrTextureEncoder(byte[] source, PvrPixelFormat pixelFormat, PvrDataFormat dataFormat)
-            : base(source)
-        {
-            if (decodedBitmap != null)
-            {
-                initalized = Initalize(pixelFormat, dataFormat);
-            }
-        }
-
-        /// <summary>
-        /// Opens a texture to encode from a byte array.
-        /// </summary>
-        /// <param name="source">Byte array that contains the texture data.</param>
-        /// <param name="offset">Offset of the texture in the array.</param>
-        /// <param name="length">Number of bytes to read.</param>
-        /// <param name="pixelFormat">Pixel format to encode the texture to.</param>
-        /// <param name="dataFormat">Data format to encode the texture to.</param>
-        public PvrTextureEncoder(byte[] source, int offset, int length, PvrPixelFormat pixelFormat, PvrDataFormat dataFormat)
-            : base(source, offset, length)
-        {
-            if (decodedBitmap != null)
-            {
-                initalized = Initalize(pixelFormat, dataFormat);
+                Initialize(stream, pixelFormat, dataFormat);
             }
         }
 
@@ -126,213 +97,392 @@ namespace PuyoTools.Core.Textures.Pvr
         /// <param name="pixelFormat">Pixel format to encode the texture to.</param>
         /// <param name="dataFormat">Data format to encode the texture to.</param>
         public PvrTextureEncoder(Stream source, PvrPixelFormat pixelFormat, PvrDataFormat dataFormat)
-            : base(source)
         {
-            if (decodedBitmap != null)
-            {
-                initalized = Initalize(pixelFormat, dataFormat);
-            }
+            Initialize(source, pixelFormat, dataFormat);
         }
 
-        /// <summary>
-        /// Opens a texture to encode from a stream.
-        /// </summary>
-        /// <param name="source">Stream that contains the texture data.</param>
-        /// <param name="length">Number of bytes to read.</param>
-        /// <param name="pixelFormat">Pixel format to encode the texture to.</param>
-        /// <param name="dataFormat">Data format to encode the texture to.</param>
-        public PvrTextureEncoder(Stream source, int length, PvrPixelFormat pixelFormat, PvrDataFormat dataFormat)
-            : base(source, length)
+        private void Initialize(Stream source, PvrPixelFormat pixelFormat, PvrDataFormat dataFormat)
         {
-            if (decodedBitmap != null)
-            {
-                initalized = Initalize(pixelFormat, dataFormat);
-            }
-        }
+            // Set the pixel and data formats, and verify that we can encode to them.
+            // Unlike with the decoder, an exception will be thrown here if a codec cannot be used to encode them.
+            PixelFormat = pixelFormat;
+            DataFormat = dataFormat;
 
-        /// <summary>
-        /// Opens a texture to encode from a bitmap.
-        /// </summary>
-        /// <param name="source">Bitmap to encode.</param>
-        /// <param name="pixelFormat">Pixel format to encode the texture to.</param>
-        /// <param name="dataFormat">Data format to encode the texture to.</param>
-        public PvrTextureEncoder(Bitmap source, PvrPixelFormat pixelFormat, PvrDataFormat dataFormat)
-            : base(source)
-        {
-            if (decodedBitmap != null)
-            {
-                initalized = Initalize(pixelFormat, dataFormat);
-            }
-        }
-
-        private bool Initalize(PvrPixelFormat pixelFormat, PvrDataFormat dataFormat)
-        {
-            // Set the default values
-            hasGlobalIndex = true;
-            globalIndex = 0;
-            compressionFormat = PvrCompressionFormat.None;
-
-            // Set the data format and pixel format and load the appropiate codecs
-            this.pixelFormat = pixelFormat;
             pixelCodec = PvrPixelCodec.GetPixelCodec(pixelFormat);
-
-            this.dataFormat = dataFormat;
+            if (pixelCodec is null)
+            {
+                throw new CannotDecodeTextureException($"Pixel format {PixelFormat:X2} is invalid or not supported for encoding.");
+            }
+            
             dataCodec = PvrDataCodec.GetDataCodec(dataFormat);
-
-            // Make sure the pixel and data codecs exists and we can encode to it
-            if (pixelCodec == null || !pixelCodec.CanEncode) return false;
-            if (dataCodec == null || !dataCodec.CanEncode) return false;
+            if (dataCodec is null)
+            {
+                throw new CannotDecodeTextureException($"Data format {DataFormat:X2} is invalid or not supported for encoding.");
+            }
             dataCodec.PixelCodec = pixelCodec;
 
-            if (dataCodec.PaletteEntries != 0)
+            // Get the number of palette entries.
+            // In a Small VQ encoded texture, it's determined by the texture dimensions.
+            paletteEntries = dataCodec.PaletteEntries;
+            if (DataFormat == PvrDataFormat.SmallVq)
             {
-                // Convert the bitmap to an array containing indicies.
-                decodedData = BitmapToRawIndexed(decodedBitmap, dataCodec.PaletteEntries, out texturePalette);
-
-                // If this texture has an external palette file, set up the palette encoder
-                if (dataCodec.NeedsExternalPalette)
+                if (Width <= 16)
                 {
-                    paletteEncoder = new PvpPaletteEncoder(texturePalette, (ushort)dataCodec.PaletteEntries, pixelFormat, pixelCodec);
+                    paletteEntries = 64; // Actually 16
+                }
+                else if (Width <= 32)
+                {
+                    paletteEntries = 128; // Actually 32
+                }
+                else if (Width <= 64)
+                {
+                    paletteEntries = 512; // Actually 128
+                }
+                else
+                {
+                    paletteEntries = 1024; // Actually 256
                 }
             }
-            else
+            else if (DataFormat == PvrDataFormat.SmallVqMipmaps)
             {
-                // Convert the bitmap to an array
-                decodedData = BitmapToRaw(decodedBitmap);
+                if (Width <= 16)
+                {
+                    paletteEntries = 64; // Actually 16
+                }
+                else if (Width <= 32)
+                {
+                    paletteEntries = 256; // Actually 64
+                }
+                else
+                {
+                    paletteEntries = 1024; // Actually 256
+                }
             }
 
-            return true;
+            // Read the image.
+            sourceImage = Image.Load<Bgra32>(source);
+
+            Width = sourceImage.Width;
+            Height = sourceImage.Height;
         }
         #endregion
 
         #region Encode Texture
-        protected override MemoryStream EncodeTexture()
+        /// <summary>
+        /// Encodes the texture. Also encodes the palette and mipmaps if needed.
+        /// </summary>
+        /// <returns>The byte array containing the encoded texture data.</returns>
+        private byte[] EncodeTexture()
         {
-            // Calculate what the length of the texture will be
-            int textureLength = 16 + (textureWidth * textureHeight * dataCodec.Bpp / 8);
-            if (hasGlobalIndex)
-            {
-                textureLength += 16;
-            }
-            if (dataCodec.PaletteEntries != 0 && !dataCodec.NeedsExternalPalette)
-            {
-                textureLength += (dataCodec.PaletteEntries * pixelCodec.Bpp / 8);
-            }
+            byte[] pixelData;
 
-            // Calculate the mipmap padding (if the texture contains mipmaps)
-            int mipmapPadding = 0;
-
-            if (dataCodec.HasMipmaps)
+            // Encode as a palettized image.
+            if (paletteEntries != 0)
             {
-                if (dataFormat == PvrDataFormat.SquareTwiddledMipmaps)
+                // Create the quantizer and quantize the texture.
+                IQuantizer<Bgra32> quantizer;
+                IndexedImageFrame<Bgra32> imageFrame;
+                var quantizerOptions = new QuantizerOptions
                 {
-                    // A 1x1 mipmap takes up as much space as a 2x1 mipmap
-                    // There are also 4 extra bytes at the end of the file
-                    mipmapPadding = (dataCodec.Bpp) >> 3;
-                    textureLength += 4;
-                }
-                else if (dataFormat == PvrDataFormat.SquareTwiddledMipmapsAlt)
+                    MaxColors = paletteEntries,
+                };
+
+                if (TryBuildExactPalette(sourceImage, paletteEntries, out var palette))
                 {
-                    // A 1x1 mipmap takes up as much space as a 2x2 mipmap
-                    mipmapPadding = (3 * dataCodec.Bpp) >> 3;
+                    quantizer = new PaletteQuantizer(palette.Cast<Color>().ToArray(), quantizerOptions)
+                        .CreatePixelSpecificQuantizer<Bgra32>(Configuration.Default);
+
+                    imageFrame = quantizer.QuantizeFrame(sourceImage.Frames.RootFrame, new Rectangle(0, 0, sourceImage.Width, sourceImage.Height));
+                }
+                else
+                {
+                    quantizer = new WuQuantizer(quantizerOptions)
+                        .CreatePixelSpecificQuantizer<Bgra32>(Configuration.Default);
+
+                    imageFrame = quantizer.BuildPaletteAndQuantizeFrame(sourceImage.Frames.RootFrame, new Rectangle(0, 0, sourceImage.Width, sourceImage.Height));
                 }
 
-                textureLength += mipmapPadding;
-
-                for (int size = 1; size < textureWidth; size <<= 1)
+                // Encode mipmaps using the same quantizer
+                if (dataCodec.HasMipmaps)
                 {
-                    textureLength += Math.Max((size * size * dataCodec.Bpp) >> 3, 1);
+                    encodedMipmapData = new byte[(int)Math.Log(Width, 2)][];
+
+                    for (int i = 0, size = 1; i < encodedMipmapData.Length && size <= Width; i++, size <<= 1)
+                    {
+                        encodedMipmapData[i] = EncodeIndexedTexture(Resize(sourceImage, size, size), quantizer);
+                    }
+                }
+
+                // Save the palette
+                if (dataCodec.NeedsExternalPalette)
+                {
+                    Palette = new PvrPaletteEncoder(this, EncodePalette(imageFrame.Palette), imageFrame.Palette.Length);
+                }
+                else
+                {
+                    encodedPaletteData = EncodePalette(imageFrame.Palette);
+                }
+
+                pixelData = GetPixelDataAsBytes(imageFrame);
+            }
+
+            // Encode as an RGBA image.
+            else
+            {
+                // Encode mipmaps
+                if (dataCodec.HasMipmaps)
+                {
+                    encodedMipmapData = new byte[(int)Math.Log(Width, 2)][];
+
+                    for (int i = 0, size = 1; i < encodedMipmapData.Length && size <= Width; i++, size <<= 1)
+                    {
+                        encodedMipmapData[i] = EncodeRgbaTexture(Resize(sourceImage, size, size));
+                    }
+                }
+
+                // Encode & return the texture
+                return EncodeRgbaTexture(sourceImage);
+            }
+
+            return dataCodec.Encode(pixelData, 0, Width, Height);
+        }
+
+        private byte[] EncodeRgbaTexture<TPixel>(Image<TPixel> image)
+            where TPixel : unmanaged, IPixel<TPixel>
+        {
+            var pixelData = GetPixelDataAsBytes(image.Frames.RootFrame);
+            return dataCodec.Encode(pixelData, 0, image.Width, image.Height);
+        }
+
+        private byte[] EncodeIndexedTexture<TPixel>(Image<TPixel> image, IQuantizer<TPixel> quantizer)
+            where TPixel : unmanaged, IPixel<TPixel>
+        {
+            var imageFrame = quantizer.QuantizeFrame(image.Frames.RootFrame, new Rectangle(0, 0, image.Width, image.Height));
+            var pixelData = GetPixelDataAsBytes(imageFrame);
+            return dataCodec.Encode(pixelData, 0, image.Width, image.Height);
+        }
+
+        /// <summary>
+        /// Encodes the palette.
+        /// </summary>
+        /// <returns></returns>
+        private byte[] EncodePalette(ReadOnlyMemory<Bgra32> palette)
+        {
+            var bytesPerPixel = pixelCodec.Bpp / 8;
+            var paletteData = MemoryMarshal.AsBytes(palette.Span).ToArray();
+            var encodedPaletteData = new byte[palette.Length * bytesPerPixel];
+
+            for (var i = 0; i < palette.Length; i++)
+            {
+                pixelCodec.EncodePixel(paletteData, 4 * i, encodedPaletteData, i * bytesPerPixel);
+            }
+
+            return encodedPaletteData;
+        }
+
+        /// <summary>
+        /// Gets if an external palette file will be created after encoding.
+        /// </summary>
+        public bool NeedsExternalPalette => dataCodec.NeedsExternalPalette;
+
+        /// <summary>
+        /// Gets the palette that was created after encoding.
+        /// </summary>
+        /// <remarks>
+        /// This property will be <see langword="null"/> until <see cref="Save(string)"/> or <see cref="Save(Stream)"/> is invoked
+        /// and <see cref="NeedsExternalPalette"/> is <see langword="true"/>.
+        /// </remarks>
+        public PvrPaletteEncoder Palette { get; private set; }
+
+        /// <summary>
+        /// Saves the encoded texture to the specified file.
+        /// </summary>
+        /// <param name="file">Name of the file to save the data to.</param>
+        public void Save(string file)
+        {
+            using (var stream = File.OpenWrite(file))
+            {
+                Save(stream);
+            }
+        }
+
+        /// <summary>
+        /// Saves the encoded texture to the specified stream.
+        /// </summary>
+        /// <param name="destination">The stream to save the texture to.</param>
+        public void Save(Stream destination)
+        {
+            var writer = new BinaryWriter(destination);
+
+            if (encodedTextureData is null)
+            {
+                encodedTextureData = EncodeTexture();
+            }
+
+            // Get the expected length of the texture data including palette and mipmaps.
+            var expectedLength = encodedTextureData.Length;
+            if (encodedPaletteData != null)
+            {
+                expectedLength += encodedPaletteData.Length;
+            }
+            if (encodedMipmapData != null)
+            {
+                expectedLength += encodedMipmapData.Sum(x => x.Length);
+
+                if (DataFormat == PvrDataFormat.SquareTwiddledMipmaps)
+                {
+                    expectedLength += pixelCodec.Bpp / 8;
+                }
+                else if (DataFormat == PvrDataFormat.SquareTwiddledMipmapsAlt)
+                {
+                    expectedLength += 3 * pixelCodec.Bpp / 8;
                 }
             }
 
-            MemoryStream destination = new MemoryStream(textureLength);
-
-            // Write out the GBIX header (if we are including one)
-            if (hasGlobalIndex)
+            // If RLE compression is used, then reserve bytes at the beginning for the uncompressed length.
+            if (CompressionFormat == PvrCompressionFormat.Rle)
             {
-                destination.WriteByte((byte)'G');
-                destination.WriteByte((byte)'B');
-                destination.WriteByte((byte)'I');
-                destination.WriteByte((byte)'X');
+                if (GlobalIndex != null)
+                {
+                    writer.WriteInt32(expectedLength + 32); // Length of the GBIX chunk + PVRT chunk
+                }
+                else
+                {
+                    writer.WriteInt32(expectedLength + 16); // Length of the PVRT chunk
+                }
+            }
 
-                PTStream.WriteUInt32(destination, 8);
-                PTStream.WriteUInt32(destination, globalIndex);
-                PTStream.WriteUInt32(destination, 0);
+            // Write out the GBIX header if a global index is present.
+            if (GlobalIndex != null)
+            {
+                writer.Write(gbixMagicCode);
+                writer.WriteInt32(8); // Length of the GBIX chunk minus 8. Always 8.
+                writer.WriteUInt32(GlobalIndex.Value);
+                writer.WriteInt32(0); // Always 0.
             }
 
             // Write out the PVRT header
-            destination.WriteByte((byte)'P');
-            destination.WriteByte((byte)'V');
-            destination.WriteByte((byte)'R');
-            destination.WriteByte((byte)'T');
+            writer.Write(pvrtMagicCode);
+            writer.WriteInt32(expectedLength + 8); // Length of the PVRT chunk minus 8.
+            writer.WriteByte((byte)PixelFormat);
+            writer.WriteByte((byte)DataFormat);
+            writer.WriteInt16(0); // Always 0.
+            writer.WriteUInt16((ushort)Width);
+            writer.WriteUInt16((ushort)Height);
 
-            if (hasGlobalIndex)
+            // Write out the palette if an internal palette is present.
+            if (encodedPaletteData != null)
             {
-                PTStream.WriteInt32(destination, textureLength - 24);
+                writer.Write(encodedPaletteData);
+            }
+
+            // Write out the mipmaps if present.
+            if (encodedMipmapData != null)
+            {
+                if (DataFormat == PvrDataFormat.SquareTwiddledMipmaps)
+                {
+                    writer.Write(new byte[pixelCodec.Bpp / 8]);
+                }
+                else if (DataFormat == PvrDataFormat.SquareTwiddledMipmapsAlt)
+                {
+                    writer.Write(new byte[3 * pixelCodec.Bpp / 8]);
+                }
+
+                foreach (var encodedMipmapDataItem in encodedMipmapData)
+                {
+                    writer.Write(encodedMipmapDataItem);
+                }
+            }
+
+            // Write out the texture data.
+            if (compressionCodec != null)
+            {
+                compressionCodec.Compress(new MemoryStream(encodedTextureData), destination, pixelCodec, dataCodec);
             }
             else
             {
-                PTStream.WriteInt32(destination, textureLength - 8);
+                writer.Write(encodedTextureData);
             }
+        }
 
-            destination.WriteByte((byte)pixelFormat);
-            destination.WriteByte((byte)dataFormat);
-            PTStream.WriteUInt16(destination, 0);
+        private Image<TPixel> Resize<TPixel>(Image<TPixel> image, int width, int height)
+            where TPixel : unmanaged, IPixel<TPixel>
+        {
+            var newImage = image.Clone();
+            newImage.Mutate(x => x.Resize(width, height));
 
-            PTStream.WriteUInt16(destination, textureWidth);
-            PTStream.WriteUInt16(destination, textureHeight);
+            return newImage;
+        }
 
-            // If we have an internal palette, write it
-            if (dataCodec.PaletteEntries != 0 && !dataCodec.NeedsExternalPalette)
+        private static bool TryBuildExactPalette<TPixel>(Image<TPixel> image, int maxColors, out IList<TPixel> palette)
+            where TPixel : unmanaged, IPixel<TPixel>
+        {
+            palette = null;
+            var newPalette = new List<TPixel>(maxColors);
+
+            for (var y = 0; y < image.Height; y++)
             {
-                byte[] palette = pixelCodec.EncodePalette(texturePalette, dataCodec.PaletteEntries);
-                destination.Write(palette, 0, palette.Length);
-            }
+                var row = image.GetPixelRowSpan(y);
 
-            // Write out any mipmaps
-            if (dataCodec.HasMipmaps)
-            {
-                // Write out any padding bytes before the 1x1 mipmap
-                for (int i = 0; i < mipmapPadding; i++)
+                for (var x = 0; x < row.Length; x++)
                 {
-                    destination.WriteByte(0);
-                }
+                    if (!newPalette.Contains(row[x]))
+                    {
+                        // If there are too many colors, then an exact palette cannot be built.
+                        if (newPalette.Count == maxColors)
+                        {
+                            return false;
+                        }
 
-                for (int size = 1; size < textureWidth; size <<= 1)
-                {
-                    byte[] mipmapDecodedData = BitmapToRawResized(decodedBitmap, size, 1);
-                    byte[] mipmapTextureData = dataCodec.Encode(mipmapDecodedData, 0, size, size);
-                    destination.Write(mipmapTextureData, 0, mipmapTextureData.Length);
-                }
-            }
-
-            // Write the texture data
-            byte[] textureData = dataCodec.Encode(decodedData, textureWidth, textureHeight, null);
-            destination.Write(textureData, 0, textureData.Length);
-
-            // If the data format is square twiddled with mipmaps, write out the extra bytes.
-            if (dataFormat == PvrDataFormat.SquareTwiddledMipmaps)
-            {
-                destination.Write(new byte[] { 0, 0, 0, 0 }, 0, 4);
-            }
-
-            // Compress the texture
-            if (compressionFormat != PvrCompressionFormat.None)
-            {
-                compressionCodec = PvrCompressionCodec.GetCompressionCodec(compressionFormat);
-
-                if (compressionCodec != null)
-                {
-                    // Ok, we need to convert the current stream to an array, compress it, then write it back to a new stream
-                    byte[] buffer = destination.ToArray();
-                    buffer = compressionCodec.Compress(buffer, (hasGlobalIndex ? 0x20 : 0x10), pixelCodec, dataCodec);
-
-                    destination = new MemoryStream();
-                    destination.Write(buffer, 0, buffer.Length);
+                        newPalette.Add(row[x]);
+                    }
                 }
             }
 
-            return destination;
+            palette = newPalette;
+
+            return true;
+        }
+
+        private static byte[] GetPixelDataAsBytes<TPixel>(ImageFrame<TPixel> imageFrame)
+            where TPixel : unmanaged, IPixel<TPixel>
+        {
+            if (!imageFrame.TryGetSinglePixelSpan(out var pixelSpan))
+            {
+                return MemoryMarshal.AsBytes(pixelSpan).ToArray();
+            }
+            
+            var data = new TPixel[imageFrame.Width * imageFrame.Height];
+
+            for (var y = 0; y < imageFrame.Height; y++)
+            {
+                var row = imageFrame.GetPixelRowSpan(y);
+
+                for (var x = 0; x < row.Length; x++)
+                {
+                    data[(y * imageFrame.Width) + x] = row[x];
+                }
+            }
+
+            return MemoryMarshal.AsBytes<TPixel>(data).ToArray();
+        }
+
+        private static byte[] GetPixelDataAsBytes<TPixel>(IndexedImageFrame<TPixel> imageFrame)
+            where TPixel : unmanaged, IPixel<TPixel>
+        {
+            var data = new byte[imageFrame.Width * imageFrame.Height];
+
+            for (var y = 0; y < imageFrame.Height; y++)
+            {
+                var row = imageFrame.GetPixelRowSpan(y);
+
+                for (var x = 0; x < row.Length; x++)
+                {
+                    data[(y * imageFrame.Width) + x] = row[x];
+                }
+            }
+
+            return data;
         }
         #endregion
     }

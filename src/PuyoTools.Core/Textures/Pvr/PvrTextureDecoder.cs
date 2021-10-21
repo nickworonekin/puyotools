@@ -1,10 +1,10 @@
-﻿using System;
+﻿using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Png;
+using SixLabors.ImageSharp.PixelFormats;
+using System;
 using System.Collections.ObjectModel;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 
 namespace PuyoTools.Core.Textures.Pvr
@@ -215,15 +215,28 @@ namespace PuyoTools.Core.Textures.Pvr
 
                 // Calculate the initial padding for the 1x1 mipmap.
                 // Due to PVR twiddling works, the actual pixel will be in the last bytes of its mipmap.
-                if (DataFormat == PvrDataFormat.SquareTwiddledMipmaps)
+                switch (DataFormat)
                 {
                     // A 1x1 mipmap takes up as much space as a 2x1 mipmap.
-                    source.Position += dataCodec.Bpp / 8;
-                }
-                else if (DataFormat == PvrDataFormat.SquareTwiddledMipmapsAlt)
-                {
+                    case PvrDataFormat.SquareTwiddledMipmaps:
+                        source.Position += dataCodec.Bpp / 8;
+                        break;
+
                     // A 1x1 mipmap takes up as much space as a 2x2 mipmap.
-                    source.Position += 3 * dataCodec.Bpp / 8;
+                    // The pixel is stored in the upper 4 bits of the final byte.
+                    case PvrDataFormat.Index4Mipmaps:
+                        source.Position += 2 * dataCodec.Bpp / 8;
+                        break;
+
+                    // A 1x1 mipmap takes up as much space as a 2x2 mipmap.
+                    case PvrDataFormat.Index8Mipmaps:
+                        source.Position += 3 * dataCodec.Bpp / 8;
+                        break;
+
+                    // A 1x1 mipmap takes up as much space as a 2x2 mipmap.
+                    case PvrDataFormat.SquareTwiddledMipmapsAlt:
+                        source.Position += 3 * dataCodec.Bpp / 8;
+                        break;
                 }
 
                 for (int i = mipmaps.Length - 1, size = 1; i >= 0; i--, size <<= 1)
@@ -299,14 +312,8 @@ namespace PuyoTools.Core.Textures.Pvr
         /// <param name="destination">The stream to save the texture to.</param>
         public void Save(Stream destination)
         {
-            var pixelData = GetPixelData();
-
-            Bitmap img = new Bitmap(Width, Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-            BitmapData bitmapData = img.LockBits(new Rectangle(0, 0, img.Width, img.Height), ImageLockMode.WriteOnly, img.PixelFormat);
-            Marshal.Copy(pixelData, 0, bitmapData.Scan0, pixelData.Length);
-            img.UnlockBits(bitmapData);
-
-            img.Save(destination, ImageFormat.Png);
+            var image = Image.LoadPixelData<Bgra32>(GetPixelData(), Width, Height);
+            image.Save(destination, new PngEncoder());
         }
 
         // Decodes a texture
