@@ -1,9 +1,9 @@
-﻿using System;
-using System.Drawing;
-using System.Drawing.Imaging;
+﻿using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Png;
+using SixLabors.ImageSharp.PixelFormats;
+using System;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 
 namespace PuyoTools.Core.Textures.Svr
@@ -79,69 +79,6 @@ namespace PuyoTools.Core.Textures.Svr
         {
             Initialize(source);
         }
-
-        /*protected override void Initalize()
-        {
-            // Check to see if what we are dealing with is a SVR texture
-            if (!Is(encodedData))
-            {
-                throw new NotAValidTextureException("This is not a valid GVR texture.");
-            }
-
-            // Determine the offsets of the GBIX (if present) and PVRT header chunks.
-            if (encodedData.Take(4).SequenceEqual(Encoding.UTF8.GetBytes("GBIX")))
-            {
-                gbixOffset = 0x00;
-                pvrtOffset = 0x10;
-            }
-            else
-            {
-                gbixOffset = -1;
-                pvrtOffset = 0x00;
-            }
-
-            // Read the global index (if it is present). If it is not present, just set it to 0.
-            if (gbixOffset != -1)
-            {
-                globalIndex = BitConverter.ToUInt32(encodedData, gbixOffset + 0x08);
-            }
-            else
-            {
-                globalIndex = 0;
-            }
-
-            // Read information about the texture
-            textureWidth  = BitConverter.ToUInt16(encodedData, pvrtOffset + 0x0C);
-            textureHeight = BitConverter.ToUInt16(encodedData, pvrtOffset + 0x0E);
-
-            pixelFormat = (SvrPixelFormat)encodedData[pvrtOffset + 0x08];
-            dataFormat  = (SvrDataFormat)encodedData[pvrtOffset + 0x09];
-
-            // Get the codecs and make sure we can decode using them
-            pixelCodec = SvrPixelCodec.GetPixelCodec(pixelFormat);
-            dataCodec = SvrDataCodec.GetDataCodec(dataFormat);
-
-            if (dataCodec != null && pixelCodec != null)
-            {
-                dataCodec.PixelCodec = pixelCodec;
-                canDecode = true;
-            }
-
-            // Set the palette and data offsets
-            paletteEntries = dataCodec.PaletteEntries;
-            if (!canDecode || paletteEntries == 0 || dataCodec.NeedsExternalPalette)
-            {
-                paletteOffset = -1;
-                dataOffset = pvrtOffset + 0x10;
-            }
-            else
-            {
-                paletteOffset = pvrtOffset + 0x10;
-                dataOffset = paletteOffset + (paletteEntries * (pixelCodec.Bpp >> 3));
-            }
-
-            initalized = true;
-        }*/
 
         private void Initialize(Stream source)
         {
@@ -228,14 +165,8 @@ namespace PuyoTools.Core.Textures.Svr
         /// <param name="destination">The stream to save the texture to.</param>
         public void Save(Stream destination)
         {
-            var pixelData = GetPixelData();
-
-            Bitmap img = new Bitmap(Width, Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-            BitmapData bitmapData = img.LockBits(new Rectangle(0, 0, img.Width, img.Height), ImageLockMode.WriteOnly, img.PixelFormat);
-            Marshal.Copy(pixelData, 0, bitmapData.Scan0, pixelData.Length);
-            img.UnlockBits(bitmapData);
-
-            img.Save(destination, ImageFormat.Png);
+            var image = Image.LoadPixelData<Bgra32>(GetPixelData(), Width, Height);
+            image.Save(destination, new PngEncoder());
         }
 
         // Decodes a texture
