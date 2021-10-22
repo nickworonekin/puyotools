@@ -111,13 +111,13 @@ namespace PuyoTools.Core.Textures.Pvr
             pixelCodec = PvrPixelCodec.GetPixelCodec(pixelFormat);
             if (pixelCodec is null)
             {
-                throw new CannotDecodeTextureException($"Pixel format {PixelFormat:X2} is invalid or not supported for encoding.");
+                throw new CannotDecodeTextureException($"Pixel format {PixelFormat:X} is invalid or not supported for encoding.");
             }
             
             dataCodec = PvrDataCodec.GetDataCodec(dataFormat);
             if (dataCodec is null)
             {
-                throw new CannotDecodeTextureException($"Data format {DataFormat:X2} is invalid or not supported for encoding.");
+                throw new CannotDecodeTextureException($"Data format {DataFormat:X} is invalid or not supported for encoding.");
             }
             dataCodec.PixelCodec = pixelCodec;
 
@@ -207,7 +207,7 @@ namespace PuyoTools.Core.Textures.Pvr
                 {
                     encodedMipmapData = new byte[(int)Math.Log(Width, 2)][];
 
-                    for (int i = 0, size = 1; i < encodedMipmapData.Length && size <= Width; i++, size <<= 1)
+                    for (int i = 0, size = 1; i < encodedMipmapData.Length && size < Width; i++, size <<= 1)
                     {
                         encodedMipmapData[i] = EncodeIndexedTexture(Resize(sourceImage, size, size), quantizer);
                     }
@@ -234,7 +234,7 @@ namespace PuyoTools.Core.Textures.Pvr
                 {
                     encodedMipmapData = new byte[(int)Math.Log(Width, 2)][];
 
-                    for (int i = 0, size = 1; i < encodedMipmapData.Length && size <= Width; i++, size <<= 1)
+                    for (int i = 0, size = 1; i < encodedMipmapData.Length && size < Width; i++, size <<= 1)
                     {
                         encodedMipmapData[i] = EncodeRgbaTexture(Resize(sourceImage, size, size));
                     }

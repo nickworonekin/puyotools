@@ -40,6 +40,8 @@ namespace PuyoTools.Core.Textures.Gvr
 
     public enum GvrGbixType
     {
+        None,
+
         /// <summary>
         /// A magic code of "GBIX". This is generally used for textures in GameCube games.
         /// </summary>

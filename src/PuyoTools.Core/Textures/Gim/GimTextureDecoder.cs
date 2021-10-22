@@ -135,7 +135,7 @@ namespace PuyoTools.Core.Textures.Gim
 
                         if (pixelCodec is null)
                         {
-                            throw new CannotDecodeTextureException($"Pixel format {PixelFormat:X2} is invalid or not supported for decoding.");
+                            throw new CannotDecodeTextureException($"Pixel format {PixelFormat:X} is invalid or not supported for decoding.");
                         }
 
                         // Get whether this texture is swizzled
@@ -174,7 +174,7 @@ namespace PuyoTools.Core.Textures.Gim
 
                         if (paletteCodec is null)
                         {
-                            throw new CannotDecodeTextureException($"Palette format {PaletteFormat:X2} is invalid or not supported for decoding.");
+                            throw new CannotDecodeTextureException($"Palette format {PaletteFormat:X} is invalid or not supported for decoding.");
                         }
 
                         // Get the number of entries in the palette
@@ -207,7 +207,7 @@ namespace PuyoTools.Core.Textures.Gim
 
                     default: // Unknown chunk
 
-                        throw new Exception($"Unknown chunk type {chunkType:X2}");
+                        throw new Exception($"Unknown chunk type {chunkType:X}");
                 }
 
                 // Verify that the chunk length will allow the stream to progress

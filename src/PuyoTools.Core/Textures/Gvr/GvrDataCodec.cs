@@ -310,6 +310,12 @@ namespace PuyoTools.Core.Textures.Gvr
                         {
                             for (int x2 = 0; x2 < 4; x2++)
                             {
+                                if (!(x + x2 < width && y + y2 < height))
+                                {
+                                    offset += 2;
+                                    continue;
+                                }
+
                                 ushort pixel = BinaryPrimitives.ReverseEndianness(BitConverter.ToUInt16(input, offset));
 
                                 //output[((((y + y2) * width) + (x + x2)) * 4) + 3] = 0xFF;
@@ -333,7 +339,7 @@ namespace PuyoTools.Core.Textures.Gvr
             public override byte[] Encode(byte[] input, int width, int height, VrPixelCodec PixelCodec)
             {
                 int offset    = 0;
-                byte[] output = new byte[width * height * 2];
+                byte[] output = new byte[Math.Max(width * height * 2, 32)];
 
                 for (int y = 0; y < height; y += 4)
                 {
@@ -343,6 +349,12 @@ namespace PuyoTools.Core.Textures.Gvr
                         {
                             for (int x2 = 0; x2 < 4; x2++)
                             {
+                                if (!(x + x2 < width && y + y2 < height))
+                                {
+                                    offset += 2;
+                                    continue;
+                                }
+
                                 ushort pixel = 0x0000;
                                 pixel |= (ushort)((input[((((y + y2) * width) + (x + x2)) * 4) + 2] >> 3) << 11);
                                 pixel |= (ushort)((input[((((y + y2) * width) + (x + x2)) * 4) + 1] >> 2) << 5);
@@ -389,6 +401,12 @@ namespace PuyoTools.Core.Textures.Gvr
                         {
                             for (int x2 = 0; x2 < 4; x2++)
                             {
+                                if (!(x + x2 < width && y + y2 < height))
+                                {
+                                    offset += 2;
+                                    continue;
+                                }
+
                                 ushort pixel = BinaryPrimitives.ReverseEndianness(BitConverter.ToUInt16(input, offset));
 
                                 if ((pixel & 0x8000) != 0) // Rgb555
@@ -426,7 +444,7 @@ namespace PuyoTools.Core.Textures.Gvr
             public override byte[] Encode(byte[] input, int width, int height, VrPixelCodec PixelCodec)
             {
                 int offset    = 0;
-                byte[] output = new byte[width * height * 2];
+                byte[] output = new byte[Math.Max(width * height * 2, 32)];
 
                 for (int y = 0; y < height; y += 4)
                 {
@@ -436,6 +454,12 @@ namespace PuyoTools.Core.Textures.Gvr
                         {
                             for (int x2 = 0; x2 < 4; x2++)
                             {
+                                if (!(x + x2 < width && y + y2 < height))
+                                {
+                                    offset += 2;
+                                    continue;
+                                }
+
                                 ushort pixel = 0x0000;
 
                                 if (input[((((y + y2) * width) + (x + x2)) * 4) + 3] <= 0xDA) // Argb3444
@@ -729,6 +753,12 @@ namespace PuyoTools.Core.Textures.Gvr
                         {
                             for (int x2 = 0; x2 < 8; x2 += 4)
                             {
+                                if (!(x + x2 < width && y + y2 < height))
+                                {
+                                    offset += 8;
+                                    continue;
+                                }
+
                                 // Get the first two colors
                                 pixel[0] = BinaryPrimitives.ReverseEndianness(BitConverter.ToUInt16(input, offset));
                                 pixel[1] = BinaryPrimitives.ReverseEndianness(BitConverter.ToUInt16(input, offset + 2));
@@ -773,6 +803,12 @@ namespace PuyoTools.Core.Textures.Gvr
 
                                 for (int y3 = 0; y3 < 4; y3++)
                                 {
+                                    if (!(y + y2 + y3 < height))
+                                    {
+                                        offset++;
+                                        continue;
+                                    }
+
                                     for (int x3 = 0; x3 < 4; x3++)
                                     {
                                         output[((((y + y2 + y3) * width) + (x + x2 + x3)) * 4) + 3] = palette[((input[offset] >> (6 - (x3 * 2))) & 0x03)][3];
@@ -794,7 +830,7 @@ namespace PuyoTools.Core.Textures.Gvr
             public override byte[] Encode(byte[] input, int width, int height, VrPixelCodec PixelCodec)
             {
                 int offset = 0;
-                byte[] output = new byte[width * height / 2];
+                byte[] output = new byte[Math.Max(width * height / 2, 32)];
 
                 byte[] subBlock;
                 byte[] result;
@@ -816,6 +852,12 @@ namespace PuyoTools.Core.Textures.Gvr
                                 {
                                     for (int x3 = 0; x3 < 4; x3++)
                                     {
+                                        if (!(x + x2 + x3 < width && y + y2 + y3 < height))
+                                        {
+                                            i += 4;
+                                            continue;
+                                        }
+
                                         subBlock[i + 3] = input[((((y + y2 + y3) * width) + (x + x2 + x3)) * 4) + 3];
                                         subBlock[i + 2] = input[((((y + y2 + y3) * width) + (x + x2 + x3)) * 4) + 2];
                                         subBlock[i + 1] = input[((((y + y2 + y3) * width) + (x + x2 + x3)) * 4) + 1];

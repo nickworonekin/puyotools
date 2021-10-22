@@ -116,11 +116,6 @@ namespace PuyoTools.Core.Textures
             texture.Save(destination);
 
             // If we have an external palette file, save it
-            /*if (texture.NeedsExternalPalette)
-            {
-                var paletteStream = texture.PaletteEncoder.ToStream();
-                OnExternalPaletteCreated(new ExternalPaletteCreatedEventArgs(paletteStream));
-            }*/
             if (texture.NeedsExternalPalette)
             {
                 var paletteStream = new MemoryStream();

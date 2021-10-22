@@ -1,129 +1,106 @@
-﻿using System;
-using System.Drawing;
+﻿using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.Processing.Processors.Quantization;
+using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace PuyoTools.Core.Textures.Gvr
 {
-    public class GvrTextureEncoder : VrTextureEncoder
+    public class GvrTextureEncoder
     {
+        #region Fields
+        private GvrPixelCodec paletteCodec; // Palette codec
+        private GvrDataCodec pixelCodec;   // Pixel codec
+
+        private int paletteEntries; // Number of palette entries in the palette data
+
+        private static readonly byte[] gbixMagicCode = { (byte)'G', (byte)'B', (byte)'I', (byte)'X' };
+        private static readonly byte[] gcixMagicCode = { (byte)'G', (byte)'C', (byte)'I', (byte)'X' };
+        private static readonly byte[] gvrtMagicCode = { (byte)'G', (byte)'V', (byte)'R', (byte)'T' };
+
+        private byte[] encodedPaletteData;
+        private byte[] encodedTextureData;
+        private byte[][] encodedMipmapData;
+
+        private Image<Bgra32> sourceImage;
+        #endregion
+
         #region Texture Properties
         /// <summary>
-        /// Indicates the magic code used for the GBIX header. This only matters if IncludeGbixHeader is true. The default value is GvrGbixType.Gbix.
+        /// Gets the width.
         /// </summary>
-        public GvrGbixType GbixType
-        {
-            get
-            {
-                if (!initalized)
-                {
-                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
-                }
+        public int Width { get; private set; }
 
-                return gbixType;
-            }
+        /// <summary>
+        /// Gets the height.
+        /// </summary>
+        public int Height { get; private set; }
+
+        /// <summary>
+        /// Gets the flags.
+        /// </summary>
+        public GvrDataFlags Flags { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the global index type. If <see cref="GvrGbixType.None"/>, the GBIX or GCIX header will not be written regardless of the value of <see cref="GlobalIndex"/>.
+        /// </summary>
+        public GvrGbixType GlobalIndexType { get; set; }
+
+        /// <summary>
+        /// Gets or sets the global index. If <see langword="null"/>, the GBIX or GCIX header will not be written regardless of the value of <see cref="GlobalIndexType"/>.
+        /// </summary>
+        public uint? GlobalIndex { get; set; }
+
+        /// <summary>
+        /// Gets the palette format, or <see langword="null"/> if a palette is not used.
+        /// </summary>
+        public GvrPixelFormat? PaletteFormat { get; private set; }
+
+        /// <summary>
+        /// Gets the pixel format.
+        /// </summary>
+        public GvrDataFormat PixelFormat { get; private set; }
+
+        /// <summary>
+        /// Gets or sets if the texture has mipmaps.
+        /// </summary>
+        /// <remarks>
+        /// Only square textures with pixel formats
+        /// <see cref="GvrDataFormat.Rgb565"/>, <see cref="GvrDataFormat.Rgb5a3"/>, and <see cref="GvrDataFormat.Dxt1"/>
+        /// support mipmaps.
+        /// If mipmaps aren't supported, this property will always return <see langword="false"/>.
+        /// </remarks>
+        public bool HasMipmaps
+        {
+            get => hasMipmaps;
             set
             {
-                if (!initalized)
+                // Mipmaps can only be used with square textures on certain pixel formats.
+                if (Width != Height
+                    && !(PixelFormat == GvrDataFormat.Rgb565
+                        || PixelFormat == GvrDataFormat.Rgb5a3
+                        || PixelFormat == GvrDataFormat.Dxt1))
                 {
-                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
-                }
-
-                gbixType = value;
-            }
-        }
-        protected GvrGbixType gbixType;
-
-        /// <summary>
-        /// The texture's data flags. Can contain one or more of the following:
-        /// <para>- GvrDataFlags.Mipmaps</para>
-        /// <para>- GvrDataFlags.ExternalPalette</para>
-        /// <para>- GvrDataFlags.InternalPalette</para>
-        /// </summary>
-        public GvrDataFlags DataFlags
-        {
-            get
-            {
-                if (!initalized)
-                {
-                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
-                }
-
-                return dataFlags;
-            }
-        }
-        protected GvrDataFlags dataFlags;
-
-        /// <summary>
-        /// The texture's pixel format. This only applies to palettized textures.
-        /// </summary>
-        public GvrPixelFormat PixelFormat
-        {
-            get
-            {
-                if (!initalized)
-                {
-                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
-                }
-
-                return pixelFormat;
-            }
-        }
-        private GvrPixelFormat pixelFormat;
-
-        /// <summary>
-        /// The texture's data format.
-        /// </summary>
-        public GvrDataFormat DataFormat
-        {
-            get
-            {
-                if (!initalized)
-                {
-                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
-                }
-
-                return dataFormat;
-            }
-        }
-        private GvrDataFormat dataFormat;
-
-        /// <summary>
-        /// Gets or sets if this texture has mipmaps. This only applies to 4-bit or 16-bit non-palettized textures.
-        /// </summary>
-        public new bool HasMipmaps
-        {
-            get
-            {
-                if (!initalized)
-                {
-                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
-                }
-
-                return ((dataFlags & GvrDataFlags.Mipmaps) != 0);
-            }
-            set
-            {
-                if (!initalized)
-                {
-                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
-                }
-
-                // Mipmaps can only be used on 4-bit or 16-bit non-palettized textures
-                if (dataCodec.PaletteEntries != 0 || (dataCodec.Bpp != 4 && dataCodec.Bpp != 16))
                     return;
+                }
 
                 if (value)
                 {
-                    // Set mipmaps to true
-                    dataFlags |= GvrDataFlags.Mipmaps;
+                    hasMipmaps = true;
+                    Flags |= GvrDataFlags.Mipmaps;
                 }
                 else
                 {
-                    // Set mipmaps to false
-                    dataFlags &= ~GvrDataFlags.Mipmaps;
+                    hasMipmaps = false;
+                    Flags &= ~GvrDataFlags.Mipmaps;
                 }
             }
         }
+        private bool hasMipmaps;
         #endregion
 
         #region Constructors & Initalizers
@@ -133,43 +110,22 @@ namespace PuyoTools.Core.Textures.Gvr
         /// <param name="file">Filename of the file that contains the texture data.</param>
         /// <param name="pixelFormat">Pixel format to encode the texture to. If the data format does not require a pixel format, use GvrPixelFormat.Unknown.</param>
         /// <param name="dataFormat">Data format to encode the texture to.</param>
-        public GvrTextureEncoder(string file, GvrPixelFormat pixelFormat, GvrDataFormat dataFormat) : base(file)
+        public GvrTextureEncoder(string file, GvrDataFormat pixelFormat)
+            : this(file, null, pixelFormat)
         {
-            if (decodedBitmap != null)
-            {
-                initalized = Initalize(pixelFormat, dataFormat);
-            }
         }
 
         /// <summary>
-        /// Opens a texture to encode from a byte array.
+        /// Opens a texture to encode from a file.
         /// </summary>
-        /// <param name="source">Byte array that contains the texture data.</param>
+        /// <param name="file">Filename of the file that contains the texture data.</param>
         /// <param name="pixelFormat">Pixel format to encode the texture to. If the data format does not require a pixel format, use GvrPixelFormat.Unknown.</param>
         /// <param name="dataFormat">Data format to encode the texture to.</param>
-        public GvrTextureEncoder(byte[] source, GvrPixelFormat pixelFormat, GvrDataFormat dataFormat)
-            : base(source)
+        public GvrTextureEncoder(string file, GvrPixelFormat? paletteFormat, GvrDataFormat pixelFormat)
         {
-            if (decodedBitmap != null)
+            using (var stream = File.OpenRead(file))
             {
-                initalized = Initalize(pixelFormat, dataFormat);
-            }
-        }
-
-        /// <summary>
-        /// Opens a texture to encode from a byte array.
-        /// </summary>
-        /// <param name="source">Byte array that contains the texture data.</param>
-        /// <param name="offset">Offset of the texture in the array.</param>
-        /// <param name="length">Number of bytes to read.</param>
-        /// <param name="pixelFormat">Pixel format to encode the texture to. If the data format does not require a pixel format, use GvrPixelFormat.Unknown.</param>
-        /// <param name="dataFormat">Data format to encode the texture to.</param>
-        public GvrTextureEncoder(byte[] source, int offset, int length, GvrPixelFormat pixelFormat, GvrDataFormat dataFormat)
-            : base(source, offset, length)
-        {
-            if (decodedBitmap != null)
-            {
-                initalized = Initalize(pixelFormat, dataFormat);
+                Initialize(stream, paletteFormat, pixelFormat);
             }
         }
 
@@ -179,256 +135,376 @@ namespace PuyoTools.Core.Textures.Gvr
         /// <param name="source">Stream that contains the texture data.</param>
         /// <param name="pixelFormat">Pixel format to encode the texture to. If the data format does not require a pixel format, use GvrPixelFormat.Unknown.</param>
         /// <param name="dataFormat">Data format to encode the texture to.</param>
-        public GvrTextureEncoder(Stream source, GvrPixelFormat pixelFormat, GvrDataFormat dataFormat)
-            : base(source)
+        public GvrTextureEncoder(Stream source, GvrDataFormat pixelFormat)
+            : this(source, null, pixelFormat)
         {
-            if (decodedBitmap != null)
-            {
-                initalized = Initalize(pixelFormat, dataFormat);
-            }
         }
 
         /// <summary>
         /// Opens a texture to encode from a stream.
         /// </summary>
         /// <param name="source">Stream that contains the texture data.</param>
-        /// <param name="length">Number of bytes to read.</param>
         /// <param name="pixelFormat">Pixel format to encode the texture to. If the data format does not require a pixel format, use GvrPixelFormat.Unknown.</param>
         /// <param name="dataFormat">Data format to encode the texture to.</param>
-        public GvrTextureEncoder(Stream source, int length, GvrPixelFormat pixelFormat, GvrDataFormat dataFormat)
-            : base(source, length)
+        public GvrTextureEncoder(Stream source, GvrPixelFormat? paletteFormat, GvrDataFormat pixelFormat)
         {
-            if (decodedBitmap != null)
-            {
-                initalized = Initalize(pixelFormat, dataFormat);
-            }
+            Initialize(source, paletteFormat, pixelFormat);
         }
 
-        /// <summary>
-        /// Opens a texture to encode from a bitmap.
-        /// </summary>
-        /// <param name="source">Bitmap to encode.</param>
-        /// <param name="pixelFormat">Pixel format to encode the texture to. If the data format does not require a pixel format, use GvrPixelFormat.Unknown.</param>
-        /// <param name="dataFormat">Data format to encode the texture to.</param>
-        public GvrTextureEncoder(Bitmap source, GvrPixelFormat pixelFormat, GvrDataFormat dataFormat)
-            : base(source)
+        private void Initialize(Stream source, GvrPixelFormat? paletteFormat, GvrDataFormat pixelFormat)
         {
-            if (decodedBitmap != null)
+            // Set the palette and pixel formats, and verify that we can encode to them.
+            // We'll also need to verify that the palette format is set if it's a palettized pixel format.
+            // Unlike with the decoder, an exception will be thrown here if a codec cannot be used to encode them.
+            PixelFormat = pixelFormat;
+            pixelCodec = GvrDataCodec.GetDataCodec(pixelFormat);
+            if (pixelCodec is null)
             {
-                initalized = Initalize(pixelFormat, dataFormat);
-            }
-        }
-
-        private bool Initalize(GvrPixelFormat pixelFormat, GvrDataFormat dataFormat)
-        {
-            // Set the default values
-            dataFlags = GvrDataFlags.None;
-            hasGlobalIndex = true;
-            gbixType = GvrGbixType.Gbix;
-            globalIndex = 0;
-
-            // Set the data format and pixel format and load the appropiate codecs
-            this.dataFormat = dataFormat;
-            dataCodec = GvrDataCodec.GetDataCodec(dataFormat);
-
-            // Make sure the data codec exists and we can encode to it
-            if (dataCodec == null || !dataCodec.CanEncode) return false;
-
-            // Only palettized formats require a pixel codec.
-            if (dataCodec.PaletteEntries != 0)
-            {
-                this.pixelFormat = pixelFormat;
-                pixelCodec = GvrPixelCodec.GetPixelCodec(pixelFormat);
-
-                // Make sure the pixel codec exists and we can encode to it
-                if (pixelCodec == null || !pixelCodec.CanEncode) return false;
-
-                dataCodec.PixelCodec = pixelCodec;
-
-                dataFlags |= GvrDataFlags.InternalPalette;
-
-                // Convert the bitmap to an array containing indicies.
-                decodedData = BitmapToRawIndexed(decodedBitmap, dataCodec.PaletteEntries, out texturePalette);
-            }
-            else
-            {
-                this.pixelFormat = GvrPixelFormat.Unknown;
-                pixelCodec = null;
-
-                // Convert the bitmap to an array
-                decodedData = BitmapToRaw(decodedBitmap);
+                throw new CannotDecodeTextureException($"Pixel format {PixelFormat:X} is invalid or not supported for encoding.");
             }
 
-            return true;
+            // Get the number of palette entries.
+            paletteEntries = pixelCodec.PaletteEntries;
+
+            if (paletteEntries != 0)
+            {
+                if (paletteFormat is null)
+                {
+                    throw new CannotDecodeTextureException($"Palette format must be set for pixel format {PixelFormat}");
+                }
+
+                PaletteFormat = paletteFormat.Value;
+                paletteCodec = GvrPixelCodec.GetPixelCodec(paletteFormat.Value);
+                if (paletteCodec is null)
+                {
+                    throw new CannotDecodeTextureException($"Palette format {PaletteFormat:X} is invalid or not supported for encoding.");
+                }
+                pixelCodec.PixelCodec = paletteCodec;
+            }
+
+            // Read the image.
+            sourceImage = Image.Load<Bgra32>(source);
+
+            Width = sourceImage.Width;
+            Height = sourceImage.Height;
         }
         #endregion
 
         #region Palette
         /// <summary>
-        /// Gets or sets if the texture needs an external palette file. This only applies to palettized textures.
+        /// Gets or sets if an external palette file will be created after encoding.
         /// </summary>
-        /// <returns></returns>
-        public new bool NeedsExternalPalette
+        /// <remarks>If palettes aren't used, this property will always return <see langword="false"/>.</remarks>
+        public bool NeedsExternalPalette
         {
-            get
-            {
-                if (!initalized)
-                {
-                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
-                }
-
-                return ((dataFlags & GvrDataFlags.ExternalPalette) != 0);
-            }
+            get => needsExternalPalette;
             set
             {
-                if (!initalized)
+                // If this is a non-palettized texture, don't do anything.
+                if (pixelCodec.PaletteEntries == 0)
                 {
-                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
+                    return;
                 }
 
-                // If this is a non-palettized texture, don't set anything
-                if (dataCodec.PaletteEntries == 0)
-                    return;
-
+                // If true, set the external palette flag and unset the internal palette flag.
                 if (value)
                 {
-                    // Set external palette to true
-                    dataFlags &= ~GvrDataFlags.InternalPalette;
-                    dataFlags |= GvrDataFlags.ExternalPalette;
+                    needsExternalPalette = true;
+                    Flags &= ~GvrDataFlags.InternalPalette;
+                    Flags |= GvrDataFlags.ExternalPalette;
+                }
 
-                    // Initalize the palette encoder
-                    if (paletteEncoder == null)
-                    {
-                        paletteEncoder = new GvpPaletteEncoder(texturePalette, (ushort)dataCodec.PaletteEntries, pixelFormat, pixelCodec);
-                    }
+                // If false, set the internal palette flag and unset the external palette flag.
+                else
+                {
+                    needsExternalPalette = false;
+                    Flags &= ~GvrDataFlags.ExternalPalette;
+                    Flags |= GvrDataFlags.InternalPalette;
+                }
+            }
+        }
+        private bool needsExternalPalette;
+        #endregion
+
+        #region Encode Texture
+        /// <summary>
+        /// Encodes the texture. Also encodes the palette and mipmaps if needed.
+        /// </summary>
+        /// <returns>The byte array containing the encoded texture data.</returns>
+        private byte[] EncodeTexture()
+        {
+            byte[] pixelData;
+
+            // Encode as a palettized image.
+            if (paletteEntries != 0)
+            {
+                // Create the quantizer and quantize the texture.
+                IQuantizer<Bgra32> quantizer;
+                IndexedImageFrame<Bgra32> imageFrame;
+                var quantizerOptions = new QuantizerOptions
+                {
+                    MaxColors = paletteEntries,
+                };
+
+                if (TryBuildExactPalette(sourceImage, paletteEntries, out var palette))
+                {
+                    quantizer = new PaletteQuantizer(palette.Cast<Color>().ToArray(), quantizerOptions)
+                        .CreatePixelSpecificQuantizer<Bgra32>(Configuration.Default);
+
+                    imageFrame = quantizer.QuantizeFrame(sourceImage.Frames.RootFrame, new Rectangle(0, 0, sourceImage.Width, sourceImage.Height));
                 }
                 else
                 {
-                    // Set external palette to false
-                    dataFlags &= ~GvrDataFlags.ExternalPalette;
-                    dataFlags |= GvrDataFlags.InternalPalette;
+                    quantizer = new WuQuantizer(quantizerOptions)
+                        .CreatePixelSpecificQuantizer<Bgra32>(Configuration.Default);
 
-                    // Uninitalize the palette encoder
-                    if (paletteEncoder != null)
+                    imageFrame = quantizer.BuildPaletteAndQuantizeFrame(sourceImage.Frames.RootFrame, new Rectangle(0, 0, sourceImage.Width, sourceImage.Height));
+                }
+
+                // Palettized textures don't support mipmaps, so that logic will not be included here.
+
+                // Save the palette
+                if (NeedsExternalPalette)
+                {
+                    Palette = new GvrPaletteEncoder(this, EncodePalette(imageFrame.Palette), imageFrame.Palette.Length);
+                }
+                else
+                {
+                    encodedPaletteData = EncodePalette(imageFrame.Palette);
+                }
+
+                pixelData = GetPixelDataAsBytes(imageFrame);
+            }
+
+            // Encode as an RGBA image.
+            else
+            {
+                // Encode mipmaps
+                if (HasMipmaps)
+                {
+                    encodedMipmapData = new byte[(int)Math.Log(Width, 2)][];
+
+                    // Mipmaps are ordered from largest to smallest.
+                    for (int i = 0, size = Width >> 1; i < encodedMipmapData.Length && size >= 1; i++, size >>= 1)
                     {
-                        paletteEncoder = null;
+                        encodedMipmapData[i] = EncodeRgbaTexture(Resize(sourceImage, size, size));
+                    }
+                }
+
+                // Encode & return the texture
+                return EncodeRgbaTexture(sourceImage);
+            }
+
+            return pixelCodec.Encode(pixelData, 0, Width, Height);
+        }
+
+        private byte[] EncodeRgbaTexture<TPixel>(Image<TPixel> image)
+            where TPixel : unmanaged, IPixel<TPixel>
+        {
+            var pixelData = GetPixelDataAsBytes(image.Frames.RootFrame);
+            return pixelCodec.Encode(pixelData, 0, image.Width, image.Height);
+        }
+
+        private byte[] EncodeIndexedTexture<TPixel>(Image<TPixel> image, IQuantizer<TPixel> quantizer)
+            where TPixel : unmanaged, IPixel<TPixel>
+        {
+            var imageFrame = quantizer.QuantizeFrame(image.Frames.RootFrame, new Rectangle(0, 0, image.Width, image.Height));
+            var pixelData = GetPixelDataAsBytes(imageFrame);
+            return pixelCodec.Encode(pixelData, 0, image.Width, image.Height);
+        }
+
+        /// <summary>
+        /// Encodes the palette.
+        /// </summary>
+        /// <returns></returns>
+        private byte[] EncodePalette(ReadOnlyMemory<Bgra32> palette)
+        {
+            var bytesPerPixel = paletteCodec.Bpp / 8;
+            var paletteData = MemoryMarshal.AsBytes(palette.Span).ToArray();
+            var encodedPaletteData = new byte[palette.Length * bytesPerPixel];
+
+            for (var i = 0; i < palette.Length; i++)
+            {
+                paletteCodec.EncodePixel(paletteData, 4 * i, encodedPaletteData, i * bytesPerPixel);
+            }
+
+            return encodedPaletteData;
+        }
+
+        /// <summary>
+        /// Gets the palette that was created after encoding.
+        /// </summary>
+        /// <remarks>
+        /// This property will be <see langword="null"/> until <see cref="Save(string)"/> or <see cref="Save(Stream)"/> is invoked
+        /// and <see cref="NeedsExternalPalette"/> is <see langword="true"/>.
+        /// </remarks>
+        public GvrPaletteEncoder Palette { get; private set; }
+
+        /// <summary>
+        /// Saves the encoded texture to the specified file.
+        /// </summary>
+        /// <param name="file">Name of the file to save the data to.</param>
+        public void Save(string file)
+        {
+            using (var stream = File.OpenWrite(file))
+            {
+                Save(stream);
+            }
+        }
+
+        /// <summary>
+        /// Saves the encoded texture to the specified stream.
+        /// </summary>
+        /// <param name="destination">The stream to save the texture to.</param>
+        public void Save(Stream destination)
+        {
+            var writer = new BinaryWriter(destination);
+
+            if (encodedTextureData is null)
+            {
+                encodedTextureData = EncodeTexture();
+            }
+
+            // Get the expected length of the texture data including palette and mipmaps.
+            var expectedLength = encodedTextureData.Length;
+            if (encodedPaletteData != null)
+            {
+                expectedLength += encodedPaletteData.Length;
+            }
+            if (encodedMipmapData != null)
+            {
+                expectedLength += encodedMipmapData.Sum(x => Math.Max(x.Length, 32));
+            }
+
+            // Write out the GBIX or GCIX header if a global index is present.
+            if (GlobalIndex != null && (GlobalIndexType == GvrGbixType.Gbix || GlobalIndexType == GvrGbixType.Gcix))
+            {
+                if (GlobalIndexType == GvrGbixType.Gbix)
+                {
+                    writer.Write(gbixMagicCode);
+                }
+                else if (GlobalIndexType == GvrGbixType.Gcix)
+                {
+                    writer.Write(gcixMagicCode);
+                }
+                writer.WriteInt32(8); // Length of the GBIX or GCIX chunk minus 8. Always 8.
+                writer.WriteUInt32BigEndian(GlobalIndex.Value);
+                writer.WriteInt32(0); // Always 0.
+            }
+
+            // Write out the PVRT header
+            writer.Write(gvrtMagicCode);
+            writer.WriteInt32(expectedLength + 8); // Length of the PVRT chunk minus 8.
+            writer.WriteInt16(0); // Always 0.
+            writer.WriteByte((byte)(((byte)PaletteFormat.GetValueOrDefault() << 4) | ((byte)Flags & 0xF)));
+            writer.WriteByte((byte)PixelFormat);
+            
+            writer.WriteUInt16BigEndian((ushort)Width);
+            writer.WriteUInt16BigEndian((ushort)Height);
+
+            // Write out the palette if an internal palette is present.
+            if (encodedPaletteData != null)
+            {
+                writer.Write(encodedPaletteData);
+            }
+
+            // Write out the texture data.
+            writer.Write(encodedTextureData);
+
+            // Write out the mipmaps if present.
+            if (encodedMipmapData != null)
+            {
+                foreach (var encodedMipmapDataItem in encodedMipmapData)
+                {
+                    writer.Write(encodedMipmapDataItem);
+
+                    // Each mipmap must be at least 32 bytes in length. Pad the end of each as needed.
+                    if (encodedMipmapDataItem.Length < 32)
+                    {
+                        writer.Write(new byte[32 - encodedMipmapDataItem.Length]);
                     }
                 }
             }
         }
-        #endregion
 
-        #region Encode Texture
-        protected override MemoryStream EncodeTexture()
+        private Image<TPixel> Resize<TPixel>(Image<TPixel> image, int width, int height)
+    where TPixel : unmanaged, IPixel<TPixel>
         {
-            // Calculate what the length of the texture will be
-            int textureLength = 16 + (textureWidth * textureHeight * dataCodec.Bpp / 8);
-            if (hasGlobalIndex)
+            var newImage = image.Clone();
+            newImage.Mutate(x => x.Resize(width, height));
+
+            return newImage;
+        }
+
+        private static bool TryBuildExactPalette<TPixel>(Image<TPixel> image, int maxColors, out IList<TPixel> palette)
+            where TPixel : unmanaged, IPixel<TPixel>
+        {
+            palette = null;
+            var newPalette = new List<TPixel>(maxColors);
+
+            for (var y = 0; y < image.Height; y++)
             {
-                textureLength += 16;
-            }
-            if ((dataFlags & GvrDataFlags.InternalPalette) != 0)
-            {
-                textureLength += (dataCodec.PaletteEntries * pixelCodec.Bpp / 8);
-            }
-            if ((dataFlags & GvrDataFlags.Mipmaps) != 0)
-            {
-                for (int size = 1; size < textureWidth; size <<= 1)
+                var row = image.GetPixelRowSpan(y);
+
+                for (var x = 0; x < row.Length; x++)
                 {
-                    textureLength += Math.Max((size * size * dataCodec.Bpp) >> 3, 32);
+                    if (!newPalette.Contains(row[x]))
+                    {
+                        // If there are too many colors, then an exact palette cannot be built.
+                        if (newPalette.Count == maxColors)
+                        {
+                            return false;
+                        }
+
+                        newPalette.Add(row[x]);
+                    }
                 }
             }
 
-            MemoryStream destination = new MemoryStream(textureLength);
+            palette = newPalette;
 
-            // Write out the GBIX header (if we are including one)
-            if (hasGlobalIndex)
+            return true;
+        }
+
+        private static byte[] GetPixelDataAsBytes<TPixel>(ImageFrame<TPixel> imageFrame)
+            where TPixel : unmanaged, IPixel<TPixel>
+        {
+            if (!imageFrame.TryGetSinglePixelSpan(out var pixelSpan))
             {
-                if (gbixType == GvrGbixType.Gcix)
+                return MemoryMarshal.AsBytes(pixelSpan).ToArray();
+            }
+
+            var data = new TPixel[imageFrame.Width * imageFrame.Height];
+
+            for (var y = 0; y < imageFrame.Height; y++)
+            {
+                var row = imageFrame.GetPixelRowSpan(y);
+
+                for (var x = 0; x < row.Length; x++)
                 {
-                    destination.WriteByte((byte)'G');
-                    destination.WriteByte((byte)'C');
-                    destination.WriteByte((byte)'I');
-                    destination.WriteByte((byte)'X');
-                }
-                else
-                {
-                    destination.WriteByte((byte)'G');
-                    destination.WriteByte((byte)'B');
-                    destination.WriteByte((byte)'I');
-                    destination.WriteByte((byte)'X');
-                }
-
-                PTStream.WriteUInt32(destination, 8);
-                PTStream.WriteUInt32BE(destination, globalIndex);
-                PTStream.WriteUInt32(destination, 0);
-            }
-
-            // Write out the GVRT header
-            destination.WriteByte((byte)'G');
-            destination.WriteByte((byte)'V');
-            destination.WriteByte((byte)'R');
-            destination.WriteByte((byte)'T');
-
-            if (hasGlobalIndex)
-            {
-                PTStream.WriteInt32(destination, textureLength - 24);
-            }
-            else
-            {
-                PTStream.WriteInt32(destination, textureLength - 8);
-            }
-
-            PTStream.WriteUInt16(destination, 0);
-            if (PixelFormat != GvrPixelFormat.Unknown)
-            {
-                destination.WriteByte((byte)(((byte)pixelFormat << 4) | ((byte)dataFlags & 0x0F)));
-            }
-            else
-            {
-                destination.WriteByte((byte)((byte)dataFlags & 0xF));
-            }
-            destination.WriteByte((byte)dataFormat);
-
-            PTStream.WriteUInt16BE(destination, textureWidth);
-            PTStream.WriteUInt16BE(destination, textureHeight);
-
-            // If we have an internal palette, write it
-            if ((dataFlags & GvrDataFlags.InternalPalette) != 0)
-            {
-                byte[] palette = pixelCodec.EncodePalette(texturePalette, dataCodec.PaletteEntries);
-                destination.Write(palette, 0, palette.Length);
-            }
-
-            // Write the texture data
-            byte[] textureData = dataCodec.Encode(decodedData, textureWidth, textureHeight, null);
-            destination.Write(textureData, 0, textureData.Length);
-
-            // Write out any mipmaps
-            if ((dataFlags & GvrDataFlags.Mipmaps) != 0)
-            {
-                // Calculate the minimum size for each mipmap
-                int minSize = 0;
-                if (dataCodec.Bpp == 4)
-                {
-                    // 8x8 blocks
-                    minSize = 8;
-                }
-                else if (dataCodec.Bpp == 16)
-                {
-                    // 4x4 blocks
-                    minSize = 4;
-                }
-
-                for (int size = textureWidth >> 1; size > 0; size >>= 1)
-                {
-                    byte[] mipmapDecodedData = BitmapToRawResized(decodedBitmap, size, minSize);
-                    byte[] mipmapTextureData = dataCodec.Encode(mipmapDecodedData, 0, Math.Max(size, minSize), Math.Max(size, minSize));
-                    destination.Write(mipmapTextureData, 0, mipmapTextureData.Length);
+                    data[(y * imageFrame.Width) + x] = row[x];
                 }
             }
 
-            return destination;
+            return MemoryMarshal.AsBytes<TPixel>(data).ToArray();
+        }
+
+        private static byte[] GetPixelDataAsBytes<TPixel>(IndexedImageFrame<TPixel> imageFrame)
+            where TPixel : unmanaged, IPixel<TPixel>
+        {
+            var data = new byte[imageFrame.Width * imageFrame.Height];
+
+            for (var y = 0; y < imageFrame.Height; y++)
+            {
+                var row = imageFrame.GetPixelRowSpan(y);
+
+                for (var x = 0; x < row.Length; x++)
+                {
+                    data[(y * imageFrame.Width) + x] = row[x];
+                }
+            }
+
+            return data;
         }
         #endregion
     }

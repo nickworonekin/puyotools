@@ -89,13 +89,13 @@ namespace PuyoTools.Core.Textures.Svr
             pixelCodec = SvrPixelCodec.GetPixelCodec(pixelFormat);
             if (pixelCodec is null)
             {
-                throw new CannotDecodeTextureException($"Pixel format {PixelFormat:X2} is invalid or not supported for encoding.");
+                throw new CannotDecodeTextureException($"Pixel format {PixelFormat:X} is invalid or not supported for encoding.");
             }
 
             dataCodec = SvrDataCodec.GetDataCodec(dataFormat);
             if (dataCodec is null)
             {
-                throw new CannotDecodeTextureException($"Data format {DataFormat:X2} is invalid or not supported for encoding.");
+                throw new CannotDecodeTextureException($"Data format {DataFormat:X} is invalid or not supported for encoding.");
             }
             dataCodec.PixelCodec = pixelCodec;
 

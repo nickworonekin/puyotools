@@ -124,17 +124,10 @@ namespace PuyoTools.Core.Textures
             // Writing GVR textures is done through the GVR texture encoder, so just pass it to that
             GvrTextureEncoder texture = new GvrTextureEncoder(source, PaletteFormat, DataFormat);
 
-            if (!texture.Initalized)
-            {
-                throw new TextureNotInitalizedException("Unable to initalize texture.");
-            }
-
-            texture.HasGlobalIndex = HasGlobalIndex;
-            if (texture.HasGlobalIndex)
-            {
-                texture.GlobalIndex = GlobalIndex;
-                texture.GbixType = GbixType;
-            }
+            texture.GlobalIndexType = GbixType;
+            texture.GlobalIndex = HasGlobalIndex
+                ? GlobalIndex
+                : (uint?)null;
 
             texture.HasMipmaps = HasMipmaps;
             texture.NeedsExternalPalette = needsExternalPalette;
@@ -144,7 +137,10 @@ namespace PuyoTools.Core.Textures
             // If we have an external palette file, save it
             if (texture.NeedsExternalPalette)
             {
-                var paletteStream = texture.PaletteEncoder.ToStream();
+                var paletteStream = new MemoryStream();
+                texture.Palette.Save(paletteStream);
+                paletteStream.Position = 0;
+
                 OnExternalPaletteCreated(new ExternalPaletteCreatedEventArgs(paletteStream));
             }
         }

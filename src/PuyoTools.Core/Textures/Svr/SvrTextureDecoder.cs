@@ -180,11 +180,11 @@ namespace PuyoTools.Core.Textures.Svr
             // Verify that a pixel and data codec have been set.
             if (pixelCodec is null)
             {
-                throw new CannotDecodeTextureException($"Pixel format {PixelFormat:X2} is invalid or not supported for decoding.");
+                throw new CannotDecodeTextureException($"Pixel format {PixelFormat:X} is invalid or not supported for decoding.");
             }
             if (dataCodec is null)
             {
-                throw new CannotDecodeTextureException($"Data format {DataFormat:X2} is invalid or not supported for decoding.");
+                throw new CannotDecodeTextureException($"Data format {DataFormat:X} is invalid or not supported for decoding.");
             }
 
             if (paletteData != null) // The texture contains an embedded palette

@@ -86,7 +86,7 @@ namespace PuyoTools.Core.Textures.Gvr
             // Verify that a palette codec has been set.
             if (paletteCodec is null)
             {
-                throw new CannotDecodeTextureException($"Pixel format {PaletteFormat:X2} is invalid or not supported for decoding.");
+                throw new CannotDecodeTextureException($"Pixel format {PaletteFormat:X} is invalid or not supported for decoding.");
             }
 
             // Decode the palette
