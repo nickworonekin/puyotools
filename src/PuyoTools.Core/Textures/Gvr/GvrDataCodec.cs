@@ -131,7 +131,7 @@ namespace PuyoTools.Core.Textures.Gvr
                         {
                             for (int x2 = 0; x2 < 8; x2++)
                             {
-                                int loc    = ((y + y2) * width) + (x + x2);
+                                int loc    = (((y + y2) * width) + (x + x2)) * 4;
                                 byte entry = (byte)((0.30 * input[loc + 2]) + (0.59 * input[loc + 1]) + (0.11 * input[loc + 0]));
 
                                 output[offset] = entry;
@@ -199,7 +199,7 @@ namespace PuyoTools.Core.Textures.Gvr
                         {
                             for (int x2 = 0; x2 < 8; x2++)
                             {
-                                int loc    = ((y + y2) * width) + (x + x2);
+                                int loc    = (((y + y2) * width) + (x + x2)) * 4;
                                 byte entry = (byte)(((0.30 * input[loc + 2]) + (0.59 * input[loc + 1]) + (0.11 * input[loc + 0])) * 0x0F / 0xFF);
                                 entry      = (byte)(((((input[loc + 3]) * 0x0F / 0xFF) & 0x0F) << 4) | (entry & 0x0F));
 
@@ -268,7 +268,7 @@ namespace PuyoTools.Core.Textures.Gvr
                         {
                             for (int x2 = 0; x2 < 4; x2++)
                             {
-                                int loc    = ((y + y2) * width) + (x + x2);
+                                int loc    = (((y + y2) * width) + (x + x2)) * 4;
                                 byte entry = (byte)((0.30 * input[loc + 2]) + (0.59 * input[loc + 1]) + (0.11 * input[loc + 0]));
 
                                 output[offset + 0] = input[loc + 3];
