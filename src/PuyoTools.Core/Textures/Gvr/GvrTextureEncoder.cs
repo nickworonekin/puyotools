@@ -160,7 +160,7 @@ namespace PuyoTools.Core.Textures.Gvr
             pixelCodec = GvrDataCodec.GetDataCodec(pixelFormat);
             if (pixelCodec is null)
             {
-                throw new CannotDecodeTextureException($"Pixel format {PixelFormat:X} is invalid or not supported for encoding.");
+                throw new NotSupportedException($"Pixel format {PixelFormat:X} is not supported for encoding.");
             }
 
             // Get the number of palette entries.
@@ -170,14 +170,14 @@ namespace PuyoTools.Core.Textures.Gvr
             {
                 if (paletteFormat is null)
                 {
-                    throw new CannotDecodeTextureException($"Palette format must be set for pixel format {PixelFormat}");
+                    throw new ArgumentNullException(nameof(paletteFormat), $"Palette format must be set for pixel format {PixelFormat}");
                 }
 
                 PaletteFormat = paletteFormat.Value;
                 paletteCodec = GvrPixelCodec.GetPixelCodec(paletteFormat.Value);
                 if (paletteCodec is null)
                 {
-                    throw new CannotDecodeTextureException($"Palette format {PaletteFormat:X} is invalid or not supported for encoding.");
+                    throw new NotSupportedException($"Palette format {PaletteFormat:X} is not supported for encoding.");
                 }
                 pixelCodec.PixelCodec = paletteCodec;
             }

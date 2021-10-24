@@ -54,7 +54,7 @@ namespace PuyoTools.Core.Textures.Svr
             // Check to see if what we are dealing with is a SVR palette
             if (!Is(source))
             {
-                throw new NotAValidTextureException("This is not a valid SVR palette.");
+                throw new InvalidFormatException("Not a valid SVR palette.");
             }
 
             var startPosition = source.Position;

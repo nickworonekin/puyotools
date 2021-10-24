@@ -54,7 +54,7 @@ namespace PuyoTools.Core.Textures.Gvr
             // Check to see if what we are dealing with is a GVR palette
             if (!Is(source))
             {
-                throw new NotAValidTextureException("This is not a valid GVR palette.");
+                throw new InvalidFormatException("Not a valid GVR palette.");
             }
 
             var startPosition = source.Position;

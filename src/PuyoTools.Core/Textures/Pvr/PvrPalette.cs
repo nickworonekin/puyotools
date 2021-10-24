@@ -54,7 +54,7 @@ namespace PuyoTools.Core.Textures.Pvr
             // Check to see if what we are dealing with is a PVR palette
             if (!Is(source))
             {
-                throw new NotAValidTextureException("This is not a valid PVR palette.");
+                throw new InvalidFormatException("Not a valid PVR palette.");
             }
 
             var startPosition = source.Position;

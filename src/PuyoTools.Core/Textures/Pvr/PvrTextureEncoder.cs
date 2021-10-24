@@ -60,7 +60,7 @@ namespace PuyoTools.Core.Textures.Pvr
             {
                 if (!Enum.IsDefined(typeof(PvrCompressionFormat), value))
                 {
-                    throw new CannotDecodeTextureException($"Unknown compression format {value}.");
+                    throw new NotSupportedException($"Unknown compression format {value}.");
                 }
 
                 compressionFormat = value;
@@ -111,13 +111,13 @@ namespace PuyoTools.Core.Textures.Pvr
             pixelCodec = PvrPixelCodec.GetPixelCodec(pixelFormat);
             if (pixelCodec is null)
             {
-                throw new CannotDecodeTextureException($"Pixel format {PixelFormat:X} is invalid or not supported for encoding.");
+                throw new NotSupportedException($"Pixel format {PixelFormat:X} is not supported for encoding.");
             }
             
             dataCodec = PvrDataCodec.GetDataCodec(dataFormat);
             if (dataCodec is null)
             {
-                throw new CannotDecodeTextureException($"Data format {DataFormat:X} is invalid or not supported for encoding.");
+                throw new NotSupportedException($"Data format {DataFormat:X} is not supported for encoding.");
             }
             dataCodec.PixelCodec = pixelCodec;
 

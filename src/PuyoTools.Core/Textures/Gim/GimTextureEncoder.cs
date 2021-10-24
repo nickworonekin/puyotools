@@ -144,7 +144,7 @@ namespace PuyoTools.Core.Textures.Gim
             // Verify if the dimensions are valid
             if (!HasValidDimensions(Width, Height))
             {
-                throw new Exception("Invalid dimensions.");
+                throw new NotSupportedException("Source image width must be a multiple of 16 and height must be a multiple of 8.");
             }
 
             // Create the metadata and set the default values.
