@@ -52,20 +52,15 @@ namespace PuyoTools.Core.Textures
             // Writing GIM textures is done through GIM texture encoder, so just pass it to that
             GimTextureEncoder texture = new GimTextureEncoder(source, PaletteFormat, DataFormat);
 
-            if (!texture.Initalized)
-            {
-                throw new TextureNotInitalizedException("Unable to initalize texture.");
-            }
-
             texture.HasMetadata = HasMetadata;
-            if (texture.HasMetadata)
+            /*if (texture.HasMetadata)
             {
                 texture.Metadata.OriginalFilename = source is FileStream fs
                     ? Path.GetFileName(fs.Name)
                     : string.Empty;
                 texture.Metadata.User = Environment.UserName;
                 texture.Metadata.Program = "Puyo Tools";
-            }
+            }*/
 
             texture.Save(destination);
         }

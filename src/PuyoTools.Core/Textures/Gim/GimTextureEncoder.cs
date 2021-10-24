@@ -1,95 +1,59 @@
-﻿using System;
-using System.Drawing;
-using System.Drawing.Imaging;
+﻿using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing.Processors.Quantization;
+using System;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
-
-using PuyoTools.Core.Textures.Quantizers.Wu;
 
 namespace PuyoTools.Core.Textures.Gim
 {
     public class GimTextureEncoder
     {
         #region Fields
-        private bool initalized = false; // Is the texture initalized?
+        private GimPixelCodec paletteCodec; // Palette codec
+        private GimDataCodec pixelCodec;   // Pixel codec
 
-        private byte[] decodedData; // Decoded texture data (either 32-bit RGBA or 8-bit indexed)
+        private int paletteEntries; // Number of palette entries in the palette data
 
-        private GimPixelCodec pixelCodec; // Pixel codec
-        private GimDataCodec dataCodec;   // Data codec
+        private static readonly byte[] magicCode =
+        {
+            (byte)'M', (byte)'I', (byte)'G', (byte)'.',
+            (byte)'0', (byte)'0', (byte)'.',
+            (byte)'1', (byte)'P', (byte)'S', (byte)'P',
+            0,
+        };
 
-        private byte[][] texturePalette; // The texture's palette
+        private byte[] encodedPaletteData;
+        private byte[] encodedTextureData;
+
+        private Image<Bgra32> sourceImage;
+
+        private GimMetadata metadata;
         #endregion
 
         #region Texture Properties
         /// <summary>
-        /// Width of the texture (in pixels).
+        /// Gets the width.
         /// </summary>
-        public ushort TextureWidth
-        {
-            get
-            {
-                if (!initalized)
-                {
-                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
-                }
-
-                return textureWidth;
-            }
-        }
-        private ushort textureWidth;
+        public int Width { get; private set; }
 
         /// <summary>
-        /// Height of the texture (in pixels).
+        /// Gets the height.
         /// </summary>
-        public ushort TextureHeight
-        {
-            get
-            {
-                if (!initalized)
-                {
-                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
-                }
-
-                return textureHeight;
-            }
-        }
-        private ushort textureHeight;
+        public int Height { get; private set; }
 
         /// <summary>
-        /// The texture's palette format.
+        /// Gets the palette format, or null if a palette is not used.
         /// </summary>
-        public GimPaletteFormat PaletteFormat
-        {
-            get
-            {
-                if (!initalized)
-                {
-                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
-                }
-
-                return paletteFormat;
-            }
-        }
-        private GimPaletteFormat paletteFormat;
+        public GimPaletteFormat? PaletteFormat { get; private set; }
 
         /// <summary>
-        /// The texture's data format.
+        /// Gets the pixel format.
         /// </summary>
-        public GimDataFormat DataFormat
-        {
-            get
-            {
-                if (!initalized)
-                {
-                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
-                }
-
-                return dataFormat;
-            }
-        }
-        private GimDataFormat dataFormat;
+        public GimDataFormat PixelFormat { get; private set; }
         #endregion
 
         #region Constructors & Initalizers
@@ -99,33 +63,23 @@ namespace PuyoTools.Core.Textures.Gim
         /// <param name="file">Filename of the file that contains the texture data.</param>
         /// <param name="pixelFormat">Pixel format to encode the texture to.</param>
         /// <param name="dataFormat">Data format to encode the texture to.</param>
-        public GimTextureEncoder(string file, GimPaletteFormat paletteFormat, GimDataFormat dataFormat)
+        public GimTextureEncoder(string file, GimDataFormat pixelFormat)
+            : this(file, null, pixelFormat)
         {
-            initalized = Initalize(new Bitmap(file), paletteFormat, dataFormat);
         }
 
         /// <summary>
-        /// Opens a texture to encode from a byte array.
+        /// Opens a texture to encode from a file.
         /// </summary>
-        /// <param name="source">Byte array that contains the texture data.</param>
+        /// <param name="file">Filename of the file that contains the texture data.</param>
         /// <param name="pixelFormat">Pixel format to encode the texture to.</param>
         /// <param name="dataFormat">Data format to encode the texture to.</param>
-        public GimTextureEncoder(byte[] source, GimPaletteFormat paletteFormat, GimDataFormat dataFormat) : this(source, 0, source.Length, paletteFormat, dataFormat) { }
-
-        /// <summary>
-        /// Opens a texture to encode from a byte array.
-        /// </summary>
-        /// <param name="source">Byte array that contains the texture data.</param>
-        /// <param name="offset">Offset of the texture in the array.</param>
-        /// <param name="length">Number of bytes to read.</param>
-        /// <param name="pixelFormat">Pixel format to encode the texture to.</param>
-        /// <param name="dataFormat">Data format to encode the texture to.</param>
-        public GimTextureEncoder(byte[] source, int offset, int length, GimPaletteFormat paletteFormat, GimDataFormat dataFormat)
+        public GimTextureEncoder(string file, GimPaletteFormat? paletteFormat, GimDataFormat pixelFormat)
         {
-            MemoryStream buffer = new MemoryStream();
-            buffer.Write(source, offset, length);
-
-            initalized = Initalize(new Bitmap(buffer), paletteFormat, dataFormat);
+            using (var stream = File.OpenRead(file))
+            {
+                Initialize(stream, paletteFormat, pixelFormat);
+            }
         }
 
         /// <summary>
@@ -134,87 +88,79 @@ namespace PuyoTools.Core.Textures.Gim
         /// <param name="source">Stream that contains the texture data.</param>
         /// <param name="pixelFormat">Pixel format to encode the texture to.</param>
         /// <param name="dataFormat">Data format to encode the texture to.</param>
-        public GimTextureEncoder(Stream source, GimPaletteFormat paletteFormat, GimDataFormat dataFormat) : this(source, (int)(source.Length - source.Position), paletteFormat, dataFormat) { }
+        public GimTextureEncoder(Stream source, GimDataFormat pixelFormat)
+            : this(source, null, pixelFormat)
+        {
+        }
 
         /// <summary>
         /// Opens a texture to encode from a stream.
         /// </summary>
         /// <param name="source">Stream that contains the texture data.</param>
-        /// <param name="length">Number of bytes to read.</param>
         /// <param name="pixelFormat">Pixel format to encode the texture to.</param>
         /// <param name="dataFormat">Data format to encode the texture to.</param>
-        public GimTextureEncoder(Stream source, int length, GimPaletteFormat paletteFormat, GimDataFormat dataFormat)
+        public GimTextureEncoder(Stream source, GimPaletteFormat? paletteFormat, GimDataFormat pixelFormat)
         {
-            MemoryStream buffer = new MemoryStream();
-            PTStream.CopyPartTo(source, buffer, length);
-
-            initalized = Initalize(new Bitmap(buffer), paletteFormat, dataFormat);
+            Initialize(source, paletteFormat, pixelFormat);
         }
 
-        /// <summary>
-        /// Opens a texture to encode from a bitmap.
-        /// </summary>
-        /// <param name="source">Bitmap to encode.</param>
-        /// <param name="pixelFormat">Pixel format to encode the texture to.</param>
-        /// <param name="dataFormat">Data format to encode the texture to.</param>
-        public GimTextureEncoder(Bitmap source, GimPaletteFormat paletteFormat, GimDataFormat dataFormat)
+        private void Initialize(Stream source, GimPaletteFormat? paletteFormat, GimDataFormat pixelFormat)
         {
-            initalized = Initalize(source, paletteFormat, dataFormat);
-        }
-
-        private bool Initalize(Bitmap source, GimPaletteFormat paletteFormat, GimDataFormat dataFormat)
-        {
-            // Make sure this bitmap's dimensions are valid
-            if (!HasValidDimensions(source.Width, source.Height))
-                return false;
-
-            textureWidth = (ushort)source.Width;
-            textureHeight = (ushort)source.Height;
-            
-            // Set default values
-            hasMetadata = true;
-            metadata = new GimMetadata();
-
-            // Set the data format and palette format and load the appropiate codecs
-            this.dataFormat = dataFormat;
-            dataCodec = GimDataCodec.GetDataCodec(dataFormat);
-
-            // Make sure the data codec exists and we can encode to it
-            if (dataCodec == null || !dataCodec.CanEncode) return false;
-
-            // Only palettized formats require a pixel codec.
-            if (dataCodec.PaletteEntries != 0)
+            // Set the palette and pixel formats, and verify that we can encode to them.
+            // We'll also need to verify that the palette format is set if it's a palettized pixel format.
+            // Unlike with the decoder, an exception will be thrown here if a codec cannot be used to encode them.
+            PixelFormat = pixelFormat;
+            pixelCodec = GimDataCodec.GetDataCodec(pixelFormat);
+            if (pixelCodec is null)
             {
-                this.paletteFormat = paletteFormat;
-                pixelCodec = GimPixelCodec.GetPixelCodec(paletteFormat);
-
-                // Make sure the pixel codec exists and we can encode to it
-                if (pixelCodec == null || !pixelCodec.CanEncode) return false;
-
-                dataCodec.PixelCodec = pixelCodec;
-
-                // Convert the bitmap to an array containing indicies.
-                decodedData = BitmapToRawIndexed(source, dataCodec.PaletteEntries, out texturePalette);
-            }
-            else
-            {
-                this.paletteFormat = GimPaletteFormat.Unknown;
-                pixelCodec = null;
-
-                // Convert the bitmap to an array
-                decodedData = BitmapToRaw(source);
+                throw new NotSupportedException($"Pixel format {PixelFormat:X} is not supported for encoding.");
             }
 
-            return true;
-        }
+            // Get the number of palette entries.
+            paletteEntries = pixelCodec.PaletteEntries;
 
-        /// <summary>
-        /// Returns if the texture was loaded successfully.
-        /// </summary>
-        /// <returns></returns>
-        public bool Initalized
-        {
-            get { return initalized; }
+            if (paletteEntries != 0)
+            {
+                if (paletteFormat is null)
+                {
+                    throw new ArgumentNullException(nameof(paletteFormat), $"Palette format must be set for pixel format {PixelFormat}");
+                }
+
+                PaletteFormat = paletteFormat.Value;
+                paletteCodec = GimPixelCodec.GetPixelCodec(paletteFormat.Value);
+                if (paletteCodec is null)
+                {
+                    throw new NotSupportedException($"Palette format {PaletteFormat:X} is not supported for encoding.");
+                }
+                pixelCodec.PixelCodec = paletteCodec;
+            }
+
+            // Read the image.
+            sourceImage = Image.Load<Bgra32>(source);
+
+            Width = sourceImage.Width;
+            Height = sourceImage.Height;
+
+            // Verify if the dimensions are valid
+            if (!HasValidDimensions(Width, Height))
+            {
+                throw new Exception("Invalid dimensions.");
+            }
+
+            // Create the metadata and set the default values.
+            metadata = new GimMetadata
+            {
+                OriginalFilename = source is FileStream fs
+                    ? Path.GetFileName(fs.Name)
+                    : "unnamed",
+                User = Environment.UserName,
+                Timestamp = DateTime.Now.ToString("ddd MMM d HH:mm:ss yyyy"),
+                Program =
+                    Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyProductAttribute>().Product
+                    + " " +
+                    Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion,
+
+            };
         }
 
         // Returns if the texture dimensuons are valid
@@ -231,117 +177,19 @@ namespace PuyoTools.Core.Textures.Gim
         /// <summary>
         /// Gets or sets if the texture should include metadata.
         /// </summary>
-        public bool HasMetadata
-        {
-            get
-            {
-                if (!initalized)
-                {
-                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
-                }
-
-                return hasMetadata;
-            }
-            set
-            {
-                if (!initalized)
-                {
-                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
-                }
-
-                hasMetadata = value;
-            }
-        }
-        private bool hasMetadata;
-
-        /// <summary>
-        /// Returns the metadata object for the texture.
-        /// </summary>
-        public GimMetadata Metadata
-        {
-            get
-            {
-                if (!initalized)
-                {
-                    throw new TextureNotInitalizedException("Cannot access this property as the texture is not initalized.");
-                }
-
-                return metadata;
-            }
-        }
-        private GimMetadata metadata;
-
-        public class GimMetadata
-        {
-            /// <summary>
-            /// Gets or sets the original filename of the texture specified in the metadata. The default value is "texture.png".
-            /// </summary>
-            public string OriginalFilename = "texture.png";
-
-            /// <summary>
-            /// Gets or sets the user that created this texture as specified in the metadata. The default value is "user".
-            /// </summary>
-            public string User = "user";
-
-            /// <summary>
-            /// Gets or sets the timestamp in the metadata. The timestamp is in the format of "ddd MMM d HH:mm:ss yyyy".
-            /// </summary>
-            public string Timestamp = DateTime.Now.ToString("ddd MMM d HH:mm:ss yyyy");
-
-            /// <summary>
-            /// Gets or sets the program used to create this texture as specified in the metadata. The default value is "GimConv 1.40".
-            /// </summary>
-            public string Program = "GimConv 1.40";
-        }
+        public bool HasMetadata { get; set; } = true;
         #endregion
 
         #region Texture Retrieval
-        /// <summary>
-        /// Returns the encoded texture as a byte array.
-        /// </summary>
-        /// <returns></returns>
-        public byte[] ToArray()
-        {
-            if (!initalized)
-            {
-                throw new TextureNotInitalizedException("Cannot encode this texture as it is not initalized.");
-            }
-
-            return EncodeTexture().ToArray();
-        }
-
-        /// <summary>
-        /// Returns the encoded texture as a stream.
-        /// </summary>
-        /// <returns></returns>
-        public MemoryStream ToStream()
-        {
-            if (!initalized)
-            {
-                throw new TextureNotInitalizedException("Cannot encode this texture as it is not initalized.");
-            }
-
-            MemoryStream textureStream = EncodeTexture();
-            textureStream.Position = 0;
-            return textureStream;
-        }
-
         /// <summary>
         /// Saves the encoded texture to the specified path.
         /// </summary>
         /// <param name="path">Name of the file to save the data to.</param>
         public void Save(string path)
         {
-            if (!initalized)
+            using (var stream = File.OpenWrite(path))
             {
-                throw new TextureNotInitalizedException("Cannot encode this texture as it is not initalized.");
-            }
-
-            using (FileStream destination = File.Create(path))
-            {
-                MemoryStream textureStream = EncodeTexture();
-                textureStream.Position = 0;
-                textureStream.CopyTo(destination);
+                Save(stream);
             }
         }
 
@@ -351,19 +199,13 @@ namespace PuyoTools.Core.Textures.Gim
         /// <param name="destination">The stream to save the texture to.</param>
         public void Save(Stream destination)
         {
-            if (!initalized)
+            var writer = new BinaryWriter(destination);
+
+            if (encodedTextureData is null)
             {
-                throw new TextureNotInitalizedException("Cannot encode this texture as it is not initalized.");
+                encodedTextureData = EncodeTexture();
             }
 
-            MemoryStream textureStream = EncodeTexture();
-            textureStream.Position = 0;
-            textureStream.CopyTo(destination);
-        }
-
-        // Encodes a texture
-        private MemoryStream EncodeTexture()
-        {
             // Get the lengths of the various chunks
             int eofOffsetChunkLength = 16,
                 metadataOffsetChunkLength = 16,
@@ -371,14 +213,14 @@ namespace PuyoTools.Core.Textures.Gim
                 textureDataChunkLength = 0,
                 metadataChunkLength = 0;
 
-            if (dataCodec.PaletteEntries != 0)
+            if (encodedPaletteData != null)
             {
-                paletteDataChunkLength = 80 + (dataCodec.PaletteEntries * (pixelCodec.Bpp >> 3));
+                paletteDataChunkLength = 80 + encodedPaletteData.Length;
             }
 
-            textureDataChunkLength = 80 + ((textureWidth * textureHeight * dataCodec.Bpp) >> 3);
+            textureDataChunkLength = 80 + encodedTextureData.Length;
 
-            if (hasMetadata)
+            if (HasMetadata)
             {
                 metadataChunkLength = 16;
 
@@ -415,196 +257,182 @@ namespace PuyoTools.Core.Textures.Gim
                 textureDataChunkLength +
                 metadataChunkLength;
 
-            MemoryStream destination = new MemoryStream(textureLength);
-            var writer = new BinaryWriter(destination);
-
             // Write the GIM header
-            PTStream.WriteCString(destination, "MIG.00.1PSP", 12);
-            PTStream.WriteUInt32(destination, 0);
+            writer.Write(magicCode);
+            writer.WriteInt32(0);
 
             // Write the EOF offset chunk
-            PTStream.WriteUInt16(destination, 0x02);
-            PTStream.WriteUInt16(destination, 0);
-            PTStream.WriteInt32(destination, textureLength - 16);
-            PTStream.WriteInt32(destination, eofOffsetChunkLength);
-            PTStream.WriteUInt32(destination, 16);
+            writer.WriteUInt16(0x02);
+            writer.WriteUInt16(0);
+            writer.WriteInt32(textureLength - 16);
+            writer.WriteInt32(eofOffsetChunkLength);
+            writer.WriteUInt32(16);
 
             // Write the metadata offset chunk
-            PTStream.WriteUInt16(destination, 0x03);
-            PTStream.WriteUInt16(destination, 0);
+            writer.WriteUInt16(0x03);
+            writer.WriteUInt16(0);
 
-            if (hasMetadata)
+            if (HasMetadata)
             {
-                PTStream.WriteInt32(destination, textureLength - metadataChunkLength - 32);
+                writer.WriteInt32(textureLength - metadataChunkLength - 32);
             }
             else
             {
-                PTStream.WriteInt32(destination, textureLength - 32);
+                writer.WriteInt32(textureLength - 32);
             }
 
-            PTStream.WriteInt32(destination, metadataOffsetChunkLength);
-            PTStream.WriteUInt32(destination, 16);
+            writer.WriteInt32(metadataOffsetChunkLength);
+            writer.WriteUInt32(16);
 
             // Write the palette data, if we have a palette
-            if (dataCodec.PaletteEntries != 0)
+            if (encodedPaletteData != null)
             {
-                PTStream.WriteUInt16(destination, 0x05);
-                PTStream.WriteUInt16(destination, 0);
-                PTStream.WriteInt32(destination, paletteDataChunkLength);
-                PTStream.WriteInt32(destination, paletteDataChunkLength);
-                PTStream.WriteUInt32(destination, 16);
+                writer.WriteUInt16(0x05);
+                writer.WriteUInt16(0);
+                writer.WriteInt32(paletteDataChunkLength);
+                writer.WriteInt32(paletteDataChunkLength);
+                writer.WriteUInt32(16);
 
-                PTStream.WriteUInt16(destination, 48);
-                PTStream.WriteUInt16(destination, 0);
-                PTStream.WriteUInt16(destination, (byte)paletteFormat);
-                PTStream.WriteUInt16(destination, 0);
-                PTStream.WriteUInt16(destination, (ushort)dataCodec.PaletteEntries);
-                destination.Write(new byte[] { 0x01, 0x00, 0x20, 0x00, 0x10, 0x00 }, 0, 6);
+                writer.WriteUInt16(48);
+                writer.WriteUInt16(0);
+                writer.WriteUInt16((byte)PaletteFormat.Value);
+                writer.WriteUInt16(0);
+                writer.WriteUInt16((ushort)paletteEntries);
+                writer.Write(new byte[] { 0x01, 0x00, 0x20, 0x00, 0x10, 0x00 });
 
-                destination.Write(new byte[] { 0x01, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00 }, 0, 8);
-                PTStream.WriteUInt32(destination, 0x30);
-                PTStream.WriteUInt32(destination, 0x40);
+                writer.Write(new byte[] { 0x01, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00 });
+                writer.WriteUInt32(0x30);
+                writer.WriteUInt32(0x40);
 
-                PTStream.WriteInt32(destination, paletteDataChunkLength - 16);
-                PTStream.WriteUInt32(destination, 0);
-                destination.Write(new byte[] { 0x02, 0x00, 0x01, 0x00, 0x03, 0x00, 0x01, 0x00 }, 0, 8);
+                writer.WriteInt32(paletteDataChunkLength - 16);
+                writer.WriteUInt32(0);
+                writer.Write(new byte[] { 0x02, 0x00, 0x01, 0x00, 0x03, 0x00, 0x01, 0x00 });
 
-                destination.Write(new byte[] { 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }, 0, 16);
+                writer.Write(new byte[] { 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
 
-                byte[] palette = pixelCodec.EncodePalette(texturePalette, dataCodec.PaletteEntries);
-                destination.Write(palette, 0, palette.Length);
+                writer.Write(encodedPaletteData);
             }
 
             // Write the texture data
-            PTStream.WriteUInt16(destination, 0x04);
-            PTStream.WriteUInt16(destination, 0);
-            PTStream.WriteInt32(destination, textureDataChunkLength);
-            PTStream.WriteInt32(destination, textureDataChunkLength);
-            PTStream.WriteUInt32(destination, 16);
+            writer.WriteUInt16(0x04);
+            writer.WriteUInt16(0);
+            writer.WriteInt32(textureDataChunkLength);
+            writer.WriteInt32(textureDataChunkLength);
+            writer.WriteUInt32(16);
 
-            PTStream.WriteUInt16(destination, 48);
-            PTStream.WriteUInt16(destination, 0);
-            PTStream.WriteUInt16(destination, (byte)dataFormat);
-            PTStream.WriteUInt16(destination, 1); // Always swizzled
-            PTStream.WriteUInt16(destination, textureWidth);
-            PTStream.WriteUInt16(destination, textureHeight);
+            writer.WriteUInt16(48);
+            writer.WriteUInt16(0);
+            writer.WriteUInt16((byte)PixelFormat);
+            writer.WriteUInt16(1); // Always swizzled
+            writer.WriteUInt16((ushort)Width);
+            writer.WriteUInt16((ushort)Height);
 
-            if (dataCodec.PaletteEntries != 0)
+            if (paletteEntries != 0)
             {
                 // For palettized textures, this is the bpp for this data format
-                PTStream.WriteUInt16(destination, (ushort)dataCodec.Bpp);
+                writer.WriteUInt16((ushort)pixelCodec.Bpp);
             }
             else
             {
                 // For non-palettized textures, this is always specified as 32bpp
-                PTStream.WriteUInt16(destination, 32);
+                writer.WriteUInt16(32);
             }
 
-            PTStream.WriteUInt16(destination, 16);
+            writer.WriteUInt16(16);
 
-            destination.Write(new byte[] { 0x08, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x30, 0x00, 0x00, 0x00, 0x40, 0x00, 0x00, 0x00 }, 0, 16);
+            writer.Write(new byte[] { 0x08, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x30, 0x00, 0x00, 0x00, 0x40, 0x00, 0x00, 0x00 });
 
-            PTStream.WriteInt32(destination, textureDataChunkLength - 16);
-            PTStream.WriteUInt32(destination, 0);
-            destination.Write(new byte[] { 0x01, 0x00, 0x01, 0x00, 0x03, 0x00, 0x01, 0x00 }, 0, 8);
+            writer.WriteInt32(textureDataChunkLength - 16);
+            writer.WriteUInt32(0);
+            writer.Write(new byte[] { 0x01, 0x00, 0x01, 0x00, 0x03, 0x00, 0x01, 0x00 });
 
-            destination.Write(new byte[] { 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }, 0, 16);
+            writer.Write(new byte[] { 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
 
-            byte[] textureData = GimDataCodec.Swizzle(dataCodec.Encode(decodedData, 0, textureWidth, textureHeight), 0, textureWidth, textureHeight, dataCodec.Bpp);
-            destination.Write(textureData, 0, textureData.Length);
+            writer.Write(GimDataCodec.Swizzle(encodedTextureData, 0, Width, Height, pixelCodec.Bpp));
 
             // Write the metadata, only if we are including it
-            if (hasMetadata)
+            if (HasMetadata)
             {
-                PTStream.WriteUInt16(destination, 0xFF);
-                PTStream.WriteUInt16(destination, 0);
-                PTStream.WriteInt32(destination, metadataChunkLength);
-                PTStream.WriteInt32(destination, metadataChunkLength);
-                PTStream.WriteUInt32(destination, 16);
+                writer.WriteUInt16(0xFF);
+                writer.WriteUInt16(0);
+                writer.WriteInt32(metadataChunkLength);
+                writer.WriteInt32(metadataChunkLength);
+                writer.WriteUInt32(16);
 
                 writer.WriteNullTerminatedString(metadata.OriginalFilename);
                 writer.WriteNullTerminatedString(metadata.User);
                 writer.WriteNullTerminatedString(metadata.Timestamp);
                 writer.WriteNullTerminatedString(metadata.Program);
             }
-            return destination;
         }
         #endregion
 
         #region Texture Conversion
-        private byte[] BitmapToRaw(Bitmap source)
+        /// <summary>
+        /// Encodes the texture. Also encodes the palette if needed.
+        /// </summary>
+        /// <returns>The byte array containing the encoded texture data.</returns>
+        private byte[] EncodeTexture()
         {
-            Bitmap img = source;
-            byte[] destination = new byte[img.Width * img.Height * 4];
+            byte[] pixelData;
 
-            // If this is not a 32-bit ARGB bitmap, convert it to one
-            if (img.PixelFormat != PixelFormat.Format32bppArgb)
+            // Encode as a palettized image.
+            if (paletteEntries != 0)
             {
-                Bitmap newImage = new Bitmap(img.Width, img.Height, PixelFormat.Format32bppArgb);
-                using (Graphics g = Graphics.FromImage(newImage))
+                // Create the quantizer and quantize the texture.
+                IQuantizer<Bgra32> quantizer;
+                IndexedImageFrame<Bgra32> imageFrame;
+                var quantizerOptions = new QuantizerOptions
                 {
-                    g.DrawImage(img, 0, 0, img.Width, img.Height);
+                    MaxColors = paletteEntries,
+                };
+
+                if (ImageHelper.TryBuildExactPalette(sourceImage, paletteEntries, out var palette))
+                {
+                    quantizer = new PaletteQuantizer(palette.Cast<Color>().ToArray(), quantizerOptions)
+                        .CreatePixelSpecificQuantizer<Bgra32>(Configuration.Default);
+
+                    imageFrame = quantizer.QuantizeFrame(sourceImage.Frames.RootFrame, new Rectangle(0, 0, sourceImage.Width, sourceImage.Height));
                 }
-                img = newImage;
+                else
+                {
+                    quantizer = new WuQuantizer(quantizerOptions)
+                        .CreatePixelSpecificQuantizer<Bgra32>(Configuration.Default);
+
+                    imageFrame = quantizer.BuildPaletteAndQuantizeFrame(sourceImage.Frames.RootFrame, new Rectangle(0, 0, sourceImage.Width, sourceImage.Height));
+                }
+
+                // Save the palette
+                encodedPaletteData = EncodePalette(imageFrame.Palette);
+
+                pixelData = ImageHelper.GetPixelDataAsBytes(imageFrame);
             }
 
-            // Copy over the data to the destination. It's ok to do it without utilizing Stride
-            // since each pixel takes up 4 bytes (aka Stride will always be equal to Width)
-            BitmapData bitmapData = img.LockBits(new Rectangle(0, 0, img.Width, img.Height), ImageLockMode.ReadOnly, img.PixelFormat);
-            Marshal.Copy(bitmapData.Scan0, destination, 0, destination.Length);
-            img.UnlockBits(bitmapData);
+            // Encode as an RGBA image.
+            else
+            {
+                pixelData = ImageHelper.GetPixelDataAsBytes(sourceImage.Frames.RootFrame);
+            }
 
-            return destination;
+            return pixelCodec.Encode(pixelData, 0, Width, Height);
         }
 
-        private unsafe byte[] BitmapToRawIndexed(Bitmap source, int maxColors, out byte[][] palette)
+        /// <summary>
+        /// Encodes the palette.
+        /// </summary>
+        /// <returns></returns>
+        private byte[] EncodePalette(ReadOnlyMemory<Bgra32> palette)
         {
-            Bitmap img = source;
-            byte[] destination = new byte[img.Width * img.Height];
+            var bytesPerPixel = paletteCodec.Bpp / 8;
+            var paletteData = MemoryMarshal.AsBytes(palette.Span).ToArray();
+            var encodedPaletteData = new byte[palette.Length * bytesPerPixel];
 
-            // If this is not a 32-bit ARGB bitmap, convert it to one
-            if (img.PixelFormat != PixelFormat.Format32bppArgb)
+            for (var i = 0; i < palette.Length; i++)
             {
-                Bitmap newImage = new Bitmap(img.Width, img.Height, PixelFormat.Format32bppArgb);
-                using (Graphics g = Graphics.FromImage(newImage))
-                {
-                    g.DrawImage(img, 0, 0, img.Width, img.Height);
-                }
-                img = newImage;
+                paletteCodec.EncodePixel(paletteData, 4 * i, encodedPaletteData, i * bytesPerPixel);
             }
 
-            // Quantize the image
-            WuQuantizer quantizer = new WuQuantizer();
-            img = (Bitmap)quantizer.QuantizeImage(img, maxColors);
-
-            // Copy over the data to the destination. We need to use Stride in this case, as it may not
-            // always be equal to Width.
-            BitmapData bitmapData = img.LockBits(new Rectangle(0, 0, img.Width, img.Height), ImageLockMode.ReadOnly, img.PixelFormat);
-
-            byte* pointer = (byte*)bitmapData.Scan0;
-            for (int y = 0; y < bitmapData.Height; y++)
-            {
-                for (int x = 0; x < bitmapData.Width; x++)
-                {
-                    destination[(y * img.Width) + x] = pointer[(y * bitmapData.Stride) + x];
-                }
-            }
-
-            img.UnlockBits(bitmapData);
-
-            // Copy over the palette
-            palette = new byte[maxColors][];
-            for (int i = 0; i < maxColors; i++)
-            {
-                palette[i] = new byte[4];
-
-                palette[i][3] = img.Palette.Entries[i].A;
-                palette[i][2] = img.Palette.Entries[i].R;
-                palette[i][1] = img.Palette.Entries[i].G;
-                palette[i][0] = img.Palette.Entries[i].B;
-            }
-
-            return destination;
+            return encodedPaletteData;
         }
         #endregion
     }

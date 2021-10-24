@@ -88,7 +88,7 @@ namespace PuyoTools.App.Tools
                             synchronizationContext.Send(new SendOrPostCallback(state => formatOptions.MapTo(texture)), null);
                         }
 
-                        texture.Write(source, buffer, (int)source.Length);
+                        texture.Write(source, buffer);
                     }
 
                     // Do we want to compress this texture?

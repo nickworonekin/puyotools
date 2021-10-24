@@ -1,10 +1,10 @@
-﻿using System;
+﻿using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Png;
+using SixLabors.ImageSharp.PixelFormats;
+using System;
 using System.Collections.ObjectModel;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 
 namespace PuyoTools.Core.Textures.Gvr
@@ -97,7 +97,7 @@ namespace PuyoTools.Core.Textures.Gvr
             // Check to see if what we are dealing with is a GVR texture
             if (!Is(source))
             {
-                throw new NotAValidTextureException("This is not a valid GVR texture.");
+                throw new InvalidFormatException("Not a valid GVR texture.");
             }
 
             var startPosition = source.Position;
@@ -208,14 +208,8 @@ namespace PuyoTools.Core.Textures.Gvr
         /// <param name="destination">The stream to save the texture to.</param>
         public void Save(Stream destination)
         {
-            var pixelData = GetPixelData();
-
-            Bitmap img = new Bitmap(Width, Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-            BitmapData bitmapData = img.LockBits(new Rectangle(0, 0, img.Width, img.Height), ImageLockMode.WriteOnly, img.PixelFormat);
-            Marshal.Copy(pixelData, 0, bitmapData.Scan0, pixelData.Length);
-            img.UnlockBits(bitmapData);
-
-            img.Save(destination, ImageFormat.Png);
+            var image = Image.LoadPixelData<Bgra32>(GetPixelData(), Width, Height);
+            image.Save(destination, new PngEncoder());
         }
 
         // Decodes a texture
@@ -229,11 +223,17 @@ namespace PuyoTools.Core.Textures.Gvr
             // Verify that a palette codec (if required) and pixel codec have been set.
             if (pixelCodec is null)
             {
-                throw new CannotDecodeTextureException($"Pixel format {PixelFormat:X} is invalid or not supported for decoding.");
+                throw new NotSupportedException($"Pixel format {PixelFormat:X} is not supported for decoding.");
             }
             if (paletteCodec is null && pixelCodec.PaletteEntries != 0)
             {
-                throw new CannotDecodeTextureException($"Palette format {PaletteFormat:X} is invalid or not supported for decoding.");
+                throw new NotSupportedException($"Palette format {PaletteFormat:X} is not supported for decoding.");
+            }
+
+            // Verify that a palette has been set for data formats requiring external palettes.
+            if (NeedsExternalPalette && pixelCodec.Palette is null)
+            {
+                throw new InvalidOperationException("An external palette file is required for decoding.");
             }
 
             if (paletteData != null) // The texture contains an embedded palette

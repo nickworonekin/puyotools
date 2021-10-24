@@ -86,7 +86,7 @@ namespace PuyoTools.Core.Textures.Svr
             // Verify that a pixel codec has been set.
             if (pixelCodec is null)
             {
-                throw new CannotDecodeTextureException($"Pixel format {PixelFormat:X} is invalid or not supported for decoding.");
+                throw new NotSupportedException($"Pixel format {PixelFormat:X} is invalid or not supported for decoding.");
             }
 
             // Decode the palette

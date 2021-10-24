@@ -85,7 +85,7 @@ namespace PuyoTools.Core.Textures.Svr
             // Check to see if what we are dealing with is a SVR texture
             if (!Is(source))
             {
-                throw new NotAValidTextureException("This is not a valid SVR texture.");
+                throw new InvalidFormatException("Not a valid SVR texture.");
             }
 
             var startPosition = source.Position;
@@ -180,11 +180,17 @@ namespace PuyoTools.Core.Textures.Svr
             // Verify that a pixel and data codec have been set.
             if (pixelCodec is null)
             {
-                throw new CannotDecodeTextureException($"Pixel format {PixelFormat:X} is invalid or not supported for decoding.");
+                throw new NotSupportedException($"Pixel format {PixelFormat:X} is not supported for decoding.");
             }
             if (dataCodec is null)
             {
-                throw new CannotDecodeTextureException($"Data format {DataFormat:X} is invalid or not supported for decoding.");
+                throw new NotSupportedException($"Data format {DataFormat:X} is not supported for decoding.");
+            }
+
+            // Verify that a palette has been set for data formats requiring external palettes.
+            if (NeedsExternalPalette && dataCodec.Palette is null)
+            {
+                throw new InvalidOperationException("An external palette file is required for decoding.");
             }
 
             if (paletteData != null) // The texture contains an embedded palette

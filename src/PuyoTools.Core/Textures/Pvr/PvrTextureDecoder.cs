@@ -99,7 +99,7 @@ namespace PuyoTools.Core.Textures.Pvr
             // Check to see if what we are dealing with is a PVR texture
             if (!Is(source))
             {
-                throw new NotAValidTextureException("This is not a valid PVR texture.");
+                throw new InvalidFormatException("Not a valid PVR texture.");
             }
 
             var startPosition = source.Position;
@@ -140,7 +140,8 @@ namespace PuyoTools.Core.Textures.Pvr
             }
             else
             {
-                throw new Exception("Unable to find GBIX and PVRT headers.");
+                // This should never be thrown, but is included anyway.
+                throw new InvalidFormatException("GBIX and PVRT headers not found.");
             }
 
             // Get the codecs and make sure we can decode using them
@@ -327,11 +328,17 @@ namespace PuyoTools.Core.Textures.Pvr
             // Verify that a pixel and data codec have been set.
             if (pixelCodec is null)
             {
-                throw new CannotDecodeTextureException($"Pixel format {PixelFormat:X} is invalid or not supported for decoding.");
+                throw new NotSupportedException($"Pixel format {PixelFormat:X} is not supported for decoding.");
             }
             if (dataCodec is null)
             {
-                throw new CannotDecodeTextureException($"Data format {DataFormat:X} is invalid or not supported for decoding.");
+                throw new NotSupportedException($"Data format {DataFormat:X} is not supported for decoding.");
+            }
+
+            // Verify that a palette has been set for data formats requiring external palettes.
+            if (NeedsExternalPalette && dataCodec.Palette is null)
+            {
+                throw new InvalidOperationException("An external palette file is required for decoding.");
             }
 
             if (paletteData != null) // The texture contains an embedded palette

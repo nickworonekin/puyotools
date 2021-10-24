@@ -175,7 +175,7 @@ namespace PuyoTools.Core.Textures.Svr
 
         #region Encode Texture
         /// <summary>
-        /// Encodes the texture. Also encodes the palette and mipmaps if needed.
+        /// Encodes the texture. Also encodes the palette if needed.
         /// </summary>
         /// <returns>The byte array containing the encoded texture data.</returns>
         private byte[] EncodeTexture()
@@ -193,7 +193,7 @@ namespace PuyoTools.Core.Textures.Svr
                     MaxColors = paletteEntries,
                 };
 
-                if (TryBuildExactPalette(sourceImage, paletteEntries, out var palette))
+                if (ImageHelper.TryBuildExactPalette(sourceImage, paletteEntries, out var palette))
                 {
                     quantizer = new PaletteQuantizer(palette.Cast<Color>().ToArray(), quantizerOptions)
                         .CreatePixelSpecificQuantizer<Bgra32>(Configuration.Default);
@@ -218,13 +218,13 @@ namespace PuyoTools.Core.Textures.Svr
                     encodedPaletteData = EncodePalette(imageFrame.Palette);
                 }
 
-                pixelData = GetPixelDataAsBytes(imageFrame);
+                pixelData = ImageHelper.GetPixelDataAsBytes(imageFrame);
             }
 
             // Encode as an RGBA image.
             else
             {
-                pixelData = GetPixelDataAsBytes(sourceImage.Frames.RootFrame);
+                pixelData = ImageHelper.GetPixelDataAsBytes(sourceImage.Frames.RootFrame);
             }
 
             return dataCodec.Encode(pixelData, 0, Width, Height);
@@ -320,77 +320,6 @@ namespace PuyoTools.Core.Textures.Svr
 
             // Write out the texture data.
             writer.Write(encodedTextureData);
-        }
-
-        private static bool TryBuildExactPalette<TPixel>(Image<TPixel> image, int maxColors, out IList<TPixel> palette)
-            where TPixel : unmanaged, IPixel<TPixel>
-        {
-            palette = null;
-            var newPalette = new List<TPixel>(maxColors);
-
-            for (var y = 0; y < image.Height; y++)
-            {
-                var row = image.GetPixelRowSpan(y);
-
-                for (var x = 0; x < row.Length; x++)
-                {
-                    if (!newPalette.Contains(row[x]))
-                    {
-                        // If there are too many colors, then an exact palette cannot be built.
-                        if (newPalette.Count == maxColors)
-                        {
-                            return false;
-                        }
-
-                        newPalette.Add(row[x]);
-                    }
-                }
-            }
-
-            palette = newPalette;
-
-            return true;
-        }
-
-        private static byte[] GetPixelDataAsBytes<TPixel>(ImageFrame<TPixel> imageFrame)
-            where TPixel : unmanaged, IPixel<TPixel>
-        {
-            if (!imageFrame.TryGetSinglePixelSpan(out var pixelSpan))
-            {
-                return MemoryMarshal.AsBytes(pixelSpan).ToArray();
-            }
-
-            var data = new TPixel[imageFrame.Width * imageFrame.Height];
-
-            for (var y = 0; y < imageFrame.Height; y++)
-            {
-                var row = imageFrame.GetPixelRowSpan(y);
-
-                for (var x = 0; x < row.Length; x++)
-                {
-                    data[(y * imageFrame.Width) + x] = row[x];
-                }
-            }
-
-            return MemoryMarshal.AsBytes<TPixel>(data).ToArray();
-        }
-
-        private static byte[] GetPixelDataAsBytes<TPixel>(IndexedImageFrame<TPixel> imageFrame)
-            where TPixel : unmanaged, IPixel<TPixel>
-        {
-            var data = new byte[imageFrame.Width * imageFrame.Height];
-
-            for (var y = 0; y < imageFrame.Height; y++)
-            {
-                var row = imageFrame.GetPixelRowSpan(y);
-
-                for (var x = 0; x < row.Length; x++)
-                {
-                    data[(y * imageFrame.Width) + x] = row[x];
-                }
-            }
-
-            return data;
         }
         #endregion
     }

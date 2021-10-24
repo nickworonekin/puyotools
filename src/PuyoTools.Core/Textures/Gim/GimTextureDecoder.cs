@@ -1,9 +1,9 @@
-﻿using System;
-using System.Drawing;
-using System.Drawing.Imaging;
+﻿using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Png;
+using SixLabors.ImageSharp.PixelFormats;
+using System;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 
 namespace PuyoTools.Core.Textures.Gim
@@ -22,7 +22,8 @@ namespace PuyoTools.Core.Textures.Gim
         {
             (byte)'M', (byte)'I', (byte)'G', (byte)'.',
             (byte)'0', (byte)'0', (byte)'.',
-            (byte)'1', (byte)'P', (byte)'S', (byte)'P'
+            (byte)'1', (byte)'P', (byte)'S', (byte)'P',
+            0,
         };
 
         private byte[] paletteData;
@@ -83,7 +84,7 @@ namespace PuyoTools.Core.Textures.Gim
             // Check to see if what we are dealing with is a GIM texture
             if (!Is(source))
             {
-                throw new NotAValidTextureException("This is not a valid GIM texture.");
+                throw new InvalidFormatException("Not a valid GIM texture.");
             }
 
             var startPosition = source.Position;
@@ -133,11 +134,6 @@ namespace PuyoTools.Core.Textures.Gim
                         PixelFormat = (GimDataFormat)reader.ReadUInt16();
                         pixelCodec = GimDataCodec.GetDataCodec(PixelFormat);
 
-                        if (pixelCodec is null)
-                        {
-                            throw new CannotDecodeTextureException($"Pixel format {PixelFormat:X} is invalid or not supported for decoding.");
-                        }
-
                         // Get whether this texture is swizzled
                         isSwizzled = reader.ReadUInt16() == 1;
 
@@ -156,6 +152,14 @@ namespace PuyoTools.Core.Textures.Gim
                             actualHeight = PTMethods.RoundUp(actualHeight, 8);
                         }
 
+                        // If we don't have a known pixel codec for this format, that's ok.
+                        // This will allow the properties to be read if the user doesn't want to decode this texture.
+                        // The exception will be thrown when the texture is being decoded.
+                        if (pixelCodec is null)
+                        {
+                            break;
+                        }
+
                         // Read the texture data
                         textureData = reader.At(chunkPosition + 0x50, x => x.ReadBytes(actualWidth * actualHeight * pixelCodec.Bpp / 8));
 
@@ -172,14 +176,17 @@ namespace PuyoTools.Core.Textures.Gim
                         PaletteFormat = (GimPaletteFormat)reader.ReadUInt16();
                         paletteCodec = GimPixelCodec.GetPixelCodec(PaletteFormat.Value);
 
-                        if (paletteCodec is null)
-                        {
-                            throw new CannotDecodeTextureException($"Palette format {PaletteFormat:X} is invalid or not supported for decoding.");
-                        }
-
                         // Get the number of entries in the palette
                         source.Position += 2; // 0x24
                         paletteEntries = reader.ReadUInt16();
+
+                        // If we don't have a known palette codec for this format, that's ok.
+                        // This will allow the properties to be read if the user doesn't want to decode this texture.
+                        // The exception will be thrown when the texture is being decoded.
+                        if (paletteCodec is null)
+                        {
+                            break;
+                        }
 
                         // Read the palette data
                         paletteData = reader.At(chunkPosition + 0x50, x => x.ReadBytes(paletteEntries * paletteCodec.Bpp / 8));
@@ -207,13 +214,13 @@ namespace PuyoTools.Core.Textures.Gim
 
                     default: // Unknown chunk
 
-                        throw new Exception($"Unknown chunk type {chunkType:X}");
+                        throw new InvalidFormatException($"Unknown chunk type {chunkType:X}");
                 }
 
                 // Verify that the chunk length will allow the stream to progress
                 if (chunkLength <= 0)
                 {
-                    throw new Exception("Chunk length cannot be zero or negative.");
+                    throw new InvalidFormatException("Chunk length cannot be zero or negative.");
                 }
 
                 // Go to the next chunk
@@ -223,27 +230,31 @@ namespace PuyoTools.Core.Textures.Gim
             // Verify that the stream's position is as the expected position
             if (source.Position - startPosition != eofOffset)
             {
-                throw new Exception("Stream position does not match expected end-of-file position.");
+                throw new InvalidFormatException("Stream position does not match expected end-of-file position.");
             }
 
-            // Verify that a data codec exists
+            // If we don't have a known pixel codec for this format, that's ok.
+            // This will allow the properties to be read if the user doesn't want to decode this texture.
+            // The exception will be thrown when the texture is being decoded.
             if (pixelCodec is null)
             {
-                throw new CannotDecodeTextureException("No texture data found.");
+                return;
             }
 
             if (pixelCodec.PaletteEntries != 0)
             {
-                // Verify that a palette exists for palettized formats
+                // If we don't have a known palette codec for this format, that's ok.
+                // This will allow the properties to be read if the user doesn't want to decode this texture.
+                // The exception will be thrown when the texture is being decoded.
                 if (paletteCodec is null)
                 {
-                    throw new CannotDecodeTextureException("No palette found for palette-based pixel format.");
+                    return;
                 }
 
                 // Verify that there aren't too many entries in the palette
                 if (paletteEntries > pixelCodec.PaletteEntries)
                 {
-                    throw new CannotDecodeTextureException("Too many entries in palette for the specified pixel format.");
+                    throw new InvalidFormatException("Too many entries in palette for the specified pixel format.");
                 }
 
                 // Set the data format's palette codec
@@ -278,19 +289,23 @@ namespace PuyoTools.Core.Textures.Gim
         /// <param name="destination">The stream to save the texture to.</param>
         public void Save(Stream destination)
         {
-            var pixelData = GetPixelData();
-
-            Bitmap img = new Bitmap(Width, Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-            BitmapData bitmapData = img.LockBits(new Rectangle(0, 0, img.Width, img.Height), ImageLockMode.WriteOnly, img.PixelFormat);
-            Marshal.Copy(pixelData, 0, bitmapData.Scan0, pixelData.Length);
-            img.UnlockBits(bitmapData);
-
-            img.Save(destination, ImageFormat.Png);
+            var image = Image.LoadPixelData<Bgra32>(GetPixelData(), Width, Height);
+            image.Save(destination, new PngEncoder());
         }
 
         // Decodes a texture
         private byte[] DecodeTexture()
         {
+            // Verify that a palette codec (if required) and pixel codec have been set.
+            if (pixelCodec is null)
+            {
+                throw new NotSupportedException($"Pixel format {PixelFormat:X} is not supported for decoding.");
+            }
+            if (paletteCodec is null && pixelCodec.PaletteEntries != 0)
+            {
+                throw new NotSupportedException($"Palette format {PaletteFormat:X} is not supported for decoding.");
+            }
+
             if (paletteData != null) // The texture contains an embedded palette
             {
                 pixelCodec.SetPalette(paletteData, 0, paletteEntries);

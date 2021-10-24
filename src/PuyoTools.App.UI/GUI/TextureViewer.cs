@@ -43,13 +43,17 @@ namespace PuyoTools.GUI
             EventHandler<ExternalPaletteRequiredEventArgs> onExternalPaletteRequired = null)
         {
             Bitmap textureBitmap;
+            MemoryStream textureStream = new MemoryStream();
 
             var texture = format.GetCodec();
             if (texture is ITextureHasExternalPalette textureWithExternalPalette)
             {
                 textureWithExternalPalette.ExternalPaletteRequired += onExternalPaletteRequired;
             }
-            texture.Read(data, out textureBitmap);
+            //texture.Read(data, out textureBitmap);
+            texture.Read(data, textureStream);
+            textureStream.Position = 0;
+            textureBitmap = new Bitmap(textureStream);
 
             DisplayTexture(textureBitmap, filename, format);
         }

@@ -187,7 +187,7 @@ namespace PuyoTools.Core.Textures.Pvr
                     MaxColors = paletteEntries,
                 };
 
-                if (TryBuildExactPalette(sourceImage, paletteEntries, out var palette))
+                if (ImageHelper.TryBuildExactPalette(sourceImage, paletteEntries, out var palette))
                 {
                     quantizer = new PaletteQuantizer(palette.Cast<Color>().ToArray(), quantizerOptions)
                         .CreatePixelSpecificQuantizer<Bgra32>(Configuration.Default);
@@ -209,7 +209,7 @@ namespace PuyoTools.Core.Textures.Pvr
 
                     for (int i = 0, size = 1; i < encodedMipmapData.Length && size < Width; i++, size <<= 1)
                     {
-                        encodedMipmapData[i] = EncodeIndexedTexture(Resize(sourceImage, size, size), quantizer);
+                        encodedMipmapData[i] = EncodeIndexedTexture(ImageHelper.Resize(sourceImage, size, size), quantizer);
                     }
                 }
 
@@ -223,7 +223,7 @@ namespace PuyoTools.Core.Textures.Pvr
                     encodedPaletteData = EncodePalette(imageFrame.Palette);
                 }
 
-                pixelData = GetPixelDataAsBytes(imageFrame);
+                pixelData = ImageHelper.GetPixelDataAsBytes(imageFrame);
             }
 
             // Encode as an RGBA image.
@@ -236,7 +236,7 @@ namespace PuyoTools.Core.Textures.Pvr
 
                     for (int i = 0, size = 1; i < encodedMipmapData.Length && size < Width; i++, size <<= 1)
                     {
-                        encodedMipmapData[i] = EncodeRgbaTexture(Resize(sourceImage, size, size));
+                        encodedMipmapData[i] = EncodeRgbaTexture(ImageHelper.Resize(sourceImage, size, size));
                     }
                 }
 
@@ -250,7 +250,7 @@ namespace PuyoTools.Core.Textures.Pvr
         private byte[] EncodeRgbaTexture<TPixel>(Image<TPixel> image)
             where TPixel : unmanaged, IPixel<TPixel>
         {
-            var pixelData = GetPixelDataAsBytes(image.Frames.RootFrame);
+            var pixelData = ImageHelper.GetPixelDataAsBytes(image.Frames.RootFrame);
             return dataCodec.Encode(pixelData, 0, image.Width, image.Height);
         }
 
@@ -258,7 +258,7 @@ namespace PuyoTools.Core.Textures.Pvr
             where TPixel : unmanaged, IPixel<TPixel>
         {
             var imageFrame = quantizer.QuantizeFrame(image.Frames.RootFrame, new Rectangle(0, 0, image.Width, image.Height));
-            var pixelData = GetPixelDataAsBytes(imageFrame);
+            var pixelData = ImageHelper.GetPixelDataAsBytes(imageFrame);
             return dataCodec.Encode(pixelData, 0, image.Width, image.Height);
         }
 
@@ -403,86 +403,6 @@ namespace PuyoTools.Core.Textures.Pvr
             {
                 writer.Write(encodedTextureData);
             }
-        }
-
-        private Image<TPixel> Resize<TPixel>(Image<TPixel> image, int width, int height)
-            where TPixel : unmanaged, IPixel<TPixel>
-        {
-            var newImage = image.Clone();
-            newImage.Mutate(x => x.Resize(width, height));
-
-            return newImage;
-        }
-
-        private static bool TryBuildExactPalette<TPixel>(Image<TPixel> image, int maxColors, out IList<TPixel> palette)
-            where TPixel : unmanaged, IPixel<TPixel>
-        {
-            palette = null;
-            var newPalette = new List<TPixel>(maxColors);
-
-            for (var y = 0; y < image.Height; y++)
-            {
-                var row = image.GetPixelRowSpan(y);
-
-                for (var x = 0; x < row.Length; x++)
-                {
-                    if (!newPalette.Contains(row[x]))
-                    {
-                        // If there are too many colors, then an exact palette cannot be built.
-                        if (newPalette.Count == maxColors)
-                        {
-                            return false;
-                        }
-
-                        newPalette.Add(row[x]);
-                    }
-                }
-            }
-
-            palette = newPalette;
-
-            return true;
-        }
-
-        private static byte[] GetPixelDataAsBytes<TPixel>(ImageFrame<TPixel> imageFrame)
-            where TPixel : unmanaged, IPixel<TPixel>
-        {
-            if (!imageFrame.TryGetSinglePixelSpan(out var pixelSpan))
-            {
-                return MemoryMarshal.AsBytes(pixelSpan).ToArray();
-            }
-            
-            var data = new TPixel[imageFrame.Width * imageFrame.Height];
-
-            for (var y = 0; y < imageFrame.Height; y++)
-            {
-                var row = imageFrame.GetPixelRowSpan(y);
-
-                for (var x = 0; x < row.Length; x++)
-                {
-                    data[(y * imageFrame.Width) + x] = row[x];
-                }
-            }
-
-            return MemoryMarshal.AsBytes<TPixel>(data).ToArray();
-        }
-
-        private static byte[] GetPixelDataAsBytes<TPixel>(IndexedImageFrame<TPixel> imageFrame)
-            where TPixel : unmanaged, IPixel<TPixel>
-        {
-            var data = new byte[imageFrame.Width * imageFrame.Height];
-
-            for (var y = 0; y < imageFrame.Height; y++)
-            {
-                var row = imageFrame.GetPixelRowSpan(y);
-
-                for (var x = 0; x < row.Length; x++)
-                {
-                    data[(y * imageFrame.Width) + x] = row[x];
-                }
-            }
-
-            return data;
         }
         #endregion
     }

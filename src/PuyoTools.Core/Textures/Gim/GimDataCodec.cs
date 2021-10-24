@@ -54,8 +54,8 @@ namespace PuyoTools.Core.Textures.Gim
                     for (int x = 0; x < width; x++)
                     {
                         PixelCodec.DecodePixel(source, sourceIndex, destination, destinationIndex);
-                        sourceIndex++;
-                        destinationIndex++;
+                        sourceIndex += PixelCodec.Bpp / 8;
+                        destinationIndex += 4;
                     }
                 }
 
@@ -74,8 +74,8 @@ namespace PuyoTools.Core.Textures.Gim
                     for (int x = 0; x < width; x++)
                     {
                         PixelCodec.EncodePixel(source, sourceIndex, destination, destinationIndex);
-                        sourceIndex++;
-                        destinationIndex++;
+                        sourceIndex += 4;
+                        destinationIndex += PixelCodec.Bpp / 8;
                     }
                 }
 
