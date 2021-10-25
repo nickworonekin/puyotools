@@ -9,11 +9,11 @@ namespace PuyoTools.Core
         private static readonly Lazy<Encoding> shiftJisEncoding = new Lazy<Encoding>(() => Encoding.GetEncoding("Shift_JIS"));
         private static readonly Lazy<Encoding> utf8NoBomEncoding = new Lazy<Encoding>(() => new UTF8Encoding(false));
 
-#if NETSTANDARD2_0
+#if (NET || NETCOREAPP || NETSTANDARD) 
         static EncodingExtensions()
         {
             // Register the CodePagesEncodingProvider for Shift JIS encoding support
-            // This is only needed when targeting .NET Standard.
+            // This is only needed when targeting .NET 5.0+/.NET Core/.NET Standard.
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
         }
 #endif
