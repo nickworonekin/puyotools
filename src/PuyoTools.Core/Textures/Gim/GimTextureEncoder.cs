@@ -26,6 +26,20 @@ namespace PuyoTools.Core.Textures.Gim
             0,
         };
 
+        private static readonly byte[] magicCodeLittleEndian =
+        {
+            (byte)'M', (byte)'I', (byte)'G', (byte)'.',
+            (byte)'0', (byte)'0', (byte)'.', (byte)'1',
+            (byte)'P', (byte)'S', (byte)'P', 0,
+        };
+
+        private static readonly byte[] magicCodeBigEndian =
+        {
+            (byte)'.', (byte)'G', (byte)'I', (byte)'M',
+            (byte)'1', (byte)'.', (byte)'0', (byte)'0',
+            0, (byte)'P', (byte)'S', (byte)'P',
+        };
+
         private byte[] encodedPaletteData;
         private byte[] encodedTextureData;
 
@@ -54,6 +68,11 @@ namespace PuyoTools.Core.Textures.Gim
         /// Gets the pixel format.
         /// </summary>
         public GimDataFormat PixelFormat { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the endianness. Defaults to <see cref="Endianness.Little"/>.
+        /// </summary>
+        public Endianness Endianness { get; set; } = Endianness.Little;
         #endregion
 
         #region Constructors & Initalizers
@@ -213,7 +232,7 @@ namespace PuyoTools.Core.Textures.Gim
                 textureDataChunkLength = 0,
                 metadataChunkLength = 0;
 
-            if (encodedPaletteData != null)
+            if (encodedPaletteData is not null)
             {
                 paletteDataChunkLength = 80 + encodedPaletteData.Length;
             }
@@ -224,25 +243,25 @@ namespace PuyoTools.Core.Textures.Gim
             {
                 metadataChunkLength = 16;
 
-                if (metadata.OriginalFilename != null)
+                if (metadata.OriginalFilename is not null)
                 {
                     metadataChunkLength += metadata.OriginalFilename.Length;
                 }
                 metadataChunkLength++;
 
-                if (metadata.User != null)
+                if (metadata.User is not null)
                 {
                     metadataChunkLength += metadata.User.Length;
                 }
                 metadataChunkLength++;
 
-                if (metadata.Timestamp != null)
+                if (metadata.Timestamp is not null)
                 {
                     metadataChunkLength += metadata.Timestamp.Length;
                 }
                 metadataChunkLength++;
 
-                if (metadata.Program != null)
+                if (metadata.Program is not null)
                 {
                     metadataChunkLength += metadata.Program.Length;
                 }
@@ -285,7 +304,7 @@ namespace PuyoTools.Core.Textures.Gim
             writer.WriteUInt32(16);
 
             // Write the palette data, if we have a palette
-            if (encodedPaletteData != null)
+            if (encodedPaletteData is not null)
             {
                 writer.WriteUInt16(0x05);
                 writer.WriteUInt16(0);
@@ -322,7 +341,7 @@ namespace PuyoTools.Core.Textures.Gim
 
             writer.WriteUInt16(48);
             writer.WriteUInt16(0);
-            writer.WriteUInt16((byte)PixelFormat);
+            writer.WriteUInt16((ushort)PixelFormat);
             writer.WriteUInt16(1); // Always swizzled
             writer.WriteUInt16((ushort)Width);
             writer.WriteUInt16((ushort)Height);

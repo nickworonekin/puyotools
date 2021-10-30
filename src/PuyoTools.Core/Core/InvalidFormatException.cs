@@ -5,6 +5,9 @@ using System.Text;
 
 namespace PuyoTools.Core
 {
+    /// <summary>
+    /// The exception that is thrown when the data is not in the expected format.
+    /// </summary>
     public class InvalidFormatException : Exception
     {
         public InvalidFormatException()

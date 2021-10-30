@@ -13,7 +13,7 @@ namespace PuyoTools.Core.Textures
         public Stream Palette { get; set; }
 
         /// <summary>
-        /// Gets or sets whether to close the palette stream after being read. Defaults to false.
+        /// Gets or sets whether to close the palette stream after being read. Defaults to <see langword="false"/>.
         /// </summary>
         public bool CloseAfterRead { get; set; }
     }

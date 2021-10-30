@@ -113,7 +113,7 @@ namespace PuyoTools.Core.Textures.Pvr
         /// <returns>The palette data as a byte array.</returns>
         public virtual byte[] GetPaletteData()
         {
-            if (decodedData == null)
+            if (decodedData is null)
             {
                 decodedData = DecodePalette();
             }

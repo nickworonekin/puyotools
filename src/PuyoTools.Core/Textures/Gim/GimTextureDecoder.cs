@@ -2,6 +2,7 @@
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -16,14 +17,22 @@ namespace PuyoTools.Core.Textures.Gim
 
         private ushort paletteEntries; // Number of entries in the palette
 
+        private Endianness endianness;
+
         private bool isSwizzled; // Is the texture data swizzled?
 
-        private static readonly byte[] magicCode =
+        private static readonly byte[] magicCodeLittleEndian =
         {
             (byte)'M', (byte)'I', (byte)'G', (byte)'.',
-            (byte)'0', (byte)'0', (byte)'.',
-            (byte)'1', (byte)'P', (byte)'S', (byte)'P',
-            0,
+            (byte)'0', (byte)'0', (byte)'.', (byte)'1',
+            // The remaining 4 bytes present in the encoder are intentionally omitted.
+        };
+
+        private static readonly byte[] magicCodeBigEndian =
+        {
+            (byte)'.', (byte)'G', (byte)'I', (byte)'M',
+            (byte)'1', (byte)'.', (byte)'0', (byte)'0',
+            // The remaining 4 bytes present in the encoder are intentionally omitted.
         };
 
         private byte[] paletteData;
@@ -90,6 +99,16 @@ namespace PuyoTools.Core.Textures.Gim
             var startPosition = source.Position;
             var reader = new BinaryReader(source);
 
+            // Check to see what endianness we're dealing with.
+            if (reader.At(startPosition, x => x.ReadBytes(magicCodeLittleEndian.Length)).SequenceEqual(magicCodeLittleEndian))
+            {
+                endianness = Endianness.Little;
+            }
+            else
+            {
+                endianness = Endianness.Big;
+            }
+
             paletteEntries = 0;
 
             // A GIM is constructed of different chunks. They do not necessarily have to be in order.
@@ -101,17 +120,17 @@ namespace PuyoTools.Core.Textures.Gim
                 var chunkPosition = source.Position;
                 int chunkLength;
 
-                var chunkType = reader.ReadUInt16();
+                var chunkType = reader.ReadUInt16(endianness);
                 source.Position += 2; // 0x04
 
                 switch (chunkType)
                 {
                     case 0x02: // EOF offset chunk
 
-                        eofOffset = reader.ReadInt32() + 16;
+                        eofOffset = reader.ReadInt32(endianness) + 16;
 
                         // Get the length of this chunk
-                        chunkLength = reader.ReadInt32();
+                        chunkLength = reader.ReadInt32(endianness);
 
                         break;
 
@@ -119,7 +138,7 @@ namespace PuyoTools.Core.Textures.Gim
 
                         // Skip this chunk. It's not necessary for decoding this texture.
                         source.Position += 4; // 0x08
-                        chunkLength = reader.ReadInt32();
+                        chunkLength = reader.ReadInt32(endianness);
 
                         break;
 
@@ -127,19 +146,19 @@ namespace PuyoTools.Core.Textures.Gim
 
                         // Get the length of this chunk
                         source.Position += 4; // 0x08
-                        chunkLength = reader.ReadInt32();
+                        chunkLength = reader.ReadInt32(endianness);
 
                         // Get the pixel format & codec
-                        source.Position += 8; // 0x20
-                        PixelFormat = (GimDataFormat)reader.ReadUInt16();
+                        source.Position += 8; // 0x14
+                        PixelFormat = (GimDataFormat)reader.ReadUInt16(endianness);
                         pixelCodec = GimDataCodec.GetDataCodec(PixelFormat);
 
                         // Get whether this texture is swizzled
-                        isSwizzled = reader.ReadUInt16() == 1;
+                        isSwizzled = reader.ReadUInt16(endianness) == 1;
 
                         // Get the texture dimensions
-                        Width = actualWidth = reader.ReadUInt16();
-                        Height = actualHeight = reader.ReadUInt16();
+                        Width = actualWidth = reader.ReadUInt16(endianness);
+                        Height = actualHeight = reader.ReadUInt16(endianness);
 
                         // Some textures do not have a width that is a multiple or 16 or a height that is a multiple of 8.
                         // We'll just do it the lazy way and set their width/height to a multiple of 16/8.
@@ -169,16 +188,16 @@ namespace PuyoTools.Core.Textures.Gim
 
                         // Get the length of this chunk
                         source.Position += 4; // 0x08
-                        chunkLength = reader.ReadInt32();
+                        chunkLength = reader.ReadInt32(endianness);
 
                         // Get the palette format & codec
-                        source.Position += 8; // 0x20
-                        PaletteFormat = (GimPaletteFormat)reader.ReadUInt16();
+                        source.Position += 8; // 0x14
+                        PaletteFormat = (GimPaletteFormat)reader.ReadUInt16(endianness);
                         paletteCodec = GimPixelCodec.GetPixelCodec(PaletteFormat.Value);
 
                         // Get the number of entries in the palette
-                        source.Position += 2; // 0x24
-                        paletteEntries = reader.ReadUInt16();
+                        source.Position += 2; // 0x18
+                        paletteEntries = reader.ReadUInt16(endianness);
 
                         // If we don't have a known palette codec for this format, that's ok.
                         // This will allow the properties to be read if the user doesn't want to decode this texture.
@@ -197,7 +216,7 @@ namespace PuyoTools.Core.Textures.Gim
 
                         // Get the length of this chunk
                         source.Position += 4; // 0x08
-                        chunkLength = reader.ReadInt32();
+                        chunkLength = reader.ReadInt32(endianness);
 
                         // Read the metadata
                         source.Position += 4; // 0x10
@@ -306,7 +325,7 @@ namespace PuyoTools.Core.Textures.Gim
                 throw new NotSupportedException($"Palette format {PaletteFormat:X} is not supported for decoding.");
             }
 
-            if (paletteData != null) // The texture contains an embedded palette
+            if (paletteData is not null) // The texture contains an embedded palette
             {
                 pixelCodec.SetPalette(paletteData, 0, paletteEntries);
             }
@@ -347,9 +366,26 @@ namespace PuyoTools.Core.Textures.Gim
 
             using (var reader = new BinaryReader(source, Encoding.UTF8, true))
             {
-                return remainingLength > 24
-                    && reader.At(startPosition, x => x.ReadBytes(magicCode.Length)).SequenceEqual(magicCode)
-                    && reader.At(startPosition + 0x14, x => x.ReadUInt32()) == remainingLength - 16;
+                if (!(remainingLength > 24))
+                {
+                    return false;
+                }
+
+                var magicCode = reader.At(startPosition, x => x.ReadBytes(magicCodeLittleEndian.Length));
+
+                if (magicCode.SequenceEqual(magicCodeLittleEndian)
+                    && reader.At(startPosition + 0x14, x => x.ReadUInt32()) == remainingLength - 16)
+                {
+                    return true;
+                }
+
+                if (magicCode.SequenceEqual(magicCodeBigEndian)
+                    && reader.At(startPosition + 0x14, x => x.ReadUInt32BigEndian()) == remainingLength - 16)
+                {
+                    return true;
+                }
+
+                return false;
             }
         }
 

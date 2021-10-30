@@ -321,11 +321,11 @@ namespace PuyoTools.Core.Textures.Pvr
 
             // Get the expected length of the texture data including palette and mipmaps.
             var expectedLength = encodedTextureData.Length;
-            if (encodedPaletteData != null)
+            if (encodedPaletteData is not null)
             {
                 expectedLength += encodedPaletteData.Length;
             }
-            if (encodedMipmapData != null)
+            if (encodedMipmapData is not null)
             {
                 expectedLength += encodedMipmapData.Sum(x => x.Length);
 
@@ -342,7 +342,7 @@ namespace PuyoTools.Core.Textures.Pvr
             // If RLE compression is used, then reserve bytes at the beginning for the uncompressed length.
             if (CompressionFormat == PvrCompressionFormat.Rle)
             {
-                if (GlobalIndex != null)
+                if (GlobalIndex is not null)
                 {
                     writer.WriteInt32(expectedLength + 32); // Length of the GBIX chunk + PVRT chunk
                 }
@@ -353,7 +353,7 @@ namespace PuyoTools.Core.Textures.Pvr
             }
 
             // Write out the GBIX header if a global index is present.
-            if (GlobalIndex != null)
+            if (GlobalIndex is not null)
             {
                 writer.Write(gbixMagicCode);
                 writer.WriteInt32(8); // Length of the GBIX chunk minus 8. Always 8.
@@ -371,13 +371,13 @@ namespace PuyoTools.Core.Textures.Pvr
             writer.WriteUInt16((ushort)Height);
 
             // Write out the palette if an internal palette is present.
-            if (encodedPaletteData != null)
+            if (encodedPaletteData is not null)
             {
                 writer.Write(encodedPaletteData);
             }
 
             // Write out the mipmaps if present.
-            if (encodedMipmapData != null)
+            if (encodedMipmapData is not null)
             {
                 if (DataFormat == PvrDataFormat.SquareTwiddledMipmaps)
                 {
@@ -395,7 +395,7 @@ namespace PuyoTools.Core.Textures.Pvr
             }
 
             // Write out the texture data.
-            if (compressionCodec != null)
+            if (compressionCodec is not null)
             {
                 compressionCodec.Compress(new MemoryStream(encodedTextureData), destination, pixelCodec, dataCodec);
             }

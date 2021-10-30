@@ -251,7 +251,7 @@ namespace PuyoTools.Core.Textures.Pvr
             }
 
             // Read the texture data
-            if (compressionCodec != null)
+            if (compressionCodec is not null)
             {
                 // The texture data is compressed.
                 textureData = new byte[Width * Height * dataCodec.Bpp / 8];
@@ -341,7 +341,7 @@ namespace PuyoTools.Core.Textures.Pvr
                 throw new InvalidOperationException("An external palette file is required for decoding.");
             }
 
-            if (paletteData != null) // The texture contains an embedded palette
+            if (paletteData is not null) // The texture contains an embedded palette
             {
                 if (decodedPaletteData is null)
                 {

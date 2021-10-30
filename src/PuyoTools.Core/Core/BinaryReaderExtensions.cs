@@ -2,7 +2,6 @@
 using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.IO;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
 namespace PuyoTools.Core
@@ -105,6 +104,84 @@ namespace PuyoTools.Core
         /// <param name="reader"></param>
         /// <returns>An 8-byte unsigned integer read from this stream.</returns>
         public static ulong ReadUInt64BigEndian(this BinaryReader reader) => BinaryPrimitives.ReverseEndianness(reader.ReadUInt64());
+
+        /// <summary>
+        /// Reads a 2-byte signed integer from the current stream in the specified endianness and advances the current position of the stream by two bytes.
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <param name="endianness">The endianess of the value to read.</param>
+        /// <returns>A 2-byte signed integer read from the current stream.</returns>
+        public static short ReadInt16(this BinaryReader reader, Endianness endianness) => endianness switch
+        {
+            Endianness.Little => reader.ReadInt16(),
+            Endianness.Big => reader.ReadInt16BigEndian(),
+            _ => throw new ArgumentOutOfRangeException(nameof(endianness)),
+        };
+
+        /// <summary>
+        /// Reads a 4-byte signed integer from the current stream in the specified endianness and advances the current position of the stream by four bytes.
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <param name="endianness">The endianess of the value to read.</param>
+        /// <returns>A 4-byte signed integer read from the current stream.</returns>
+        public static int ReadInt32(this BinaryReader reader, Endianness endianness) => endianness switch
+        {
+            Endianness.Little => reader.ReadInt32(),
+            Endianness.Big => reader.ReadInt32BigEndian(),
+            _ => throw new ArgumentOutOfRangeException(nameof(endianness)),
+        };
+
+        /// <summary>
+        /// Reads an 8-byte signed integer from the current stream in the specified endianness and advances the current position of the stream by eight bytes.
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <param name="endianness">The endianess of the value to read.</param>
+        /// <returns>An 8-byte signed integer read from the current stream.</returns>
+        public static long ReadInt64(this BinaryReader reader, Endianness endianness) => endianness switch
+        {
+            Endianness.Little => reader.ReadInt64(),
+            Endianness.Big => reader.ReadInt64BigEndian(),
+            _ => throw new ArgumentOutOfRangeException(nameof(endianness)),
+        };
+
+        /// <summary>
+        /// Reads a 2-byte unsigned integer from the current stream in the specified endianness and advances the position of the stream by two bytes.
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <param name="endianness">The endianess of the value to read.</param>
+        /// <returns>A 2-byte unsigned integer read from this stream.</returns>
+        public static ushort ReadUInt16(this BinaryReader reader, Endianness endianness) => endianness switch
+        {
+            Endianness.Little => reader.ReadUInt16(),
+            Endianness.Big => reader.ReadUInt16BigEndian(),
+            _ => throw new ArgumentOutOfRangeException(nameof(endianness)),
+        };
+
+        /// <summary>
+        /// Reads a 4-byte unsigned integer from the current stream in the specified endianness and advances the position of the stream by four bytes.
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <param name="endianness">The endianess of the value to read.</param>
+        /// <returns>A 4-byte unsigned integer read from this stream.</returns>
+        public static uint ReadUInt32(this BinaryReader reader, Endianness endianness) => endianness switch
+        {
+            Endianness.Little => reader.ReadUInt32(),
+            Endianness.Big => reader.ReadUInt32BigEndian(),
+            _ => throw new ArgumentOutOfRangeException(nameof(endianness)),
+        };
+
+        /// <summary>
+        /// Reads an 8-byte unsigned integer from the current stream the specified endianness and advances the position of the stream by eight bytes.
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <param name="endianness">The endianess of the value to read.</param>
+        /// <returns>An 8-byte unsigned integer read from this stream.</returns>
+        public static ulong ReadUInt64(this BinaryReader reader, Endianness endianness) => endianness switch
+        {
+            Endianness.Little => reader.ReadUInt64(),
+            Endianness.Big => reader.ReadUInt64BigEndian(),
+            _ => throw new ArgumentOutOfRangeException(nameof(endianness)),
+        };
 
         /// <summary>
         /// Reads a string from the current stream.
