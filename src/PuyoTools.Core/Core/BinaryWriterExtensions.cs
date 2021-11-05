@@ -137,6 +137,90 @@ namespace PuyoTools.Core
         public static void WriteUInt64BigEndian(this BinaryWriter writer, ulong value) => writer.Write(BinaryPrimitives.ReverseEndianness(value));
 
         /// <summary>
+        /// Writes a two-byte signed integer in the specified endianness to the current stream and advances the stream position by two bytes.
+        /// </summary>
+        /// <inheritdoc cref="BinaryWriter.Write(short)"/>
+        public static void WriteInt16(this BinaryWriter writer, short value, Endianness endianness)
+        {
+            switch (endianness)
+            {
+                case Endianness.Little: writer.WriteInt16(value); break;
+                case Endianness.Big: writer.WriteInt16BigEndian(value); break;
+                default: throw new ArgumentOutOfRangeException(nameof(endianness));
+            }
+        }
+
+        /// <summary>
+        /// Writes a four-byte signed integer in the specified endianness to the current stream and advances the stream position by four bytes.
+        /// </summary>
+        /// <inheritdoc cref="BinaryWriter.Write(int)"/>
+        public static void WriteInt32(this BinaryWriter writer, int value, Endianness endianness)
+        {
+            switch (endianness)
+            {
+                case Endianness.Little: writer.WriteInt32(value); break;
+                case Endianness.Big: writer.WriteInt32BigEndian(value); break;
+                default: throw new ArgumentOutOfRangeException(nameof(endianness));
+            }
+        }
+
+        /// <summary>
+        /// Writes an eight-byte signed integer the specified endianness to the current stream and advances the stream position by eight bytes.
+        /// </summary>
+        /// <inheritdoc cref="BinaryWriter.Write(long)"/>
+        public static void WriteInt64(this BinaryWriter writer, long value, Endianness endianness)
+        {
+            switch (endianness)
+            {
+                case Endianness.Little: writer.WriteInt64(value); break;
+                case Endianness.Big: writer.WriteInt64BigEndian(value); break;
+                default: throw new ArgumentOutOfRangeException(nameof(endianness));
+            }
+        }
+
+        /// <summary>
+        /// Writes a two-byte unsigned integer the specified endianness to the current stream and advances the stream position by two bytes.
+        /// </summary>
+        /// <inheritdoc cref="BinaryWriter.Write(ushort)"/>
+        public static void WriteUInt16(this BinaryWriter writer, ushort value, Endianness endianness)
+        {
+            switch (endianness)
+            {
+                case Endianness.Little: writer.WriteUInt16(value); break;
+                case Endianness.Big: writer.WriteUInt16BigEndian(value); break;
+                default: throw new ArgumentOutOfRangeException(nameof(endianness));
+            }
+        }
+
+        /// <summary>
+        /// Writes a four-byte unsigned integer the specified endianness to the current stream and advances the stream position by four bytes.
+        /// </summary>
+        /// <inheritdoc cref="BinaryWriter.Write(uint)"/>
+        public static void WriteUInt32(this BinaryWriter writer, uint value, Endianness endianness)
+        {
+            switch (endianness)
+            {
+                case Endianness.Little: writer.WriteUInt32(value); break;
+                case Endianness.Big: writer.WriteUInt32BigEndian(value); break;
+                default: throw new ArgumentOutOfRangeException(nameof(endianness));
+            }
+        }
+
+        /// <summary>
+        /// Writes an eight-byte unsigned integer the specified endianness to the current stream and advances the stream position by eight bytes.
+        /// </summary>
+        /// <inheritdoc cref="BinaryWriter.Write(ulong)"/>
+        public static void WriteUInt64(this BinaryWriter writer, ulong value, Endianness endianness)
+        {
+            switch (endianness)
+            {
+                case Endianness.Little: writer.WriteUInt64(value); break;
+                case Endianness.Big: writer.WriteUInt64BigEndian(value); break;
+                default: throw new ArgumentOutOfRangeException(nameof(endianness));
+            }
+        }
+
+        /// <summary>
         /// Writes a string to this stream, and advances the current position of the stream by the number of bytes specified in <paramref name="count"/>.
         /// </summary>
         /// <param name="writer"></param>

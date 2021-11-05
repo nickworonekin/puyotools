@@ -1,7 +1,10 @@
-﻿using SixLabors.ImageSharp;
+﻿using PuyoTools.Core.Textures.Gim.PaletteCodecs;
+using PuyoTools.Core.Textures.Gim.PixelCodecs;
+using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing.Processors.Quantization;
 using System;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -13,8 +16,8 @@ namespace PuyoTools.Core.Textures.Gim
     public class GimTextureEncoder
     {
         #region Fields
-        private GimPixelCodec paletteCodec; // Palette codec
-        private GimDataCodec pixelCodec;   // Pixel codec
+        private PaletteCodec paletteCodec; // Palette codec
+        private PixelCodec pixelCodec;   // Pixel codec
 
         private int paletteEntries; // Number of palette entries in the palette data
 
@@ -42,6 +45,13 @@ namespace PuyoTools.Core.Textures.Gim
 
         private byte[] encodedPaletteData;
         private byte[] encodedTextureData;
+
+        private readonly int strideAlignment = 16; // Stride alignment will always be 16
+        private int heightAlignment; // Height alignment will be 8 (if swizzled) or 1 (if not swizzled).
+
+        private int stride;
+        private int pixelsPerRow;
+        private int pixelsPerColumn;
 
         private Image<Bgra32> sourceImage;
 
@@ -72,7 +82,22 @@ namespace PuyoTools.Core.Textures.Gim
         /// <summary>
         /// Gets or sets the endianness. Defaults to <see cref="Endianness.Little"/>.
         /// </summary>
-        public Endianness Endianness { get; set; } = Endianness.Little;
+        public Endianness Endianness
+        {
+            get => endianness;
+            set
+            {
+                EnumHelper.ThrowIfArgumentNotDefined(value, nameof(Endianness));
+
+                endianness = value;
+            }
+        }
+        private Endianness endianness = Endianness.Little;
+
+        /// <summary>
+        /// Gets or sets if this texture should be swizzled.
+        /// </summary>
+        public bool IsSwizzled { get; set; }
         #endregion
 
         #region Constructors & Initalizers
@@ -129,7 +154,7 @@ namespace PuyoTools.Core.Textures.Gim
             // We'll also need to verify that the palette format is set if it's a palettized pixel format.
             // Unlike with the decoder, an exception will be thrown here if a codec cannot be used to encode them.
             PixelFormat = pixelFormat;
-            pixelCodec = GimDataCodec.GetDataCodec(pixelFormat);
+            pixelCodec = PixelCodecFactory.Create(pixelFormat);
             if (pixelCodec is null)
             {
                 throw new NotSupportedException($"Pixel format {PixelFormat:X} is not supported for encoding.");
@@ -146,12 +171,11 @@ namespace PuyoTools.Core.Textures.Gim
                 }
 
                 PaletteFormat = paletteFormat.Value;
-                paletteCodec = GimPixelCodec.GetPixelCodec(paletteFormat.Value);
+                paletteCodec = PaletteCodecFactory.Create(paletteFormat.Value);
                 if (paletteCodec is null)
                 {
                     throw new NotSupportedException($"Palette format {PaletteFormat:X} is not supported for encoding.");
                 }
-                pixelCodec.PixelCodec = paletteCodec;
             }
 
             // Read the image.
@@ -160,11 +184,11 @@ namespace PuyoTools.Core.Textures.Gim
             Width = sourceImage.Width;
             Height = sourceImage.Height;
 
-            // Verify if the dimensions are valid
+            /*// Verify if the dimensions are valid
             if (!HasValidDimensions(Width, Height))
             {
                 throw new NotSupportedException("Source image width must be a multiple of 16 and height must be a multiple of 8.");
-            }
+            }*/
 
             // Create the metadata and set the default values.
             metadata = new GimMetadata
@@ -189,6 +213,32 @@ namespace PuyoTools.Core.Textures.Gim
                 return false;
 
             return true;
+        }
+
+        public static byte[] Swizzle(byte[] source, int stride, int pixelsPerColumn)
+        {
+            int sourceIndex = 0;
+
+            byte[] destination = new byte[stride * pixelsPerColumn];
+
+            int rowblocks = stride / 16;
+
+            for (int y = 0; y < pixelsPerColumn; y++)
+            {
+                for (int x = 0; x < stride; x++)
+                {
+                    int blockX = x / 16;
+                    int blockY = y / 8;
+
+                    int blockIndex = blockX + (blockY * rowblocks);
+                    int blockAddress = blockIndex * 16 * 8;
+
+                    destination[blockAddress + (x - blockX * 16) + ((y - blockY * 8) * 16)] = source[sourceIndex];
+                    sourceIndex++;
+                }
+            }
+
+            return destination;
         }
         #endregion
 
@@ -272,111 +322,139 @@ namespace PuyoTools.Core.Textures.Gim
             int textureLength = 16 +
                 eofOffsetChunkLength +
                 metadataOffsetChunkLength +
-                paletteDataChunkLength +
                 textureDataChunkLength +
+                paletteDataChunkLength +
                 metadataChunkLength;
 
             // Write the GIM header
-            writer.Write(magicCode);
+            if (endianness == Endianness.Big)
+            {
+                writer.Write(magicCodeBigEndian);
+            }
+            else
+            {
+                writer.Write(magicCodeLittleEndian);
+            }
             writer.WriteInt32(0);
 
             // Write the EOF offset chunk
-            writer.WriteUInt16(0x02);
+            writer.WriteUInt16(0x02, endianness);
             writer.WriteUInt16(0);
-            writer.WriteInt32(textureLength - 16);
-            writer.WriteInt32(eofOffsetChunkLength);
-            writer.WriteUInt32(16);
+            writer.WriteInt32(textureLength - 16, endianness);
+            writer.WriteInt32(eofOffsetChunkLength, endianness);
+            writer.WriteUInt32(16, endianness);
 
             // Write the metadata offset chunk
-            writer.WriteUInt16(0x03);
+            writer.WriteUInt16(0x03, endianness);
             writer.WriteUInt16(0);
 
             if (HasMetadata)
             {
-                writer.WriteInt32(textureLength - metadataChunkLength - 32);
+                writer.WriteInt32(textureLength - metadataChunkLength - 32, endianness);
             }
             else
             {
-                writer.WriteInt32(textureLength - 32);
+                writer.WriteInt32(textureLength - 32, endianness);
             }
 
-            writer.WriteInt32(metadataOffsetChunkLength);
-            writer.WriteUInt32(16);
-
-            // Write the palette data, if we have a palette
-            if (encodedPaletteData is not null)
-            {
-                writer.WriteUInt16(0x05);
-                writer.WriteUInt16(0);
-                writer.WriteInt32(paletteDataChunkLength);
-                writer.WriteInt32(paletteDataChunkLength);
-                writer.WriteUInt32(16);
-
-                writer.WriteUInt16(48);
-                writer.WriteUInt16(0);
-                writer.WriteUInt16((byte)PaletteFormat.Value);
-                writer.WriteUInt16(0);
-                writer.WriteUInt16((ushort)paletteEntries);
-                writer.Write(new byte[] { 0x01, 0x00, 0x20, 0x00, 0x10, 0x00 });
-
-                writer.Write(new byte[] { 0x01, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00 });
-                writer.WriteUInt32(0x30);
-                writer.WriteUInt32(0x40);
-
-                writer.WriteInt32(paletteDataChunkLength - 16);
-                writer.WriteUInt32(0);
-                writer.Write(new byte[] { 0x02, 0x00, 0x01, 0x00, 0x03, 0x00, 0x01, 0x00 });
-
-                writer.Write(new byte[] { 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
-
-                writer.Write(encodedPaletteData);
-            }
+            writer.WriteInt32(metadataOffsetChunkLength, endianness);
+            writer.WriteUInt32(16, endianness);
 
             // Write the texture data
-            writer.WriteUInt16(0x04);
+            writer.WriteUInt16(0x04, endianness);
             writer.WriteUInt16(0);
-            writer.WriteInt32(textureDataChunkLength);
-            writer.WriteInt32(textureDataChunkLength);
-            writer.WriteUInt32(16);
+            writer.WriteInt32(textureDataChunkLength, endianness);
+            writer.WriteInt32(textureDataChunkLength, endianness);
+            writer.WriteUInt32(16, endianness);
 
-            writer.WriteUInt16(48);
+            writer.WriteUInt16(48, endianness);
             writer.WriteUInt16(0);
-            writer.WriteUInt16((ushort)PixelFormat);
-            writer.WriteUInt16(1); // Always swizzled
-            writer.WriteUInt16((ushort)Width);
-            writer.WriteUInt16((ushort)Height);
+            writer.WriteUInt16((ushort)PixelFormat, endianness);
+            writer.WriteUInt16((ushort)(IsSwizzled ? 1 : 0), endianness);
+            writer.WriteUInt16((ushort)Width, endianness);
+            writer.WriteUInt16((ushort)Height, endianness);
 
             if (paletteEntries != 0)
             {
                 // For palettized textures, this is the bpp for this data format
-                writer.WriteUInt16((ushort)pixelCodec.Bpp);
+                writer.WriteUInt16((ushort)pixelCodec.BitsPerPixel, endianness);
             }
             else
             {
                 // For non-palettized textures, this is always specified as 32bpp
-                writer.WriteUInt16(32);
+                writer.WriteUInt16(32, endianness);
             }
 
-            writer.WriteUInt16(16);
+            writer.WriteUInt16((ushort)strideAlignment, endianness); // Stride alignment (always 16)
+            writer.WriteUInt16((ushort)heightAlignment, endianness); // Height alignment (always 8 for swizzled)
 
-            writer.Write(new byte[] { 0x08, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x30, 0x00, 0x00, 0x00, 0x40, 0x00, 0x00, 0x00 });
-
-            writer.WriteInt32(textureDataChunkLength - 16);
+            writer.WriteUInt16(0x02, endianness);
             writer.WriteUInt32(0);
-            writer.Write(new byte[] { 0x01, 0x00, 0x01, 0x00, 0x03, 0x00, 0x01, 0x00 });
+            writer.WriteUInt32(0x30, endianness);
+            writer.WriteUInt32(0x40, endianness);
 
-            writer.Write(new byte[] { 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
+            writer.WriteInt32(textureDataChunkLength - 16, endianness);
+            writer.WriteUInt32(0);
+            writer.WriteUInt16(0x01, endianness);
+            writer.WriteUInt16(0x01, endianness);
+            writer.WriteUInt16(0x03, endianness);
+            writer.WriteUInt16(0x01, endianness);
+            writer.WriteUInt32(0x40, endianness);
+            writer.Write(new byte[12]);
 
-            writer.Write(GimDataCodec.Swizzle(encodedTextureData, 0, Width, Height, pixelCodec.Bpp));
+            if (IsSwizzled)
+            {
+                writer.Write(Swizzle(encodedTextureData, stride, pixelsPerColumn));
+            }
+            else
+            {
+                writer.Write(encodedTextureData);
+            }
+
+            // Write the palette data, if we have a palette
+            if (encodedPaletteData is not null)
+            {
+                writer.WriteUInt16(0x05, endianness);
+                writer.WriteUInt16(0);
+                writer.WriteInt32(paletteDataChunkLength, endianness);
+                writer.WriteInt32(paletteDataChunkLength, endianness);
+                writer.WriteUInt32(16, endianness);
+
+                writer.WriteUInt16(48, endianness);
+                writer.WriteUInt16(0);
+                writer.WriteUInt16((byte)PaletteFormat.Value, endianness);
+                writer.WriteUInt16(0);
+                writer.WriteUInt16((ushort)paletteEntries, endianness);
+
+                writer.WriteUInt16(0x01, endianness);
+                writer.WriteUInt16(0x20, endianness);
+                writer.WriteUInt16(0x10, endianness);
+                writer.WriteUInt16(0x01, endianness);
+                writer.WriteUInt16(0x02, endianness);
+                writer.WriteUInt32(0);
+                writer.WriteUInt32(0x30, endianness);
+                writer.WriteUInt32(0x40, endianness);
+
+                writer.WriteInt32(paletteDataChunkLength - 16, endianness);
+                writer.WriteUInt32(0);
+                writer.WriteUInt16(0x02, endianness);
+                writer.WriteUInt16(0x01, endianness);
+                writer.WriteUInt16(0x03, endianness);
+                writer.WriteUInt16(0x01, endianness);
+                writer.WriteUInt32(0x40, endianness);
+                writer.Write(new byte[12]);
+
+                writer.Write(encodedPaletteData);
+            }
 
             // Write the metadata, only if we are including it
             if (HasMetadata)
             {
-                writer.WriteUInt16(0xFF);
+                writer.WriteUInt16(0xFF, endianness);
                 writer.WriteUInt16(0);
-                writer.WriteInt32(metadataChunkLength);
-                writer.WriteInt32(metadataChunkLength);
-                writer.WriteUInt32(16);
+                writer.WriteInt32(metadataChunkLength, endianness);
+                writer.WriteInt32(metadataChunkLength, endianness);
+                writer.WriteUInt32(16, endianness);
 
                 writer.WriteNullTerminatedString(metadata.OriginalFilename);
                 writer.WriteNullTerminatedString(metadata.User);
@@ -394,6 +472,13 @@ namespace PuyoTools.Core.Textures.Gim
         private byte[] EncodeTexture()
         {
             byte[] pixelData;
+
+            // Calculate the alignment, stride, and pixels per row/column.
+            heightAlignment = IsSwizzled ? 8 : 1;
+
+            stride = MathExtensions.RoundUp((int)Math.Ceiling((double)Width * pixelCodec.BitsPerPixel / 8), strideAlignment);
+            pixelsPerRow = stride * 8 / pixelCodec.BitsPerPixel;
+            pixelsPerColumn = MathExtensions.RoundUp(Height, heightAlignment);
 
             // Encode as a palettized image.
             if (paletteEntries != 0)
@@ -433,7 +518,7 @@ namespace PuyoTools.Core.Textures.Gim
                 pixelData = ImageHelper.GetPixelDataAsBytes(sourceImage.Frames.RootFrame);
             }
 
-            return pixelCodec.Encode(pixelData, 0, Width, Height);
+            return pixelCodec.Encode(pixelData, Width, Height, pixelsPerRow, pixelsPerColumn);
         }
 
         /// <summary>
@@ -442,16 +527,9 @@ namespace PuyoTools.Core.Textures.Gim
         /// <returns></returns>
         private byte[] EncodePalette(ReadOnlyMemory<Bgra32> palette)
         {
-            var bytesPerPixel = paletteCodec.Bpp / 8;
             var paletteData = MemoryMarshal.AsBytes(palette.Span).ToArray();
-            var encodedPaletteData = new byte[palette.Length * bytesPerPixel];
 
-            for (var i = 0; i < palette.Length; i++)
-            {
-                paletteCodec.EncodePixel(paletteData, 4 * i, encodedPaletteData, i * bytesPerPixel);
-            }
-
-            return encodedPaletteData;
+            return paletteCodec.Encode(paletteData);
         }
         #endregion
     }

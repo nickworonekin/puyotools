@@ -52,7 +52,7 @@ namespace PuyoTools.App.Formats.Textures.WriterSettings
             }
             else
             {
-                texture.PaletteFormat = GimPaletteFormat.Unknown;
+                texture.PaletteFormat = null;
             }
 
             // Set the data format

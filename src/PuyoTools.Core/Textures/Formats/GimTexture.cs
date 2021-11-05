@@ -10,7 +10,8 @@ namespace PuyoTools.Core.Textures
         public GimTexture()
         {
             // Set default values
-            PaletteFormat = GimPaletteFormat.Unknown;
+            //PaletteFormat = GimPaletteFormat.Unknown;
+            PaletteFormat = null;
             DataFormat = GimDataFormat.Rgb565;
 
             HasMetadata = true;
@@ -34,7 +35,7 @@ namespace PuyoTools.Core.Textures
         /// <summary>
         /// The texture's palette format. The default value is GimPaletteFormat.Unknown.
         /// </summary>
-        public GimPaletteFormat PaletteFormat { get; set; }
+        public GimPaletteFormat? PaletteFormat { get; set; }
 
         /// <summary>
         /// The texture's data format. The default value is GimDataFormat.Rgb565.

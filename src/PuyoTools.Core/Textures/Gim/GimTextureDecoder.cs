@@ -1,4 +1,6 @@
-﻿using SixLabors.ImageSharp;
+﻿using PuyoTools.Core.Textures.Gim.PaletteCodecs;
+using PuyoTools.Core.Textures.Gim.PixelCodecs;
+using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using System;
@@ -12,8 +14,8 @@ namespace PuyoTools.Core.Textures.Gim
     public class GimTextureDecoder
     {
         #region Fields
-        private GimPixelCodec paletteCodec; // Palette codec
-        private GimDataCodec pixelCodec;    // Pixel codec
+        private PaletteCodec paletteCodec; // Palette codec
+        private PixelCodec pixelCodec;    // Pixel codec
 
         private ushort paletteEntries; // Number of entries in the palette
 
@@ -40,8 +42,9 @@ namespace PuyoTools.Core.Textures.Gim
 
         private byte[] decodedData;
 
-        private int actualWidth;
-        private int actualHeight;
+        private int stride;
+        private int pixelsPerRow;
+        private int pixelsPerColumn;
         #endregion
 
         #region Texture Properties
@@ -151,25 +154,14 @@ namespace PuyoTools.Core.Textures.Gim
                         // Get the pixel format & codec
                         source.Position += 8; // 0x14
                         PixelFormat = (GimDataFormat)reader.ReadUInt16(endianness);
-                        pixelCodec = GimDataCodec.GetDataCodec(PixelFormat);
+                        pixelCodec = PixelCodecFactory.Create(PixelFormat);
 
                         // Get whether this texture is swizzled
                         isSwizzled = reader.ReadUInt16(endianness) == 1;
 
                         // Get the texture dimensions
-                        Width = actualWidth = reader.ReadUInt16(endianness);
-                        Height = actualHeight = reader.ReadUInt16(endianness);
-
-                        // Some textures do not have a width that is a multiple or 16 or a height that is a multiple of 8.
-                        // We'll just do it the lazy way and set their width/height to a multiple of 16/8.
-                        if (actualWidth % 16 != 0)
-                        {
-                            actualWidth = PTMethods.RoundUp(actualWidth, 16);
-                        }
-                        if (actualHeight % 8 != 0)
-                        {
-                            actualHeight = PTMethods.RoundUp(actualHeight, 8);
-                        }
+                        Width = pixelsPerRow = reader.ReadUInt16(endianness);
+                        Height = pixelsPerColumn = reader.ReadUInt16(endianness);
 
                         // If we don't have a known pixel codec for this format, that's ok.
                         // This will allow the properties to be read if the user doesn't want to decode this texture.
@@ -179,8 +171,25 @@ namespace PuyoTools.Core.Textures.Gim
                             break;
                         }
 
+                        // Get the pixels per row and pixels per column.
+                        source.Position += 2; // 0x1E
+                        var strideAlignment = reader.ReadUInt16(endianness);
+                        var heightAlignment = reader.ReadUInt16(endianness);
+
+                        stride = (int)Math.Ceiling((double)Width * pixelCodec.BitsPerPixel / 8);
+                        if (stride % strideAlignment != 0)
+                        {
+                            stride = MathExtensions.RoundUp(stride, strideAlignment);
+                            pixelsPerRow = stride * 8 / pixelCodec.BitsPerPixel;
+                        }
+
+                        if (pixelsPerColumn % heightAlignment != 0)
+                        {
+                            pixelsPerColumn = MathExtensions.RoundUp(pixelsPerColumn, heightAlignment);
+                        }
+
                         // Read the texture data
-                        textureData = reader.At(chunkPosition + 0x50, x => x.ReadBytes(actualWidth * actualHeight * pixelCodec.Bpp / 8));
+                        textureData = reader.At(chunkPosition + 0x50, x => x.ReadBytes(stride * pixelsPerColumn));
 
                         break;
 
@@ -193,7 +202,7 @@ namespace PuyoTools.Core.Textures.Gim
                         // Get the palette format & codec
                         source.Position += 8; // 0x14
                         PaletteFormat = (GimPaletteFormat)reader.ReadUInt16(endianness);
-                        paletteCodec = GimPixelCodec.GetPixelCodec(PaletteFormat.Value);
+                        paletteCodec = PaletteCodecFactory.Create(PaletteFormat.Value);
 
                         // Get the number of entries in the palette
                         source.Position += 2; // 0x18
@@ -208,7 +217,7 @@ namespace PuyoTools.Core.Textures.Gim
                         }
 
                         // Read the palette data
-                        paletteData = reader.At(chunkPosition + 0x50, x => x.ReadBytes(paletteEntries * paletteCodec.Bpp / 8));
+                        paletteData = reader.At(chunkPosition + 0x50, x => x.ReadBytes(paletteEntries * paletteCodec.BitsPerPixel / 8));
 
                         break;
 
@@ -277,8 +286,34 @@ namespace PuyoTools.Core.Textures.Gim
                 }
 
                 // Set the data format's palette codec
-                pixelCodec.PixelCodec = paletteCodec;
+                //pixelCodec.PixelCodec = paletteCodec;
             }
+        }
+
+        private static byte[] Unswizzle(byte[] source, int stride, int pixelsPerColumn)
+        {
+            int destinationIndex = 0;
+
+            byte[] destination = new byte[stride * pixelsPerColumn];
+
+            int rowblocks = stride / 16;
+
+            for (int y = 0; y < pixelsPerColumn; y++)
+            {
+                for (int x = 0; x < stride; x++)
+                {
+                    int blockX = x / 16;
+                    int blockY = y / 8;
+
+                    int blockIndex = blockX + (blockY * rowblocks);
+                    int blockAddress = blockIndex * 16 * 8;
+
+                    destination[destinationIndex] = source[blockAddress + (x - blockX * 16) + ((y - blockY * 8) * 16)];
+                    destinationIndex++;
+                }
+            }
+
+            return destination;
         }
         #endregion
 
@@ -327,15 +362,15 @@ namespace PuyoTools.Core.Textures.Gim
 
             if (paletteData is not null) // The texture contains an embedded palette
             {
-                pixelCodec.SetPalette(paletteData, 0, paletteEntries);
+                pixelCodec.Palette = paletteCodec.Decode(paletteData);
             }
 
             if (isSwizzled)
             {
-                return pixelCodec.Decode(GimDataCodec.UnSwizzle(textureData, 0, actualWidth, actualHeight, pixelCodec.Bpp), 0, actualWidth, actualHeight);
+                return pixelCodec.Decode(Unswizzle(textureData, stride, pixelsPerColumn), Width, Height, pixelsPerRow, pixelsPerColumn);
             }
 
-            return pixelCodec.Decode(textureData, 0, actualWidth, actualHeight);
+            return pixelCodec.Decode(textureData, Width, Height, pixelsPerRow, pixelsPerColumn);
         }
 
         /// <summary>

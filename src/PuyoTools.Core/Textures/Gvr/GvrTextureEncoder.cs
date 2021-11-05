@@ -321,7 +321,7 @@ namespace PuyoTools.Core.Textures.Gvr
         {
             var bytesPerPixel = paletteCodec.Bpp / 8;
             var paletteData = MemoryMarshal.AsBytes(palette.Span).ToArray();
-            var encodedPaletteData = new byte[palette.Length * bytesPerPixel];
+            var encodedPaletteData = new byte[pixelCodec.PaletteEntries * bytesPerPixel];
 
             for (var i = 0; i < palette.Length; i++)
             {

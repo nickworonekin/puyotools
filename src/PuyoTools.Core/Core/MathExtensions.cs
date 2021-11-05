@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace PuyoTools.Core.Core
+namespace PuyoTools.Core
 {
     public static class MathExtensions
     {

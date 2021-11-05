@@ -9,7 +9,6 @@ namespace PuyoTools.Core.Textures.Gim
         Argb1555 = 0x01,
         Argb4444 = 0x02,
         Argb8888 = 0x03,
-        Unknown  = 0xFF,
     }
 
     // Gim Data Formats
@@ -26,6 +25,8 @@ namespace PuyoTools.Core.Textures.Gim
         Dxt1     = 0x0008,
         Dxt3     = 0x0009,
         Dxt5     = 0x000A,
-        Unknown  = 0x00FF,
+        Dxt1Ext  = 0x0108,
+        Dxt3Ext  = 0x0109,
+        Dxt5Ext  = 0x010A,
     }
 }
