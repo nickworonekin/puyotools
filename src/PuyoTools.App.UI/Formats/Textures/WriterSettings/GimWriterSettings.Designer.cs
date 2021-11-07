@@ -71,9 +71,9 @@
             this.label2.AutoSize = true;
             this.label2.Location = new System.Drawing.Point(3, 33);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(65, 13);
+            this.label2.Size = new System.Drawing.Size(64, 13);
             this.label2.TabIndex = 19;
-            this.label2.Text = "Data Format";
+            this.label2.Text = "Pixel Format";
             // 
             // label1
             // 

@@ -15,19 +15,10 @@ namespace PuyoTools.Core.Textures.Gim
 {
     public class GimTextureEncoder
     {
-        #region Fields
         private PaletteCodec paletteCodec; // Palette codec
         private PixelCodec pixelCodec;   // Pixel codec
 
         private int paletteEntries; // Number of palette entries in the palette data
-
-        private static readonly byte[] magicCode =
-        {
-            (byte)'M', (byte)'I', (byte)'G', (byte)'.',
-            (byte)'0', (byte)'0', (byte)'.',
-            (byte)'1', (byte)'P', (byte)'S', (byte)'P',
-            0,
-        };
 
         private static readonly byte[] magicCodeLittleEndian =
         {
@@ -46,8 +37,8 @@ namespace PuyoTools.Core.Textures.Gim
         private byte[] encodedPaletteData;
         private byte[] encodedTextureData;
 
-        private readonly int strideAlignment = 16; // Stride alignment will always be 16
-        private int heightAlignment; // Height alignment will be 8 (if swizzled) or 1 (if not swizzled).
+        private readonly int strideAlignment = 16; // Stride alignment will always be 16, except for DXTn-based pixel formats.
+        private int heightAlignment; // Height alignment will be 8 (if swizzled) or 1 (if not swizzled), or 4 if using a DXTn pixel format.
 
         private int stride;
         private int pixelsPerRow;
@@ -56,9 +47,7 @@ namespace PuyoTools.Core.Textures.Gim
         private Image<Bgra32> sourceImage;
 
         private GimMetadata metadata;
-        #endregion
 
-        #region Texture Properties
         /// <summary>
         /// Gets the width.
         /// </summary>
@@ -77,7 +66,12 @@ namespace PuyoTools.Core.Textures.Gim
         /// <summary>
         /// Gets the pixel format.
         /// </summary>
-        public GimDataFormat PixelFormat { get; private set; }
+        public GimPixelFormat PixelFormat { get; private set; }
+
+        /// <summary>
+        /// Gets or sets if the texture should include metadata.
+        /// </summary>
+        public bool HasMetadata { get; set; } = true;
 
         /// <summary>
         /// Gets or sets the endianness. Defaults to <see cref="Endianness.Little"/>.
@@ -97,30 +91,34 @@ namespace PuyoTools.Core.Textures.Gim
         /// <summary>
         /// Gets or sets if this texture should be swizzled.
         /// </summary>
+        /// <remarks>Swizzling isn't supported when using DXTn-based pixel formats.</remarks>
         public bool IsSwizzled { get; set; }
-        #endregion
 
-        #region Constructors & Initalizers
+        /// <summary>
+        /// Gets or sets whether dithering should be used when quantizing.
+        /// </summary>
+        public bool Dither { get; set; }
+
         /// <summary>
         /// Opens a texture to encode from a file.
         /// </summary>
-        /// <param name="file">Filename of the file that contains the texture data.</param>
+        /// <param name="path">Filename of the file that contains the texture data.</param>
         /// <param name="pixelFormat">Pixel format to encode the texture to.</param>
         /// <param name="dataFormat">Data format to encode the texture to.</param>
-        public GimTextureEncoder(string file, GimDataFormat pixelFormat)
-            : this(file, null, pixelFormat)
+        public GimTextureEncoder(string path, GimPixelFormat pixelFormat)
+            : this(path, null, pixelFormat)
         {
         }
 
         /// <summary>
         /// Opens a texture to encode from a file.
         /// </summary>
-        /// <param name="file">Filename of the file that contains the texture data.</param>
+        /// <param name="path">Filename of the file that contains the texture data.</param>
         /// <param name="pixelFormat">Pixel format to encode the texture to.</param>
         /// <param name="dataFormat">Data format to encode the texture to.</param>
-        public GimTextureEncoder(string file, GimPaletteFormat? paletteFormat, GimDataFormat pixelFormat)
+        public GimTextureEncoder(string path, GimPaletteFormat? paletteFormat, GimPixelFormat pixelFormat)
         {
-            using (var stream = File.OpenRead(file))
+            using (var stream = File.OpenRead(path))
             {
                 Initialize(stream, paletteFormat, pixelFormat);
             }
@@ -132,7 +130,7 @@ namespace PuyoTools.Core.Textures.Gim
         /// <param name="source">Stream that contains the texture data.</param>
         /// <param name="pixelFormat">Pixel format to encode the texture to.</param>
         /// <param name="dataFormat">Data format to encode the texture to.</param>
-        public GimTextureEncoder(Stream source, GimDataFormat pixelFormat)
+        public GimTextureEncoder(Stream source, GimPixelFormat pixelFormat)
             : this(source, null, pixelFormat)
         {
         }
@@ -143,12 +141,12 @@ namespace PuyoTools.Core.Textures.Gim
         /// <param name="source">Stream that contains the texture data.</param>
         /// <param name="pixelFormat">Pixel format to encode the texture to.</param>
         /// <param name="dataFormat">Data format to encode the texture to.</param>
-        public GimTextureEncoder(Stream source, GimPaletteFormat? paletteFormat, GimDataFormat pixelFormat)
+        public GimTextureEncoder(Stream source, GimPaletteFormat? paletteFormat, GimPixelFormat pixelFormat)
         {
             Initialize(source, paletteFormat, pixelFormat);
         }
 
-        private void Initialize(Stream source, GimPaletteFormat? paletteFormat, GimDataFormat pixelFormat)
+        private void Initialize(Stream source, GimPaletteFormat? paletteFormat, GimPixelFormat pixelFormat)
         {
             // Set the palette and pixel formats, and verify that we can encode to them.
             // We'll also need to verify that the palette format is set if it's a palettized pixel format.
@@ -184,12 +182,6 @@ namespace PuyoTools.Core.Textures.Gim
             Width = sourceImage.Width;
             Height = sourceImage.Height;
 
-            /*// Verify if the dimensions are valid
-            if (!HasValidDimensions(Width, Height))
-            {
-                throw new NotSupportedException("Source image width must be a multiple of 16 and height must be a multiple of 8.");
-            }*/
-
             // Create the metadata and set the default values.
             metadata = new GimMetadata
             {
@@ -206,50 +198,6 @@ namespace PuyoTools.Core.Textures.Gim
             };
         }
 
-        // Returns if the texture dimensuons are valid
-        private bool HasValidDimensions(int width, int height)
-        {
-            if (width % 16 != 0 || height % 8 != 0)
-                return false;
-
-            return true;
-        }
-
-        public static byte[] Swizzle(byte[] source, int stride, int pixelsPerColumn)
-        {
-            int sourceIndex = 0;
-
-            byte[] destination = new byte[stride * pixelsPerColumn];
-
-            int rowblocks = stride / 16;
-
-            for (int y = 0; y < pixelsPerColumn; y++)
-            {
-                for (int x = 0; x < stride; x++)
-                {
-                    int blockX = x / 16;
-                    int blockY = y / 8;
-
-                    int blockIndex = blockX + (blockY * rowblocks);
-                    int blockAddress = blockIndex * 16 * 8;
-
-                    destination[blockAddress + (x - blockX * 16) + ((y - blockY * 8) * 16)] = source[sourceIndex];
-                    sourceIndex++;
-                }
-            }
-
-            return destination;
-        }
-        #endregion
-
-        #region Metadata
-        /// <summary>
-        /// Gets or sets if the texture should include metadata.
-        /// </summary>
-        public bool HasMetadata { get; set; } = true;
-        #endregion
-
-        #region Texture Retrieval
         /// <summary>
         /// Saves the encoded texture to the specified path.
         /// </summary>
@@ -462,9 +410,7 @@ namespace PuyoTools.Core.Textures.Gim
                 writer.WriteNullTerminatedString(metadata.Program);
             }
         }
-        #endregion
 
-        #region Texture Conversion
         /// <summary>
         /// Encodes the texture. Also encodes the palette if needed.
         /// </summary>
@@ -489,6 +435,7 @@ namespace PuyoTools.Core.Textures.Gim
                 var quantizerOptions = new QuantizerOptions
                 {
                     MaxColors = paletteEntries,
+                    Dither = Dither ? QuantizerConstants.DefaultDither : null,
                 };
 
                 if (ImageHelper.TryBuildExactPalette(sourceImage, paletteEntries, out var palette))
@@ -531,6 +478,31 @@ namespace PuyoTools.Core.Textures.Gim
 
             return paletteCodec.Encode(paletteData);
         }
-        #endregion
+
+        private static byte[] Swizzle(byte[] source, int stride, int pixelsPerColumn)
+        {
+            int sourceIndex = 0;
+
+            byte[] destination = new byte[stride * pixelsPerColumn];
+
+            int rowblocks = stride / 16;
+
+            for (int y = 0; y < pixelsPerColumn; y++)
+            {
+                for (int x = 0; x < stride; x++)
+                {
+                    int blockX = x / 16;
+                    int blockY = y / 8;
+
+                    int blockIndex = blockX + (blockY * rowblocks);
+                    int blockAddress = blockIndex * 16 * 8;
+
+                    destination[blockAddress + (x - blockX * 16) + ((y - blockY * 8) * 16)] = source[sourceIndex];
+                    sourceIndex++;
+                }
+            }
+
+            return destination;
+        }
     }
 }

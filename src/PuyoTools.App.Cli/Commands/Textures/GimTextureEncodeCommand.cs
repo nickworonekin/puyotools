@@ -16,7 +16,7 @@ namespace PuyoTools.App.Cli.Commands.Textures
             : base(format)
         {
             AddOption(new Option<GimPaletteFormat>("--palette-format", "Set the palette format"));
-            AddOption(new Option<GimDataFormat>("--data-format", "Set the data format")
+            AddOption(new Option<GimPixelFormat>("--pixel-format", "Set the pixel format")
             {
                 IsRequired = true,
             });

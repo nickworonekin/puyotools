@@ -58,12 +58,12 @@ namespace PuyoTools.App.Formats.Textures.WriterSettings
             // Set the data format
             switch (dataFormatBox.SelectedIndex)
             {
-                case 0: texture.DataFormat = GimDataFormat.Rgb565; break;
-                case 1: texture.DataFormat = GimDataFormat.Argb1555; break;
-                case 2: texture.DataFormat = GimDataFormat.Argb4444; break;
-                case 3: texture.DataFormat = GimDataFormat.Argb8888; break;
-                case 4: texture.DataFormat = GimDataFormat.Index4; break;
-                case 5: texture.DataFormat = GimDataFormat.Index8; break;
+                case 0: texture.DataFormat = GimPixelFormat.Rgb565; break;
+                case 1: texture.DataFormat = GimPixelFormat.Argb1555; break;
+                case 2: texture.DataFormat = GimPixelFormat.Argb4444; break;
+                case 3: texture.DataFormat = GimPixelFormat.Argb8888; break;
+                case 4: texture.DataFormat = GimPixelFormat.Index4; break;
+                case 5: texture.DataFormat = GimPixelFormat.Index8; break;
             }
 
             // Has metadata?

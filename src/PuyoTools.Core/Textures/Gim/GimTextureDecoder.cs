@@ -13,7 +13,6 @@ namespace PuyoTools.Core.Textures.Gim
 {
     public class GimTextureDecoder
     {
-        #region Fields
         private PaletteCodec paletteCodec; // Palette codec
         private PixelCodec pixelCodec;    // Pixel codec
 
@@ -45,9 +44,7 @@ namespace PuyoTools.Core.Textures.Gim
         private int stride;
         private int pixelsPerRow;
         private int pixelsPerColumn;
-        #endregion
 
-        #region Texture Properties
         /// <summary>
         /// Gets the width.
         /// </summary>
@@ -66,17 +63,20 @@ namespace PuyoTools.Core.Textures.Gim
         /// <summary>
         /// Gets the pixel format.
         /// </summary>
-        public GimDataFormat PixelFormat { get; private set; }
-        #endregion
+        public GimPixelFormat PixelFormat { get; private set; }
 
-        #region Constructors & Initalizers
+        /// <summary>
+        /// Gets the metadata, or <see langword="null"/> if there is no metadata.
+        /// </summary>
+        public GimMetadata Metadata { get; private set; }
+
         /// <summary>
         /// Open a GIM texture from a file.
         /// </summary>
-        /// <param name="file">Filename of the file that contains the texture data.</param>
-        public GimTextureDecoder(string file)
+        /// <param name="path">Filename of the file that contains the texture data.</param>
+        public GimTextureDecoder(string path)
         {
-            using (var stream = File.OpenRead(file))
+            using (var stream = File.OpenRead(path))
             {
                 Initialize(stream);
             }
@@ -153,7 +153,7 @@ namespace PuyoTools.Core.Textures.Gim
 
                         // Get the pixel format & codec
                         source.Position += 8; // 0x14
-                        PixelFormat = (GimDataFormat)reader.ReadUInt16(endianness);
+                        PixelFormat = (GimPixelFormat)reader.ReadUInt16(endianness);
                         pixelCodec = PixelCodecFactory.Create(PixelFormat);
 
                         // Get whether this texture is swizzled
@@ -260,78 +260,15 @@ namespace PuyoTools.Core.Textures.Gim
             {
                 throw new InvalidFormatException("Stream position does not match expected end-of-file position.");
             }
-
-            // If we don't have a known pixel codec for this format, that's ok.
-            // This will allow the properties to be read if the user doesn't want to decode this texture.
-            // The exception will be thrown when the texture is being decoded.
-            if (pixelCodec is null)
-            {
-                return;
-            }
-
-            if (pixelCodec.PaletteEntries != 0)
-            {
-                // If we don't have a known palette codec for this format, that's ok.
-                // This will allow the properties to be read if the user doesn't want to decode this texture.
-                // The exception will be thrown when the texture is being decoded.
-                if (paletteCodec is null)
-                {
-                    return;
-                }
-
-                // Verify that there aren't too many entries in the palette
-                if (paletteEntries > pixelCodec.PaletteEntries)
-                {
-                    throw new InvalidFormatException("Too many entries in palette for the specified pixel format.");
-                }
-
-                // Set the data format's palette codec
-                //pixelCodec.PixelCodec = paletteCodec;
-            }
         }
 
-        private static byte[] Unswizzle(byte[] source, int stride, int pixelsPerColumn)
-        {
-            int destinationIndex = 0;
-
-            byte[] destination = new byte[stride * pixelsPerColumn];
-
-            int rowblocks = stride / 16;
-
-            for (int y = 0; y < pixelsPerColumn; y++)
-            {
-                for (int x = 0; x < stride; x++)
-                {
-                    int blockX = x / 16;
-                    int blockY = y / 8;
-
-                    int blockIndex = blockX + (blockY * rowblocks);
-                    int blockAddress = blockIndex * 16 * 8;
-
-                    destination[destinationIndex] = source[blockAddress + (x - blockX * 16) + ((y - blockY * 8) * 16)];
-                    destinationIndex++;
-                }
-            }
-
-            return destination;
-        }
-        #endregion
-
-        #region Metadata
-        /// <summary>
-        /// Gets the metadata, or null if there is no metadata.
-        /// </summary>
-        public GimMetadata Metadata { get; private set; }
-        #endregion
-
-        #region Texture Retrieval
         /// <summary>
         /// Saves the decoded texture to the specified file as a PNG.
         /// </summary>
-        /// <param name="file">Name of the file to save the data to.</param>
-        public void Save(string file)
+        /// <param name="path">Name of the file to save the data to.</param>
+        public void Save(string path)
         {
-            using (var stream = File.OpenWrite(file))
+            using (var stream = File.OpenWrite(path))
             {
                 Save(stream);
             }
@@ -386,9 +323,33 @@ namespace PuyoTools.Core.Textures.Gim
 
             return decodedData;
         }
-        #endregion
 
-        #region Texture Check
+        private static byte[] Unswizzle(byte[] source, int stride, int pixelsPerColumn)
+        {
+            int destinationIndex = 0;
+
+            byte[] destination = new byte[stride * pixelsPerColumn];
+
+            int rowblocks = stride / 16;
+
+            for (int y = 0; y < pixelsPerColumn; y++)
+            {
+                for (int x = 0; x < stride; x++)
+                {
+                    int blockX = x / 16;
+                    int blockY = y / 8;
+
+                    int blockIndex = blockX + (blockY * rowblocks);
+                    int blockAddress = blockIndex * 16 * 8;
+
+                    destination[destinationIndex] = source[blockAddress + (x - blockX * 16) + ((y - blockY * 8) * 16)];
+                    destinationIndex++;
+                }
+            }
+
+            return destination;
+        }
+
         /// <summary>
         /// Determines if this is a GIM texture.
         /// </summary>
@@ -436,6 +397,5 @@ namespace PuyoTools.Core.Textures.Gim
                 return Is(stream);
             }
         }
-        #endregion
     }
 }

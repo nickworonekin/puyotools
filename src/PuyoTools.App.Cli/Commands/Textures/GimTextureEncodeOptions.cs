@@ -14,7 +14,7 @@ namespace PuyoTools.App.Cli.Commands.Textures
     {
         public GimPaletteFormat PaletteFormat { get; set; }
 
-        public GimDataFormat DataFormat { get; set; }
+        public GimPixelFormat PixelFormat { get; set; }
 
         public bool Metadata { get; set; }
 
@@ -23,7 +23,7 @@ namespace PuyoTools.App.Cli.Commands.Textures
             var texture = (GimTexture)obj;
 
             texture.PaletteFormat = PaletteFormat;
-            texture.DataFormat = DataFormat;
+            texture.DataFormat = PixelFormat;
             texture.HasMetadata = Metadata;
         }
     }
