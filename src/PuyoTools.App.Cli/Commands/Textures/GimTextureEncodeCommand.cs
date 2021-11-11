@@ -21,6 +21,8 @@ namespace PuyoTools.App.Cli.Commands.Textures
                 IsRequired = true,
             });
             AddOption(new Option("--metadata", "Include metadata"));
+            AddOption(new Option("--swizzle", "Use texture swizzling (for PSP only)."));
+            AddOption(new Option("--dither", "Use dithering when creating palette-based textures."));
 
             Handler = CommandHandler.Create<GimTextureEncodeOptions, IConsole>(Execute);
         }

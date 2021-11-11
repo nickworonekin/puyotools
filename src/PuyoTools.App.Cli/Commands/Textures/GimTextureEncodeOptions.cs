@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using GimTexture = PuyoTools.Core.Textures.GimTexture;
 
 namespace PuyoTools.App.Cli.Commands.Textures
 {
@@ -17,6 +16,10 @@ namespace PuyoTools.App.Cli.Commands.Textures
         public GimPixelFormat PixelFormat { get; set; }
 
         public bool Metadata { get; set; }
+
+        public bool Swizzle { get; set; }
+
+        public bool Dither { get; set; }
 
         public void MapTo(TextureBase obj)
         {

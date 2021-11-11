@@ -6,7 +6,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using PuyoTools.Core.Textures.Pvr;
-using PvrTexture = PuyoTools.Core.Textures.PvrTexture;
 
 namespace PuyoTools.App.Cli.Commands.Textures
 {

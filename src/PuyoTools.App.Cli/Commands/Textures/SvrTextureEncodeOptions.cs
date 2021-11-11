@@ -6,7 +6,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using PuyoTools.Core.Textures.Svr;
-using SvrTexture = PuyoTools.Core.Textures.SvrTexture;
 
 namespace PuyoTools.App.Cli.Commands.Textures
 {

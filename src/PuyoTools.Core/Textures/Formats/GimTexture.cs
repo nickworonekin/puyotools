@@ -46,6 +46,16 @@ namespace PuyoTools.Core.Textures
         /// Gets or sets if the texture should include metadata. The default value is true.
         /// </summary>
         public bool HasMetadata { get; set; }
+
+        /// <summary>
+        /// Gets or sets if the texture should be swizzled.
+        /// </summary>
+        public bool Swizzle { get; set; }
+
+        /// <summary>
+        /// Gets or sets if dithering should be used when creating palette-based textures.
+        /// </summary>
+        public bool Dither { get; set; }
         #endregion
 
         public override void Write(Stream source, Stream destination)
@@ -54,6 +64,8 @@ namespace PuyoTools.Core.Textures
             GimTextureEncoder texture = new GimTextureEncoder(source, PaletteFormat, DataFormat);
 
             texture.HasMetadata = HasMetadata;
+            texture.IsSwizzled = Swizzle;
+            texture.Dither = Dither;
             /*if (texture.HasMetadata)
             {
                 texture.Metadata.OriginalFilename = source is FileStream fs

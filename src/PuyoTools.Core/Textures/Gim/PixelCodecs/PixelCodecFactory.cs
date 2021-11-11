@@ -21,9 +21,9 @@ namespace PuyoTools.Core.Textures.Gim.PixelCodecs
             GimPixelFormat.Index8 => new Index8PixelCodec(),
             GimPixelFormat.Index16 => new Index16PixelCodec(),
             GimPixelFormat.Index32 => new Index32PixelCodec(),
-            GimPixelFormat.Dxt1 => new Dxt1PixelCodec(),
-            GimPixelFormat.Dxt3 => new Dxt3PixelCodec(),
-            GimPixelFormat.Dxt5 => new Dxt5PixelCodec(),
+            GimPixelFormat.Dxt1 or GimPixelFormat.Dxt1Ext => new Dxt1PixelCodec(),
+            GimPixelFormat.Dxt3 or GimPixelFormat.Dxt3Ext => new Dxt3PixelCodec(),
+            GimPixelFormat.Dxt5 or GimPixelFormat.Dxt5Ext => new Dxt5PixelCodec(),
             _ => null,
         };
     }
