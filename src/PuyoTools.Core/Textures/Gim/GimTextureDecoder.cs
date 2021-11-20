@@ -179,13 +179,13 @@ namespace PuyoTools.Core.Textures.Gim
                         stride = (int)Math.Ceiling((double)Width * pixelCodec.BitsPerPixel / 8);
                         if (stride % strideAlignment != 0)
                         {
-                            stride = MathExtensions.RoundUp(stride, strideAlignment);
+                            stride = MathHelper.RoundUp(stride, strideAlignment);
                             pixelsPerRow = stride * 8 / pixelCodec.BitsPerPixel;
                         }
 
                         if (pixelsPerColumn % heightAlignment != 0)
                         {
-                            pixelsPerColumn = MathExtensions.RoundUp(pixelsPerColumn, heightAlignment);
+                            pixelsPerColumn = MathHelper.RoundUp(pixelsPerColumn, heightAlignment);
                         }
 
                         // Read the texture data
@@ -253,6 +253,12 @@ namespace PuyoTools.Core.Textures.Gim
 
                 // Go to the next chunk
                 source.Position = chunkPosition + chunkLength;
+
+                // Stop reading if all of the chunks have been read
+                if (source.Position - startPosition == eofOffset)
+                {
+                    break;
+                }
             }
 
             // Verify that the stream's position is as the expected position
@@ -368,20 +374,25 @@ namespace PuyoTools.Core.Textures.Gim
                 }
 
                 var magicCode = reader.At(startPosition, x => x.ReadBytes(magicCodeLittleEndian.Length));
+                uint expectedLength;
 
                 if (magicCode.SequenceEqual(magicCodeLittleEndian)
-                    && reader.At(startPosition + 0x14, x => x.ReadUInt32()) == remainingLength - 16)
+                    && reader.At(startPosition + 0x10, x => x.ReadUInt16()) == 0x2)
                 {
-                    return true;
+                    expectedLength = reader.At(startPosition + 0x14, x => x.ReadUInt32());
+                }
+                else if (magicCode.SequenceEqual(magicCodeBigEndian)
+                    && reader.At(startPosition + 0x10, x => x.ReadUInt16BigEndian()) == 0x2)
+                {
+                    expectedLength = reader.At(startPosition + 0x14, x => x.ReadUInt32BigEndian());
+                }
+                else
+                {
+                    return false;
                 }
 
-                if (magicCode.SequenceEqual(magicCodeBigEndian)
-                    && reader.At(startPosition + 0x14, x => x.ReadUInt32BigEndian()) == remainingLength - 16)
-                {
-                    return true;
-                }
-
-                return false;
+                return expectedLength == remainingLength - 16
+                    || MathHelper.RoundUp(expectedLength, 16) == remainingLength - 16;
             }
         }
 

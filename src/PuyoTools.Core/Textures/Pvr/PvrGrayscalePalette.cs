@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PuyoTools.Core.Textures.Pvr.DataCodecs;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -17,7 +18,7 @@ namespace PuyoTools.Core.Textures.Pvr
         /// <summary>
         /// Throws a <see cref="NotSupportedException"/>.
         /// </summary>
-        /// <remarks>To get the palette data, see <see cref="GetPaletteData(PvrDataCodec)"/>.</remarks>
+        /// <remarks>To get the palette data, see <see cref="GetPaletteData(DataCodec)"/>.</remarks>
         public override byte[] GetPaletteData()
         {
             throw new NotSupportedException();
@@ -28,7 +29,7 @@ namespace PuyoTools.Core.Textures.Pvr
         /// </summary>
         /// <param name="dataCodec">The data codec this palette will be used for.</param>
         /// <returns>The palette data as a byte array.</returns>
-        public byte[] GetPaletteData(PvrDataCodec dataCodec)
+        internal byte[] GetPaletteData(DataCodec dataCodec)
         {
             var count = dataCodec.PaletteEntries;
             var palette = new byte[count * 4];

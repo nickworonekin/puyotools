@@ -1,19 +1,21 @@
-﻿using System;
+﻿using PuyoTools.Core.Textures.Pvr.DataCodecs;
+using PuyoTools.Core.Textures.Pvr.PixelCodecs;
+using System;
 using System.IO;
 using System.Linq;
 using System.Text;
 
 namespace PuyoTools.Core.Textures.Pvr
 {
-    public abstract class PvrCompressionCodec
+    internal abstract class PvrCompressionCodec
     {
         #region Rle Compression
         // Rle Compression
         public class Rle : PvrCompressionCodec
         {
-            public override void Compress(Stream source, Stream destination, PvrPixelCodec pixelCodec, PvrDataCodec dataCodec)
+            public override void Compress(Stream source, Stream destination, PixelCodec pixelCodec, DataCodec dataCodec)
             {
-                var bytesPerPixel = dataCodec.Bpp / 8;
+                var bytesPerPixel = dataCodec.BitsPerPixel / 8;
 
                 using (var reader = new BinaryReader(source, Encoding.UTF8, true))
                 using (var writer = new BinaryWriter(destination, Encoding.UTF8, true))
@@ -44,9 +46,9 @@ namespace PuyoTools.Core.Textures.Pvr
                 }
             }
 
-            public override void Decompress(Stream source, Stream destination, PvrPixelCodec pixelCodec, PvrDataCodec dataCodec)
+            public override void Decompress(Stream source, Stream destination, PixelCodec pixelCodec, DataCodec dataCodec)
             {
-                var bytesPerPixel = dataCodec.Bpp / 8;
+                var bytesPerPixel = dataCodec.BitsPerPixel / 8;
 
                 using (var reader = new BinaryReader(source, Encoding.UTF8, true))
                 using (var writer = new BinaryWriter(destination, Encoding.UTF8, true))
@@ -153,11 +155,11 @@ namespace PuyoTools.Core.Textures.Pvr
         }
         #endregion
 
-        public virtual void Compress(Stream source, Stream destination, PvrPixelCodec pixelCodec, PvrDataCodec dataCodec)
+        public virtual void Compress(Stream source, Stream destination, PixelCodec pixelCodec, DataCodec dataCodec)
         {
         }
 
-        public virtual void Decompress(Stream source, Stream destination, PvrPixelCodec pixelCodec, PvrDataCodec dataCodec)
+        public virtual void Decompress(Stream source, Stream destination, PixelCodec pixelCodec, DataCodec dataCodec)
         {
         }
 

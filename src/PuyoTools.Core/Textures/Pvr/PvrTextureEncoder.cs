@@ -1,4 +1,6 @@
-﻿using SixLabors.ImageSharp;
+﻿using PuyoTools.Core.Textures.Pvr.DataCodecs;
+using PuyoTools.Core.Textures.Pvr.PixelCodecs;
+using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Processing.Processors.Quantization;
@@ -13,8 +15,8 @@ namespace PuyoTools.Core.Textures.Pvr
     public class PvrTextureEncoder
     {
         #region Fields
-        private PvrPixelCodec pixelCodec; // Pixel codec
-        private PvrDataCodec dataCodec;   // Data codec
+        private PixelCodec pixelCodec; // Pixel codec
+        private DataCodec dataCodec;   // Data codec
         private PvrCompressionCodec compressionCodec; // Compression Codec
 
         private int paletteEntries; // Number of palette entries in the palette data
@@ -108,18 +110,27 @@ namespace PuyoTools.Core.Textures.Pvr
             PixelFormat = pixelFormat;
             DataFormat = dataFormat;
 
-            pixelCodec = PvrPixelCodec.GetPixelCodec(pixelFormat);
+            // When using pixel format ARGB8888, verify that a palette-based data format is used.
+            if (pixelFormat == PvrPixelFormat.Argb8888
+                && !(dataFormat is PvrDataFormat.Index4
+                    or PvrDataFormat.Index4Mipmaps
+                    or PvrDataFormat.Index8
+                    or PvrDataFormat.Index8Mipmaps))
+            {
+                throw new InvalidOperationException($"Pixel format {nameof(PvrPixelFormat.Argb8888)} can only be used with palette-based data formats.");
+            }
+
+            pixelCodec = PixelCodecFactory.Create(pixelFormat);
             if (pixelCodec is null)
             {
                 throw new NotSupportedException($"Pixel format {PixelFormat:X} is not supported for encoding.");
             }
             
-            dataCodec = PvrDataCodec.GetDataCodec(dataFormat);
+            dataCodec = DataCodecFactory.Create(dataFormat, pixelCodec);
             if (dataCodec is null)
             {
                 throw new NotSupportedException($"Data format {DataFormat:X} is not supported for encoding.");
             }
-            dataCodec.PixelCodec = pixelCodec;
 
             // Get the number of palette entries.
             // In a Small VQ encoded texture, it's determined by the texture dimensions.
@@ -164,6 +175,12 @@ namespace PuyoTools.Core.Textures.Pvr
 
             Width = sourceImage.Width;
             Height = sourceImage.Height;
+
+            // Verify the dimensions for this image are valid for the specified data format.
+            if (!dataCodec.IsValidDimensions(Width, Height))
+            {
+                throw new InvalidOperationException($"The dimensions ({Width}x{Height}) of the specified image are not valid for data format {dataFormat}.");
+            }
         }
         #endregion
 
@@ -189,7 +206,7 @@ namespace PuyoTools.Core.Textures.Pvr
 
                 if (ImageHelper.TryBuildExactPalette(sourceImage, paletteEntries, out var palette))
                 {
-                    quantizer = new PaletteQuantizer(palette.Cast<Color>().ToArray(), quantizerOptions)
+                    quantizer = new PaletteQuantizer(palette.Select(x => (Color)x).ToArray(), quantizerOptions)
                         .CreatePixelSpecificQuantizer<Bgra32>(Configuration.Default);
 
                     imageFrame = quantizer.QuantizeFrame(sourceImage.Frames.RootFrame, new Rectangle(0, 0, sourceImage.Width, sourceImage.Height));
@@ -244,14 +261,14 @@ namespace PuyoTools.Core.Textures.Pvr
                 return EncodeRgbaTexture(sourceImage);
             }
 
-            return dataCodec.Encode(pixelData, 0, Width, Height);
+            return dataCodec.Encode(pixelData, Width, Height);
         }
 
         private byte[] EncodeRgbaTexture<TPixel>(Image<TPixel> image)
             where TPixel : unmanaged, IPixel<TPixel>
         {
             var pixelData = ImageHelper.GetPixelDataAsBytes(image.Frames.RootFrame);
-            return dataCodec.Encode(pixelData, 0, image.Width, image.Height);
+            return dataCodec.Encode(pixelData, image.Width, image.Height);
         }
 
         private byte[] EncodeIndexedTexture<TPixel>(Image<TPixel> image, IQuantizer<TPixel> quantizer)
@@ -259,7 +276,7 @@ namespace PuyoTools.Core.Textures.Pvr
         {
             var imageFrame = quantizer.QuantizeFrame(image.Frames.RootFrame, new Rectangle(0, 0, image.Width, image.Height));
             var pixelData = ImageHelper.GetPixelDataAsBytes(imageFrame);
-            return dataCodec.Encode(pixelData, 0, image.Width, image.Height);
+            return dataCodec.Encode(pixelData, image.Width, image.Height);
         }
 
         /// <summary>
@@ -268,7 +285,7 @@ namespace PuyoTools.Core.Textures.Pvr
         /// <returns></returns>
         private byte[] EncodePalette(ReadOnlyMemory<Bgra32> palette)
         {
-            var bytesPerPixel = pixelCodec.Bpp / 8;
+            var bytesPerPixel = pixelCodec.BitsPerPixel / 8;
             var paletteData = MemoryMarshal.AsBytes(palette.Span).ToArray();
             var encodedPaletteData = new byte[dataCodec.PaletteEntries * bytesPerPixel];
 
@@ -331,11 +348,19 @@ namespace PuyoTools.Core.Textures.Pvr
 
                 if (DataFormat == PvrDataFormat.SquareTwiddledMipmaps)
                 {
-                    expectedLength += pixelCodec.Bpp / 8;
+                    expectedLength += pixelCodec.BitsPerPixel / 8;
+                }
+                else if (DataFormat == PvrDataFormat.Index4Mipmaps)
+                {
+                    expectedLength += 2 * dataCodec.BitsPerPixel / 8;
+                }
+                else if (DataFormat == PvrDataFormat.Index8Mipmaps)
+                {
+                    expectedLength += 3 * dataCodec.BitsPerPixel / 8;
                 }
                 else if (DataFormat == PvrDataFormat.SquareTwiddledMipmapsAlt)
                 {
-                    expectedLength += 3 * pixelCodec.Bpp / 8;
+                    expectedLength += 3 * pixelCodec.BitsPerPixel / 8;
                 }
             }
 
@@ -381,11 +406,19 @@ namespace PuyoTools.Core.Textures.Pvr
             {
                 if (DataFormat == PvrDataFormat.SquareTwiddledMipmaps)
                 {
-                    writer.Write(new byte[pixelCodec.Bpp / 8]);
+                    writer.Write(new byte[pixelCodec.BitsPerPixel / 8]);
+                }
+                else if (DataFormat == PvrDataFormat.Index4Mipmaps)
+                {
+                    writer.Write(new byte[2 * dataCodec.BitsPerPixel / 8]);
+                }
+                else if (DataFormat == PvrDataFormat.Index8Mipmaps)
+                {
+                    writer.Write(new byte[3 * dataCodec.BitsPerPixel / 8]);
                 }
                 else if (DataFormat == PvrDataFormat.SquareTwiddledMipmapsAlt)
                 {
-                    writer.Write(new byte[3 * pixelCodec.Bpp / 8]);
+                    writer.Write(new byte[3 * pixelCodec.BitsPerPixel / 8]);
                 }
 
                 foreach (var encodedMipmapDataItem in encodedMipmapData)

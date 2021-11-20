@@ -81,7 +81,7 @@ namespace PuyoTools.Core.Textures.Gim
             get => endianness;
             set
             {
-                EnumHelper.ThrowIfArgumentNotDefined(value, nameof(Endianness));
+                ArgumentHelper.ThrowIfInvalidEnumValue(value);
 
                 endianness = value;
             }
@@ -422,9 +422,9 @@ namespace PuyoTools.Core.Textures.Gim
             // Calculate the alignment, stride, and pixels per row/column.
             heightAlignment = IsSwizzled ? 8 : 1;
 
-            stride = MathExtensions.RoundUp((int)Math.Ceiling((double)Width * pixelCodec.BitsPerPixel / 8), strideAlignment);
+            stride = MathHelper.RoundUp((int)Math.Ceiling((double)Width * pixelCodec.BitsPerPixel / 8), strideAlignment);
             pixelsPerRow = stride * 8 / pixelCodec.BitsPerPixel;
-            pixelsPerColumn = MathExtensions.RoundUp(Height, heightAlignment);
+            pixelsPerColumn = MathHelper.RoundUp(Height, heightAlignment);
 
             // Encode as a palettized image.
             if (paletteEntries != 0)
@@ -440,7 +440,7 @@ namespace PuyoTools.Core.Textures.Gim
 
                 if (ImageHelper.TryBuildExactPalette(sourceImage, paletteEntries, out var palette))
                 {
-                    quantizer = new PaletteQuantizer(palette.Cast<Color>().ToArray(), quantizerOptions)
+                    quantizer = new PaletteQuantizer(palette.Select(x => (Color)x).ToArray(), quantizerOptions)
                         .CreatePixelSpecificQuantizer<Bgra32>(Configuration.Default);
 
                     imageFrame = quantizer.QuantizeFrame(sourceImage.Frames.RootFrame, new Rectangle(0, 0, sourceImage.Width, sourceImage.Height));

@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace PuyoTools.Core
 {
-    internal static class EnumHelper
+    internal static class ArgumentHelper
     {
         /// <summary>
         /// Throws <see cref="InvalidEnumArgumentException"/> if <paramref name="value"/> is not defined in <typeparamref name="T"/>.
@@ -13,7 +14,7 @@ namespace PuyoTools.Core
         /// <typeparam name="T"></typeparam>
         /// <param name="value"></param>
         /// <param name="paramName"></param>
-        public static void ThrowIfArgumentNotDefined<T>(T value, string paramName) where T : Enum
+        public static void ThrowIfInvalidEnumValue<T>(T value, [CallerArgumentExpression("value")] string paramName = null) where T : Enum
         {
             if (!Enum.IsDefined(typeof(T), value))
             {

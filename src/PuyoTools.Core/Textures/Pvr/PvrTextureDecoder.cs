@@ -1,4 +1,6 @@
-﻿using SixLabors.ImageSharp;
+﻿using PuyoTools.Core.Textures.Pvr.DataCodecs;
+using PuyoTools.Core.Textures.Pvr.PixelCodecs;
+using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using System;
@@ -12,8 +14,8 @@ namespace PuyoTools.Core.Textures.Pvr
     public class PvrTextureDecoder
     {
         #region Fields
-        private PvrPixelCodec pixelCodec; // Pixel codec
-        private PvrDataCodec dataCodec;   // Data codec
+        private PixelCodec pixelCodec; // Pixel codec
+        private DataCodec dataCodec;   // Data codec
         private PvrCompressionCodec compressionCodec; // Compression Codec
 
         protected int paletteEntries; // Number of palette entries in the palette data
@@ -145,8 +147,8 @@ namespace PuyoTools.Core.Textures.Pvr
             }
 
             // Get the codecs and make sure we can decode using them
-            pixelCodec = PvrPixelCodec.GetPixelCodec(PixelFormat);
-            dataCodec = PvrDataCodec.GetDataCodec(DataFormat);
+            pixelCodec = PixelCodecFactory.Create(PixelFormat);
+            dataCodec = DataCodecFactory.Create(DataFormat, pixelCodec);
 
             // If we don't have a known pixel or data codec for these formats, that's ok.
             // This will allow the properties to be read if the user doesn't want to decode this texture.
@@ -155,8 +157,6 @@ namespace PuyoTools.Core.Textures.Pvr
             {
                 return;
             }
-
-            dataCodec.PixelCodec = pixelCodec;
 
             if (CompressionFormat != PvrCompressionFormat.None)
             {
@@ -204,7 +204,7 @@ namespace PuyoTools.Core.Textures.Pvr
             // Read the palette data (if present)
             if (dataCodec.PaletteEntries != 0 && !dataCodec.NeedsExternalPalette)
             {
-                paletteData = reader.ReadBytes(paletteEntries * pixelCodec.Bpp / 8);
+                paletteData = reader.ReadBytes(paletteEntries * pixelCodec.BitsPerPixel / 8);
             }
 
             // If the texture contains mipmaps, read them into the texture mipmap data array.
@@ -220,23 +220,23 @@ namespace PuyoTools.Core.Textures.Pvr
                 {
                     // A 1x1 mipmap takes up as much space as a 2x1 mipmap.
                     case PvrDataFormat.SquareTwiddledMipmaps:
-                        source.Position += dataCodec.Bpp / 8;
+                        source.Position += dataCodec.BitsPerPixel / 8;
                         break;
 
                     // A 1x1 mipmap takes up as much space as a 2x2 mipmap.
                     // The pixel is stored in the upper 4 bits of the final byte.
                     case PvrDataFormat.Index4Mipmaps:
-                        source.Position += 2 * dataCodec.Bpp / 8;
+                        source.Position += 2 * dataCodec.BitsPerPixel / 8;
                         break;
 
                     // A 1x1 mipmap takes up as much space as a 2x2 mipmap.
                     case PvrDataFormat.Index8Mipmaps:
-                        source.Position += 3 * dataCodec.Bpp / 8;
+                        source.Position += 3 * dataCodec.BitsPerPixel / 8;
                         break;
 
                     // A 1x1 mipmap takes up as much space as a 2x2 mipmap.
                     case PvrDataFormat.SquareTwiddledMipmapsAlt:
-                        source.Position += 3 * dataCodec.Bpp / 8;
+                        source.Position += 3 * dataCodec.BitsPerPixel / 8;
                         break;
                 }
 
@@ -244,7 +244,7 @@ namespace PuyoTools.Core.Textures.Pvr
                 {
                     mipmaps[i] = new PvrMipmapDecoder(
                         this,
-                        reader.ReadBytes(Math.Max(size * size * dataCodec.Bpp / 8, 1)),
+                        reader.ReadBytes(Math.Max(size * size * dataCodec.BitsPerPixel / 8, 1)),
                         size,
                         size);
                 }
@@ -254,12 +254,12 @@ namespace PuyoTools.Core.Textures.Pvr
             if (compressionCodec is not null)
             {
                 // The texture data is compressed.
-                textureData = new byte[Width * Height * dataCodec.Bpp / 8];
+                textureData = new byte[Width * Height * dataCodec.BitsPerPixel / 8];
                 compressionCodec.Decompress(source, new MemoryStream(textureData), pixelCodec, dataCodec);
             }
             else
             {
-                textureData = reader.ReadBytes(Width * Height * dataCodec.Bpp / 8);
+                textureData = reader.ReadBytes(Width * Height * dataCodec.BitsPerPixel / 8);
             }
         }
 
@@ -351,7 +351,7 @@ namespace PuyoTools.Core.Textures.Pvr
                 dataCodec.Palette = decodedPaletteData;
             }
 
-            return dataCodec.Decode(textureData, 0, width, height);
+            return dataCodec.Decode(textureData, width, height);
         }
 
         /// <summary>
@@ -408,7 +408,7 @@ namespace PuyoTools.Core.Textures.Pvr
         {
             var decodedPaletteData = new byte[paletteEntries * 4];
 
-            var bytesPerPixel = pixelCodec.Bpp / 8;
+            var bytesPerPixel = pixelCodec.BitsPerPixel / 8;
             var sourceIndex = 0;
             var destinationIndex = 0;
 

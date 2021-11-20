@@ -195,7 +195,7 @@ namespace PuyoTools.Core.Textures.Svr
 
                 if (ImageHelper.TryBuildExactPalette(sourceImage, paletteEntries, out var palette))
                 {
-                    quantizer = new PaletteQuantizer(palette.Cast<Color>().ToArray(), quantizerOptions)
+                    quantizer = new PaletteQuantizer(palette.Select(x => (Color)x).ToArray(), quantizerOptions)
                         .CreatePixelSpecificQuantizer<Bgra32>(Configuration.Default);
 
                     imageFrame = quantizer.QuantizeFrame(sourceImage.Frames.RootFrame, new Rectangle(0, 0, sourceImage.Width, sourceImage.Height));

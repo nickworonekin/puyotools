@@ -67,6 +67,7 @@ namespace PuyoTools.App.Tools
                     {
                         textureWithExternalPalette.ExternalPaletteCreated += (sender, e) =>
                         {
+                            Directory.CreateDirectory(outPath);
                             using (FileStream destination = File.Create(Path.Combine(outPath, Path.ChangeExtension(outFname, format.PaletteFileExtension))))
                             {
                                 e.Palette.CopyTo(destination);
