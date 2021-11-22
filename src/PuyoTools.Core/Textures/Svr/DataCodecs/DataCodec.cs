@@ -1,9 +1,9 @@
-﻿using PuyoTools.Core.Textures.Pvr.PixelCodecs;
+﻿using PuyoTools.Core.Textures.Svr.PixelCodecs;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace PuyoTools.Core.Textures.Pvr.DataCodecs
+namespace PuyoTools.Core.Textures.Svr.DataCodecs
 {
     internal abstract class DataCodec
     {
@@ -35,11 +35,6 @@ namespace PuyoTools.Core.Textures.Pvr.DataCodecs
         /// </summary>
         public virtual byte[] Palette { get; set; }
 
-        /// <summary>
-        /// Gets if this data format has mipmaps.
-        /// </summary>
-        public abstract bool HasMipmaps { get; }
-
         protected DataCodec(PixelCodec pixelCodec)
         {
             this.pixelCodec = pixelCodec;
@@ -62,35 +57,5 @@ namespace PuyoTools.Core.Textures.Pvr.DataCodecs
         /// <param name="height"></param>
         /// <returns></returns>
         public abstract byte[] Decode(byte[] source, int width, int height);
-
-        /// <summary>
-        /// Gets if the <paramref name="width"/> and <paramref name="height"/> are valid for this format.
-        /// </summary>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
-        /// <returns></returns>
-        public abstract bool IsValidDimensions(int width, int height);
-
-        /// <summary>
-        /// Creates and returns the twiddle map for the specified size.
-        /// </summary>
-        /// <param name="size"></param>
-        /// <returns></returns>
-        protected static int[] CreateTwiddleMap(int size)
-        {
-            int[] twiddleMap = new int[size];
-
-            for (int i = 0; i < size; i++)
-            {
-                twiddleMap[i] = 0;
-
-                for (int j = 0, k = 1; k <= i; j++, k <<= 1)
-                {
-                    twiddleMap[i] |= (i & k) << j;
-                }
-            }
-
-            return twiddleMap;
-        }
     }
 }

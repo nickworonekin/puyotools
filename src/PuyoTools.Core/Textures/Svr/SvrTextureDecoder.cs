@@ -1,4 +1,6 @@
-﻿using SixLabors.ImageSharp;
+﻿using PuyoTools.Core.Textures.Svr.DataCodecs;
+using PuyoTools.Core.Textures.Svr.PixelCodecs;
+using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using System;
@@ -11,8 +13,8 @@ namespace PuyoTools.Core.Textures.Svr
     public class SvrTextureDecoder
     {
         #region Fields
-        private SvrPixelCodec pixelCodec; // Pixel codec
-        private SvrDataCodec dataCodec;   // Data codec
+        private PixelCodec pixelCodec; // Pixel codec
+        private DataCodec dataCodec;   // Data codec
 
         protected int paletteEntries; // Number of palette entries in the palette data
 
@@ -119,8 +121,8 @@ namespace PuyoTools.Core.Textures.Svr
             Height = reader.ReadUInt16();
 
             // Get the codecs and make sure we can decode using them
-            pixelCodec = SvrPixelCodec.GetPixelCodec(PixelFormat);
-            dataCodec = SvrDataCodec.GetDataCodec(DataFormat);
+            pixelCodec = PixelCodecFactory.Create(PixelFormat);
+            dataCodec = DataCodecFactory.Create(DataFormat, pixelCodec);
 
             // If we don't have a known pixel or data codec for these formats, that's ok.
             // This will allow the properties to be read if the user doesn't want to decode this texture.
@@ -130,19 +132,17 @@ namespace PuyoTools.Core.Textures.Svr
                 return;
             }
 
-            dataCodec.PixelCodec = pixelCodec;
-
             // Get the number of palette entries.
             paletteEntries = dataCodec.PaletteEntries;
 
             // Read the palette data (if present).
             if (dataCodec.PaletteEntries != 0 && !dataCodec.NeedsExternalPalette)
             {
-                paletteData = reader.ReadBytes(paletteEntries * pixelCodec.Bpp / 8);
+                paletteData = reader.ReadBytes(paletteEntries * pixelCodec.BitsPerPixel / 8);
             }
 
             // Read the texture data
-            textureData = reader.ReadBytes(Width * Height * dataCodec.Bpp / 8);
+            textureData = reader.ReadBytes(Width * Height * dataCodec.BitsPerPixel / 8);
         }
         #endregion
 
@@ -203,7 +203,7 @@ namespace PuyoTools.Core.Textures.Svr
                 dataCodec.Palette = decodedPaletteData;
             }
 
-            return dataCodec.Decode(textureData, 0, width, height);
+            return dataCodec.Decode(DataSwizzler.UnSwizzle(textureData, Width, Height, dataCodec.BitsPerPixel), width, height);
         }
 
         /// <summary>
@@ -261,7 +261,7 @@ namespace PuyoTools.Core.Textures.Svr
         {
             var decodedPaletteData = new byte[paletteEntries * 4];
 
-            var bytesPerPixel = pixelCodec.Bpp / 8;
+            var bytesPerPixel = pixelCodec.BitsPerPixel / 8;
             var sourceIndex = 0;
             var destinationIndex = 0;
 

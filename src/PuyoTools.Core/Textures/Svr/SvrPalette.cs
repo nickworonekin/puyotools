@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PuyoTools.Core.Textures.Svr.PixelCodecs;
+using System;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -7,7 +8,7 @@ namespace PuyoTools.Core.Textures.Svr
 {
     public class SvrPalette
     {
-        private SvrPixelCodec pixelCodec; // Pixel Codec
+        private PixelCodec pixelCodec; // Pixel Codec
         private int paletteEntries; // Number of palette entries in the palette data
 
         private static readonly byte[] magicCode = { (byte)'P', (byte)'V', (byte)'P', (byte)'L' };
@@ -64,7 +65,7 @@ namespace PuyoTools.Core.Textures.Svr
 
             // Get the pixel format and the codec and make sure we can decode using them
             PixelFormat = (SvrPixelFormat)reader.ReadByte();
-            pixelCodec = SvrPixelCodec.GetPixelCodec(PixelFormat);
+            pixelCodec = PixelCodecFactory.Create(PixelFormat);
 
             reader.BaseStream.Position += 5; // 0x0E
 
@@ -77,7 +78,7 @@ namespace PuyoTools.Core.Textures.Svr
             }
 
             // Read the palette data
-            paletteData = reader.ReadBytes(paletteEntries * pixelCodec.Bpp / 8);
+            paletteData = reader.ReadBytes(paletteEntries * pixelCodec.BitsPerPixel / 8);
         }
 
         // Decodes a palette
@@ -92,7 +93,7 @@ namespace PuyoTools.Core.Textures.Svr
             // Decode the palette
             var decodedData = new byte[paletteEntries * 4];
 
-            var bytesPerPixel = pixelCodec.Bpp / 8;
+            var bytesPerPixel = pixelCodec.BitsPerPixel / 8;
             var sourceIndex = 0;
             var destinationIndex = 0;
 

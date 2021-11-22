@@ -125,11 +125,19 @@ namespace PuyoTools.Core.Textures.Pvr
             {
                 throw new NotSupportedException($"Pixel format {PixelFormat:X} is not supported for encoding.");
             }
-            
+            if (!pixelCodec.CanEncode)
+            {
+                throw new NotSupportedException($"Pixel format {PixelFormat} is not supported for encoding.");
+            }
+
             dataCodec = DataCodecFactory.Create(dataFormat, pixelCodec);
             if (dataCodec is null)
             {
                 throw new NotSupportedException($"Data format {DataFormat:X} is not supported for encoding.");
+            }
+            if (!dataCodec.CanEncode)
+            {
+                throw new NotSupportedException($"Data format {DataFormat} is not supported for encoding.");
             }
 
             // Get the number of palette entries.

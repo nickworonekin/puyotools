@@ -1,4 +1,6 @@
-﻿using SixLabors.ImageSharp;
+﻿using PuyoTools.Core.Textures.Svr.DataCodecs;
+using PuyoTools.Core.Textures.Svr.PixelCodecs;
+using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing.Processors.Quantization;
 using System;
@@ -12,8 +14,8 @@ namespace PuyoTools.Core.Textures.Svr
     public class SvrTextureEncoder
     {
         #region Fields
-        private SvrPixelCodec pixelCodec; // Pixel codec
-        private SvrDataCodec dataCodec;   // Data codec
+        private PixelCodec pixelCodec; // Pixel codec
+        private DataCodec dataCodec;   // Data codec
 
         private int paletteEntries; // Number of palette entries in the palette data
 
@@ -86,18 +88,25 @@ namespace PuyoTools.Core.Textures.Svr
             PixelFormat = pixelFormat;
             DataFormat = dataFormat;
 
-            pixelCodec = SvrPixelCodec.GetPixelCodec(pixelFormat);
+            pixelCodec = PixelCodecFactory.Create(pixelFormat);
             if (pixelCodec is null)
             {
                 throw new NotSupportedException($"Pixel format {PixelFormat:X} is not supported for encoding.");
             }
+            if (!pixelCodec.CanEncode)
+            {
+                throw new NotSupportedException($"Pixel format {PixelFormat} is not supported for encoding.");
+            }
 
-            dataCodec = SvrDataCodec.GetDataCodec(dataFormat);
+            dataCodec = DataCodecFactory.Create(dataFormat, pixelCodec);
             if (dataCodec is null)
             {
                 throw new NotSupportedException($"Data format {DataFormat:X} is not supported for encoding.");
             }
-            dataCodec.PixelCodec = pixelCodec;
+            if (!dataCodec.CanEncode)
+            {
+                throw new NotSupportedException($"Data format {DataFormat} is not supported for encoding.");
+            }
 
             // Get the number of palette entries.
             paletteEntries = dataCodec.PaletteEntries;
@@ -227,7 +236,7 @@ namespace PuyoTools.Core.Textures.Svr
                 pixelData = ImageHelper.GetPixelDataAsBytes(sourceImage.Frames.RootFrame);
             }
 
-            return dataCodec.Encode(pixelData, 0, Width, Height);
+            return dataCodec.Encode(pixelData, Width, Height);
         }
 
         /// <summary>
@@ -236,7 +245,7 @@ namespace PuyoTools.Core.Textures.Svr
         /// <returns></returns>
         private byte[] EncodePalette(ReadOnlyMemory<Bgra32> palette)
         {
-            var bytesPerPixel = pixelCodec.Bpp / 8;
+            var bytesPerPixel = pixelCodec.BitsPerPixel / 8;
             var paletteData = MemoryMarshal.AsBytes(palette.Span).ToArray();
             var encodedPaletteData = new byte[dataCodec.PaletteEntries * bytesPerPixel];
 
@@ -319,7 +328,7 @@ namespace PuyoTools.Core.Textures.Svr
             }
 
             // Write out the texture data.
-            writer.Write(encodedTextureData);
+            writer.Write(DataSwizzler.Swizzle(encodedTextureData, Width, Height, dataCodec.BitsPerPixel));
         }
         #endregion
     }

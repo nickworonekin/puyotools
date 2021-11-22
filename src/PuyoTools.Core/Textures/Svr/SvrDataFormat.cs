@@ -1,16 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace PuyoTools.Core.Textures.Svr
 {
-    // Svr Pixel Formats
-    public enum SvrPixelFormat : byte
-    {
-        Rgb5a3   = 0x08,
-        Argb8888 = 0x09,
-        Unknown  = 0xFF,
-    }
-
-    // Svr Data Formats
     public enum SvrDataFormat : byte
     {
         Rectangle             = 0x60,
@@ -26,6 +19,5 @@ namespace PuyoTools.Core.Textures.Svr
         Index8Argb8Square     = 0x6D,
         Index4                = Index4Rgb5a3Rectangle,
         Index8                = Index8Rgb5a3Rectangle,
-        Unknown               = 0xFF,
     }
 }
