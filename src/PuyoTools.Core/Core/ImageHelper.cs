@@ -3,6 +3,7 @@ using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -45,24 +46,34 @@ namespace PuyoTools.Core
         {
             palette = null;
             var newPalette = new List<TPixel>(maxColors);
+            var exactPaletteCreated = true;
 
-            for (var y = 0; y < image.Height; y++)
+            image.ProcessPixelRows(accessor =>
             {
-                var row = image.GetPixelRowSpan(y);
-
-                for (var x = 0; x < row.Length; x++)
+                for (var y = 0; y < image.Height; y++)
                 {
-                    if (!newPalette.Contains(row[x]))
-                    {
-                        // If there are too many colors, then an exact palette cannot be built.
-                        if (newPalette.Count == maxColors)
-                        {
-                            return false;
-                        }
+                    var row = accessor.GetRowSpan(y);
 
-                        newPalette.Add(row[x]);
+                    for (var x = 0; x < row.Length; x++)
+                    {
+                        if (!newPalette.Contains(row[x]))
+                        {
+                            // If there are too many colors, then an exact palette cannot be built.
+                            if (newPalette.Count == maxColors)
+                            {
+                                exactPaletteCreated = false;
+                                return;
+                            }
+
+                            newPalette.Add(row[x]);
+                        }
                     }
                 }
+            });
+
+            if (!exactPaletteCreated)
+            {
+                return false;
             }
 
             palette = newPalette;
@@ -79,24 +90,24 @@ namespace PuyoTools.Core
         public static byte[] GetPixelDataAsBytes<TPixel>(ImageFrame<TPixel> imageFrame)
             where TPixel : unmanaged, IPixel<TPixel>
         {
-            if (!imageFrame.TryGetSinglePixelSpan(out var pixelSpan))
+            var data = new byte[imageFrame.Width * imageFrame.Height * Unsafe.SizeOf<TPixel>()];
+
+            // We could use CopyPixelDataTo here, but it's easier on the GC to use ProcessPixelRows here.
+
+            imageFrame.ProcessPixelRows(accessor =>
             {
-                return MemoryMarshal.AsBytes(pixelSpan).ToArray();
-            }
+                var pixelData = MemoryMarshal.Cast<byte, TPixel>(data);
 
-            var data = new TPixel[imageFrame.Width * imageFrame.Height];
-
-            for (var y = 0; y < imageFrame.Height; y++)
-            {
-                var row = imageFrame.GetPixelRowSpan(y);
-
-                for (var x = 0; x < row.Length; x++)
+                for (var y = 0; y < imageFrame.Height; y++)
                 {
-                    data[(y * imageFrame.Width) + x] = row[x];
-                }
-            }
+                    var sourceRow = accessor.GetRowSpan(y);
+                    var targetRow = pixelData.Slice(y * imageFrame.Width);
 
-            return MemoryMarshal.AsBytes<TPixel>(data).ToArray();
+                    sourceRow.CopyTo(targetRow);
+                }
+            });
+
+            return data;
         }
 
         /// <summary>
@@ -109,15 +120,14 @@ namespace PuyoTools.Core
             where TPixel : unmanaged, IPixel<TPixel>
         {
             var data = new byte[imageFrame.Width * imageFrame.Height];
+            var pixelData = data.AsSpan();
 
             for (var y = 0; y < imageFrame.Height; y++)
             {
-                var row = imageFrame.GetPixelRowSpan(y);
+                var sourceRow = imageFrame.DangerousGetRowSpan(y);
+                var targetRow = pixelData.Slice(y * imageFrame.Width);
 
-                for (var x = 0; x < row.Length; x++)
-                {
-                    data[(y * imageFrame.Width) + x] = row[x];
-                }
+                sourceRow.CopyTo(targetRow);
             }
 
             return data;
