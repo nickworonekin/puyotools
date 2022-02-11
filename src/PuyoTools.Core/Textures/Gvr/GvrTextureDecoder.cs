@@ -1,4 +1,6 @@
-﻿using SixLabors.ImageSharp;
+﻿using PuyoTools.Core.Textures.Gvr.PaletteCodecs;
+using PuyoTools.Core.Textures.Gvr.PixelCodecs;
+using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using System;
@@ -11,8 +13,8 @@ namespace PuyoTools.Core.Textures.Gvr
 {
     public class GvrTextureDecoder
     {
-        private GvrPixelCodec paletteCodec; // Palette codec
-        private GvrDataCodec pixelCodec;    // Pixel codec
+        private PaletteCodec paletteCodec; // Palette codec
+        private PixelCodec pixelCodec;    // Pixel codec
 
         protected int paletteEntries; // Number of palette entries in the palette data
 
@@ -131,7 +133,7 @@ namespace PuyoTools.Core.Textures.Gvr
             Height = reader.ReadUInt16BigEndian();
 
             // Get the codecs and make sure we can decode using them
-            pixelCodec = GvrDataCodec.GetDataCodec(PixelFormat);
+            pixelCodec = PixelCodecFactory.Create(PixelFormat);
 
             // If we don't have a known pixel codec for this format, that's ok.
             // This will allow the properties to be read if the user doesn't want to decode this texture.
@@ -145,7 +147,7 @@ namespace PuyoTools.Core.Textures.Gvr
             if (pixelCodec.PaletteEntries != 0)
             {
                 PaletteFormat = (GvrPixelFormat)(paletteFormatAndFlags >> 4); // Palette format uses the upper 4 bits
-                paletteCodec = GvrPixelCodec.GetPixelCodec(PaletteFormat.Value);
+                paletteCodec = PaletteCodecFactory.Create(PaletteFormat.Value);
 
                 // If we don't have a known palette codec for this format, that's ok.
                 // This will allow the properties to be read if the user doesn't want to decode this texture.
@@ -154,8 +156,6 @@ namespace PuyoTools.Core.Textures.Gvr
                 {
                     return;
                 }
-
-                pixelCodec.PixelCodec = paletteCodec;
             }
 
             // Get the number of palette entries.
@@ -164,11 +164,11 @@ namespace PuyoTools.Core.Textures.Gvr
             // Read the palette data (if present).
             if (pixelCodec.PaletteEntries != 0 && Flags.HasFlag(GvrDataFlags.InternalPalette))
             {
-                paletteData = reader.ReadBytes(paletteEntries * paletteCodec.Bpp / 8);
+                paletteData = reader.ReadBytes(paletteEntries * paletteCodec.BitsPerPixel / 8);
             }
 
             // Read the texture data
-            textureData = reader.ReadBytes(Width * Height * pixelCodec.Bpp / 8);
+            textureData = reader.ReadBytes(Width * Height * pixelCodec.BitsPerPixel / 8);
 
             // If the texture contains mipmaps, read them into the texture mipmap data array.
             // Mipmaps are stored in order from largest to smallest.
@@ -181,7 +181,7 @@ namespace PuyoTools.Core.Textures.Gvr
                 {
                     mipmaps[i] = new GvrMipmapDecoder(
                         this,
-                        reader.ReadBytes(Math.Max(size * size * pixelCodec.Bpp / 8, 32)),
+                        reader.ReadBytes(Math.Max(size * size * pixelCodec.BitsPerPixel / 8, 32)),
                         size,
                         size);
                 }
@@ -246,7 +246,7 @@ namespace PuyoTools.Core.Textures.Gvr
                 pixelCodec.Palette = decodedPaletteData;
             }
 
-            return pixelCodec.Decode(textureData, 0, width, height);
+            return pixelCodec.Decode(textureData, width, height);
         }
 
         /// <summary>
@@ -301,9 +301,9 @@ namespace PuyoTools.Core.Textures.Gvr
 
         private byte[] DecodePalette()
         {
-            var decodedPaletteData = new byte[paletteEntries * 4];
+            /*var decodedPaletteData = new byte[paletteEntries * 4];
 
-            var bytesPerPixel = paletteCodec.Bpp / 8;
+            var bytesPerPixel = paletteCodec.BitsPerPixel / 8;
             var sourceIndex = 0;
             var destinationIndex = 0;
 
@@ -315,7 +315,9 @@ namespace PuyoTools.Core.Textures.Gvr
                 destinationIndex += 4;
             }
 
-            return decodedPaletteData;
+            return decodedPaletteData;*/
+
+            return paletteCodec.Decode(paletteData);
         }
         #endregion
 

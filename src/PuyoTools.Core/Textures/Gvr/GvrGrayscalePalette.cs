@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PuyoTools.Core.Textures.Gvr.PixelCodecs;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -28,7 +29,7 @@ namespace PuyoTools.Core.Textures.Gvr
         /// </summary>
         /// <param name="dataCodec">The data codec this palette will be used for.</param>
         /// <returns>The palette data as a byte array.</returns>
-        public byte[] GetPaletteData(GvrDataCodec dataCodec)
+        internal byte[] GetPaletteData(PixelCodec dataCodec)
         {
             var count = dataCodec.PaletteEntries;
             var palette = new byte[count * 4];
