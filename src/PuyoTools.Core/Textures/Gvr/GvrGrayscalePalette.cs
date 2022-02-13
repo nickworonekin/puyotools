@@ -18,7 +18,7 @@ namespace PuyoTools.Core.Textures.Gvr
         /// <summary>
         /// Throws a <see cref="NotSupportedException"/>.
         /// </summary>
-        /// <remarks>To get the palette data, see <see cref="GetPaletteData(GvrDataCodec)"/>.</remarks>
+        /// <remarks>To get the palette data, see <see cref="GetPaletteData(PixelCodec)"/>.</remarks>
         public override byte[] GetPaletteData()
         {
             throw new NotSupportedException();

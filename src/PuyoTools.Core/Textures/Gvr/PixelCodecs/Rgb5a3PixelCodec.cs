@@ -8,7 +8,7 @@ namespace PuyoTools.Core.Textures.Gvr.PixelCodecs
     /// <inheritdoc/>
     internal class Rgb5a3PixelCodec : PixelCodec
     {
-        public override bool CanEncode => false;
+        public override bool CanEncode => true;
 
         public override int BitsPerPixel => 16;
 
@@ -59,7 +59,50 @@ namespace PuyoTools.Core.Textures.Gvr.PixelCodecs
 
         public override byte[] Encode(byte[] source, int width, int height)
         {
-            throw new NotImplementedException();
+            var destination = new byte[width * height * 2];
+
+            int blockIndex = 0;
+            int sourceIndex;
+            int destinationIndex;
+
+            for (int yBlock = 0; yBlock < height; yBlock += 4)
+            {
+                for (int xBlock = 0; xBlock < width; xBlock += 4)
+                {
+                    for (int y = 0; y < 4; y++)
+                    {
+                        for (int x = 0; x < 4; x++)
+                        {
+                            sourceIndex = (((yBlock + y) * width) + xBlock + x) * 4;
+                            destinationIndex = blockIndex + (((y * 4) + x) * 2);
+
+                            ushort pixel = 0x0000;
+
+                            if (source[sourceIndex + 3] <= 0xDA) // Argb3444
+                            {
+                                pixel |= (ushort)((source[sourceIndex + 3] >> 5) << 12);
+                                pixel |= (ushort)((source[sourceIndex + 2] >> 4) << 8);
+                                pixel |= (ushort)((source[sourceIndex + 1] >> 4) << 4);
+                                pixel |= (ushort)((source[sourceIndex + 0] >> 4) << 0);
+                            }
+                            else // Rgb555
+                            {
+                                pixel |= 0x8000;
+                                pixel |= (ushort)((source[sourceIndex + 2] >> 3) << 10);
+                                pixel |= (ushort)((source[sourceIndex + 1] >> 3) << 5);
+                                pixel |= (ushort)((source[sourceIndex + 0] >> 3) << 0);
+                            }
+
+                            destination[destinationIndex + 1] = (byte)(pixel & 0xFF);
+                            destination[destinationIndex + 0] = (byte)((pixel >> 8) & 0xFF);
+                        }
+                    }
+
+                    blockIndex += 32;
+                }
+            }
+
+            return destination;
         }
     }
 }

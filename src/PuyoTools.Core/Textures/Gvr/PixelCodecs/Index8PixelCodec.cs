@@ -7,7 +7,7 @@ namespace PuyoTools.Core.Textures.Gvr.PixelCodecs
     /// <inheritdoc/>
     internal class Index8PixelCodec : PixelCodec
     {
-        public override bool CanEncode => false;
+        public override bool CanEncode => true;
 
         public override int BitsPerPixel => 8;
 

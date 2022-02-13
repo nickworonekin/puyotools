@@ -7,7 +7,7 @@ namespace PuyoTools.Core.Textures.Gvr.PixelCodecs
     /// <inheritdoc/>
     internal class Intensity8PixelCodec : PixelCodec
     {
-        public override bool CanEncode => false;
+        public override bool CanEncode => true;
 
         public override int BitsPerPixel => 8;
 
@@ -44,7 +44,30 @@ namespace PuyoTools.Core.Textures.Gvr.PixelCodecs
 
         public override byte[] Encode(byte[] source, int width, int height)
         {
-            throw new NotImplementedException();
+            var destination = new byte[width * height];
+
+            int sourceIndex;
+            int destinationIndex = 0;
+
+            for (int yBlock = 0; yBlock < height; yBlock += 4)
+            {
+                for (int xBlock = 0; xBlock < width; xBlock += 8)
+                {
+                    for (int y = 0; y < 4; y++)
+                    {
+                        for (int x = 0; x < 8; x++)
+                        {
+                            sourceIndex = (((yBlock + y) * width) + xBlock + x) * 4;
+
+                            destination[destinationIndex] = (byte)((0.30 * source[sourceIndex + 2]) + (0.59 * source[sourceIndex + 1]) + (0.11 * source[sourceIndex + 0]));
+
+                            destinationIndex++;
+                        }
+                    }
+                }
+            }
+
+            return destination;
         }
     }
 }
