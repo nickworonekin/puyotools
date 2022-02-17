@@ -28,6 +28,8 @@ namespace PuyoTools.App.Cli.Commands.Textures
             texture.PaletteFormat = PaletteFormat;
             texture.DataFormat = PixelFormat;
             texture.HasMetadata = Metadata;
+            texture.Swizzle = Swizzle;
+            texture.Dither = Dither;
         }
     }
 }

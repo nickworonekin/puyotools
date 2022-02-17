@@ -66,7 +66,7 @@ namespace PuyoTools.Core.Textures.Gvr.PixelCodecs
                     {
                         for (int x = 0; x < 8; x++)
                         {
-                            sourceIndex = (((yBlock + y) * width) + xBlock + x) * 4;
+                            sourceIndex = ((yBlock + y) * width) + xBlock + x;
 
                             destination[destinationIndex / 2] |= (byte)((source[sourceIndex] & 0xF) << ((~x & 0x1) * 4));
 

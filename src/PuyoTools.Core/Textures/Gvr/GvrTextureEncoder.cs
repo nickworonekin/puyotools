@@ -1,4 +1,6 @@
-﻿using SixLabors.ImageSharp;
+﻿using PuyoTools.Core.Textures.Gvr.PaletteCodecs;
+using PuyoTools.Core.Textures.Gvr.PixelCodecs;
+using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Processing.Processors.Quantization;
@@ -13,8 +15,8 @@ namespace PuyoTools.Core.Textures.Gvr
     public class GvrTextureEncoder
     {
         #region Fields
-        private GvrPixelCodec paletteCodec; // Palette codec
-        private GvrDataCodec pixelCodec;   // Pixel codec
+        private PaletteCodec paletteCodec; // Palette codec
+        private PixelCodec pixelCodec;   // Pixel codec
 
         private int paletteEntries; // Number of palette entries in the palette data
 
@@ -157,7 +159,7 @@ namespace PuyoTools.Core.Textures.Gvr
             // We'll also need to verify that the palette format is set if it's a palettized pixel format.
             // Unlike with the decoder, an exception will be thrown here if a codec cannot be used to encode them.
             PixelFormat = pixelFormat;
-            pixelCodec = GvrDataCodec.GetDataCodec(pixelFormat);
+            pixelCodec = PixelCodecFactory.Create(pixelFormat);
             if (pixelCodec is null)
             {
                 throw new NotSupportedException($"Pixel format {PixelFormat:X} is not supported for encoding.");
@@ -174,12 +176,11 @@ namespace PuyoTools.Core.Textures.Gvr
                 }
 
                 PaletteFormat = paletteFormat.Value;
-                paletteCodec = GvrPixelCodec.GetPixelCodec(paletteFormat.Value);
+                paletteCodec = PaletteCodecFactory.Create(paletteFormat.Value);
                 if (paletteCodec is null)
                 {
                     throw new NotSupportedException($"Palette format {PaletteFormat:X} is not supported for encoding.");
                 }
-                pixelCodec.PixelCodec = paletteCodec;
             }
 
             // Read the image.
@@ -295,14 +296,14 @@ namespace PuyoTools.Core.Textures.Gvr
                 return EncodeRgbaTexture(sourceImage);
             }
 
-            return pixelCodec.Encode(pixelData, 0, Width, Height);
+            return pixelCodec.Encode(pixelData, Width, Height);
         }
 
         private byte[] EncodeRgbaTexture<TPixel>(Image<TPixel> image)
             where TPixel : unmanaged, IPixel<TPixel>
         {
             var pixelData = ImageHelper.GetPixelDataAsBytes(image.Frames.RootFrame);
-            return pixelCodec.Encode(pixelData, 0, image.Width, image.Height);
+            return pixelCodec.Encode(pixelData, image.Width, image.Height);
         }
 
         private byte[] EncodeIndexedTexture<TPixel>(Image<TPixel> image, IQuantizer<TPixel> quantizer)
@@ -310,7 +311,7 @@ namespace PuyoTools.Core.Textures.Gvr
         {
             var imageFrame = quantizer.QuantizeFrame(image.Frames.RootFrame, new Rectangle(0, 0, image.Width, image.Height));
             var pixelData = ImageHelper.GetPixelDataAsBytes(imageFrame);
-            return pixelCodec.Encode(pixelData, 0, image.Width, image.Height);
+            return pixelCodec.Encode(pixelData, image.Width, image.Height);
         }
 
         /// <summary>
@@ -319,16 +320,8 @@ namespace PuyoTools.Core.Textures.Gvr
         /// <returns></returns>
         private byte[] EncodePalette(ReadOnlyMemory<Bgra32> palette)
         {
-            var bytesPerPixel = paletteCodec.Bpp / 8;
             var paletteData = MemoryMarshal.AsBytes(palette.Span).ToArray();
-            var encodedPaletteData = new byte[pixelCodec.PaletteEntries * bytesPerPixel];
-
-            for (var i = 0; i < palette.Length; i++)
-            {
-                paletteCodec.EncodePixel(paletteData, 4 * i, encodedPaletteData, i * bytesPerPixel);
-            }
-
-            return encodedPaletteData;
+            return paletteCodec.Encode(paletteData);
         }
 
         /// <summary>

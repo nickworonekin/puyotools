@@ -13,21 +13,24 @@ namespace PuyoTools.App.Cli.Commands.Textures
     {
         public GvrPixelFormat PaletteFormat { get; set; }
 
-        public GvrDataFormat DataFormat { get; set; }
+        public GvrDataFormat PixelFormat { get; set; }
 
         public uint? GlobalIndex { get; set; }
 
         public bool Gcix { get; set; }
+
+        public bool Dither { get; set; }
 
         public void MapTo(TextureBase obj)
         {
             var texture = (GvrTexture)obj;
 
             texture.PaletteFormat = PaletteFormat;
-            texture.DataFormat = DataFormat;
+            texture.DataFormat = PixelFormat;
             texture.GbixType = Gcix ? GvrGbixType.Gcix : GvrGbixType.Gbix;
             texture.HasGlobalIndex = GlobalIndex.HasValue;
             texture.GlobalIndex = GlobalIndex ?? default;
+            texture.Dither = Dither;
         }
     }
 }

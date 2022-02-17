@@ -100,6 +100,11 @@ namespace PuyoTools.Core.Textures
         /// Sets the texture's data format for encoding. The default value is PvrDataFormat.SquareTwiddled.
         /// </summary>
         public PvrDataFormat DataFormat { get; set; }
+
+        /// <summary>
+        /// Gets or sets if dithering should be used when creating palette-based textures.
+        /// </summary>
+        public bool Dither { get; set; }
         #endregion
 
         public override void Write(Stream source, Stream destination)

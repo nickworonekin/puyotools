@@ -15,16 +15,44 @@ namespace PuyoTools.App.Cli.Commands.Textures
         public GvrTextureEncodeCommand(GvrFormat format)
             : base(format)
         {
-            AddOption(new Option<GvrPixelFormat>("--palette-format", "Set the palette format"));
-            AddOption(new Option<GvrDataFormat>("--data-format", "Set the data format")
+            var paletteFormatOption = new Option<GvrPixelFormat>("--palette-format", "Set the palette format");
+            var pixelFormatOption = new Option<GvrDataFormat>("--pixel-format", "Set the pixel format")
             {
                 IsRequired = true,
-            });
-            AddOption(new Option<uint?>("--global-index", "Adds the GBIX header, optionally with a global index.")
+            };
+
+            AddOption(paletteFormatOption);
+            AddOption(pixelFormatOption);
+            AddOption(new Option<uint?>("--global-index", result =>
+            {
+                // If the option was passed with an argument, use the argument's value as the global index.
+                if (result.Tokens.Any()
+                    && uint.TryParse(result.Tokens[0].Value, out uint globalIndex))
+                {
+                    return globalIndex;
+                }
+
+                // Otherwise, if the option was passed without an argument, use 0 as the global index.
+                return 0;
+            }, description: "Adds the GBIX header, optionally with a global index.")
             {
                 Arity = ArgumentArity.ZeroOrOne,
             });
             AddOption(new Option("--gcix", "Use GCIX global index header."));
+            AddOption(new Option("--dither", "Use dithering when creating palette-based textures."));
+
+            AddValidator(result =>
+            {
+                // If the pixel format is palette-based, validate that a palette format was passed.
+                var pixelFormat = result.GetValueForOption(pixelFormatOption);
+                var paletteFormatResult = result.FindResultFor(paletteFormatOption);
+
+                if (pixelFormat is GvrDataFormat.Index4 or GvrDataFormat.Index8
+                    && paletteFormatResult is null)
+                {
+                    result.ErrorMessage = $"Palette format is required for pixel format '{pixelFormat}'.";
+                }
+            });
 
             Handler = CommandHandler.Create<GvrTextureEncodeOptions, IConsole>(Execute);
         }

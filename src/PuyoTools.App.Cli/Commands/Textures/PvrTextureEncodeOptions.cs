@@ -19,6 +19,8 @@ namespace PuyoTools.App.Cli.Commands.Textures
 
         public bool RleCompression { get; set; }
 
+        public bool Dither { get; set; }
+
         public void MapTo(TextureBase obj)
         {
             var texture = (PvrTexture)obj;
@@ -30,6 +32,7 @@ namespace PuyoTools.App.Cli.Commands.Textures
             texture.CompressionFormat = RleCompression
                 ? PvrCompressionFormat.Rle
                 : PvrCompressionFormat.None;
+            texture.Dither = Dither;
         }
     }
 }

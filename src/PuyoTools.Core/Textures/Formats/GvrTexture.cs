@@ -15,7 +15,7 @@ namespace PuyoTools.Core.Textures
             GlobalIndex = 0;
             gbixType = GvrGbixType.Gbix;
 
-            PaletteFormat = GvrPixelFormat.Unknown;
+            PaletteFormat = null;
             DataFormat = GvrDataFormat.Rgb5a3;
 
             HasMipmaps = false;
@@ -95,7 +95,7 @@ namespace PuyoTools.Core.Textures
         /// <summary>
         /// The texture's palette format. This only applies to palettized textures. The default value is GvrPixelFormat.Unknown.
         /// </summary>
-        public GvrPixelFormat PaletteFormat { get; set; }
+        public GvrPixelFormat? PaletteFormat { get; set; }
 
         /// <summary>
         /// The texture's data format. The default value is GvrDataFormat.Rgb5a3.
@@ -106,6 +106,11 @@ namespace PuyoTools.Core.Textures
         /// Gets or sets if this texture has mipmaps. This only applies to 4-bit or 16-bit non-palettized textures. The default value is false.
         /// </summary>
         public bool HasMipmaps { get; set; }
+
+        /// <summary>
+        /// Gets or sets if dithering should be used when creating palette-based textures.
+        /// </summary>
+        public bool Dither { get; set; }
 
         /// <summary>
         /// Gets or sets if the texture needs an external palette file. This only applies to palettized textures.

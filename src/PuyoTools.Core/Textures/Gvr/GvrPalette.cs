@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PuyoTools.Core.Textures.Gvr.PaletteCodecs;
+using System;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -7,7 +8,7 @@ namespace PuyoTools.Core.Textures.Gvr
 {
     public class GvrPalette
     {
-        private GvrPixelCodec paletteCodec; // Palette Codec
+        private PaletteCodec paletteCodec; // Palette Codec
         private int paletteEntries; // Number of palette entries in the palette data
 
         private static readonly byte[] magicCode = { (byte)'G', (byte)'V', (byte)'P', (byte)'L' };
@@ -64,7 +65,7 @@ namespace PuyoTools.Core.Textures.Gvr
 
             // Get the pixel format and the codec and make sure we can decode using them
             PaletteFormat = (GvrPixelFormat)reader.ReadByte();
-            paletteCodec = GvrPixelCodec.GetPixelCodec(PaletteFormat);
+            paletteCodec = PaletteCodecFactory.Create(PaletteFormat);
 
             reader.BaseStream.Position += 4; // 0x0E
 
@@ -77,7 +78,7 @@ namespace PuyoTools.Core.Textures.Gvr
             }
 
             // Read the palette data
-            paletteData = reader.ReadBytes(paletteEntries * paletteCodec.Bpp / 8);
+            paletteData = reader.ReadBytes(paletteEntries * paletteCodec.BitsPerPixel / 8);
         }
 
         // Decodes a palette
@@ -90,21 +91,7 @@ namespace PuyoTools.Core.Textures.Gvr
             }
 
             // Decode the palette
-            var decodedData = new byte[paletteEntries * 4];
-
-            var bytesPerPixel = paletteCodec.Bpp / 8;
-            var sourceIndex = 0;
-            var destinationIndex = 0;
-
-            for (var i = 0; i < paletteEntries; i++)
-            {
-                paletteCodec.DecodePixel(paletteData, sourceIndex, decodedData, destinationIndex);
-
-                sourceIndex += bytesPerPixel;
-                destinationIndex += 4;
-            }
-
-            return decodedData;
+            return paletteCodec.Decode(paletteData);
         }
 
         /// <summary>

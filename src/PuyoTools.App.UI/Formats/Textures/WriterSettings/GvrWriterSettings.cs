@@ -53,7 +53,7 @@ namespace PuyoTools.App.Formats.Textures.WriterSettings
             }
             else
             {
-                texture.PaletteFormat = GvrPixelFormat.Unknown;
+                texture.PaletteFormat = null;
             }
 
             // Set the data format

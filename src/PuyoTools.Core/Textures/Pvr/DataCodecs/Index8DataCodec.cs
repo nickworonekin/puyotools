@@ -43,11 +43,11 @@ namespace PuyoTools.Core.Textures.Pvr.DataCodecs
             {
                 for (int xStart = 0; xStart < width; xStart += size)
                 {
-                    for (int y = 0; y < height; y++)
+                    for (int y = 0; y < size; y++)
                     {
-                        for (int x = 0; x < width; x++)
+                        for (int x = 0; x < size; x++)
                         {
-                            sourceIndex = (twiddleMap[x] << 1) | twiddleMap[y];
+                            sourceIndex = sourceBlockIndex + ((twiddleMap[x] << 1) | twiddleMap[y]);
                             destinationIndex = (((yStart + y) * width) + xStart + x) * 4;
 
                             byte paletteIndex = source[sourceIndex];

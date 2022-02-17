@@ -17,6 +17,8 @@ namespace PuyoTools.App.Cli.Commands.Textures
 
         public uint? GlobalIndex { get; set; }
 
+        public bool Dither { get; set; }
+
         public void MapTo(TextureBase obj)
         {
             var texture = (SvrTexture)obj;
@@ -25,6 +27,7 @@ namespace PuyoTools.App.Cli.Commands.Textures
             texture.DataFormat = DataFormat;
             texture.HasGlobalIndex = GlobalIndex.HasValue;
             texture.GlobalIndex = GlobalIndex ?? default;
+            texture.Dither = Dither;
         }
     }
 }

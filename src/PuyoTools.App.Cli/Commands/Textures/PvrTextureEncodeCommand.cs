@@ -23,11 +23,23 @@ namespace PuyoTools.App.Cli.Commands.Textures
             {
                 IsRequired = true,
             });
-            AddOption(new Option<uint?>("--global-index", "Adds the GBIX header, optionally with a global index.")
+            AddOption(new Option<uint?>("--global-index", result =>
+            {
+                // If the option was passed with an argument, use the argument's value as the global index.
+                if (result.Tokens.Any()
+                    && uint.TryParse(result.Tokens[0].Value, out uint globalIndex))
+                {
+                    return globalIndex;
+                }
+
+                // Otherwise, if the option was passed without an argument, use 0 as the global index.
+                return 0;
+            }, description: "Adds the GBIX header, optionally with a global index.")
             {
                 Arity = ArgumentArity.ZeroOrOne,
             });
             AddOption(new Option("--rle-compression", "RLE compression (PVZ) for Puyo Puyo Fever."));
+            AddOption(new Option("--dither", "Use dithering when creating palette-based textures."));
 
             Handler = CommandHandler.Create<PvrTextureEncodeOptions, IConsole>(Execute);
         }
