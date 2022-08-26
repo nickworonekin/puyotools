@@ -75,6 +75,12 @@ namespace PuyoTools.Core.Textures.Pvr
         /// Gets or sets the global index. If <see langword="null"/>, the GBIX header will not be written.
         /// </summary>
         public uint? GlobalIndex { get; set; }
+
+
+        /// <summary>
+        /// Gets or sets whether dithering should be used when quantizing.
+        /// </summary>
+        public bool Dither { get; set; }
         #endregion
 
         #region Constructors & Initalizers
@@ -210,6 +216,7 @@ namespace PuyoTools.Core.Textures.Pvr
                 var quantizerOptions = new QuantizerOptions
                 {
                     MaxColors = paletteEntries,
+                    Dither = Dither ? QuantizerConstants.DefaultDither : null,
                 };
 
                 if (ImageHelper.TryBuildExactPalette(sourceImage, paletteEntries, out var palette))

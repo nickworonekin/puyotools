@@ -114,11 +114,11 @@ namespace PuyoTools.Core.Textures.Gvr.PixelCodecs
                         {
                             subBlockStart = 0;
 
-                            for (int ySubBlock = 0; ySubBlock < 4 && y + yBlock + ySubBlock < height; y++)
+                            for (int ySubBlock = 0; ySubBlock < 4 && y + yBlock + ySubBlock < height; ySubBlock++)
                             {
                                 subBlockIndex = subBlockStart;
 
-                                for (int xSubBlock = 0; xSubBlock < 4 && x + xBlock + xSubBlock < width; x++)
+                                for (int xSubBlock = 0; xSubBlock < 4 && x + xBlock + xSubBlock < width; xSubBlock++)
                                 {
                                     sourceIndex = (((y + yBlock + ySubBlock) * width) + x + xBlock + xSubBlock) * 4;
 

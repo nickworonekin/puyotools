@@ -135,6 +135,7 @@ namespace PuyoTools.Core.Textures
                 : (uint?)null;
 
             texture.HasMipmaps = HasMipmaps;
+            texture.Dither = Dither;
             texture.NeedsExternalPalette = needsExternalPalette;
 
             texture.Save(destination);

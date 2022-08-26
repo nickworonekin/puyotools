@@ -103,6 +103,12 @@ namespace PuyoTools.Core.Textures.Gvr
             }
         }
         private bool hasMipmaps;
+
+
+        /// <summary>
+        /// Gets or sets whether dithering should be used when quantizing.
+        /// </summary>
+        public bool Dither { get; set; }
         #endregion
 
         #region Constructors & Initalizers
@@ -245,6 +251,7 @@ namespace PuyoTools.Core.Textures.Gvr
                 var quantizerOptions = new QuantizerOptions
                 {
                     MaxColors = paletteEntries,
+                    Dither = Dither ? QuantizerConstants.DefaultDither : null,
                 };
 
                 if (ImageHelper.TryBuildExactPalette(sourceImage, paletteEntries, out var palette))
@@ -321,7 +328,16 @@ namespace PuyoTools.Core.Textures.Gvr
         private byte[] EncodePalette(ReadOnlyMemory<Bgra32> palette)
         {
             var paletteData = MemoryMarshal.AsBytes(palette.Span).ToArray();
-            return paletteCodec.Encode(paletteData);
+
+            if (NeedsExternalPalette)
+            {
+                return paletteCodec.Encode(paletteData);
+            }
+
+            var bytesPerPixel = paletteCodec.BitsPerPixel / 8;
+            var encodedPaletteData = new byte[pixelCodec.PaletteEntries * bytesPerPixel];
+
+            return paletteCodec.Encode(paletteData, encodedPaletteData);
         }
 
         /// <summary>

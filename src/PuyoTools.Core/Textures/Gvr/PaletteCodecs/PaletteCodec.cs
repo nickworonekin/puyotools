@@ -20,6 +20,13 @@ namespace PuyoTools.Core.Textures.Gvr.PaletteCodecs
         public abstract byte[] Encode(byte[] source);
 
         /// <summary>
+        /// Encodes the specified colors and writes it to the destination.
+        /// </summary>
+        /// <param name="source">Colors to encode.</param>
+        /// <returns></returns>
+        public abstract byte[] Encode(byte[] source, byte[] destination);
+
+        /// <summary>
         /// Decodes the specified palette.
         /// </summary>
         /// <param name="source">Palette to decode.</param>

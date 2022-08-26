@@ -39,6 +39,19 @@ namespace PuyoTools.Core.Textures.Gvr.PaletteCodecs
             var count = source.Length / 4;
             var destination = new byte[count * 2];
 
+            return Encode(source, destination);
+        }
+
+        public override byte[] Encode(byte[] source, byte[] destination)
+        {
+            var count = source.Length / 4;
+            var destinationLength = count * 2;
+
+            if (destination.Length < destinationLength)
+            {
+                throw new ArgumentException($"Destination must be at least {destination.Length} bytes long.", nameof(destination));
+            }
+
             int sourceIndex = 0;
             int destinationIndex = 0;
 

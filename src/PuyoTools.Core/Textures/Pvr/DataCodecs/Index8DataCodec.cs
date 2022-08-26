@@ -82,9 +82,9 @@ namespace PuyoTools.Core.Textures.Pvr.DataCodecs
             {
                 for (int xStart = 0; xStart < width; xStart += size)
                 {
-                    for (int y = 0; y < height; y++)
+                    for (int y = 0; y < size; y++)
                     {
-                        for (int x = 0; x < width; x++)
+                        for (int x = 0; x < size; x++)
                         {
                             sourceIndex = (y * width) + x;
                             destinationIndex = destinationBlockIndex + ((twiddleMap[x] << 1) | twiddleMap[y]);

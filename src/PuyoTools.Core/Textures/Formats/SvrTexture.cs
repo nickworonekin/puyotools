@@ -96,6 +96,8 @@ namespace PuyoTools.Core.Textures
                 ? GlobalIndex
                 : (uint?)null;
 
+            texture.Dither = Dither;
+
             texture.Save(destination);
 
             // If we have an external palette file, save it
