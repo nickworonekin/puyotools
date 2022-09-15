@@ -38,8 +38,8 @@ namespace PuyoTools.App.Cli.Commands.Textures
             {
                 Arity = ArgumentArity.ZeroOrOne,
             });
-            AddOption(new Option("--gcix", "Use GCIX global index header."));
-            AddOption(new Option("--dither", "Use dithering when creating palette-based textures."));
+            AddOption(new Option<bool>("--gcix", "Use GCIX global index header."));
+            AddOption(new Option<bool>("--dither", "Use dithering when creating palette-based textures."));
 
             AddValidator(result =>
             {

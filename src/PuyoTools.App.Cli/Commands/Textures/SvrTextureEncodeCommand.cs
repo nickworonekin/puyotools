@@ -38,7 +38,7 @@ namespace PuyoTools.App.Cli.Commands.Textures
             {
                 Arity = ArgumentArity.ZeroOrOne,
             });
-            AddOption(new Option("--dither", "Use dithering when creating palette-based textures."));
+            AddOption(new Option<bool>("--dither", "Use dithering when creating palette-based textures."));
 
             Handler = CommandHandler.Create<SvrTextureEncodeOptions, IConsole>(Execute);
         }

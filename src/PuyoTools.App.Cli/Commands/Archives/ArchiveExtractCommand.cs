@@ -22,16 +22,16 @@ namespace PuyoTools.App.Cli.Commands.Archives
                 IsRequired = true,
             });
             AddOption(new Option<string[]>("--exclude", "Archives to exclude from being extracted (pattern matching supported)."));
-            AddOption(new Option("--decompress", "Extract compressed archives"));
-            AddOption(new Option("--extract-source-folder", "Extract files to the same folder as the source archive."));
-            AddOption(new Option("--extract-same-name", "Extract files to a folder with the same name as the source archive (and delete the source archive)."));
-            AddOption(new Option("--delete", "Delete archive on successful extraction."));
-            AddOption(new Option("--decompress-extracted", "Decompress extracted files."));
-            AddOption(new Option("--file-number", "Use file number as filename."));
-            AddOption(new Option("--prepend-file-number", "Prepend file number to filename."));
-            AddOption(new Option("--extract-if-archive", "Extract extracted files that are archives."));
-            AddOption(new Option("--decode-if-texture", "Decode extracted files that are textures."));
-            AddOption(new Option("--verbose", "Show verbose output for archives being extracted"));
+            AddOption(new Option<bool>("--decompress", "Extract compressed archives"));
+            AddOption(new Option<bool>("--extract-source-folder", "Extract files to the same folder as the source archive."));
+            AddOption(new Option<bool>("--extract-same-name", "Extract files to a folder with the same name as the source archive (and delete the source archive)."));
+            AddOption(new Option<bool>("--delete", "Delete archive on successful extraction."));
+            AddOption(new Option<bool>("--decompress-extracted", "Decompress extracted files."));
+            AddOption(new Option<bool>("--file-number", "Use file number as filename."));
+            AddOption(new Option<bool>("--prepend-file-number", "Prepend file number to filename."));
+            AddOption(new Option<bool>("--extract-if-archive", "Extract extracted files that are archives."));
+            AddOption(new Option<bool>("--decode-if-texture", "Decode extracted files that are textures."));
+            AddOption(new Option<bool>("--verbose", "Show verbose output for archives being extracted"));
 
             Handler = CommandHandler.Create<ArchiveExtractOptions, IConsole>(Execute);
         }

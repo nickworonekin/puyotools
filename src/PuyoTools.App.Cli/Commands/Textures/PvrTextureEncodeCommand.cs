@@ -38,8 +38,8 @@ namespace PuyoTools.App.Cli.Commands.Textures
             {
                 Arity = ArgumentArity.ZeroOrOne,
             });
-            AddOption(new Option("--rle-compression", "RLE compression (PVZ) for Puyo Puyo Fever."));
-            AddOption(new Option("--dither", "Use dithering when creating palette-based textures."));
+            AddOption(new Option<bool>("--rle-compression", "RLE compression (PVZ) for Puyo Puyo Fever."));
+            AddOption(new Option<bool>("--dither", "Use dithering when creating palette-based textures."));
 
             Handler = CommandHandler.Create<PvrTextureEncodeOptions, IConsole>(Execute);
         }

@@ -23,8 +23,8 @@ namespace PuyoTools.App.Cli.Commands.Compression
                 IsRequired = true,
             });
             AddOption(new Option<string[]>("--exclude", "Files to exclude from being decompressed (pattern matching supported)."));
-            AddOption(new Option("--overwrite", "Overwrite compressed file with its decompressed file."));
-            AddOption(new Option("--delete", "Delete compressed file on successful decompression."));
+            AddOption(new Option<bool>("--overwrite", "Overwrite compressed file with its decompressed file."));
+            AddOption(new Option<bool>("--delete", "Delete compressed file on successful decompression."));
             //AddOption(new Option("--quiet", "Do not produce console output"));
 
             Handler = CommandHandler.Create<CompressionDecompressOptions, IConsole>(Execute);

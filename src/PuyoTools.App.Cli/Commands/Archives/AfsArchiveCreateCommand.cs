@@ -18,7 +18,7 @@ namespace PuyoTools.App.Cli.Commands.Archives
                 .FromAmong(new int[] { 16, 2048 }.Select(x => x.ToString()).ToArray()));
             AddOption(new Option<int>("--version", () => 1, "Set the AFS version")
                 .FromAmong(new int[] { 1, 2 }.Select(x => x.ToString()).ToArray()));
-            AddOption(new Option("--timestamps", "Include timestamp info"));
+            AddOption(new Option<bool>("--timestamps", "Include timestamp info"));
 
             Handler = CommandHandler.Create<AfsArchiveCreateOptions, IConsole>(Execute);
         }

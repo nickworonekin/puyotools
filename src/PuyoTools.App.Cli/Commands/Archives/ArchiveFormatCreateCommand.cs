@@ -27,6 +27,7 @@ namespace PuyoTools.App.Cli.Commands.Archives
             AddOption(new Option<string[]>(new string[] { "-i", "--input" }, "Files to add to the archive (pattern matching supported).")
             {
                 IsRequired = true,
+                AllowMultipleArgumentsPerToken = true,
             });
             AddOption(new Option<string[]>("--exclude", "Files to exclude from being added to the archive (pattern matching supported)."));
             AddOption(new Option<string>(new string[] { "-o", "--output" }, "The name of the archive to create.")
@@ -41,24 +42,32 @@ namespace PuyoTools.App.Cli.Commands.Archives
 
         protected void Execute(ArchiveCreateOptions options, IConsole console)
         {
-            // Get the files to process by the tool
-            var matcher = new Matcher();
-            matcher.AddIncludePatterns(options.Input);
-            if (options.Exclude?.Any() == true)
+            var files = new List<ArchiveCreatorFileEntry>();
+            
+            foreach (var input in options.Input)
             {
-                matcher.AddExcludePatterns(options.Exclude);
-            }
-
-            var files = matcher.Execute(new DirectoryInfoWrapper(new DirectoryInfo(Environment.CurrentDirectory)))
-                .Files
-                .Select(x => x.Path)
-                .Select(x => new ArchiveCreatorFileEntry
+                // Get the files to process by the tool
+                // To ensure files are added in the order specified, they will be matched seperately.
+                var matcher = new Matcher();
+                matcher.AddInclude(input);
+                if (options.Exclude?.Any() == true)
                 {
-                    SourceFile = x,
-                    Filename = Path.GetFileName(x),
-                    FilenameInArchive = Path.GetFileName(x),
-                })
-                .ToArray();
+                    matcher.AddExcludePatterns(options.Exclude);
+                }
+
+                var matchedFiles = matcher.Execute(new DirectoryInfoWrapper(new DirectoryInfo(Environment.CurrentDirectory)))
+                    .Files
+                    .Select(x => x.Path)
+                    .Select(x => new ArchiveCreatorFileEntry
+                    {
+                        SourceFile = x,
+                        Filename = Path.GetFileName(x),
+                        FilenameInArchive = Path.GetFileName(x),
+                    })
+                    .ToArray();
+
+                files.AddRange(matchedFiles);
+            }
 
             // Create options in the format the tool uses
             var toolOptions = new ArchiveCreatorOptions

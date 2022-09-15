@@ -23,9 +23,9 @@ namespace PuyoTools.App.Cli.Commands.Textures
                 IsRequired = true,
             });
             AddOption(new Option<string[]>("--exclude", "Files to exclude from being decoded (pattern matching supported)."));
-            AddOption(new Option("--compressed", "Decode compressed textures"));
-            AddOption(new Option("--overwrite", "Overwrite source texture file with its decoded texture file."));
-            AddOption(new Option("--delete", "Delete source texture file on successful decode."));
+            AddOption(new Option<bool>("--compressed", "Decode compressed textures"));
+            AddOption(new Option<bool>("--overwrite", "Overwrite source texture file with its decoded texture file."));
+            AddOption(new Option<bool>("--delete", "Delete source texture file on successful decode."));
 
             Handler = CommandHandler.Create<TextureDecodeOptions, IConsole>(Execute);
         }
