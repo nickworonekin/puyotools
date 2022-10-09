@@ -11,7 +11,7 @@ namespace PuyoTools.Core.Archives
         private static readonly byte[] primaryMagicCode = { (byte)'N', (byte)'G', (byte)'I', (byte)'F' };
         private static readonly byte[] secondaryMagicCode = { (byte)'N', (byte)'G', (byte)'T', (byte)'L' };
 
-        public override ArchiveReader Open(Stream source)
+        public override LegacyArchiveReader Open(Stream source)
         {
             return new GntArchiveReader(source);
         }
@@ -41,7 +41,7 @@ namespace PuyoTools.Core.Archives
     }
 
     #region Archive Reader
-    public class GntArchiveReader : ArchiveReader
+    public class GntArchiveReader : LegacyArchiveReader
     {
         public GntArchiveReader(Stream source) : base(source)
         {

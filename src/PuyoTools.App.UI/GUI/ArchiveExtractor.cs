@@ -90,7 +90,7 @@ namespace PuyoTools.GUI
                         }
 
                         // Now that we know its format, let's open it and start working with it.
-                        ArchiveReader archive = format.GetCodec().Open(source);
+                        LegacyArchiveReader archive = format.GetCodec().Open(source);
 
                         // Get the appropiate output directory
                         if (settings.ExtractToSourceDirectory)

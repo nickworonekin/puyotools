@@ -14,7 +14,7 @@ namespace PuyoTools.Core.Archives
         private static readonly byte[] pspPrimaryMagicCode = { (byte)'N', (byte)'U', (byte)'I', (byte)'F' };
         private static readonly byte[] pspSecondaryMagicCode = { (byte)'N', (byte)'U', (byte)'T', (byte)'L' };
 
-        public override ArchiveReader Open(Stream source)
+        public override LegacyArchiveReader Open(Stream source)
         {
             return new SntArchiveReader(source);
         }
@@ -64,7 +64,7 @@ namespace PuyoTools.Core.Archives
     }
 
     #region Archive Reader
-    public class SntArchiveReader : ArchiveReader
+    public class SntArchiveReader : LegacyArchiveReader
     {
         public SntArchiveReader(Stream source) : base(source)
         {

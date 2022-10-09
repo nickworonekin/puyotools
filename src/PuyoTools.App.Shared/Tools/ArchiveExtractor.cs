@@ -1,6 +1,7 @@
 ﻿using PuyoTools.App.Formats.Archives;
 using PuyoTools.App.Formats.Compression;
 using PuyoTools.App.Formats.Textures;
+using PuyoTools.Archives;
 using PuyoTools.Core.Archives;
 using PuyoTools.Core.Textures;
 using System;
@@ -76,7 +77,7 @@ namespace PuyoTools.App.Tools
                         }
 
                         // Now that we know its format, let's open it and start working with it.
-                        ArchiveReader archive = format.GetCodec().Open(source);
+                        ArchiveReader archive = format.CreateReader(source);
 
                         // Get the appropiate output directory
                         if (options.ExtractToSourceDirectory)
@@ -111,11 +112,11 @@ namespace PuyoTools.App.Tools
                                 dialog.Description = description + "\n\n" + string.Format("{0:N0} of {1:N0} extracted", j + 1, archive.Entries.Count);
                             }*/
 
-                            ArchiveEntry entry = archive.Entries[j];
+                            ArchiveReaderEntry entry = archive.Entries[j];
                             Stream entryData = entry.Open();
 
                             // Get the output name for this file
-                            if (options.FileNumberAsFilename || entry.Name == String.Empty)
+                            if (options.FileNumberAsFilename || string.IsNullOrEmpty(entry.Name))
                             {
                                 // Use the file number as its filename
                                 outName = j.ToString("D" + archive.Entries.Count.ToString().Length) + Path.GetExtension(entry.Name);

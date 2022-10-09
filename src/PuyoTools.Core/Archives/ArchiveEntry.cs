@@ -9,7 +9,7 @@ namespace PuyoTools.Core.Archives
     public class ArchiveEntry
     {
         private Mode mode; // Read/Write mode for this archive entry.
-        protected ArchiveReader archiveReader; // The archive reader associated with this entry
+        protected LegacyArchiveReader archiveReader; // The archive reader associated with this entry
         private ArchiveWriter archiveWriter; // The archive writer associated with this entry
         protected long offset; // The offset of the entry within the archive
         protected int length; // The size of the entry within the archive
@@ -24,7 +24,7 @@ namespace PuyoTools.Core.Archives
         /// <param name="offset">The offset of the entry within the archive.</param>
         /// <param name="length">The size of the entry within the archive.</param>
         /// <param name="name">The file name of the entry.</param>
-        internal ArchiveEntry(ArchiveReader archiveReader, long offset, int length, string name)
+        internal ArchiveEntry(LegacyArchiveReader archiveReader, long offset, int length, string name)
         {
             mode = Mode.Read;
             this.archiveReader = archiveReader;
@@ -65,7 +65,7 @@ namespace PuyoTools.Core.Archives
         /// <summary>
         /// Returns the ArchiveReader that contains this entry.
         /// </summary>
-        public ArchiveReader ArchiveReader
+        public LegacyArchiveReader ArchiveReader
         {
             get
             {

@@ -17,6 +17,7 @@ using PuyoTools.App.Formats.Textures;
 using PuyoTools.App;
 using PuyoTools.App.Formats.Archives;
 using PuyoTools.App.Formats.Compression;
+using PuyoTools.Archives;
 
 namespace PuyoTools.GUI
 {
@@ -54,7 +55,7 @@ namespace PuyoTools.GUI
         private void OpenArchive(Stream data, string filename, IArchiveFormat format)
         {
             // Let's open the archive and add it to the stack
-            ArchiveReader archive = format.GetCodec().Open(data);
+            ArchiveReader archive = format.CreateReader(data);
 
             ArchiveInfo info = new ArchiveInfo();
             info.Format = format;
@@ -78,7 +79,7 @@ namespace PuyoTools.GUI
 
                 // Seems like we need a palette for this texture. Let's try to find one.
                 string textureName = Path.ChangeExtension(filename, format.PaletteFileExtension);
-                ArchiveEntry paletteEntry = info.Archive.Entries.FirstOrDefault(x => x.FullName.Equals(textureName, StringComparison.OrdinalIgnoreCase));
+                ArchiveReaderEntry paletteEntry = info.Archive.Entries.FirstOrDefault(x => x.FullName.Equals(textureName, StringComparison.OrdinalIgnoreCase));
 
                 // Let's see if we found the palette file. And if so, open it up.
                 // Due to the nature of how this works, we need to copy the palette data to another stream first
@@ -149,7 +150,7 @@ namespace PuyoTools.GUI
 
             for (int i = 0; i < info.Archive.Entries.Count; i++)
             {
-                ArchiveEntry entry = info.Archive.Entries[i];
+                ArchiveReaderEntry entry = info.Archive.Entries[i];
 
                 var listViewItem = new ListViewItem(new string[] {
                     (i + 1).ToString(),
@@ -283,7 +284,7 @@ namespace PuyoTools.GUI
                 }
             }
 
-            ArchiveEntry entry = openedArchives.Peek().Archive.Entries[index];
+            ArchiveReaderEntry entry = openedArchives.Peek().Archive.Entries[index];
             Stream entryData = entry.Open();
 
             // Let's determine first if it is an archive or a texture
@@ -360,7 +361,7 @@ namespace PuyoTools.GUI
                     index--;
                 }
 
-                ArchiveEntry entry = archive.Entries[index];
+                ArchiveReaderEntry entry = archive.Entries[index];
 
                 SaveFileDialog sfd = new SaveFileDialog();
                 sfd.FileName = entry.Name;
@@ -369,7 +370,7 @@ namespace PuyoTools.GUI
 
                 if (sfd.ShowDialog() == DialogResult.OK)
                 {
-                    archive.ExtractToFile(entry, sfd.FileName);
+                    entry.ExtractToFile(sfd.FileName);
                 }
             }
 
@@ -382,6 +383,7 @@ namespace PuyoTools.GUI
 
                 if (fbd.ShowDialog() == DialogResult.OK)
                 {
+                    //ArchiveReader archive = openedArchives.Peek().Archive;
                     ArchiveReader archive = openedArchives.Peek().Archive;
                     for (int i = 0; i < listView.SelectedIndices.Count; i++)
                     {
@@ -391,7 +393,7 @@ namespace PuyoTools.GUI
                             index--;
                         }
 
-                        ArchiveEntry entry = archive.Entries[index];
+                        ArchiveReaderEntry entry = archive.Entries[index];
 
                         string entryFilename = entry.Name;
                         if (entryFilename == string.Empty)
@@ -399,7 +401,7 @@ namespace PuyoTools.GUI
                             entryFilename = index.ToString("D" + archive.Entries.Count.ToString().Length);
                         }
 
-                        archive.ExtractToFile(entry, Path.Combine(fbd.SelectedPath, entryFilename));
+                        entry.ExtractToFile(Path.Combine(fbd.SelectedPath, entryFilename));
                     }
                 }
             }
@@ -421,7 +423,7 @@ namespace PuyoTools.GUI
             // One file in the archive
             else if (archive.Entries.Count == 1)
             {
-                ArchiveEntry entry = archive.Entries[0];
+                ArchiveReaderEntry entry = archive.Entries[0];
 
                 SaveFileDialog sfd = new SaveFileDialog();
                 sfd.FileName = entry.Name;
@@ -430,7 +432,7 @@ namespace PuyoTools.GUI
 
                 if (sfd.ShowDialog() == DialogResult.OK)
                 {
-                    archive.ExtractToFile(entry, sfd.FileName);
+                    entry.ExtractToFile(sfd.FileName);
                 }
             }
 
@@ -445,7 +447,7 @@ namespace PuyoTools.GUI
                 {
                     for (int i = 0; i < archive.Entries.Count; i++)
                     {
-                        ArchiveEntry entry = archive.Entries[i];
+                        ArchiveReaderEntry entry = archive.Entries[i];
 
                         string entryFilename = entry.Name;
                         if (entryFilename == string.Empty)
@@ -453,7 +455,7 @@ namespace PuyoTools.GUI
                             entryFilename = i.ToString("D" + archive.Entries.Count.ToString().Length);
                         }
 
-                        archive.ExtractToFile(entry, Path.Combine(fbd.SelectedPath, entryFilename));
+                        entry.ExtractToFile(Path.Combine(fbd.SelectedPath, entryFilename));
                     }
                 }
             }

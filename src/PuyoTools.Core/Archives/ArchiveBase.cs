@@ -14,7 +14,7 @@ namespace PuyoTools.Core.Archives
         /// <param name="source">The stream to read from.</param>
         /// <returns>An ArchiveReader object.</returns>
         /// <remarks>You must keep the stream open for the duration of the ArchiveReader.</remarks>
-        public abstract ArchiveReader Open(Stream source);
+        public abstract LegacyArchiveReader Open(Stream source);
 
         /// <summary>
         /// Open an archive from part of a stream.
@@ -23,7 +23,7 @@ namespace PuyoTools.Core.Archives
         /// <param name="length">Number of bytes to read.</param>
         /// <returns>An ArchiveReader object.</returns>
         /// <remarks>You must keep the stream open for the duration of the ArchiveReader.</remarks>
-        public ArchiveReader Open(Stream source, int length)
+        public LegacyArchiveReader Open(Stream source, int length)
         {
             return Open(new StreamView(source, length));
         }
@@ -33,7 +33,7 @@ namespace PuyoTools.Core.Archives
         /// </summary>
         /// <param name="path">File to open.</param>
         /// <returns>An ArchiveReader object.</returns>
-        public ArchiveReader Open(string path)
+        public LegacyArchiveReader Open(string path)
         {
             return Open(File.OpenRead(path));
         }
@@ -43,7 +43,7 @@ namespace PuyoTools.Core.Archives
         /// </summary>
         /// <param name="source">Byte array containing the data.</param>
         /// <returns>An ArchiveReader object.</returns>
-        public ArchiveReader Open(byte[] source)
+        public LegacyArchiveReader Open(byte[] source)
         {
             return Open(source, 0, source.Length);
         }
@@ -55,7 +55,7 @@ namespace PuyoTools.Core.Archives
         /// <param name="offset">Offset of the data in the source array.</param>
         /// <param name="length">Length of the data in the source array.</param>
         /// <returns>An ArchiveReader object.</returns>
-        public ArchiveReader Open(byte[] source, int offset, int length)
+        public LegacyArchiveReader Open(byte[] source, int offset, int length)
         {
             MemoryStream sourceStream = new MemoryStream();
             sourceStream.Write(source, 0, length);

@@ -11,7 +11,7 @@ namespace PuyoTools.Core.Archives
     {
         private static readonly byte[] magicCode = { (byte)'G', (byte)'V', (byte)'M', (byte)'H' };
 
-        public override ArchiveReader Open(Stream source)
+        public override LegacyArchiveReader Open(Stream source)
         {
             return new GvmArchiveReader(source);
         }
@@ -39,7 +39,7 @@ namespace PuyoTools.Core.Archives
     }
 
     #region Archive Reader
-    public class GvmArchiveReader : ArchiveReader
+    public class GvmArchiveReader : LegacyArchiveReader
     {
         bool hasFilenames, hasFormats, hasDimensions, hasGlobalIndexes;
         int tableEntryLength, globalIndexOffset;

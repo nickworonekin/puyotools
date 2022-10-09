@@ -9,7 +9,7 @@ namespace PuyoTools.Core.Archives
     {
         private bool needToFix;
 
-        internal GvmArchiveEntry(ArchiveReader archiveReader, long offset, int length, string name, uint? globalIndex, bool needToFix)
+        internal GvmArchiveEntry(LegacyArchiveReader archiveReader, long offset, int length, string name, uint? globalIndex, bool needToFix)
             : base(archiveReader, offset, length, name)
         {
             GlobalIndex = globalIndex;

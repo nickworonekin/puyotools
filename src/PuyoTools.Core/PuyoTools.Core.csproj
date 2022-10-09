@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>net6.0</TargetFrameworks>
+    <RootNamespace>PuyoTools</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

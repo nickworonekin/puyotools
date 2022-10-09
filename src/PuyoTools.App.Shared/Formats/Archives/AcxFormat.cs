@@ -1,4 +1,6 @@
-﻿using PuyoTools.Core;
+﻿using PuyoTools.Archives;
+using PuyoTools.Archives.Formats.Acx;
+using PuyoTools.Core;
 using PuyoTools.Core.Archives;
 using System;
 using System.Collections.Generic;
@@ -25,6 +27,8 @@ namespace PuyoTools.App.Formats.Archives
 
         public ArchiveBase GetCodec() => new AcxArchive();
 
-        public bool Identify(Stream source, string filename) => Path.GetExtension(filename).Equals(FileExtension, StringComparison.OrdinalIgnoreCase) && AcxArchive.Identify(source);
+        public ArchiveReader CreateReader(Stream source) => new AcxReader(source);
+
+        public bool Identify(Stream source, string filename) => Path.GetExtension(filename).Equals(FileExtension, StringComparison.OrdinalIgnoreCase) && AcxReader.IsFormat(source);
     }
 }

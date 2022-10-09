@@ -7,7 +7,7 @@ namespace PuyoTools.Core.Archives
 {
     public class SvmArchiveEntry : ArchiveEntry
     {
-        internal SvmArchiveEntry(ArchiveReader archiveReader, long offset, int length, string name, uint? globalIndex)
+        internal SvmArchiveEntry(LegacyArchiveReader archiveReader, long offset, int length, string name, uint? globalIndex)
             : base(archiveReader, offset, length, name)
         {
             GlobalIndex = globalIndex;
