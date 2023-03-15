@@ -47,6 +47,7 @@ namespace PuyoTools.App.Formats.Archives
                 MrgFormat.Instance,
                 NarcFormat.Instance,
                 OneStorybookFormat.Instance,
+                OneUnleashedFormat.Instance,
                 PvmFormat.Instance,
                 SntFormat.Instance,
                 SpkFormat.Instance,

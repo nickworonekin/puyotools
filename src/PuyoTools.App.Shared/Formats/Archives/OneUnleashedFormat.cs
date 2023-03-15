@@ -23,7 +23,7 @@ namespace PuyoTools.App.Formats.Archives
 
         public string FileExtension => ".one";
 
-        public ArchiveBase GetCodec() => new OneStorybookArchive();
+        public ArchiveBase GetCodec() => new OneUnleashedArchive();
 
         public bool Identify(Stream source, string filename) => OneUnleashedArchive.Identify(source);
     }
