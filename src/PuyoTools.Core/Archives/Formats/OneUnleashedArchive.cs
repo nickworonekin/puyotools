@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -17,7 +18,7 @@ namespace PuyoTools.Core.Archives
 
         public override ArchiveWriter Create(Stream destination)
         {
-            throw new NotImplementedException();
+            return new OneUnleashedArchiveWriter(destination);
         }
 
         /// <summary>
@@ -61,6 +62,56 @@ namespace PuyoTools.Core.Archives
 
             // Set the position of the stream to the end of the file
             source.Seek(0, SeekOrigin.End);
+        }
+    }
+    #endregion
+
+    #region Archive Writer
+    public class OneUnleashedArchiveWriter : ArchiveWriter
+    {
+        public OneUnleashedArchiveWriter(Stream dest) : base(dest)
+        {
+        }
+
+        protected override void WriteFile()
+        {
+            destination.WriteByte((byte)'o');
+            destination.WriteByte((byte)'n');
+            destination.WriteByte((byte)'e');
+            destination.WriteByte((byte)'.');
+            PTStream.WriteInt32(destination, entries.Count);
+
+            var offset = MathHelper.RoundUp(8 + (entries.Count * 64), 32);
+
+            for (int i = 0; i < entries.Count; i++)
+            {
+                // Call the entry writing event
+                OnEntryWriting(new ArchiveEntryWritingEventArgs(entries[i]));
+
+                var entry = entries[i];
+                var entryStream = entry.Open();
+
+                PTStream.WriteCString(destination, entry.Name, 56);
+                PTStream.WriteInt32(destination, offset);
+                PTStream.WriteInt32(destination, (int)entryStream.Length);
+
+                Debug.Assert(destination.Position <= offset, "Table overrun!");
+
+                var currentPos = destination.Position;
+                destination.Position = offset;
+                entryStream.CopyTo(destination);
+                destination.Position = currentPos;
+
+                offset = MathHelper.RoundUp(offset + (int)entryStream.Length, 64);
+
+                // Call the entry written event
+                OnEntryWritten(new ArchiveEntryWrittenEventArgs(entries[i]));
+            }
+
+            // Pad the end of the stream if necessary
+            destination.Seek(0, SeekOrigin.End);
+            while (destination.Position < offset)
+                destination.WriteByte(0);
         }
     }
     #endregion
