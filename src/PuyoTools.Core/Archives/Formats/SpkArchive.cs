@@ -10,7 +10,7 @@ namespace PuyoTools.Core.Archives
     {
         private static readonly byte[] magicCode = { (byte)'S', (byte)'N', (byte)'D', (byte)'0' };
 
-        public override ArchiveReader Open(Stream source)
+        public override LegacyArchiveReader Open(Stream source)
         {
             return new SpkArchiveReader(source);
         }
@@ -38,7 +38,7 @@ namespace PuyoTools.Core.Archives
     }
 
     #region Archive Reader
-    public class SpkArchiveReader : ArchiveReader
+    public class SpkArchiveReader : LegacyArchiveReader
     {
         public SpkArchiveReader(Stream source) : base(source)
         {

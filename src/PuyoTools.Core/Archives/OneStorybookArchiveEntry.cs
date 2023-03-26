@@ -8,7 +8,7 @@ namespace PuyoTools.Core.Archives
 {
     public class OneStorybookArchiveEntry : ArchiveEntry
     {
-        internal OneStorybookArchiveEntry(ArchiveReader archiveReader, long offset, int length, string name)
+        internal OneStorybookArchiveEntry(LegacyArchiveReader archiveReader, long offset, int length, string name)
             : base(archiveReader, offset, length, name)
         {
         }

@@ -1,4 +1,5 @@
-﻿using PuyoTools.Core;
+﻿using PuyoTools.Archives;
+using PuyoTools.Core;
 using PuyoTools.Core.Archives;
 using System;
 using System.Collections.Generic;
@@ -26,6 +27,13 @@ namespace PuyoTools.App.Formats.Archives
         /// </summary>
         /// <returns>The archive codec.</returns>
         ArchiveBase GetCodec();
+
+        /// <summary>
+        /// Creates a <see cref="ArchiveReader"/> instance for the data in <paramref name="source"/>.
+        /// </summary>
+        /// <param name="source">The data to read.</param>
+        /// <returns></returns>
+        ArchiveReader CreateReader(Stream source);
 
         /// <summary>
         /// Returns if the codec for this format can read the data in <paramref name="source"/>.

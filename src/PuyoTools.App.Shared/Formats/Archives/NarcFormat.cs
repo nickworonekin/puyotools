@@ -1,4 +1,6 @@
-﻿using PuyoTools.Core;
+﻿using PuyoTools.Archives;
+using PuyoTools.Archives.Formats.Narc;
+using PuyoTools.Core;
 using PuyoTools.Core.Archives;
 using System;
 using System.Collections.Generic;
@@ -25,6 +27,8 @@ namespace PuyoTools.App.Formats.Archives
 
         public ArchiveBase GetCodec() => new NarcArchive();
 
-        public bool Identify(Stream source, string filename) => NarcArchive.Identify(source);
+        public ArchiveReader CreateReader(Stream source) => new NarcReader(source);
+
+        public bool Identify(Stream source, string filename) => NarcReader.IsFormat(source);
     }
 }

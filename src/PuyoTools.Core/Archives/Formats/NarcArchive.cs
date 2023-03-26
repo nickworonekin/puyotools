@@ -10,7 +10,7 @@ namespace PuyoTools.Core.Archives
     {
         private static readonly byte[] magicCode = { (byte)'N', (byte)'A', (byte)'R', (byte)'C', 0xFE, 0xFF, 0x00, 0x01 };
 
-        public override ArchiveReader Open(Stream source)
+        public override LegacyArchiveReader Open(Stream source)
         {
             return new NarcArchiveReader(source);
         }
@@ -40,7 +40,7 @@ namespace PuyoTools.Core.Archives
     }
 
     #region Archive Reader
-    public class NarcArchiveReader : ArchiveReader
+    public class NarcArchiveReader : LegacyArchiveReader
     {
         public NarcArchiveReader(Stream source) : base(source)
         {

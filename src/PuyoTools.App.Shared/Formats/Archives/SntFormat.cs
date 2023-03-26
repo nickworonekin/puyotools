@@ -1,4 +1,6 @@
-﻿using PuyoTools.Core;
+﻿using PuyoTools.Archives;
+using PuyoTools.Archives.Formats.Snt;
+using PuyoTools.Core;
 using PuyoTools.Core.Archives;
 using System;
 using System.Collections.Generic;
@@ -25,6 +27,8 @@ namespace PuyoTools.App.Formats.Archives
 
         public ArchiveBase GetCodec() => new SntArchive();
 
-        public bool Identify(Stream source, string filename) => SntArchive.Identify(source);
+        public ArchiveReader CreateReader(Stream source) => new SntReader(source);
+
+        public bool Identify(Stream source, string filename) => SntReader.IsFormat(source);
     }
 }

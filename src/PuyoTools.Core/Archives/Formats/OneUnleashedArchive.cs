@@ -11,7 +11,7 @@ namespace PuyoTools.Core.Archives
     {
         private static readonly byte[] magicCode = { (byte)'o', (byte)'n', (byte)'e', (byte)'.' };
 
-        public override ArchiveReader Open(Stream source)
+        public override LegacyArchiveReader Open(Stream source)
         {
             return new OneUnleashedArchiveReader(source);
         }
@@ -39,7 +39,7 @@ namespace PuyoTools.Core.Archives
     }
 
     #region Archive Reader
-    public class OneUnleashedArchiveReader : ArchiveReader
+    public class OneUnleashedArchiveReader : LegacyArchiveReader
     {
         public OneUnleashedArchiveReader(Stream source) : base(source)
         {

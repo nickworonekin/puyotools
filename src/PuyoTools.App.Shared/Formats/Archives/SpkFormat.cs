@@ -1,4 +1,6 @@
-﻿using PuyoTools.Core;
+﻿using PuyoTools.Archives;
+using PuyoTools.Archives.Formats.Spk;
+using PuyoTools.Core;
 using PuyoTools.Core.Archives;
 using System;
 using System.Collections.Generic;
@@ -25,6 +27,8 @@ namespace PuyoTools.App.Formats.Archives
 
         public ArchiveBase GetCodec() => new SpkArchive();
 
-        public bool Identify(Stream source, string filename) => SpkArchive.Identify(source);
+        public ArchiveReader CreateReader(Stream source) => new SpkReader(source);
+
+        public bool Identify(Stream source, string filename) => SpkReader.IsFormat(source);
     }
 }

@@ -1,4 +1,6 @@
-﻿using PuyoTools.Core;
+﻿using PuyoTools.Archives;
+using PuyoTools.Archives.Formats.Afs;
+using PuyoTools.Core;
 using PuyoTools.Core.Archives;
 using System;
 using System.Collections.Generic;
@@ -25,6 +27,8 @@ namespace PuyoTools.App.Formats.Archives
 
         public ArchiveBase GetCodec() => new AfsArchive();
 
-        public bool Identify(Stream source, string filename) => AfsArchive.Identify(source);
+        public ArchiveReader CreateReader(Stream source) => new AfsReader(source);
+
+        public bool Identify(Stream source, string filename) => AfsReader.IsFormat(source);
     }
 }

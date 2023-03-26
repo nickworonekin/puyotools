@@ -9,7 +9,7 @@ namespace PuyoTools.Core.Archives
 {
     public class OneStorybookArchive : ArchiveBase
     {
-        public override ArchiveReader Open(Stream source)
+        public override LegacyArchiveReader Open(Stream source)
         {
             return new OneStorybookArchiveReader(source);
         }
@@ -51,7 +51,7 @@ namespace PuyoTools.Core.Archives
     }
 
     #region Archive Reader
-    public class OneStorybookArchiveReader : ArchiveReader
+    public class OneStorybookArchiveReader : LegacyArchiveReader
     {
         //private PrsCompression _prsCompression;
 
