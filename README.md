@@ -1,13 +1,17 @@
-Puyo Tools
-=========
-
+# Puyo Tools
 Puyo Tools is a collection of tools and libraries used to access the contents of various game files. Although its main focus is to handle files used in Puyo Puyo games, it can handle files used in other games as well.
 
-## Releases
+## Requirements
+* [.NET Framework 4.0](https://dotnet.microsoft.com/download/dotnet-framework) or higher
 
-The latest version is **[2.0.4](https://github.com/nickworonekin/puyotools/releases/latest)**, released on March 20, 2020.
+The pre-release of version 3.0.0 has the following requirements:
+* [.NET Runtime 6.0](https://dotnet.microsoft.com/download) or higher (CLI app) or
+* [.NET Desktop Runtime 6.0](https://dotnet.microsoft.com/download) or higher (GUI app)
 
-.NET Framework 4.0 or higher is required to run this app.
+## Download
+[Download the latest release](https://github.com/nickworonekin/puyotools/releases/latest)
+
+Older releases and pre-releases can be downloaded from the [Releases](https://github.com/nickworonekin/puyotools/releases) page.
 
 ## Supported Formats
 ### Compression:
