@@ -135,7 +135,7 @@ namespace PuyoTools.GUI
             }
 
             // Create the archive
-            using (ArchiveWriter archive = settings.ArchiveFormat.GetCodec().Create(destination))
+            using (LegacyArchiveWriter archive = settings.ArchiveFormat.GetCodec().Create(destination))
             {
                 // Set archive settings
                 ModuleSettingsControl settingsControl = settings.WriterSettingsControl;

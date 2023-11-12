@@ -15,7 +15,7 @@ namespace PuyoTools.Core.Archives
             return new SpkArchiveReader(source);
         }
 
-        public override ArchiveWriter Create(Stream destination)
+        public override LegacyArchiveWriter Create(Stream destination)
         {
             return new SpkArchiveWriter(destination);
         }
@@ -72,7 +72,7 @@ namespace PuyoTools.Core.Archives
     #endregion
 
     #region Archive Writer
-    public class SpkArchiveWriter : ArchiveWriter
+    public class SpkArchiveWriter : LegacyArchiveWriter
     {
         public SpkArchiveWriter(Stream destination) : base(destination) { }
 

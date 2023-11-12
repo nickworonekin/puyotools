@@ -8,6 +8,6 @@ namespace PuyoTools.Archives.Formats.Mrg
 {
     internal static class MrgConstants
     {
-        internal static ReadOnlySpan<byte> MagicCode => new byte[] { (byte)'M', (byte)'R', (byte)'G', (byte)'0' };
+        public static ReadOnlySpan<byte> MagicCode => new byte[] { (byte)'M', (byte)'R', (byte)'G', (byte)'0' };
     }
 }

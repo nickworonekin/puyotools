@@ -15,7 +15,7 @@ namespace PuyoTools.Core.Archives
             return new AfsArchiveReader(source);
         }
 
-        public override ArchiveWriter Create(Stream destination)
+        public override LegacyArchiveWriter Create(Stream destination)
         {
             return new AfsArchiveWriter(destination);
         }
@@ -82,7 +82,7 @@ namespace PuyoTools.Core.Archives
     #endregion
 
     #region Archive Writer
-    public class AfsArchiveWriter : ArchiveWriter
+    public class AfsArchiveWriter : LegacyArchiveWriter
     {
         #region Settings
         /// <summary>

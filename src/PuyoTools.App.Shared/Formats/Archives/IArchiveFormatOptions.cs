@@ -5,7 +5,7 @@ using System.Text;
 
 namespace PuyoTools.App.Formats.Archives
 {
-    interface IArchiveFormatOptions : IMappable<ArchiveWriter>
+    interface IArchiveFormatOptions : IMappable<LegacyArchiveWriter>
     {
     }
 }

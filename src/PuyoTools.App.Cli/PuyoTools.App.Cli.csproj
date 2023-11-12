@@ -3,6 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net6.0</TargetFramework>
+	<RollForward>Major</RollForward>
     <SatelliteResourceLanguages>en-US</SatelliteResourceLanguages>
     <AssemblyName>PuyoToolsCli</AssemblyName>
     <VersionPrefix>3.0.0</VersionPrefix>

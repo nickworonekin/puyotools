@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PuyoTools.Archives;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -12,6 +13,11 @@ namespace PuyoTools.Core.Archives
         public ArchiveEntryWritingEventArgs(ArchiveEntry entry)
         {
             Entry = entry;
+        }
+
+        public ArchiveEntryWritingEventArgs(ArchiveWriterEntry entry)
+        {
+            // TODO: Implement properties.
         }
 
         /// <summary>

@@ -19,7 +19,7 @@ namespace PuyoTools.Core.Archives
             return new SntArchiveReader(source);
         }
 
-        public override ArchiveWriter Create(Stream destination)
+        public override LegacyArchiveWriter Create(Stream destination)
         {
             return new SntArchiveWriter(destination);
         }
@@ -122,7 +122,7 @@ namespace PuyoTools.Core.Archives
     #endregion
 
     #region Archive Writer
-    public class SntArchiveWriter : ArchiveWriter
+    public class SntArchiveWriter : LegacyArchiveWriter
     {
         #region Settings
         /// <summary>

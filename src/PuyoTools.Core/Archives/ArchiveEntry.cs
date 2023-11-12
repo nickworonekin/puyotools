@@ -10,7 +10,7 @@ namespace PuyoTools.Core.Archives
     {
         private Mode mode; // Read/Write mode for this archive entry.
         protected LegacyArchiveReader archiveReader; // The archive reader associated with this entry
-        private ArchiveWriter archiveWriter; // The archive writer associated with this entry
+        private LegacyArchiveWriter archiveWriter; // The archive writer associated with this entry
         protected long offset; // The offset of the entry within the archive
         protected int length; // The size of the entry within the archive
         private string name; // The name of the entry within the archive
@@ -42,7 +42,7 @@ namespace PuyoTools.Core.Archives
         /// <param name="archiveWriter">The <see cref="ArchiveWriter"/> this entry belongs to.</param>
         /// <param name="source">The data to be added to the archive.</param>
         /// <param name="name">A path that specifies the name of the entry to be created.</param>
-        internal ArchiveEntry(ArchiveWriter archiveWriter, Stream source, string name)
+        internal ArchiveEntry(LegacyArchiveWriter archiveWriter, Stream source, string name)
         {
             mode = Mode.Write;
             this.archiveWriter = archiveWriter;
@@ -81,7 +81,7 @@ namespace PuyoTools.Core.Archives
         /// <summary>
         /// Returns the ArchiveWriter that contains this entry.
         /// </summary>
-        public ArchiveWriter ArchiveWriter
+        public LegacyArchiveWriter ArchiveWriter
         {
             get
             {
@@ -128,7 +128,7 @@ namespace PuyoTools.Core.Archives
         public string Name => System.IO.Path.GetFileName(name);
 
         /// <summary>
-        /// When this entry belongs to an <see cref="Archives.ArchiveWriter"/>, gets the absolute path of the file used to create this entry.
+        /// When this entry belongs to an <see cref="Archives.LegacyArchiveWriter"/>, gets the absolute path of the file used to create this entry.
         /// </summary>
         public string Path
         {

@@ -29,6 +29,8 @@ namespace PuyoTools.App.Formats.Archives
 
         public ArchiveReader CreateReader(Stream source) => new NarcReader(source);
 
+        public ArchiveWriter CreateWriter(Stream destination) => new NarcWriter(destination);
+
         public bool Identify(Stream source, string filename) => NarcReader.IsFormat(source);
     }
 }

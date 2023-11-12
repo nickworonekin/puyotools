@@ -46,10 +46,20 @@ namespace PuyoTools.App.Cli.Commands.Archives
             
             foreach (var input in options.Input)
             {
+                string filename = input;
+                //string filenameInArchive = Path.GetFileName(filename);
+                string? filenameInArchive = null;
+                int seperatorIndex = input.IndexOf(',');
+                if (seperatorIndex != -1)
+                {
+                    filename = input.Substring(0, seperatorIndex);
+                    filenameInArchive = input.Substring(seperatorIndex + 1);
+                }
+
                 // Get the files to process by the tool
                 // To ensure files are added in the order specified, they will be matched seperately.
                 var matcher = new Matcher();
-                matcher.AddInclude(input);
+                matcher.AddInclude(filename);
                 if (options.Exclude?.Any() == true)
                 {
                     matcher.AddExcludePatterns(options.Exclude);
@@ -61,8 +71,10 @@ namespace PuyoTools.App.Cli.Commands.Archives
                     .Select(x => new ArchiveCreatorFileEntry
                     {
                         SourceFile = x,
-                        Filename = Path.GetFileName(x),
-                        FilenameInArchive = Path.GetFileName(x),
+                        //Filename = filename,
+                        //FilenameInArchive = filenameInArchive,
+                        Filename = x,
+                        FilenameInArchive = filenameInArchive ?? x,
                     })
                     .ToArray();
 

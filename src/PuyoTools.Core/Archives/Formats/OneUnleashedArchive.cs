@@ -16,7 +16,7 @@ namespace PuyoTools.Core.Archives
             return new OneUnleashedArchiveReader(source);
         }
 
-        public override ArchiveWriter Create(Stream destination)
+        public override LegacyArchiveWriter Create(Stream destination)
         {
             return new OneUnleashedArchiveWriter(destination);
         }
@@ -67,7 +67,7 @@ namespace PuyoTools.Core.Archives
     #endregion
 
     #region Archive Writer
-    public class OneUnleashedArchiveWriter : ArchiveWriter
+    public class OneUnleashedArchiveWriter : LegacyArchiveWriter
     {
         public OneUnleashedArchiveWriter(Stream dest) : base(dest)
         {

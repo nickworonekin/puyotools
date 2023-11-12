@@ -18,7 +18,7 @@ namespace PuyoTools.App.Cli.Commands.Archives
 
         public bool Dimensions { get; set; }
 
-        public void MapTo(ArchiveWriter obj)
+        public void MapTo(LegacyArchiveWriter obj)
         {
             var archive = (SvmArchiveWriter)obj;
 

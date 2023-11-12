@@ -14,7 +14,7 @@ namespace PuyoTools.Core.Archives
             return new OneStorybookArchiveReader(source);
         }
 
-        public override ArchiveWriter Create(Stream destination)
+        public override LegacyArchiveWriter Create(Stream destination)
         {
             return new OneStorybookArchiveWriter(destination);
         }
@@ -95,7 +95,7 @@ namespace PuyoTools.Core.Archives
     }
     #endregion
 
-    public class OneStorybookArchiveWriter : ArchiveWriter
+    public class OneStorybookArchiveWriter : LegacyArchiveWriter
     {
         private PrsCompression _prsCompression;
 

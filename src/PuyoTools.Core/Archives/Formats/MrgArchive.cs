@@ -15,7 +15,7 @@ namespace PuyoTools.Core.Archives
             return new MrgArchiveReader(source);
         }
 
-        public override ArchiveWriter Create(Stream destination)
+        public override LegacyArchiveWriter Create(Stream destination)
         {
             return new MrgArchiveWriter(destination);
         }
@@ -75,7 +75,7 @@ namespace PuyoTools.Core.Archives
     #endregion
 
     #region Archive Writer
-    public class MrgArchiveWriter : ArchiveWriter
+    public class MrgArchiveWriter : LegacyArchiveWriter
     {
         public MrgArchiveWriter(Stream destination) : base(destination) { }
 

@@ -15,7 +15,7 @@ namespace PuyoTools.Core.Archives
             return new TexArchiveReader(source);
         }
 
-        public override ArchiveWriter Create(Stream destination)
+        public override LegacyArchiveWriter Create(Stream destination)
         {
             return new TexArchiveWriter(destination);
         }
@@ -72,7 +72,7 @@ namespace PuyoTools.Core.Archives
     #endregion
 
     #region Archive Writer
-    public class TexArchiveWriter : ArchiveWriter
+    public class TexArchiveWriter : LegacyArchiveWriter
     {
         public TexArchiveWriter(Stream destination) : base(destination) { }
 

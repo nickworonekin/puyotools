@@ -16,7 +16,7 @@ namespace PuyoTools.App.Cli.Commands.Archives
 
         public bool Timestamps { get; set; }
 
-        public void MapTo(ArchiveWriter obj)
+        public void MapTo(LegacyArchiveWriter obj)
         {
             var archive = (AfsArchiveWriter)obj;
 

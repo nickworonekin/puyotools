@@ -15,7 +15,7 @@ namespace PuyoTools.Core.Archives
             return new AcxArchiveReader(source);
         }
 
-        public override ArchiveWriter Create(Stream destination)
+        public override LegacyArchiveWriter Create(Stream destination)
         {
             return new AcxArchiveWriter(destination);
         }
@@ -86,7 +86,7 @@ namespace PuyoTools.Core.Archives
     #endregion
 
     #region Archive Writer
-    public class AcxArchiveWriter : ArchiveWriter
+    public class AcxArchiveWriter : LegacyArchiveWriter
     {
         #region Settings
         /// <summary>

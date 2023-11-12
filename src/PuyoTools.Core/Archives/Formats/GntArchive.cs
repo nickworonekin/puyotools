@@ -16,7 +16,7 @@ namespace PuyoTools.Core.Archives
             return new GntArchiveReader(source);
         }
 
-        public override ArchiveWriter Create(Stream destination)
+        public override LegacyArchiveWriter Create(Stream destination)
         {
             return new GntArchiveWriter(destination);
         }
@@ -70,7 +70,7 @@ namespace PuyoTools.Core.Archives
     #endregion
 
     #region Archive Writer
-    public class GntArchiveWriter : ArchiveWriter
+    public class GntArchiveWriter : LegacyArchiveWriter
     {
         public GntArchiveWriter(Stream destination) : base(destination) { }
 

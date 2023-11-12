@@ -1,98 +1,57 @@
-﻿using System;
+﻿using PuyoTools.Core.Archives;
+using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
-namespace PuyoTools.Core.Archives
+namespace PuyoTools.Archives
 {
-    public abstract class ArchiveWriter : IDisposable, IModule
+    public abstract class ArchiveWriter
     {
-        protected Stream destination;
+        protected Stream _destination;
 
-        protected List<ArchiveEntry> entries;
-
-        private bool disposed;
-
-        public ArchiveWriter() { }
-
-        public ArchiveWriter(Stream destination)
+        protected ArchiveWriter(Stream destination)
         {
-            this.destination = destination;
-
-            entries = new List<ArchiveEntry>();
+            _destination = destination;
         }
 
         /// <summary>
-        /// Gets the collection of entries that are currently in the archive.
+        /// Adds a new entry to the archive.
         /// </summary>
-        /// <exception cref="ObjectDisposedException">The <see cref="ArchiveWriter"/> has already been closed.</exception>
-        public ReadOnlyCollection<ArchiveEntry> Entries
-        {
-            get
-            {
-                ThrowIfDisposed();
-                return entries.AsReadOnly();
-            }
-        }
-
-        protected abstract void WriteFile();
+        /// <param name="source"></param>
+        /// <param name="name">The name of the entry to create in the archive.</param>
+        /// <param name="leaveOpen"><see langword="true"/> to leave the stream open after the entry is written; otherwise, <see langword="false"/>.</param>
+        public abstract void AddEntry(Stream source, string? name = null, bool leaveOpen = false);
 
         /// <summary>
-        /// Creates an entry that has the specified data entry name in the archive.
+        /// Tries to add a new entry to the archive, and returns a value that indicates whether the entry was added.
         /// </summary>
-        /// <param name="source">The data to be added to the archive.</param>
-        /// <param name="entryName">The name of the entry to be created.</param>
-        /// <remarks>If the file cannot be added to the archive (for example, an archive may only accept files of a certain type), <see cref="FileRejectedException"/> will be thrown.</remarks>
-        /// <returns>The entry that was created in the archive.</returns>
-        /// <exception cref="FileRejectedException">The file could not be added to the archive.</exception>
-        /// <exception cref="ObjectDisposedException">The <see cref="ArchiveWriter"/> has already been closed.</exception>
-        public virtual ArchiveEntry CreateEntry(Stream source, string entryName)
-        {
-            ThrowIfDisposed();
-
-            var entry = new ArchiveEntry(this, source, entryName);
-            entries.Add(entry);
-
-            return entry;
-        }
+        /// <param name="source"></param>
+        /// <param name="name"></param>
+        /// <param name="leaveOpen"><see langword="true"/> to leave the stream open after the entry is written; otherwise, <see langword="false"/>.</param>
+        /// <returns><see langword="true"/> if the entry was added to the archive; otherwise, <see langword="false"/>.</returns>
+        public abstract bool TryAddEntry(Stream source, string? name = null, bool leaveOpen = false);
 
         /// <summary>
-        /// Creates an entry with no file name that has the specified data entry name in the archive.
+        /// Adds a new entry from an existing file to the archive.
         /// </summary>
-        /// <param name="source">The data to be added to the archive.</param>
-        /// <remarks>
-        /// The file may be rejected from the archive. In this case, a CannotAddFileToArchiveException will be thrown.
-        /// </remarks>
-        public ArchiveEntry CreateEntry(Stream source)
-        {
-            return CreateEntry(source, String.Empty);
-        }
+        /// <param name="sourceFileName"></param>
+        /// <param name="name">The name of the entry to create in the archive.</param>
+        public void AddEntryFromFile(string sourceFileName, string? name = null)
+            => AddEntry(new FileStream(sourceFileName, FileMode.Open, FileAccess.Read), name, true);
 
         /// <summary>
-        /// Adds an existing file to the archive.
+        /// Tries to add a new entry from an existing file to the archive, and returns a value that indicates whether the entry was added.
         /// </summary>
-        /// <param name="path">The path of the file to be added.</param>
-        /// <param name="entryName">The name of the entry to be created.</param>
-        /// <remarks>
-        /// The file may be rejected from the archive. In this case, a CannotAddFileToArchiveException will be thrown.
-        /// </remarks>
-        public ArchiveEntry CreateEntryFromFile(string path, string entryName)
-        {
-            return CreateEntry(File.OpenRead(path), entryName);
-        }
+        /// <param name="sourceFileName"></param>
+        /// <param name="name">The name of the entry to create in the archive.</param>
+        /// <returns><see langword="true"/> if the entry was added to the archive; otherwise, <see langword="false"/>.</returns>
+        public bool TryAddEntryFromFile(string sourceFileName, string? name = null)
+            => TryAddEntry(new FileStream(sourceFileName, FileMode.Open, FileAccess.Read), name, true);
 
-        /// <summary>
-        /// Adds an existing file to the archive.
-        /// </summary>
-        /// <param name="path">The path of the file to be added.</param>
-        /// <remarks>
-        /// The file may be rejected from the archive. In this case, a CannotAddFileToArchiveException will be thrown.
-        /// </remarks>
-        public ArchiveEntry CreateEntryFromFile(string path)
-        {
-            return CreateEntry(File.OpenRead(path), Path.GetFileName(path));
-        }
+        public abstract void Write(Stream destination);
 
         /// <summary>
         /// Occurs when an entry is being written to the archive.
@@ -118,39 +77,6 @@ namespace PuyoTools.Core.Archives
         protected virtual void OnEntryWritten(ArchiveEntryWrittenEventArgs e)
         {
             EntryWritten?.Invoke(this, e);
-        }
-
-        protected void ThrowIfDisposed()
-        {
-            if (disposed)
-            {
-                throw new ObjectDisposedException(GetType().ToString());
-            }
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing && !disposed)
-            {
-                try
-                {
-                    WriteFile();
-                }
-                finally
-                {
-                    disposed = true;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Releases the resources used by the current instance of the <see cref="ArchiveWriter"/> class.
-        /// </summary>
-        /// <remarks>This method finishes writing the archive and releases all resources used by the <see cref="ArchiveWriter"/> object.</remarks>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
         }
     }
 }

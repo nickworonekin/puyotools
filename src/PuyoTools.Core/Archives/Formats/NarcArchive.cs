@@ -15,7 +15,7 @@ namespace PuyoTools.Core.Archives
             return new NarcArchiveReader(source);
         }
 
-        public override ArchiveWriter Create(Stream destination)
+        public override LegacyArchiveWriter Create(Stream destination)
         {
             return new NarcArchiveWriter(destination);
         }
@@ -201,7 +201,7 @@ namespace PuyoTools.Core.Archives
     #endregion
 
     #region Archive Writer
-    public class NarcArchiveWriter : ArchiveWriter
+    public class NarcArchiveWriter : LegacyArchiveWriter
     {
         public bool HasFilenames { get; set; } = true;
 

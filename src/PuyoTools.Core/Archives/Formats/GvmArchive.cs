@@ -16,7 +16,7 @@ namespace PuyoTools.Core.Archives
             return new GvmArchiveReader(source);
         }
 
-        public override ArchiveWriter Create(Stream destination)
+        public override LegacyArchiveWriter Create(Stream destination)
         {
             return new GvmArchiveWriter(destination);
         }
@@ -187,7 +187,7 @@ namespace PuyoTools.Core.Archives
     #endregion
 
     #region Archive Writer
-    public class GvmArchiveWriter : ArchiveWriter
+    public class GvmArchiveWriter : LegacyArchiveWriter
     {
         #region Settings
         /// <summary>

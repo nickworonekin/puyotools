@@ -29,6 +29,8 @@ namespace PuyoTools.App.Formats.Archives
 
         public ArchiveReader CreateReader(Stream source) => new AcxReader(source);
 
+        public ArchiveWriter CreateWriter(Stream destination) => new AcxWriter(destination);
+
         public bool Identify(Stream source, string filename) => Path.GetExtension(filename).Equals(FileExtension, StringComparison.OrdinalIgnoreCase) && AcxReader.IsFormat(source);
     }
 }

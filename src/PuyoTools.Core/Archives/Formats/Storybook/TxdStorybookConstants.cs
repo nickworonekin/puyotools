@@ -8,6 +8,6 @@ namespace PuyoTools.Archives.Formats.Storybook
 {
     internal static class TxdStorybookConstants
     {
-        internal static ReadOnlySpan<byte> MagicCode => new byte[] { (byte)'T', (byte)'X', (byte)'A', (byte)'G' };
+        public static ReadOnlySpan<byte> MagicCode => new byte[] { (byte)'T', (byte)'X', (byte)'A', (byte)'G' };
     }
 }

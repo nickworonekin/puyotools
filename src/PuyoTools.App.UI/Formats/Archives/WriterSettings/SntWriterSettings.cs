@@ -20,7 +20,7 @@ namespace PuyoTools.Formats.Archives.WriterSettings
             InitializeComponent();
         }
 
-        public void MapTo(ArchiveWriter obj)
+        public void MapTo(LegacyArchiveWriter obj)
         {
             SetModuleSettings(obj);
         }

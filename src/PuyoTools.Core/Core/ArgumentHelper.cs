@@ -14,7 +14,7 @@ namespace PuyoTools.Core
         /// <typeparam name="T"></typeparam>
         /// <param name="value"></param>
         /// <param name="paramName"></param>
-        public static void ThrowIfInvalidEnumValue<T>(T value, [CallerArgumentExpression("value")] string paramName = null) where T : Enum
+        public static void ThrowIfInvalidEnumValue<T>(T value, [CallerArgumentExpression("value")] string? paramName = null) where T : Enum
         {
             if (!Enum.IsDefined(typeof(T), value))
             {

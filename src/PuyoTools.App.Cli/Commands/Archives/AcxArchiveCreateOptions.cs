@@ -12,7 +12,7 @@ namespace PuyoTools.App.Cli.Commands.Archives
     {
         public int BlockSize { get; set; }
 
-        public void MapTo(ArchiveWriter obj)
+        public void MapTo(LegacyArchiveWriter obj)
         {
             var archive = (AcxArchiveWriter)obj;
 

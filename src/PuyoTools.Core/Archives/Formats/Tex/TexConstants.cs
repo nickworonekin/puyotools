@@ -8,6 +8,6 @@ namespace PuyoTools.Archives.Formats.Tex
 {
     internal static class TexConstants
     {
-        internal static ReadOnlySpan<byte> MagicCode => new byte[] { (byte)'T', (byte)'E', (byte)'X', (byte)'0' };
+        public static ReadOnlySpan<byte> MagicCode => new byte[] { (byte)'T', (byte)'E', (byte)'X', (byte)'0' };
     }
 }

@@ -21,7 +21,7 @@ namespace PuyoTools.Formats.Archives.WriterSettings
             blockSizeBox.SelectedIndex = 0;
         }
 
-        public void MapTo(ArchiveWriter obj)
+        public void MapTo(LegacyArchiveWriter obj)
         {
             SetModuleSettings(obj);
         }

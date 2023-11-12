@@ -36,6 +36,13 @@ namespace PuyoTools.App.Formats.Archives
         ArchiveReader CreateReader(Stream source);
 
         /// <summary>
+        /// Creates a <see cref="ArchiveWriter"/> instance.
+        /// </summary>
+        /// <param name="destination"></param>
+        /// <returns></returns>
+        ArchiveWriter CreateWriter(Stream destination);
+
+        /// <summary>
         /// Returns if the codec for this format can read the data in <paramref name="source"/>.
         /// </summary>
         /// <param name="source">The data to read.</param>

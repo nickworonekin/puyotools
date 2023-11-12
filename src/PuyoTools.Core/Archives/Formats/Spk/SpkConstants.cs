@@ -8,6 +8,6 @@ namespace PuyoTools.Archives.Formats.Spk
 {
     internal static class SpkConstants
     {
-        internal static ReadOnlySpan<byte> MagicCode => new byte[] { (byte)'S', (byte)'N', (byte)'D', (byte)'0' };
+        public static ReadOnlySpan<byte> MagicCode => new byte[] { (byte)'S', (byte)'N', (byte)'D', (byte)'0' };
     }
 }

@@ -1,4 +1,5 @@
 ﻿using PuyoTools.App.Formats.Archives;
+using PuyoTools.Archives;
 using PuyoTools.Core.Archives;
 using System;
 using System.Collections.Generic;
@@ -58,7 +59,8 @@ namespace PuyoTools.App.Tools
             }
 
             // Create the archive
-            using (ArchiveWriter archive = format.GetCodec().Create(destination))
+            //using (ArchiveWriter archive = format.GetCodec().Create(destination))
+            ArchiveWriter archive = format.CreateWriter(destination);
             {
                 // Set archive settings
                 /*ModuleSettingsControl settingsControl = settings.WriterSettingsControl;
@@ -69,7 +71,7 @@ namespace PuyoTools.App.Tools
                 }*/
                 if (formatOptions != null)
                 {
-                    synchronizationContext.Send(new SendOrPostCallback(state => formatOptions.MapTo(archive)), null);
+                    //synchronizationContext.Send(new SendOrPostCallback(state => formatOptions.MapTo(archive)), null);
                 }
 
                 // Set up event handlers
@@ -104,7 +106,8 @@ namespace PuyoTools.App.Tools
                 {
                     try
                     {
-                        archive.CreateEntryFromFile(entry.SourceFile, entry.FilenameInArchive);
+                        //archive.CreateEntryFromFile(entry.SourceFile, entry.FilenameInArchive);
+                        archive.AddEntryFromFile(entry.SourceFile, entry.FilenameInArchive);
                     }
                     catch (FileRejectedException)
                     {
@@ -122,6 +125,8 @@ namespace PuyoTools.App.Tools
                         return;
                     }*/
                 }
+
+                archive.Write(destination);
             }
 
             // Do we want to compress this archive?

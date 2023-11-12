@@ -28,250 +28,239 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
-            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
-            this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.compressionMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.decompressToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.compressToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.texturesButton = new System.Windows.Forms.Button();
-            this.archivesButton = new System.Windows.Forms.Button();
-            this.compressionButton = new System.Windows.Forms.Button();
-            this.archivesMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.extractToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.createToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.texturesMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.decodeToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.encodeToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
-            this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
-            this.menuStrip1.SuspendLayout();
-            this.compressionMenuStrip.SuspendLayout();
-            this.archivesMenuStrip.SuspendLayout();
-            this.texturesMenuStrip.SuspendLayout();
-            this.flowLayoutPanel1.SuspendLayout();
-            this.SuspendLayout();
+            components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainWindow));
+            menuStrip1 = new System.Windows.Forms.MenuStrip();
+            fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            compressionMenuStrip = new System.Windows.Forms.ContextMenuStrip(components);
+            decompressToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            compressToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            texturesButton = new System.Windows.Forms.Button();
+            archivesButton = new System.Windows.Forms.Button();
+            compressionButton = new System.Windows.Forms.Button();
+            archivesMenuStrip = new System.Windows.Forms.ContextMenuStrip(components);
+            extractToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            createToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            texturesMenuStrip = new System.Windows.Forms.ContextMenuStrip(components);
+            decodeToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            encodeToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
+            toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
+            flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
+            menuStrip1.SuspendLayout();
+            compressionMenuStrip.SuspendLayout();
+            archivesMenuStrip.SuspendLayout();
+            texturesMenuStrip.SuspendLayout();
+            flowLayoutPanel1.SuspendLayout();
+            SuspendLayout();
             // 
             // menuStrip1
             // 
-            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.fileToolStripMenuItem,
-            this.helpToolStripMenuItem});
-            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
-            this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(420, 24);
-            this.menuStrip1.TabIndex = 0;
-            this.menuStrip1.Text = "menuStrip1";
+            menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { fileToolStripMenuItem, helpToolStripMenuItem });
+            menuStrip1.Location = new System.Drawing.Point(0, 0);
+            menuStrip1.Name = "menuStrip1";
+            menuStrip1.Padding = new System.Windows.Forms.Padding(7, 2, 0, 2);
+            menuStrip1.Size = new System.Drawing.Size(492, 24);
+            menuStrip1.TabIndex = 0;
+            menuStrip1.Text = "menuStrip1";
             // 
             // fileToolStripMenuItem
             // 
-            this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.exitToolStripMenuItem});
-            this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-            this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
-            this.fileToolStripMenuItem.Text = "File";
+            fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { exitToolStripMenuItem });
+            fileToolStripMenuItem.Name = "fileToolStripMenuItem";
+            fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
+            fileToolStripMenuItem.Text = "File";
             // 
             // exitToolStripMenuItem
             // 
-            this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(93, 22);
-            this.exitToolStripMenuItem.Text = "Exit";
-            this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
+            exitToolStripMenuItem.Name = "exitToolStripMenuItem";
+            exitToolStripMenuItem.Size = new System.Drawing.Size(93, 22);
+            exitToolStripMenuItem.Text = "Exit";
+            exitToolStripMenuItem.Click += exitToolStripMenuItem_Click;
             // 
             // helpToolStripMenuItem
             // 
-            this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.aboutToolStripMenuItem});
-            this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
-            this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
-            this.helpToolStripMenuItem.Text = "Help";
+            helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { aboutToolStripMenuItem });
+            helpToolStripMenuItem.Name = "helpToolStripMenuItem";
+            helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
+            helpToolStripMenuItem.Text = "Help";
             // 
             // aboutToolStripMenuItem
             // 
-            this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(107, 22);
-            this.aboutToolStripMenuItem.Text = "About";
-            this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
+            aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
+            aboutToolStripMenuItem.Size = new System.Drawing.Size(107, 22);
+            aboutToolStripMenuItem.Text = "About";
+            aboutToolStripMenuItem.Click += aboutToolStripMenuItem_Click;
             // 
             // compressionMenuStrip
             // 
-            this.compressionMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.decompressToolStripMenuItem1,
-            this.compressToolStripMenuItem1});
-            this.compressionMenuStrip.Name = "compressionMenuStrip";
-            this.compressionMenuStrip.Size = new System.Drawing.Size(140, 48);
+            compressionMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { decompressToolStripMenuItem1, compressToolStripMenuItem1 });
+            compressionMenuStrip.Name = "compressionMenuStrip";
+            compressionMenuStrip.Size = new System.Drawing.Size(140, 48);
             // 
             // decompressToolStripMenuItem1
             // 
-            this.decompressToolStripMenuItem1.Name = "decompressToolStripMenuItem1";
-            this.decompressToolStripMenuItem1.Size = new System.Drawing.Size(139, 22);
-            this.decompressToolStripMenuItem1.Text = "Decompress";
-            this.decompressToolStripMenuItem1.Click += new System.EventHandler(this.decompressToolStripMenuItem1_Click);
+            decompressToolStripMenuItem1.Name = "decompressToolStripMenuItem1";
+            decompressToolStripMenuItem1.Size = new System.Drawing.Size(139, 22);
+            decompressToolStripMenuItem1.Text = "Decompress";
+            decompressToolStripMenuItem1.Click += decompressToolStripMenuItem1_Click;
             // 
             // compressToolStripMenuItem1
             // 
-            this.compressToolStripMenuItem1.Name = "compressToolStripMenuItem1";
-            this.compressToolStripMenuItem1.Size = new System.Drawing.Size(139, 22);
-            this.compressToolStripMenuItem1.Text = "Compress";
-            this.compressToolStripMenuItem1.Click += new System.EventHandler(this.compressToolStripMenuItem1_Click);
+            compressToolStripMenuItem1.Name = "compressToolStripMenuItem1";
+            compressToolStripMenuItem1.Size = new System.Drawing.Size(139, 22);
+            compressToolStripMenuItem1.Text = "Compress";
+            compressToolStripMenuItem1.Click += compressToolStripMenuItem1_Click;
             // 
             // texturesButton
             // 
-            this.texturesButton.Image = global::PuyoTools.BitmapResources.TextureIconDark;
-            this.texturesButton.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
-            this.texturesButton.Location = new System.Drawing.Point(290, 10);
-            this.texturesButton.Margin = new System.Windows.Forms.Padding(10);
-            this.texturesButton.Name = "texturesButton";
-            this.texturesButton.Padding = new System.Windows.Forms.Padding(10);
-            this.texturesButton.Size = new System.Drawing.Size(120, 120);
-            this.texturesButton.TabIndex = 4;
-            this.texturesButton.TabStop = false;
-            this.texturesButton.Text = "Textures";
-            this.texturesButton.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
-            this.texturesButton.UseVisualStyleBackColor = true;
-            this.texturesButton.Click += new System.EventHandler(this.texturesButton_Click);
+            texturesButton.Image = (System.Drawing.Image)resources.GetObject("texturesButton.Image");
+            texturesButton.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
+            texturesButton.Location = new System.Drawing.Point(340, 12);
+            texturesButton.Margin = new System.Windows.Forms.Padding(12, 12, 12, 12);
+            texturesButton.Name = "texturesButton";
+            texturesButton.Padding = new System.Windows.Forms.Padding(12, 12, 12, 12);
+            texturesButton.Size = new System.Drawing.Size(140, 138);
+            texturesButton.TabIndex = 4;
+            texturesButton.TabStop = false;
+            texturesButton.Text = "Textures";
+            texturesButton.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
+            texturesButton.UseVisualStyleBackColor = true;
+            texturesButton.Click += texturesButton_Click;
             // 
             // archivesButton
             // 
-            this.archivesButton.Image = global::PuyoTools.BitmapResources.ArchiveIconDark;
-            this.archivesButton.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
-            this.archivesButton.Location = new System.Drawing.Point(150, 10);
-            this.archivesButton.Margin = new System.Windows.Forms.Padding(10);
-            this.archivesButton.Name = "archivesButton";
-            this.archivesButton.Padding = new System.Windows.Forms.Padding(10);
-            this.archivesButton.Size = new System.Drawing.Size(120, 120);
-            this.archivesButton.TabIndex = 3;
-            this.archivesButton.TabStop = false;
-            this.archivesButton.Text = "Archives";
-            this.archivesButton.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
-            this.archivesButton.UseVisualStyleBackColor = true;
-            this.archivesButton.Click += new System.EventHandler(this.archivesButton_Click);
+            archivesButton.Image = (System.Drawing.Image)resources.GetObject("archivesButton.Image");
+            archivesButton.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
+            archivesButton.Location = new System.Drawing.Point(176, 12);
+            archivesButton.Margin = new System.Windows.Forms.Padding(12, 12, 12, 12);
+            archivesButton.Name = "archivesButton";
+            archivesButton.Padding = new System.Windows.Forms.Padding(12, 12, 12, 12);
+            archivesButton.Size = new System.Drawing.Size(140, 138);
+            archivesButton.TabIndex = 3;
+            archivesButton.TabStop = false;
+            archivesButton.Text = "Archives";
+            archivesButton.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
+            archivesButton.UseVisualStyleBackColor = true;
+            archivesButton.Click += archivesButton_Click;
             // 
             // compressionButton
             // 
-            this.compressionButton.Image = global::PuyoTools.BitmapResources.CompressIconDark;
-            this.compressionButton.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
-            this.compressionButton.Location = new System.Drawing.Point(10, 10);
-            this.compressionButton.Margin = new System.Windows.Forms.Padding(10);
-            this.compressionButton.Name = "compressionButton";
-            this.compressionButton.Padding = new System.Windows.Forms.Padding(10);
-            this.compressionButton.Size = new System.Drawing.Size(120, 120);
-            this.compressionButton.TabIndex = 1;
-            this.compressionButton.TabStop = false;
-            this.compressionButton.Text = "Compression";
-            this.compressionButton.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
-            this.compressionButton.UseVisualStyleBackColor = true;
-            this.compressionButton.Click += new System.EventHandler(this.compressionButton_Click);
+            compressionButton.Image = (System.Drawing.Image)resources.GetObject("compressionButton.Image");
+            compressionButton.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
+            compressionButton.Location = new System.Drawing.Point(12, 12);
+            compressionButton.Margin = new System.Windows.Forms.Padding(12, 12, 12, 12);
+            compressionButton.Name = "compressionButton";
+            compressionButton.Padding = new System.Windows.Forms.Padding(12, 12, 12, 12);
+            compressionButton.Size = new System.Drawing.Size(140, 138);
+            compressionButton.TabIndex = 1;
+            compressionButton.TabStop = false;
+            compressionButton.Text = "Compression";
+            compressionButton.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
+            compressionButton.UseVisualStyleBackColor = true;
+            compressionButton.Click += compressionButton_Click;
             // 
             // archivesMenuStrip
             // 
-            this.archivesMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.extractToolStripMenuItem1,
-            this.createToolStripMenuItem1,
-            this.toolStripSeparator3,
-            this.toolStripMenuItem1});
-            this.archivesMenuStrip.Name = "archivesMenuStrip";
-            this.archivesMenuStrip.Size = new System.Drawing.Size(118, 76);
+            archivesMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { extractToolStripMenuItem1, createToolStripMenuItem1, toolStripSeparator3, toolStripMenuItem1 });
+            archivesMenuStrip.Name = "archivesMenuStrip";
+            archivesMenuStrip.Size = new System.Drawing.Size(118, 76);
             // 
             // extractToolStripMenuItem1
             // 
-            this.extractToolStripMenuItem1.Name = "extractToolStripMenuItem1";
-            this.extractToolStripMenuItem1.Size = new System.Drawing.Size(117, 22);
-            this.extractToolStripMenuItem1.Text = "Extract";
-            this.extractToolStripMenuItem1.Click += new System.EventHandler(this.extractToolStripMenuItem1_Click);
+            extractToolStripMenuItem1.Name = "extractToolStripMenuItem1";
+            extractToolStripMenuItem1.Size = new System.Drawing.Size(117, 22);
+            extractToolStripMenuItem1.Text = "Extract";
+            extractToolStripMenuItem1.Click += extractToolStripMenuItem1_Click;
             // 
             // createToolStripMenuItem1
             // 
-            this.createToolStripMenuItem1.Name = "createToolStripMenuItem1";
-            this.createToolStripMenuItem1.Size = new System.Drawing.Size(117, 22);
-            this.createToolStripMenuItem1.Text = "Create";
-            this.createToolStripMenuItem1.Click += new System.EventHandler(this.createToolStripMenuItem1_Click);
+            createToolStripMenuItem1.Name = "createToolStripMenuItem1";
+            createToolStripMenuItem1.Size = new System.Drawing.Size(117, 22);
+            createToolStripMenuItem1.Text = "Create";
+            createToolStripMenuItem1.Click += createToolStripMenuItem1_Click;
             // 
             // toolStripSeparator3
             // 
-            this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(114, 6);
+            toolStripSeparator3.Name = "toolStripSeparator3";
+            toolStripSeparator3.Size = new System.Drawing.Size(114, 6);
             // 
             // toolStripMenuItem1
             // 
-            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(117, 22);
-            this.toolStripMenuItem1.Text = "Explorer";
-            this.toolStripMenuItem1.Click += new System.EventHandler(this.toolStripMenuItem1_Click);
+            toolStripMenuItem1.Name = "toolStripMenuItem1";
+            toolStripMenuItem1.Size = new System.Drawing.Size(117, 22);
+            toolStripMenuItem1.Text = "Explorer";
+            toolStripMenuItem1.Click += toolStripMenuItem1_Click;
             // 
             // texturesMenuStrip
             // 
-            this.texturesMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.decodeToolStripMenuItem1,
-            this.encodeToolStripMenuItem1,
-            this.toolStripSeparator4,
-            this.toolStripMenuItem2});
-            this.texturesMenuStrip.Name = "texturesMenuStrip";
-            this.texturesMenuStrip.Size = new System.Drawing.Size(115, 76);
+            texturesMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { decodeToolStripMenuItem1, encodeToolStripMenuItem1, toolStripSeparator4, toolStripMenuItem2 });
+            texturesMenuStrip.Name = "texturesMenuStrip";
+            texturesMenuStrip.Size = new System.Drawing.Size(115, 76);
             // 
             // decodeToolStripMenuItem1
             // 
-            this.decodeToolStripMenuItem1.Name = "decodeToolStripMenuItem1";
-            this.decodeToolStripMenuItem1.Size = new System.Drawing.Size(114, 22);
-            this.decodeToolStripMenuItem1.Text = "Decode";
-            this.decodeToolStripMenuItem1.Click += new System.EventHandler(this.decodeToolStripMenuItem1_Click);
+            decodeToolStripMenuItem1.Name = "decodeToolStripMenuItem1";
+            decodeToolStripMenuItem1.Size = new System.Drawing.Size(114, 22);
+            decodeToolStripMenuItem1.Text = "Decode";
+            decodeToolStripMenuItem1.Click += decodeToolStripMenuItem1_Click;
             // 
             // encodeToolStripMenuItem1
             // 
-            this.encodeToolStripMenuItem1.Name = "encodeToolStripMenuItem1";
-            this.encodeToolStripMenuItem1.Size = new System.Drawing.Size(114, 22);
-            this.encodeToolStripMenuItem1.Text = "Encode";
-            this.encodeToolStripMenuItem1.Click += new System.EventHandler(this.encodeToolStripMenuItem1_Click);
+            encodeToolStripMenuItem1.Name = "encodeToolStripMenuItem1";
+            encodeToolStripMenuItem1.Size = new System.Drawing.Size(114, 22);
+            encodeToolStripMenuItem1.Text = "Encode";
+            encodeToolStripMenuItem1.Click += encodeToolStripMenuItem1_Click;
             // 
             // toolStripSeparator4
             // 
-            this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(111, 6);
+            toolStripSeparator4.Name = "toolStripSeparator4";
+            toolStripSeparator4.Size = new System.Drawing.Size(111, 6);
             // 
             // toolStripMenuItem2
             // 
-            this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(114, 22);
-            this.toolStripMenuItem2.Text = "Viewer";
-            this.toolStripMenuItem2.Click += new System.EventHandler(this.toolStripMenuItem2_Click);
+            toolStripMenuItem2.Name = "toolStripMenuItem2";
+            toolStripMenuItem2.Size = new System.Drawing.Size(114, 22);
+            toolStripMenuItem2.Text = "Viewer";
+            toolStripMenuItem2.Click += toolStripMenuItem2_Click;
             // 
             // flowLayoutPanel1
             // 
-            this.flowLayoutPanel1.Controls.Add(this.compressionButton);
-            this.flowLayoutPanel1.Controls.Add(this.archivesButton);
-            this.flowLayoutPanel1.Controls.Add(this.texturesButton);
-            this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.flowLayoutPanel1.Location = new System.Drawing.Point(0, 24);
-            this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(420, 139);
-            this.flowLayoutPanel1.TabIndex = 5;
+            flowLayoutPanel1.Controls.Add(compressionButton);
+            flowLayoutPanel1.Controls.Add(archivesButton);
+            flowLayoutPanel1.Controls.Add(texturesButton);
+            flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            flowLayoutPanel1.Location = new System.Drawing.Point(0, 24);
+            flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            flowLayoutPanel1.Name = "flowLayoutPanel1";
+            flowLayoutPanel1.Size = new System.Drawing.Size(492, 164);
+            flowLayoutPanel1.TabIndex = 5;
             // 
             // MainWindow
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(420, 163);
-            this.Controls.Add(this.flowLayoutPanel1);
-            this.Controls.Add(this.menuStrip1);
-            this.MainMenuStrip = this.menuStrip1;
-            this.Name = "MainWindow";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Puyo Tools";
-            this.menuStrip1.ResumeLayout(false);
-            this.menuStrip1.PerformLayout();
-            this.compressionMenuStrip.ResumeLayout(false);
-            this.archivesMenuStrip.ResumeLayout(false);
-            this.texturesMenuStrip.ResumeLayout(false);
-            this.flowLayoutPanel1.ResumeLayout(false);
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
+            AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            ClientSize = new System.Drawing.Size(492, 188);
+            Controls.Add(flowLayoutPanel1);
+            Controls.Add(menuStrip1);
+            MainMenuStrip = menuStrip1;
+            Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            Name = "MainWindow";
+            StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            Text = "Puyo Tools";
+            menuStrip1.ResumeLayout(false);
+            menuStrip1.PerformLayout();
+            compressionMenuStrip.ResumeLayout(false);
+            archivesMenuStrip.ResumeLayout(false);
+            texturesMenuStrip.ResumeLayout(false);
+            flowLayoutPanel1.ResumeLayout(false);
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion

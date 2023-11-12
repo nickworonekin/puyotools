@@ -71,7 +71,7 @@ namespace PuyoTools.Core.Archives
         /// </summary>
         /// <param name="destination">The stream to write to.</param>
         /// <returns>An ArchiveWriter object.</returns>
-        public abstract ArchiveWriter Create(Stream destination);
+        public abstract LegacyArchiveWriter Create(Stream destination);
         #endregion
     }
 }

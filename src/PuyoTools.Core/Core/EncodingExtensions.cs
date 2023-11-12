@@ -6,17 +6,14 @@ namespace PuyoTools.Core
 {
     internal static class EncodingExtensions
     {
-        private static readonly Lazy<Encoding> shiftJisEncoding = new Lazy<Encoding>(() => Encoding.GetEncoding("Shift_JIS"));
-        private static readonly Lazy<Encoding> utf8NoBomEncoding = new Lazy<Encoding>(() => new UTF8Encoding(false));
+        private static readonly Lazy<Encoding> shiftJisEncoding = new(() => Encoding.GetEncoding("Shift_JIS"));
+        private static readonly Lazy<Encoding> utf8NoBomEncoding = new(() => new UTF8Encoding(false));
 
-#if (NET || NETCOREAPP || NETSTANDARD) 
         static EncodingExtensions()
         {
-            // Register the CodePagesEncodingProvider for Shift JIS encoding support
-            // This is only needed when targeting .NET 5.0+/.NET Core/.NET Standard.
+            // Register the CodePagesEncodingProvider for Shift JIS encoding support.
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
         }
-#endif
 
         /// <summary>
         /// Gets an encoding for the Shift JIS format.

@@ -29,6 +29,8 @@ namespace PuyoTools.App.Formats.Archives
 
         public ArchiveReader CreateReader(Stream source) => new PvmReader(source);
 
+        public ArchiveWriter CreateWriter(Stream destination) => new PvmWriter(destination);
+
         public bool Identify(Stream source, string filename) => PvmReader.IsFormat(source);
     }
 }

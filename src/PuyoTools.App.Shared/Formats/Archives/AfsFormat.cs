@@ -29,6 +29,8 @@ namespace PuyoTools.App.Formats.Archives
 
         public ArchiveReader CreateReader(Stream source) => new AfsReader(source);
 
+        public ArchiveWriter CreateWriter(Stream destination) => new AfsWriter(destination);
+
         public bool Identify(Stream source, string filename) => AfsReader.IsFormat(source);
     }
 }

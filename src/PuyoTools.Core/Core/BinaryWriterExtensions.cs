@@ -86,17 +86,17 @@ namespace PuyoTools.Core
         public static void WriteInt64(this BinaryWriter writer, long value) => writer.Write(value);
 
         /// <inheritdoc cref="BinaryWriter.Write(ushort)"/>
-        /// <remarks>This method is an alias for <see cref="BinaryWriter.Write(short)"/>.</remarks>
+        /// <remarks>This method is an alias for <see cref="BinaryWriter.Write(ushort)"/>.</remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteUInt16(this BinaryWriter writer, ushort value) => writer.Write(value);
 
         /// <inheritdoc cref="BinaryWriter.Write(uint)"/>
-        /// <remarks>This method is an alias for <see cref="BinaryWriter.Write(int)"/>.</remarks>
+        /// <remarks>This method is an alias for <see cref="BinaryWriter.Write(uint)"/>.</remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteUInt32(this BinaryWriter writer, uint value) => writer.Write(value);
 
         /// <inheritdoc cref="BinaryWriter.Write(ulong)"/>
-        /// <remarks>This method is an alias for <see cref="BinaryWriter.Write(long)"/>.</remarks>
+        /// <remarks>This method is an alias for <see cref="BinaryWriter.Write(ulong)"/>.</remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteUInt64(this BinaryWriter writer, ulong value) => writer.Write(value);
 
@@ -273,6 +273,31 @@ namespace PuyoTools.Core
             writer.Write((byte)0);
 
             return bytes.Length + 1;
+        }
+
+        /// <summary>
+        /// Aligns the position of this stream to the specified alignment.
+        /// </summary>
+        /// <param name="writer"></param>
+        /// <param name="alignment">The byte alignment.</param>
+        /// <param name="offset">The offset to relatively align this stream to.</param>
+        /// <param name="paddingValue">The byte value to write as padding when alignment is needed.</param>
+        /// <returns>The position of this stream after alignment.</returns>
+        public static long Align(this BinaryWriter writer, int alignment, long offset = 0, byte paddingValue = default)
+        {
+            long position = writer.BaseStream.Position - offset;
+
+            if (position % alignment != 0)
+            {
+                byte[] buffer = new byte[alignment - (position % alignment)];
+                if (paddingValue != default)
+                {
+                    Array.Fill(buffer, paddingValue);
+                }
+                writer.Write(buffer);
+            }
+
+            return writer.BaseStream.Position;
         }
     }
 }

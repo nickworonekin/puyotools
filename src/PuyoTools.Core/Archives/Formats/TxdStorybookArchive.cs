@@ -17,7 +17,7 @@ namespace PuyoTools.Core.Archives
             return new TxdStorybookArchiveReader(source);
         }
 
-        public override ArchiveWriter Create(Stream destination)
+        public override LegacyArchiveWriter Create(Stream destination)
         {
             return new TxdStorybookArchiveWriter(destination);
         }
@@ -63,7 +63,7 @@ namespace PuyoTools.Core.Archives
     }
     #endregion
 
-    public class TxdStorybookArchiveWriter : ArchiveWriter
+    public class TxdStorybookArchiveWriter : LegacyArchiveWriter
     {
         public TxdStorybookArchiveWriter(Stream destination) : base(destination) { }
 

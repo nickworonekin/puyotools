@@ -15,7 +15,7 @@ namespace PuyoTools.Core.Archives
             return new U8ArchiveReader(source);
         }
 
-        public override ArchiveWriter Create(Stream destination)
+        public override LegacyArchiveWriter Create(Stream destination)
         {
             return new U8ArchiveWriter(destination);
         }
@@ -128,7 +128,7 @@ namespace PuyoTools.Core.Archives
     #endregion
 
     #region Archive Writer
-    public class U8ArchiveWriter : ArchiveWriter
+    public class U8ArchiveWriter : LegacyArchiveWriter
     {
         public U8ArchiveWriter(Stream destination) : base(destination) { }
 

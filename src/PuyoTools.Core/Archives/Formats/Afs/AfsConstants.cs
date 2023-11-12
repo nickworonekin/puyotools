@@ -8,6 +8,6 @@ namespace PuyoTools.Archives.Formats.Afs
 {
     internal class AfsConstants
     {
-        internal static ReadOnlySpan<byte> MagicCode => new byte[] { (byte)'A', (byte)'F', (byte)'S', 0 };
+        public static ReadOnlySpan<byte> MagicCode => new byte[] { (byte)'A', (byte)'F', (byte)'S', 0 };
     }
 }

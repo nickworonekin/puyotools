@@ -29,6 +29,8 @@ namespace PuyoTools.App.Formats.Archives
 
         public ArchiveReader CreateReader(Stream source) => new SpkReader(source);
 
+        public ArchiveWriter CreateWriter(Stream destination) => null;
+
         public bool Identify(Stream source, string filename) => SpkReader.IsFormat(source);
     }
 }

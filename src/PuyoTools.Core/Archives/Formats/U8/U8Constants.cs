@@ -8,6 +8,6 @@ namespace PuyoTools.Archives.Formats.U8
 {
     internal static class U8Constants
     {
-        internal static ReadOnlySpan<byte> MagicCode => new byte[] { (byte)'U', 0xAA, (byte)'8', (byte)'-' };
+        public static ReadOnlySpan<byte> MagicCode => new byte[] { (byte)'U', 0xAA, (byte)'8', (byte)'-' };
     }
 }
