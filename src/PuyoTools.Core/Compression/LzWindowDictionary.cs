@@ -22,6 +22,10 @@ namespace PuyoTools.Core.Compression
 
         public int[] Search(byte[] decompressedData, uint offset, uint length)
         {
+            //do not allow the offset to go past the length and accidently remove entries
+            if (offset > length)
+                return new int[] { 0, 0 };
+
             RemoveOldEntries(decompressedData[offset]); // Remove old entries for this index
 
             if (offset < minMatchAmount || length - offset < minMatchAmount) // Can't find matches if there isn't enough data
@@ -37,7 +41,11 @@ namespace PuyoTools.Core.Compression
                 matchStart = offsetList[decompressedData[offset]][i];
                 matchLength = 1;
 
-                while (matchLength < maxMatchAmount && matchLength < windowLength && matchStart + matchLength < offset && offset + matchLength < length && decompressedData[offset + matchLength] == decompressedData[matchStart + matchLength])
+                while (matchLength < maxMatchAmount && 
+                    matchLength < windowLength && 
+                    matchStart < offset && //removed the + match length since we can go beyond the offset
+                    offset + matchLength < length && 
+                    decompressedData[offset + matchLength] == decompressedData[matchStart + matchLength])
                     matchLength++;
 
                 if (matchLength >= minMatchAmount && matchLength > match[1]) // This is a good match
@@ -73,7 +81,7 @@ namespace PuyoTools.Core.Compression
         }
 
         // Remove old entries
-        private void RemoveOldEntries(byte index)
+        private void RemoveOldEntries(byte index) 
         {
             for (int i = 0; i < offsetList[index].Count; ) // Don't increment i
             {
@@ -108,6 +116,17 @@ namespace PuyoTools.Core.Compression
         {
             for (int i = 0; i < length; i++)
                 AddEntry(decompressedData, offset + i);
+        }
+        public void RemoveEntry(byte[] decompressedData, int offset)
+        {
+            var list = offsetList[decompressedData[offset]];
+            list.RemoveAt(list.Count - 1);
+            SlideWindow(-1);
+        }
+        public void RemoveEntryRange(byte[] decompressedData, int offset, int length)
+        {
+            for (int i = 0; i < length; i++)
+                RemoveEntry(decompressedData, offset - i);
         }
     }
 }
