@@ -371,6 +371,10 @@ namespace PuyoTools.Core.Compression
                                 bufferWriter.Write(sourceArray, sourcePointer, matchLength);
                             }
                             sourcePointer += matchLength;
+                            if (sourcePointer < sourceLength)
+                            {
+                                match = dictionary.Search(sourceArray, (uint)sourcePointer, (uint)sourceLength);
+                            }
 
                         }
 
@@ -401,7 +405,7 @@ namespace PuyoTools.Core.Compression
                     buffer.SetLength(0);
 
 
-                }
+                } 
                 if (flagEnd)
                 {
                     writer.WriteByte(0xFC);
