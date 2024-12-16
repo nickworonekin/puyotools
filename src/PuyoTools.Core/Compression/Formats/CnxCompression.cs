@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Net.WebSockets;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -170,13 +171,18 @@ namespace PuyoTools.Core.Compression
             // Initalize the LZ dictionary
             LzWindowDictionary dictionary = new LzWindowDictionary();
             dictionary.SetWindowSize(0x800);
-            dictionary.SetMinMatchAmount(4);
-            dictionary.SetMaxMatchAmount(LENGTH + 4);
+            var minLength = 4;
+            var maxLength = LENGTH + 4;
+            dictionary.SetMinMatchAmount(minLength);
+            dictionary.SetMaxMatchAmount(maxLength);
 
-            using (var writer = destination.AsBinaryWriter())
-            using (var buffer = new MemoryStream(256)) // Will never contain more than 256 bytes
-            using (var bufferWriter = new BinaryWriter(buffer))
+            using var writer = destination.AsBinaryWriter();
+            using var buffer = new MemoryStream(256); // Will never contain more than 256 bytes
+            using var bufferWriter = new BinaryWriter(buffer);
+
+            try
             {
+
                 // Write out the header
                 // Magic code
                 writer.Write(magicCode);
@@ -191,177 +197,195 @@ namespace PuyoTools.Core.Compression
 
                 // Set the initial match
                 int[] match = new[] { 0, 0 };
-                bool flagEnd = false;
+
+                int code = 0;
+
                 // Start compression
-                while (sourcePointer < sourceLength)
+                while (sourcePointer <= sourceLength)
                 {
                     byte flag = 0;
-
+                   
                     for (int i = 0; i < 4; i++)
                     {
-                        if (match[1] > 0) // There is a match
+                        // Check to see if we reached the end of the file
+                        if (sourcePointer >= sourceLength)
                         {
-
-                            if (((writer.BaseStream.Length & 0x7FF) + 1 + bufferWriter.BaseStream.Length + 2) >= 0x7FF)
+                            if (i == 0)
                             {
-                                var remainder = (byte)(0x800 - ((writer.BaseStream.Length & 0x7FF) + 1 + bufferWriter.BaseStream.Length) - 1);
+                                writer.WriteByte(0xFC);
+                                writer.WriteByte(0x0);
+                            }
+                            else
+                            {
                                 flag |= (byte)(0 << (i * 2));
+                                //i++;
                                 for (i++; i < 4; i++)
-                                    flag |= (byte)(3 << (i * 2));
-
-                                bufferWriter.WriteByte(remainder);
-                                for (var r = 0; r < remainder; r++)
-                                    bufferWriter.WriteByte(0xCD);
-                                if (sourcePointer < sourceLength)
-                                {
-                                    match = dictionary.Search(sourceArray, (uint)sourcePointer, (uint)sourceLength - 1);
-
-                                }
-
+                                    flag |= (byte)(0x3 << (i * 2));
+                                bufferWriter.WriteByte(0x0);
                             }
-                            else
-                            {
-
-                                flag |= (byte)(2 << (i * 2));
-
-                                bufferWriter.WriteUInt16BigEndian((ushort)((((match[0] - 1) & 0x7FF) << SHIFT) | ((match[1] - 4) & LENGTH)));
-
-                                dictionary.AddEntryRange(sourceArray, sourcePointer, match[1]);
-
-                                sourcePointer += match[1];
-
-                                // Search for a match
-                                if (sourcePointer < sourceLength)
-                                {
-                                    match = dictionary.Search(sourceArray, (uint)sourcePointer, (uint)sourceLength - 1);
-                                }
-                            }
+                            sourcePointer++;
+                            break;
                         }
-                        else // There is not a match
+                        else
                         {
-                            dictionary.AddEntry(sourceArray, sourcePointer);
 
-                            byte matchLength = 1;
 
-                            // Search for a match
-                            while (sourcePointer + matchLength < sourceLength
-                                && matchLength < 255
-                                && (match = dictionary.Search(sourceArray, (uint)(sourcePointer + matchLength), (uint)sourceLength - 1))[1] == 0)
+                            byte matchLength = 0;
+
+                            match = dictionary.Search(sourceArray, (uint)sourcePointer, (uint)sourceLength-1);
+
+                            //determine unfound runlength
+                            if (match[1] == 0)
                             {
-                                dictionary.AddEntry(sourceArray, sourcePointer + matchLength);
+                                while (
+                                    ((dictionary.Search(sourceArray, (uint)(sourcePointer + matchLength), (uint)sourceLength-1 ))[1] == 0)
+                                    && sourcePointer + matchLength < sourceLength
+                                    && matchLength < 255
+                                    && sourcePointer > 0
+                                    )
 
-                                matchLength++;
-                            }
-
-
-                            int code = 0;
-
-                            // Determine the type of flag to write based on the length of the match
-                            if (matchLength > 1 && sourcePointer > 0)
-                            {
-                                code = 3;
-                            }
-                            else
-                            {
-                                if (matchLength > 1)
                                 {
-                                    //System.Diagnostics.Debug.Print("Excess:" + (matchLength - 1).ToString());
-                                    dictionary.RemoveEntryRange(sourceArray, sourcePointer + matchLength - 1, matchLength - 1);
-                                }
-                                code = 1;
-
-                                //redo
-                                matchLength = 1;
-                                match = dictionary.Search(sourceArray, (uint)(sourcePointer + matchLength), (uint)sourceLength - 1);
-                            }
-
-                            //ff6,17f4,17fe,27f6,27fd
-                            if (code == 1 && (((writer.BaseStream.Length & 0x7FF) + 1 + bufferWriter.BaseStream.Length + matchLength) >= 0x7FE))
-                            {
-
-
-                                var remainder = (int)(0x800 - ((writer.BaseStream.Length & 0x7FF) + 1 + bufferWriter.BaseStream.Length + 0) - 1);
-
-                                remainder = remainder > 0 ? remainder : 0;
-                                dictionary.RemoveEntryRange(sourceArray, sourcePointer + matchLength - 1, (int)(matchLength));
-                                matchLength = 0;
-
-
-                                if (i < 4)
-                                {
-                                    flag |= (byte)(0 << (i * 2));
-                                    for (i++; i < 4; i++)
-                                        flag |= (byte)(0x3 << (i * 2));
-
-                                    bufferWriter.WriteByte((byte)remainder);
-                                    for (var r = 0; r < remainder; r++)
-                                        bufferWriter.WriteByte(0xCD);
-
-                                    if (sourcePointer < sourceLength)
+                                    if (sourcePointer + matchLength >= LENGTH)
                                     {
-                                        match = dictionary.Search(sourceArray, (uint)sourcePointer, (uint)sourceLength);
-
+                                        dictionary.AddEntry(sourceArray, sourcePointer + matchLength);
                                     }
+                                    matchLength++;
                                 }
-
-                            }
-                            else if (code == 3 && (((writer.BaseStream.Length & 0x7FF) + 1 + bufferWriter.BaseStream.Length + 1 + matchLength) >= 0x7FF))
-                            {
-
-                                var pos = ((writer.BaseStream.Length & 0x7FF) + 1 + bufferWriter.BaseStream.Length);
-                                var remainder = (int)(0x800 - (writer.BaseStream.Length & 0x7FF)) - 1 - bufferWriter.BaseStream.Length;
-
-                                if (remainder >= 4)
+                                if (sourcePointer == 0)
                                 {
-                                    var newMatchLength = remainder - 3;
-                                    //reset slide
-                                    //System.Diagnostics.Debug.Print("Excess:" + (matchLength - newMatchLength).ToString());
-                                    dictionary.RemoveEntryRange(sourceArray, sourcePointer + matchLength - 1, (int)(matchLength - newMatchLength));
-
-                                    matchLength = (byte)(newMatchLength);
-                                    match = dictionary.Search(sourceArray, (uint)(sourcePointer + matchLength), (uint)sourceLength);
-
-
-                                    code = matchLength > 1 ? 3 : 1;
-                                    flag |= (byte)(code << (i * 2));
-                                    if (code == 3)
-                                    {
-                                        bufferWriter.WriteByte(matchLength);
-                                        remainder -= 1;
-                                    }
-                                    bufferWriter.Write(sourceArray, sourcePointer, matchLength);
-                                    i++;
-                                    remainder -= matchLength;
-                                    remainder -= 1;
+                                    dictionary.AddEntryRange(sourceArray, sourcePointer + matchLength,LENGTH);
+                                }
+                                // Determine the type of flag to write based on the length of the match
+                                if (matchLength > 1 && sourcePointer > 0)
+                                {
+                                    code = 3;
                                 }
                                 else
                                 {
-                                    remainder -= 1;
-                                    dictionary.RemoveEntryRange(sourceArray, sourcePointer + matchLength - 1, (int)(matchLength));
-                                    matchLength = 0;
-
-
-                                }
-
-                                if (i < 4)
-                                {
-                                    flag |= (byte)(0 << (i * 2));
-                                    for (i++; i < 4; i++)
-                                        flag |= (byte)(0x3 << (i * 2));
-
-                                    bufferWriter.WriteByte((byte)remainder);
-                                    for (var r = 0; r < remainder; r++)
-                                        bufferWriter.WriteByte(0xCD);
-
-                                    if (sourcePointer < sourceLength)
-                                    {
-                                        match = dictionary.Search(sourceArray, (uint)sourcePointer, (uint)sourceLength);
-
-                                    }
+                                    code = 1;
+                                    matchLength = 1;
                                 }
 
                             }
                             else
+                            {
+
+                                // Search for a match
+                                match = dictionary.Search(sourceArray, (uint)(sourcePointer + matchLength), (uint)sourceLength-1);
+
+                                matchLength = (byte)match[1];
+                                if (sourcePointer >= LENGTH)
+                                {
+                                    dictionary.AddEntryRange(sourceArray, sourcePointer, matchLength);
+                                    
+                                }
+                                else
+                                {
+                                    var diff = LENGTH - sourcePointer;
+                                    if((matchLength - diff) > 0)
+                                     dictionary.AddEntryRange(sourceArray, sourcePointer + diff, matchLength - diff);
+                                }
+                                
+
+                                code = 2;
+                            }
+
+
+                            if (((writer.BaseStream.Length & 0x7FF) + bufferWriter.BaseStream.Length + (code == 2 ? 2 : matchLength)) >= 0x7f7)
+                            {
+                                var remainder = (byte)(0x800 - ((writer.BaseStream.Length & 0x7FF) + bufferWriter.BaseStream.Length));
+                            }
+                            //current stream + flag + buffer + code3 count + matchlength
+                            var len = ((writer.BaseStream.Length & 0x7FF) + 1 + bufferWriter.BaseStream.Length + (code == 3 ? 1 : 0) + (code == 2 ? 2 : matchLength));
+                            if (len >= 0x7Fe + ((code == 2) ? 1 : 0))
+                            {
+                                if (code == 3)
+                                {
+                                    len -= matchLength;
+
+                                    var newMatchLength = (0x7FE - len);
+                                    if (newMatchLength >= 0)
+                                    {
+                                        if (newMatchLength > 0)
+                                        {
+                                            var leftover = (int)(matchLength - newMatchLength);
+                                            dictionary.RemoveEntryRange(sourceArray, sourcePointer + matchLength - 1, leftover);
+                                            matchLength = (byte)newMatchLength;
+                                            len += matchLength;
+                                            if (matchLength == 1)
+                                            {
+                                                code = 1;
+                                                len--;//we need to take out the code3 count.
+                                            }
+                                            else
+                                            {
+                                                bufferWriter.WriteByte(matchLength);
+                                            }
+                                            flag |= (byte)(code << (i * 2));
+
+
+                                            bufferWriter.Write(sourceArray, sourcePointer, matchLength);
+                                            code = 0;
+                                            i++;
+
+                                        }
+                                        else
+                                        {
+                                            len -= 1;//we need to take out the code3 count.
+                                        }
+
+                                    }
+                                    else
+                                    {
+                                        len -= 1;//we need to take out the code3 count.
+                                    }
+
+                                }
+                                else if (code == 2)
+                                {
+                                    len -= 2;
+                                }
+                                else
+                                {
+                                    dictionary.RemoveEntry(sourceArray, sourcePointer + 1 - 1);
+                                    code = 0;
+                                    matchLength = 0;
+                                    len--;
+                                }
+
+                                var remainder = (byte)(0x800 - (len + 1));
+                                if (i < 4)
+                                {
+                                    flag |= (byte)(0 << (i * 2));
+                                    for (i++; i < 4; i++)
+                                        flag |= (byte)(3 << (i * 2));
+                                }
+                                else
+                                {
+                                    //condition where we need to add a new flag, but we are beyond the 4 length limit
+                                    bufferWriter.WriteByte(0xFC); //new flag with code 2
+                                    remainder -= 1;//take a byte away from the remainder to allocate for the flag
+                                }
+                                bufferWriter.WriteByte(remainder);
+                                for (var r = 0; r < remainder; r++)
+                                    bufferWriter.WriteByte(0xCD);
+                                writer.WriteByte(flag);
+                                buffer.WriteTo(destination);
+                                buffer.SetLength(0);
+                                flag = 0;
+                                i = 0;
+                            }
+
+                            if (code == 2) // There is a match
+                            {
+                                flag |= (byte)(2 << (i * 2));
+                                bufferWriter.WriteUInt16BigEndian((ushort)((((match[0] - 1) & 0x7FF) << SHIFT) | ((match[1] - minLength) & LENGTH)));
+                            }
+                            else if (code == 0)
+                            {
+                                i -= 1; //This means there was nothing new to process, so run it again.
+                            }
+                            else // There is not a match
                             {
                                 flag |= (byte)(code << (i * 2));
                                 if (code == 3)
@@ -370,50 +394,21 @@ namespace PuyoTools.Core.Compression
                                 }
                                 bufferWriter.Write(sourceArray, sourcePointer, matchLength);
                             }
+
                             sourcePointer += matchLength;
-                            if (sourcePointer < sourceLength)
-                            {
-                                match = dictionary.Search(sourceArray, (uint)sourcePointer, (uint)sourceLength);
-                            }
-
                         }
 
-                        // Check to see if we reached the end of the file
-                        if (sourcePointer >= sourceLength)
-                        {
 
-                            if (i == 3)
-                            {
-                                flagEnd = true;
-                            }
-                            else
-                            {
-                                flag |= (byte)(0 << (i * 2));
-                                i++;
-                                for (i++; i < 4; i++)
-                                    flag |= (byte)(0x3 << (i * 2));
-                                bufferWriter.WriteByte(0x0);
-                            }
-                            break;
-                        }
+                    }
+                    if (buffer.Length > 0)
+                    {
+                        // Flush the buffer and write it to the destination stream
+                        writer.WriteByte(flag);
+                        buffer.WriteTo(destination);
+                        buffer.SetLength(0);
                     }
 
-
-                    // Flush the buffer and write it to the destination stream
-                    writer.WriteByte(flag);
-                    buffer.WriteTo(destination);
-                    buffer.SetLength(0);
-
-
-                } 
-                if (flagEnd)
-                {
-                    writer.WriteByte(0xFC);
-                    writer.WriteByte(0x0);
                 }
-
-
-
 
                 // Write the final flag of 0
                 writer.WriteByte(0);
@@ -421,6 +416,10 @@ namespace PuyoTools.Core.Compression
                 // Go back to the beginning of the file and write out the compressed length
                 var destinationLength = (int)(destination.Position - destinationStartPosition);
                 writer.At(destinationStartPosition + 8, x => x.WriteInt32BigEndian(destinationLength - 16));
+            }
+            catch (Exception ex)
+            {
+                throw;
             }
         }
 
