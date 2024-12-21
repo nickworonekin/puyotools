@@ -28,7 +28,9 @@ namespace PuyoTools.Core.Compression
 
             RemoveOldEntries(decompressedData[offset]); // Remove old entries for this index
 
-            if (offset < minMatchAmount || length - offset < minMatchAmount) // Can't find matches if there isn't enough data
+            //offset can be before minimum match amount
+            if (/*offset < minMatchAmount ||*/ length - offset < minMatchAmount) // Can't find matches if there isn't enough data
+
                 return new int[] { 0, 0 };
 
             // Start finding matches
