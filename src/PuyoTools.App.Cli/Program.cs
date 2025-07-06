@@ -3,9 +3,6 @@ using PuyoTools.App.Cli.Commands.Compression;
 using PuyoTools.App.Cli.Commands.Textures;
 using System;
 using System.CommandLine;
-using System.CommandLine.Builder;
-using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
 using System.Threading.Tasks;
 
 namespace PuyoTools.App.Cli
@@ -33,15 +30,17 @@ namespace PuyoTools.App.Cli
                 },
             };
 
-            var parser = new CommandLineBuilder(rootCommand)
-                .UseDefaults()
-                .UseExceptionHandler(ExceptionHandler)
-                .Build();
-
-            return await parser.InvokeAsync(args);
+            try
+            {
+                return await rootCommand.Parse(args).InvokeAsync();
+            }
+            catch (Exception e)
+            {
+                return HandleException(e);
+            }
         }
 
-        static void ExceptionHandler(Exception e, InvocationContext context)
+        static int HandleException(Exception e)
         {
             if (e is System.Reflection.TargetInvocationException)
             {
@@ -56,7 +55,7 @@ namespace PuyoTools.App.Cli
 #endif
             Console.ResetColor();
 
-            context.ExitCode = e.HResult;
+            return e.HResult;
         }
     }
 }

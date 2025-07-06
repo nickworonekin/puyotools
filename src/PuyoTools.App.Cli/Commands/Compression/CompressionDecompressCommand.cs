@@ -2,14 +2,9 @@
 using Microsoft.Extensions.FileSystemGlobbing.Abstractions;
 using PuyoTools.App.Tools;
 using System;
-using System.Collections.Generic;
 using System.CommandLine;
-using System.CommandLine.IO;
-using System.CommandLine.NamingConventionBinder;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PuyoTools.App.Cli.Commands.Compression
 {
@@ -18,19 +13,46 @@ namespace PuyoTools.App.Cli.Commands.Compression
         public CompressionDecompressCommand()
             : base("decompress", "Decompress files")
         {
-            AddOption(new Option<string[]>(new string[] { "-i", "--input" }, "Files to decompress (pattern matching supported).")
+            Option<string[]> inputOption = new("--input", "-i")
             {
-                IsRequired = true,
-            });
-            AddOption(new Option<string[]>("--exclude", "Files to exclude from being decompressed (pattern matching supported)."));
-            AddOption(new Option<bool>("--overwrite", "Overwrite compressed file with its decompressed file."));
-            AddOption(new Option<bool>("--delete", "Delete compressed file on successful decompression."));
-            //AddOption(new Option("--quiet", "Do not produce console output"));
+                Description = "Files to decompress (pattern matching supported).",
+                Required = true,
+            };
+            Options.Add(inputOption);
 
-            Handler = CommandHandler.Create<CompressionDecompressOptions, IConsole>(Execute);
+            Option<string[]> excludeOption = new("--exclude")
+            {
+                Description = "Files to exclude from being decompressed (pattern matching supported)."
+            };
+            Options.Add(excludeOption);
+
+            Option<bool> overwriteOption = new("--overwrite")
+            {
+                Description = "Overwrite compressed file with its decompressed file."
+            };
+            Options.Add(overwriteOption);
+
+            Option<bool> deleteOption = new("--delete")
+            {
+                Description = "Delete compressed file on successful decompression."
+            };
+            Options.Add(deleteOption);
+
+            SetAction(parseResult =>
+            {
+                CompressionDecompressOptions options = new()
+                {
+                    Input = parseResult.GetValue(inputOption),
+                    Exclude = parseResult.GetValue(excludeOption),
+                    Overwrite = parseResult.GetValue(overwriteOption),
+                    Delete = parseResult.GetValue(deleteOption),
+                };
+
+                Execute(options, parseResult.Configuration.Output);
+            });
         }
 
-        private void Execute(CompressionDecompressOptions options, IConsole console)
+        private void Execute(CompressionDecompressOptions options, TextWriter writer)
         {
             // Get the files to process by the tool
             var matcher = new Matcher();
@@ -55,7 +77,7 @@ namespace PuyoTools.App.Cli.Commands.Compression
             // Create the progress handler (only if the quiet option is not set)
             var progress = new SynchronousProgress<ToolProgress>(x =>
             {
-                console.Out.WriteLine($"Processing {x.File} ... ({x.Progress:P0})");
+                writer.WriteLine($"Processing {x.File} ... ({x.Progress:P0})");
             });
 
             // Execute the tool

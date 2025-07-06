@@ -3,38 +3,61 @@ using Microsoft.Extensions.FileSystemGlobbing.Abstractions;
 using PuyoTools.App.Formats.Compression;
 using PuyoTools.App.Tools;
 using System;
-using System.Collections.Generic;
 using System.CommandLine;
-using System.CommandLine.IO;
-using System.CommandLine.NamingConventionBinder;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PuyoTools.App.Cli.Commands.Compression
 {
     class CompressionFormatCompressCommand : Command
     {
-        private readonly ICompressionFormat format;
+        private readonly ICompressionFormat _format;
 
         public CompressionFormatCompressCommand(ICompressionFormat format)
             : base(format.CommandName, $"Compress using {format.Name} compression")
         {
-            this.format = format;
+            _format = format;
 
-            AddOption(new Option<string[]>(new string[] { "-i", "--input" }, "Files to compress (pattern matching supported).")
+            Option<string[]> inputOption = new("--input", "-i")
             {
-                IsRequired = true,
-            });
-            AddOption(new Option<string[]>("--exclude", "Files to exclude from being compressed (pattern matching supported)."));
-            AddOption(new Option<bool>("--overwrite", "Overwrite source file with its compressed file."));
-            AddOption(new Option<bool>("--delete", "Delete source file on successful compression."));
+                Description = "Files to compress (pattern matching supported).",
+                Required = true,
+            };
+            Options.Add(inputOption);
 
-            Handler = CommandHandler.Create<CompressionFormatCompressOptions, IConsole>(Execute);
+            Option<string[]> excludeOption = new("--exclude")
+            {
+                Description = "Files to exclude from being compressed (pattern matching supported)."
+            };
+            Options.Add(excludeOption);
+
+            Option<bool> overwriteOption = new("--overwrite")
+            {
+                Description = "Overwrite source file with its compressed file."
+            };
+            Options.Add(overwriteOption);
+
+            Option<bool> deleteOption = new("--delete")
+            {
+                Description = "Delete source file on successful compression."
+            };
+            Options.Add(deleteOption);
+
+            SetAction(parseResult =>
+            {
+                CompressionFormatCompressOptions options = new()
+                {
+                    Input = parseResult.GetValue(inputOption),
+                    Exclude = parseResult.GetValue(excludeOption),
+                    Overwrite = parseResult.GetValue(overwriteOption),
+                    Delete = parseResult.GetValue(deleteOption),
+                };
+
+                Execute(options, parseResult.Configuration.Output);
+            });
         }
 
-        protected virtual void Execute(CompressionFormatCompressOptions options, IConsole console)
+        protected virtual void Execute(CompressionFormatCompressOptions options, TextWriter writer)
         {
             // Get the files to process by the tool
             var matcher = new Matcher();
@@ -59,11 +82,11 @@ namespace PuyoTools.App.Cli.Commands.Compression
             // Create the progress handler (only if the quiet option is not set)
             var progress = new SynchronousProgress<ToolProgress>(x =>
             {
-                console.Out.WriteLine($"Processing {x.File} ... ({x.Progress:P0})");
+                writer.WriteLine($"Processing {x.File} ... ({x.Progress:P0})");
             });
 
             // Execute the tool
-            var tool = new CompressionCompressor(format, toolOptions);
+            var tool = new CompressionCompressor(_format, toolOptions);
             tool.Execute(files, progress);
         }
     }

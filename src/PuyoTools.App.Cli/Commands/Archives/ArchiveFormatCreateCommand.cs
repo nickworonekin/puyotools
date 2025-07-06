@@ -1,46 +1,77 @@
-﻿using Microsoft.Extensions.FileSystemGlobbing;
+﻿using System;
+using System.Collections.Generic;
+using System.CommandLine;
+using System.IO;
+using System.Linq;
+using Microsoft.Extensions.FileSystemGlobbing;
 using Microsoft.Extensions.FileSystemGlobbing.Abstractions;
 using PuyoTools.App.Formats.Archives;
 using PuyoTools.App.Formats.Compression;
 using PuyoTools.App.Tools;
-using System;
-using System.Collections.Generic;
-using System.CommandLine;
-using System.CommandLine.IO;
-using System.CommandLine.NamingConventionBinder;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PuyoTools.App.Cli.Commands.Archives
 {
     class ArchiveFormatCreateCommand : Command
     {
-        private readonly IArchiveFormat format;
+        private readonly IArchiveFormat _format;
+
+        private readonly Option<string[]> _inputOption;
+        private readonly Option<string[]> _excludeOption;
+        private readonly Option<string> _outputOption;
+        private readonly Option<string> _compressOption;
 
         public ArchiveFormatCreateCommand(IArchiveFormat format)
             : base(format.CommandName, $"Create {format.Name} archive")
         {
-            this.format = format;
+            _format = format;
 
-            AddOption(new Option<string[]>(new string[] { "-i", "--input" }, "Files to add to the archive (pattern matching supported).")
+            _inputOption = new("--input", "-i")
             {
-                IsRequired = true,
+                Description = "Files to add to the archive (pattern matching supported).",
+                Required = true,
                 AllowMultipleArgumentsPerToken = true,
-            });
-            AddOption(new Option<string[]>("--exclude", "Files to exclude from being added to the archive (pattern matching supported)."));
-            AddOption(new Option<string>(new string[] { "-o", "--output" }, "The name of the archive to create.")
-            {
-                IsRequired = true,
-            });
-            AddOption(new Option<string>("--compress", "Compress the archive")
-                .FromAmong(CompressionFactory.EncoderFormats.Select(x => x.CommandName).ToArray()));
+            };
+            Add(_inputOption);
 
-            Handler = CommandHandler.Create<ArchiveCreateOptions, IConsole>(Execute);
+            _excludeOption = new("--exclude")
+            {
+                Description = "Files to exclude from being added to the archive (pattern matching supported)."
+            };
+            Add(_excludeOption);
+
+            _outputOption = new("--output", "-o")
+            {
+                Description = "The name of the archive to create.",
+                Required = true,
+            };
+            Add(_outputOption);
+
+            _compressOption = new Option<string>("--compress")
+            {
+                Description = "Compress the archive"
+            }
+                .AcceptOnlyFromAmong(CompressionFactory.EncoderFormats.Select(x => x.CommandName).ToArray());
+            Add(_compressOption);
+
+            SetAction(parseResult => Execute(CreateOptions(parseResult), parseResult.Configuration.Output));
         }
 
-        protected void Execute(ArchiveCreateOptions options, IConsole console)
+        protected virtual ArchiveCreateOptions CreateOptions(ParseResult parseResult)
+        {
+            ArchiveCreateOptions options = new();
+            SetBaseOptions(parseResult, options);
+            return options;
+        }
+
+        protected void SetBaseOptions(ParseResult parseResult, ArchiveCreateOptions options)
+        {
+            options.Input = parseResult.GetRequiredValue(_inputOption);
+            options.Exclude = parseResult.GetValue(_excludeOption);
+            options.Output = parseResult.GetRequiredValue(_outputOption);
+            options.Compress = parseResult.GetValue(_compressOption);
+        }
+
+        protected void Execute(ArchiveCreateOptions options, TextWriter writer)
         {
             var files = new List<ArchiveCreatorFileEntry>();
             
@@ -92,11 +123,11 @@ namespace PuyoTools.App.Cli.Commands.Archives
             // Create the progress handler (only if the quiet option is not set)
             var progress = new SynchronousProgress<ToolProgress>(x =>
             {
-                console.Out.WriteLine($"Processing {x.File} ... ({x.Progress:P0})");
+                writer.WriteLine($"Processing {x.File} ... ({x.Progress:P0})");
             });
 
             // Execute the tool
-            var tool = new ArchiveCreator(format, toolOptions, options as IArchiveFormatOptions);
+            var tool = new ArchiveCreator(_format, toolOptions, options as IArchiveFormatOptions);
             tool.Execute(files, options.Output, progress);
         }
     }

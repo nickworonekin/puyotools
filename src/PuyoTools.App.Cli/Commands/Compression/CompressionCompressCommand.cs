@@ -16,7 +16,7 @@ namespace PuyoTools.App.Cli.Commands.Compression
             // Add commands for all compression formats that can be used to compress files.
             foreach (var format in CompressionFactory.EncoderFormats)
             {
-                AddCommand(format.GetCompressCommand());
+                Add(format.GetCompressCommand());
             }
         }
     }

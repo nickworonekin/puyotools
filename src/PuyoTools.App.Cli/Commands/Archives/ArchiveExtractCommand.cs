@@ -4,7 +4,6 @@ using PuyoTools.App.Tools;
 using System;
 using System.Collections.Generic;
 using System.CommandLine;
-using System.CommandLine.NamingConventionBinder;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -17,26 +16,102 @@ namespace PuyoTools.App.Cli.Commands.Archives
         public ArchiveExtractCommand()
             : base("extract", "Extract archives")
         {
-            AddOption(new Option<string[]>(new string[] { "-i", "--input" }, "Archives to extract (pattern matching supported).")
+            Option<string[]> inputOption = new("--input", "-i")
             {
-                IsRequired = true,
-            });
-            AddOption(new Option<string[]>("--exclude", "Archives to exclude from being extracted (pattern matching supported)."));
-            AddOption(new Option<bool>("--decompress", "Extract compressed archives"));
-            AddOption(new Option<bool>("--extract-source-folder", "Extract files to the same folder as the source archive."));
-            AddOption(new Option<bool>("--extract-same-name", "Extract files to a folder with the same name as the source archive (and delete the source archive)."));
-            AddOption(new Option<bool>("--delete", "Delete archive on successful extraction."));
-            AddOption(new Option<bool>("--decompress-extracted", "Decompress extracted files."));
-            AddOption(new Option<bool>("--file-number", "Use file number as filename."));
-            AddOption(new Option<bool>("--prepend-file-number", "Prepend file number to filename."));
-            AddOption(new Option<bool>("--extract-if-archive", "Extract extracted files that are archives."));
-            AddOption(new Option<bool>("--decode-if-texture", "Decode extracted files that are textures."));
-            AddOption(new Option<bool>("--verbose", "Show verbose output for archives being extracted"));
+                Description = "Archives to extract (pattern matching supported).",
+                Required = true,
+            };
+            Add(inputOption);
 
-            Handler = CommandHandler.Create<ArchiveExtractOptions, IConsole>(Execute);
+            Option<string[]> excludeOption = new("--exclude")
+            {
+                Description = "Archives to exclude from being extracted (pattern matching supported)."
+            };
+            Add(excludeOption);
+
+            Option<bool> decompressOption = new("--decompress")
+            {
+                Description = "Extract compressed archives"
+            };
+            Add(decompressOption);
+
+            Option<bool> extractSourceFolderOption = new("--extract-source-folder")
+            {
+                Description = "Extract files to the same folder as the source archive."
+            };
+            Add(extractSourceFolderOption);
+
+            Option<bool> extractSameNameOption = new("--extract-same-name")
+            {
+                Description = "Extract files to a folder with the same name as the source archive (and delete the source archive)."
+            };
+            Add(extractSameNameOption);
+
+            Option<bool> deleteOption = new("--delete")
+            {
+                Description = "Delete archive on successful extraction."
+            };
+            Add(deleteOption);
+
+            Option<bool> decompressExtractedOption = new("--decompress-extracted")
+            {
+                Description = "Decompress extracted files."
+            };
+            Add(decompressExtractedOption);
+
+            Option<bool> fileNumberOption = new("--file-number")
+            {
+                Description = "Use file number as filename."
+            };
+            Add(fileNumberOption);
+
+            Option<bool> prependFileNumberOption = new("--prepend-file-number")
+            {
+                Description = "Prepend file number to filename."
+            };
+            Add(prependFileNumberOption);
+
+            Option<bool> extractIfArchiveOption = new("--extract-if-archive")
+            {
+                Description = "Extract extracted files that are archives."
+            };
+            Add(extractIfArchiveOption);
+
+            Option<bool> decodeIfTextureOption = new("--decode-if-texture")
+            {
+                Description = "Decode extracted files that are textures."
+            };
+            Add(decodeIfTextureOption);
+
+            Option<bool> verboseOption = new("--verbose")
+            {
+                Description = "Show verbose output for archives being extracted"
+            };
+            Add(verboseOption);
+
+            SetAction(parseResult =>
+            {
+                ArchiveExtractOptions options = new()
+                {
+                    Input = parseResult.GetValue(inputOption),
+                    Exclude = parseResult.GetValue(excludeOption),
+                    Decompress = parseResult.GetValue(decompressOption),
+                    ExtractSourceFolder = parseResult.GetValue(extractSourceFolderOption),
+                    ExtractSameName = parseResult.GetValue(extractSameNameOption),
+                    Delete = parseResult.GetValue(deleteOption),
+                    DecompressExtracted = parseResult.GetValue(decompressExtractedOption),
+                    FileNumber = parseResult.GetValue(fileNumberOption),
+                    PrependFileNumber = parseResult.GetValue(prependFileNumberOption),
+                    //ExtractIfArchiveNumber = parseResult.GetValue(extractIfArchiveOption),
+                    //DecodeIfTextureNumber = parseResult.GetValue(decodeIfTextureOption),
+                    Verbose = parseResult.GetValue(verboseOption),
+                };
+
+                Execute(options, parseResult.Configuration.Output);
+            });
         }
 
-        private void Execute(ArchiveExtractOptions options, IConsole console)
+        private void Execute(ArchiveExtractOptions options, TextWriter writer)
         {
             // Get the files to process by the tool
             var matcher = new Matcher();
@@ -72,12 +147,12 @@ namespace PuyoTools.App.Cli.Commands.Archives
                 {
                     if (options.Verbose)
                     {
-                        console.Out.Write($"-- Extracting {x.Entry} ... ({x.Progress:P0})\n");
+                        writer.Write($"-- Extracting {x.Entry} ... ({x.Progress:P0})\n");
                     }
                 }
                 else
                 {
-                    console.Out.Write($"Processing {x.File} ... ({x.Progress:P0})\n");
+                    writer.Write($"Processing {x.File} ... ({x.Progress:P0})\n");
                 }
             });
 

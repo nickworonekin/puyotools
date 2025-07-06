@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.CommandLine;
-using System.CommandLine.NamingConventionBinder;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,17 +10,52 @@ namespace PuyoTools.App.Cli.Commands.Archives
 {
     class SvmArchiveCreateCommand : ArchiveFormatCreateCommand
     {
+        private readonly Option<bool> _filenamesOption;
+        private readonly Option<bool> _globalIndexesOption;
+        private readonly Option<bool> _formatsOption;
+        private readonly Option<bool> _dimensionsOption;
+
         public SvmArchiveCreateCommand(SvmFormat format)
             : base(format)
         {
-            AddOption(new Option<bool>("--filenames", "Include filenames"));
-            AddOption(new Option<bool>("--global-indexes", "Include global indexes"));
-            AddOption(new Option<bool>("--formats", "Include pixel & data formats"));
-            AddOption(new Option<bool>("--dimensions", "Include texture dimensions"));
+            _filenamesOption = new("--filenames")
+            {
+                Description = "Include filenames"
+            };
+            Add(_filenamesOption);
 
-            Handler = CommandHandler.Create<SvmArchiveCreateOptions, IConsole>(Execute);
+            _globalIndexesOption = new("--global-indexes")
+            {
+                Description = "Include global indexes"
+            };
+            Add(_globalIndexesOption);
+
+            _formatsOption = new("--formats")
+            {
+                Description = "Include pixel & data formats"
+            };
+            Add(_formatsOption);
+
+            _dimensionsOption = new("--dimensions")
+            {
+                Description = "Include texture dimensions"
+            };
+            Add(_dimensionsOption);
         }
 
-        private void Execute(SvmArchiveCreateOptions options, IConsole console) => base.Execute(options, console);
+        protected override ArchiveCreateOptions CreateOptions(ParseResult parseResult)
+        {
+            SvmArchiveCreateOptions options = new()
+            {
+                Filenames = parseResult.GetValue(_filenamesOption),
+                GlobalIndexes = parseResult.GetValue(_globalIndexesOption),
+                Formats = parseResult.GetValue(_formatsOption),
+                Dimensions = parseResult.GetValue(_dimensionsOption),
+            };
+
+            SetBaseOptions(parseResult, options);
+
+            return options;
+        }
     }
 }

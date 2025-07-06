@@ -1,25 +1,36 @@
 ﻿using PuyoTools.App.Formats.Archives;
 using System;
-using System.Collections.Generic;
 using System.CommandLine;
-using System.CommandLine.NamingConventionBinder;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PuyoTools.App.Cli.Commands.Archives
 {
     class AcxArchiveCreateCommand : ArchiveFormatCreateCommand
     {
+        private readonly Option<int> _blockSizeOption;
+
         public AcxArchiveCreateCommand(AcxFormat format)
             : base(format)
         {
-            AddOption(new Option<int>("--block-size", () => 2048, "Set the block size")
-                .FromAmong(new int[] { 4, 2048 }.Select(x => x.ToString()).ToArray()));
-
-            Handler = CommandHandler.Create<AcxArchiveCreateOptions, IConsole>(Execute);
+            _blockSizeOption = new Option<int>("--block-size")
+            {
+                Description = "Set the block size",
+                DefaultValueFactory = _ => 2048,
+            }
+                .AcceptOnlyFromAmong(new int[] { 4, 2048 }.Select(x => x.ToString()).ToArray());
+            Add(_blockSizeOption);
         }
 
-        private void Execute(AcxArchiveCreateOptions options, IConsole console) => base.Execute(options, console);
+        protected override ArchiveCreateOptions CreateOptions(ParseResult parseResult)
+        {
+            AcxArchiveCreateOptions options = new()
+            {
+                BlockSize = parseResult.GetValue(_blockSizeOption),
+            };
+
+            SetBaseOptions(parseResult, options);
+
+            return options;
+        }
     }
 }

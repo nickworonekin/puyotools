@@ -1,15 +1,14 @@
-﻿using Microsoft.Extensions.FileSystemGlobbing;
-using Microsoft.Extensions.FileSystemGlobbing.Abstractions;
-using PuyoTools.App.Tools;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.CommandLine;
-using System.CommandLine.IO;
-using System.CommandLine.NamingConventionBinder;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.FileSystemGlobbing;
+using Microsoft.Extensions.FileSystemGlobbing.Abstractions;
+using PuyoTools.App.Cli.Commands.Compression;
+using PuyoTools.App.Tools;
 
 namespace PuyoTools.App.Cli.Commands.Textures
 {
@@ -18,19 +17,46 @@ namespace PuyoTools.App.Cli.Commands.Textures
         public TextureDecodeCommand()
             : base("decode", "Decode textures")
         {
-            AddOption(new Option<string[]>(new string[] { "-i", "--input" }, "Files to decode (pattern matching supported).")
+            Option<string[]> inputOption = new("--input", "-i")
             {
-                IsRequired = true,
-            });
-            AddOption(new Option<string[]>("--exclude", "Files to exclude from being decoded (pattern matching supported)."));
-            AddOption(new Option<bool>("--compressed", "Decode compressed textures"));
-            AddOption(new Option<bool>("--overwrite", "Overwrite source texture file with its decoded texture file."));
-            AddOption(new Option<bool>("--delete", "Delete source texture file on successful decode."));
+                Description = "Files to decode (pattern matching supported).",
+                Required = true,
+            };
+            Options.Add(inputOption);
 
-            Handler = CommandHandler.Create<TextureDecodeOptions, IConsole>(Execute);
+            Option<string[]> excludeOption = new("--exclude")
+            {
+                Description = "Files to exclude from being decoded (pattern matching supported)."
+            };
+            Options.Add(excludeOption);
+
+            Option<bool> overwriteOption = new("--overwrite")
+            {
+                Description = "Overwrite source texture file with its decoded texture file."
+            };
+            Options.Add(overwriteOption);
+
+            Option<bool> deleteOption = new("--delete")
+            {
+                Description = "Delete source texture file on successful decode."
+            };
+            Options.Add(deleteOption);
+
+            SetAction(parseResult =>
+            {
+                TextureDecodeOptions options = new()
+                {
+                    Input = parseResult.GetValue(inputOption),
+                    Exclude = parseResult.GetValue(excludeOption),
+                    Overwrite = parseResult.GetValue(overwriteOption),
+                    Delete = parseResult.GetValue(deleteOption),
+                };
+
+                Execute(options, parseResult.Configuration.Output);
+            });
         }
 
-        private void Execute(TextureDecodeOptions options, IConsole console)
+        private void Execute(TextureDecodeOptions options, TextWriter writer)
         {
             // Get the files to process by the tool
             var matcher = new Matcher();
@@ -56,7 +82,7 @@ namespace PuyoTools.App.Cli.Commands.Textures
             // Create the progress handler (only if the quiet option is not set)
             var progress = new SynchronousProgress<ToolProgress>(x =>
             {
-                console.Out.WriteLine($"Processing {x.File} ... ({x.Progress:P0})");
+                writer.WriteLine($"Processing {x.File} ... ({x.Progress:P0})");
             });
 
             // Execute the tool

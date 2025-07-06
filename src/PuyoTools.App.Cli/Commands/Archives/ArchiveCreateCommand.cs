@@ -16,7 +16,7 @@ namespace PuyoTools.App.Cli.Commands.Archives
             // Add commands for all archive formats that can be used to create archives.
             foreach (var format in ArchiveFactory.WriterFormats)
             {
-                AddCommand(format.GetCreateCommand());
+                Add(format.GetCreateCommand());
             }
         }
     }

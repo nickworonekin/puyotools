@@ -15,7 +15,7 @@ namespace PuyoTools.App.Cli.Commands.Textures
             // Add commands for all texture formats that can be used to encode textures.
             foreach (var format in TextureFactory.EncoderFormats)
             {
-                AddCommand(format.GetEncodeCommand());
+                Add(format.GetEncodeCommand());
             }
         }
     }
