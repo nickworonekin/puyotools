@@ -52,7 +52,7 @@ namespace PuyoTools.App.Cli.Commands.Textures
                     Delete = parseResult.GetValue(deleteOption),
                 };
 
-                Execute(options, parseResult.Configuration.Output);
+                Execute(options, parseResult.InvocationConfiguration.Output);
             });
         }
 

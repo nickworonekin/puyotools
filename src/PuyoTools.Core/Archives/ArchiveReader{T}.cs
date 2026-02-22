@@ -13,7 +13,7 @@ namespace PuyoTools.Archives
     {
         protected Stream _stream;
         protected long _streamStart;
-        protected List<T> _entries;
+        protected List<T> _entries = [];
 
         protected ArchiveReader(Stream source)
         {

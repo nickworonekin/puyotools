@@ -1,0 +1,123 @@
+﻿/*
+ * This implementation is derived from the .NET source for System.Formats.Tar.SeekableSubReadStream.
+ * https://source.dot.net/#System.Formats.Tar/System/Formats/Tar/SeekableSubReadStream.cs
+ */
+
+using System;
+using System.Diagnostics;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace PuyoTools.Core
+{
+    public class SeekableSubReadStream : SubReadStream
+    {
+        public SeekableSubReadStream(Stream superStream)
+            : base(superStream, superStream.Position, superStream.Length - superStream.Position)
+        {
+        }
+
+        public SeekableSubReadStream(Stream superStream, long maxLength)
+            : base(superStream, superStream.Position, maxLength)
+        {
+        }
+
+        public SeekableSubReadStream(Stream superStream, long startPosition, long maxLength)
+            : base(superStream, startPosition, maxLength)
+        {
+            if (!superStream.CanSeek)
+            {
+                throw new ArgumentException("The stream does not support seeking.", nameof(superStream));
+            }
+        }
+
+        public override bool CanSeek => !_isDisposed;
+
+        public override long Position
+        {
+            get
+            {
+                ThrowIfDisposed();
+                return _positionInSuperStream - _startInSuperStream;
+            }
+            set
+            {
+                ThrowIfDisposed();
+                ArgumentOutOfRangeException.ThrowIfNegative(value);
+                ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(value, _endInSuperStream);
+                _positionInSuperStream = _startInSuperStream + value;
+            }
+        }
+
+        public override int Read(Span<byte> destination)
+        {
+            ThrowIfDisposed();
+            VerifyPositionInSuperStream();
+
+            // parameter validation sent to _superStream.Read
+            int origCount = destination.Length;
+            int count = destination.Length;
+
+            if ((ulong)(_positionInSuperStream + count) > (ulong)_endInSuperStream)
+            {
+                count = Math.Max(0, (int)(_endInSuperStream - _positionInSuperStream));
+            }
+
+            Debug.Assert(count >= 0);
+            Debug.Assert(count <= origCount);
+
+            if (count > 0)
+            {
+                int bytesRead = _superStream.Read(destination.Slice(0, count));
+                _positionInSuperStream += bytesRead;
+                return bytesRead;
+            }
+
+            return 0;
+        }
+
+        public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
+        {
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return ValueTask.FromCanceled<int>(cancellationToken);
+            }
+            ThrowIfDisposed();
+            VerifyPositionInSuperStream();
+            return ReadAsyncCore(buffer, cancellationToken);
+        }
+
+        public override long Seek(long offset, SeekOrigin origin)
+        {
+            ThrowIfDisposed();
+
+            long newPositionInSuperStream = origin switch
+            {
+                SeekOrigin.Begin => _startInSuperStream + offset,
+                SeekOrigin.Current => _positionInSuperStream + offset,
+                SeekOrigin.End => _endInSuperStream + offset,
+                _ => throw new ArgumentOutOfRangeException(nameof(origin)),
+            };
+
+            if (newPositionInSuperStream < _startInSuperStream)
+            {
+                throw new IOException("An attempt was made to move the position before the beginning of the stream.");
+            }
+
+            _positionInSuperStream = newPositionInSuperStream;
+
+            return _positionInSuperStream - _startInSuperStream;
+        }
+
+        private void VerifyPositionInSuperStream()
+        {
+            if (_positionInSuperStream != _superStream.Position)
+            {
+                // Since we can seek, if the stream had its position pointer moved externally,
+                // we must bring it back to the last read location on this stream
+                _superStream.Seek(_positionInSuperStream, SeekOrigin.Begin);
+            }
+        }
+    }
+}

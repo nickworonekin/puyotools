@@ -53,7 +53,7 @@ namespace PuyoTools.App.Cli.Commands.Compression
                     Delete = parseResult.GetValue(deleteOption),
                 };
 
-                Execute(options, parseResult.Configuration.Output);
+                Execute(options, parseResult.InvocationConfiguration.Output);
             });
         }
 

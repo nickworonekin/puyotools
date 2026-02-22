@@ -53,10 +53,10 @@ namespace PuyoTools.Core.Archives
             for (int i = 0; i < numEntries; i++)
             {
                 // Read in the entry filename extension, offset, length, and filename without the extension
-                string entryFileExtension = PTStream.ReadCString(source, 4, EncodingExtensions.ShiftJIS);
+                string entryFileExtension = PTStream.ReadCString(source, 4, Encoding.ShiftJIS);
                 int entryOffset = PTStream.ReadInt32(source);
                 int entryLength = PTStream.ReadInt32(source);
-                string entryFilename = PTStream.ReadCString(source, 20, EncodingExtensions.ShiftJIS);
+                string entryFilename = PTStream.ReadCString(source, 20, Encoding.ShiftJIS);
 
                 if (entryFileExtension != String.Empty)
                     entryFileExtension = "." + entryFileExtension;
@@ -102,12 +102,12 @@ namespace PuyoTools.Core.Archives
                 if (fileExtension != String.Empty)
                     fileExtension = fileExtension.Substring(1);
 
-                PTStream.WriteCString(destination, fileExtension, 4, EncodingExtensions.ShiftJIS);
+                PTStream.WriteCString(destination, fileExtension, 4, Encoding.ShiftJIS);
 
                 // Write out the offset, length, and filename (without the extension)
                 PTStream.WriteInt32(destination, entryOffset);
                 PTStream.WriteInt32(destination, entries[i].Length);
-                PTStream.WriteCString(destination, Path.GetFileNameWithoutExtension(entries[i].Name), 20, EncodingExtensions.ShiftJIS);
+                PTStream.WriteCString(destination, Path.GetFileNameWithoutExtension(entries[i].Name), 20, Encoding.ShiftJIS);
 
                 entryOffset += PTMethods.RoundUp(entries[i].Length, 16);
             }

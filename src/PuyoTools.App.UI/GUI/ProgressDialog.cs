@@ -37,6 +37,7 @@ namespace PuyoTools.GUI
         /// </summary>
         public event ProgressChangedEventHandler ProgressChanged;
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string WindowTitle
         {
             get { return this.Text; }
@@ -54,6 +55,7 @@ namespace PuyoTools.GUI
             }
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string Title
         {
             get { return this.titleLabel.Text; }
@@ -71,6 +73,7 @@ namespace PuyoTools.GUI
             }
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string Description
         {
             get { return this.descriptionLabel.Text; }

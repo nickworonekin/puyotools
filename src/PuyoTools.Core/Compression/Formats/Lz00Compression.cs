@@ -225,7 +225,7 @@ namespace PuyoTools.Core.Compression
                 // Filename (or null bytes)
                 if (destination is FileStream fs)
                 {
-                    writer.WriteString(Path.GetFileName(fs.Name), 32, EncodingExtensions.ShiftJIS);
+                    writer.WriteString(Path.GetFileName(fs.Name), 32, Encoding.ShiftJIS);
                 }
                 else
                 {

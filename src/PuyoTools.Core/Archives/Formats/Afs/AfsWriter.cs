@@ -1,11 +1,12 @@
-﻿using PuyoTools.Core;
-using PuyoTools.Core.Archives;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using PuyoTools.Core;
+using PuyoTools.Core.Archives;
 
 namespace PuyoTools.Archives.Formats.Afs
 {
@@ -30,7 +31,7 @@ namespace PuyoTools.Archives.Formats.Afs
             get => _version;
             set
             {
-                ArgumentHelper.ThrowIfInvalidEnumValue(value);
+                InvalidEnumArgumentException.ThrowIfNotDefined(value);
 
                 _version = value;
             }

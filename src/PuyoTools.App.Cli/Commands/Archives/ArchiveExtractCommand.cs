@@ -107,7 +107,7 @@ namespace PuyoTools.App.Cli.Commands.Archives
                     Verbose = parseResult.GetValue(verboseOption),
                 };
 
-                Execute(options, parseResult.Configuration.Output);
+                Execute(options, parseResult.InvocationConfiguration.Output);
             });
         }
 

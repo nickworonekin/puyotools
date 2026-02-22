@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using PuyoTools.Core;
 
 namespace PuyoTools.Archives.Formats.Afs
 {
@@ -13,7 +14,11 @@ namespace PuyoTools.Archives.Formats.Afs
         {
             if (source is FileStream fs)
             {
-                Timestamp = File.GetLastWriteTime(fs.Name);
+                Timestamp = File.GetLastWriteTime(fs.SafeFileHandle);
+            }
+            else if (source is LazyFileReadStream lfs)
+            {
+                Timestamp = File.GetLastWriteTime(lfs.Name);
             }
         }
 

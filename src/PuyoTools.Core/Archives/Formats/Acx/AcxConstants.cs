@@ -8,6 +8,6 @@ namespace PuyoTools.Archives.Formats.Acx
 {
     internal static class AcxConstants
     {
-        public static ReadOnlySpan<byte> MagicCode => new byte[] { 0, 0, 0, 0 };
+        public static ReadOnlySpan<byte> MagicCode => [0, 0, 0, 0];
     }
 }

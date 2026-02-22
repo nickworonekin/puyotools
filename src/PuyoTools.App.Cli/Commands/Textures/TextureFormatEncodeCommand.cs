@@ -37,7 +37,7 @@ namespace PuyoTools.App.Cli.Commands.Textures
             };
             Options.Add(_excludeOption);
 
-            SetAction(parseResult => Execute(CreateOptions(parseResult), parseResult.Configuration.Output));
+            SetAction(parseResult => Execute(CreateOptions(parseResult), parseResult.InvocationConfiguration.Output));
         }
 
         protected virtual TextureFormatEncodeOptions CreateOptions(ParseResult parseResult)

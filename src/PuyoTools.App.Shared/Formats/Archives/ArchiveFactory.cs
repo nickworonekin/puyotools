@@ -35,6 +35,7 @@ namespace PuyoTools.App.Formats.Archives
                 TexFormat.Instance,
                 TxdStorybookFormat.Instance,
                 U8Format.Instance,
+                VddFormat.Instance,
             };
 
             // Compression formats that can be used to write archives.
@@ -55,6 +56,7 @@ namespace PuyoTools.App.Formats.Archives
                 TexFormat.Instance,
                 TxdStorybookFormat.Instance,
                 U8Format.Instance,
+                VddFormat.Instance,
             };
         }
 

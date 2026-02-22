@@ -8,12 +8,13 @@ namespace PuyoTools.Archives.Formats.Narc
 {
     public partial class NarcReader
     {
-        private class FileEntry
+        private record FileEntry
         {
             public DirectoryEntry? Parent;
             public int Offset;
             public int Length;
-            public string Name;
+            public string Name = string.Empty;
+
             public string FullName => Parent?.Parent is not null
                 ? $"{Parent.FullName}/{Name}"
                 : Name;

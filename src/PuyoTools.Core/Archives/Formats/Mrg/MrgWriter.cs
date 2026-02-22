@@ -38,7 +38,7 @@ namespace PuyoTools.Archives.Formats.Mrg
                     extension = extension.Substring(1);
                 }
 
-                writer.WriteString(extension, 4, EncodingExtensions.ShiftJIS);
+                writer.WriteString(extension, 4, Encoding.ShiftJIS);
 
                 // Write the offset, length, and filename (without the extension).
                 writer.WriteInt32(entryOffset);
@@ -46,7 +46,7 @@ namespace PuyoTools.Archives.Formats.Mrg
 
                 _destination.Position += 4;
 
-                writer.WriteString(Path.GetFileNameWithoutExtension(entry.Name), 32, EncodingExtensions.ShiftJIS);
+                writer.WriteString(Path.GetFileNameWithoutExtension(entry.Name), 32, Encoding.ShiftJIS);
 
                 entryOffset += MathHelper.RoundUp((int)entry.Length, 16);
             }

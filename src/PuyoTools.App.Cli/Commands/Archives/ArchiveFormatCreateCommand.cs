@@ -53,7 +53,7 @@ namespace PuyoTools.App.Cli.Commands.Archives
                 .AcceptOnlyFromAmong(CompressionFactory.EncoderFormats.Select(x => x.CommandName).ToArray());
             Add(_compressOption);
 
-            SetAction(parseResult => Execute(CreateOptions(parseResult), parseResult.Configuration.Output));
+            SetAction(parseResult => Execute(CreateOptions(parseResult), parseResult.InvocationConfiguration.Output));
         }
 
         protected virtual ArchiveCreateOptions CreateOptions(ParseResult parseResult)

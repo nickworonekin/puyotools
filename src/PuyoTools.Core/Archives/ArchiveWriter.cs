@@ -1,4 +1,5 @@
-﻿using PuyoTools.Core.Archives;
+﻿using PuyoTools.Core;
+using PuyoTools.Core.Archives;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -40,7 +41,7 @@ namespace PuyoTools.Archives
         /// <param name="sourceFileName"></param>
         /// <param name="name">The name of the entry to create in the archive.</param>
         public void AddEntryFromFile(string sourceFileName, string? name = null)
-            => AddEntry(new FileStream(sourceFileName, FileMode.Open, FileAccess.Read), name, true);
+            => AddEntry(new LazyFileReadStream(sourceFileName), name, true);
 
         /// <summary>
         /// Tries to add a new entry from an existing file to the archive, and returns a value that indicates whether the entry was added.
@@ -49,7 +50,7 @@ namespace PuyoTools.Archives
         /// <param name="name">The name of the entry to create in the archive.</param>
         /// <returns><see langword="true"/> if the entry was added to the archive; otherwise, <see langword="false"/>.</returns>
         public bool TryAddEntryFromFile(string sourceFileName, string? name = null)
-            => TryAddEntry(new FileStream(sourceFileName, FileMode.Open, FileAccess.Read), name, true);
+            => TryAddEntry(new LazyFileReadStream(sourceFileName), name, true);
 
         public abstract void Write(Stream destination);
 

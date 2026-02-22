@@ -8,10 +8,10 @@ namespace PuyoTools.Archives.Formats.Gvm
 {
     internal static class GvmConstants
     {
-        public static ReadOnlySpan<byte> MagicCode => new[] { (byte)'G', (byte)'V', (byte)'M', (byte)'H' };
+        public static ReadOnlySpan<byte> MagicCode => "GVMH"u8;
 
-        public static ReadOnlySpan<byte> GbixMagicCode => new[] { (byte)'G', (byte)'B', (byte)'I', (byte)'X' };
+        public static ReadOnlySpan<byte> GbixMagicCode => "GBIX"u8;
 
-        public static ReadOnlySpan<byte> GcixMagicCode => new[] { (byte)'G', (byte)'C', (byte)'I', (byte)'X' };
+        public static ReadOnlySpan<byte> GcixMagicCode => "GCIX"u8;
     }
 }

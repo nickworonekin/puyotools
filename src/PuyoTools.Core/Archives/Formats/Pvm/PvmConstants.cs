@@ -8,10 +8,10 @@ namespace PuyoTools.Archives.Formats.Pvm
 {
     internal static class PvmConstants
     {
-        public static ReadOnlySpan<byte> MagicCode => new[] { (byte)'P', (byte)'V', (byte)'M', (byte)'H' };
+        public static ReadOnlySpan<byte> MagicCode => "PVMH"u8;
 
-        public static ReadOnlySpan<byte> GbixMagicCode => new[] { (byte)'G', (byte)'B', (byte)'I', (byte)'X' };
+        public static ReadOnlySpan<byte> GbixMagicCode => "GBIX"u8;
 
-        public static ReadOnlySpan<byte> PvrtMagicCode => new[] { (byte)'P', (byte)'V', (byte)'R', (byte)'T' };
+        public static ReadOnlySpan<byte> PvrtMagicCode => "PVRT"u8;
     }
 }

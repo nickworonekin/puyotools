@@ -36,10 +36,10 @@ namespace PuyoTools.Archives.Formats.Tex
             for (int i = 0; i < numEntries; i++)
             {
                 // Read the entry information.
-                string extension = reader.ReadString(4, EncodingExtensions.ShiftJIS);
+                string extension = reader.ReadString(4, Encoding.ShiftJIS);
                 int offset = reader.ReadInt32();
                 int length = reader.ReadInt32();
-                string name = reader.ReadString(20, EncodingExtensions.ShiftJIS);
+                string name = reader.ReadString(20, Encoding.ShiftJIS);
 
                 // Append the file extension to its name, if one is present.
                 if (extension.Length != 0)

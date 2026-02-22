@@ -8,12 +8,12 @@ namespace PuyoTools.Archives.Formats.Gnt
 {
     internal static class GntConstants
     {
-        public static ReadOnlySpan<byte> PrimaryMagicCode => new byte[] { (byte)'N', (byte)'G', (byte)'I', (byte)'F' };
+        public static ReadOnlySpan<byte> PrimaryMagicCode => "NGIF"u8;
 
-        public static ReadOnlySpan<byte> SecondaryMagicCode => new byte[] { (byte)'N', (byte)'G', (byte)'T', (byte)'L' };
+        public static ReadOnlySpan<byte> SecondaryMagicCode => "NGTL"u8;
 
-        public static ReadOnlySpan<byte> Nof0MagicCode => new byte[] { (byte)'N', (byte)'O', (byte)'F', (byte)'0' };
+        public static ReadOnlySpan<byte> Nof0MagicCode => "NOF0"u8;
 
-        public static ReadOnlySpan<byte> NendMagicCode => new byte[] { (byte)'N', (byte)'E', (byte)'N', (byte)'D' };
+        public static ReadOnlySpan<byte> NendMagicCode => "NEND"u8;
     }
 }

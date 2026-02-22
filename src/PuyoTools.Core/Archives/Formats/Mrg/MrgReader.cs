@@ -35,13 +35,13 @@ namespace PuyoTools.Archives.Formats.Mrg
             for (int i = 0; i < numEntries; i++)
             {
                 // Read the entry information.
-                string extension = reader.ReadString(4, EncodingExtensions.ShiftJIS);
+                string extension = reader.ReadString(4, Encoding.ShiftJIS);
                 int offset = reader.ReadInt32();
                 int length = reader.ReadInt32();
 
                 _stream.Position += 4;
 
-                string name = reader.ReadString(32, EncodingExtensions.ShiftJIS);
+                string name = reader.ReadString(32, Encoding.ShiftJIS);
 
                 // Append the file extension to its name, if one is present.
                 if (extension.Length != 0)

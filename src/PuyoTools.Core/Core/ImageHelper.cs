@@ -41,7 +41,7 @@ namespace PuyoTools.Core
         /// This parameter is passed uninitialized.
         /// </param>
         /// <returns><see langword="true"/> is an exact palette was created; otherwise <see langword="false"/>.</returns>
-        public static bool TryBuildExactPalette<TPixel>(Image<TPixel> image, int maxColors, out IList<TPixel> palette)
+        public static bool TryBuildExactPalette<TPixel>(Image<TPixel> image, int maxColors, out IList<TPixel>? palette)
             where TPixel : unmanaged, IPixel<TPixel>
         {
             palette = null;
@@ -96,7 +96,7 @@ namespace PuyoTools.Core
 
             imageFrame.ProcessPixelRows(accessor =>
             {
-                var pixelData = MemoryMarshal.Cast<byte, TPixel>(data);
+                var pixelData = MemoryMarshal.Cast<byte, TPixel>(data.AsSpan());
 
                 for (var y = 0; y < imageFrame.Height; y++)
                 {
