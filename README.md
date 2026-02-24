@@ -5,8 +5,8 @@ Puyo Tools is a collection of tools and libraries used to access the contents of
 * [.NET Framework 4.0](https://dotnet.microsoft.com/download/dotnet-framework) or higher
 
 The pre-release of version 3.0.0 has the following requirements:
-* [.NET Runtime 6.0](https://dotnet.microsoft.com/download) or higher (CLI app) or
-* [.NET Desktop Runtime 6.0](https://dotnet.microsoft.com/download) or higher (GUI app)
+* [.NET Runtime 10.0](https://dotnet.microsoft.com/download) or higher (CLI app) or
+* [.NET Desktop Runtime 10.0](https://dotnet.microsoft.com/download) or higher (GUI app)
 
 ## Download
 [Download the latest release](https://github.com/nickworonekin/puyotools/releases/latest)
