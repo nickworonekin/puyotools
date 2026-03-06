@@ -1,19 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Data;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using PuyoTools.GUI;
+using PuyoTools.App;
+using PuyoTools.App.Formats.Archives;
+using PuyoTools.Archives;
+using PuyoTools.Archives.Formats.Afs;
 using PuyoTools.Core;
 using PuyoTools.Core.Archives;
-using PuyoTools.App.Formats.Archives;
+using PuyoTools.GUI;
 
 namespace PuyoTools.Formats.Archives.WriterSettings
 {
-    public partial class AfsWriterSettings : ModuleSettingsControl, IArchiveFormatOptions
+    public partial class AfsWriterSettings : ModuleSettingsControl, IArchiveFormatOptions,
+        IArchiveWriterOptions<AfsWriter>
     {
         public AfsWriterSettings()
         {
@@ -43,6 +47,22 @@ namespace PuyoTools.Formats.Archives.WriterSettings
             }
 
             archive.HasTimestamps = hasTimestampsCheckbox.Checked;
+        }
+
+        public void MapTo(AfsWriter obj)
+        {
+            obj.BlockSize = int.Parse(blockSizeBox.GetItemText(blockSizeBox.SelectedItem) ?? string.Empty);
+
+            if (afsVersion2Radio.Checked)
+            {
+                obj.Version = AfsVersion.Version2;
+            }
+            else
+            {
+                obj.Version = AfsVersion.Version1;
+            }
+
+            obj.HasTimestamps = hasTimestampsCheckbox.Checked;
         }
     }
 }

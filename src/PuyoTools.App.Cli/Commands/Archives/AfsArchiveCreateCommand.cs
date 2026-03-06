@@ -14,6 +14,12 @@ namespace PuyoTools.App.Cli.Commands.Archives
         private readonly Option<int> _versionOption;
         private readonly Option<bool> _timestampsOption;
 
+        public Option<int> BlockSizeOption => _blockSizeOption;
+
+        public Option<int> VersionOption => _versionOption;
+
+        public Option <bool> TimestampsOption => _timestampsOption;
+
         public AfsArchiveCreateCommand(AfsFormat format)
             : base(format)
         {
@@ -21,8 +27,7 @@ namespace PuyoTools.App.Cli.Commands.Archives
             {
                 Description = "Set the block size",
                 DefaultValueFactory = _ => 2048,
-            }
-                .AcceptOnlyFromAmong(new int[] { 16, 2048 }.Select(x => x.ToString()).ToArray());
+            }.AcceptOnlyFromAmong(["16", "2048"]);
             Add(_blockSizeOption);
 
             _versionOption = new Option<int>("--version")
@@ -30,7 +35,7 @@ namespace PuyoTools.App.Cli.Commands.Archives
                 Description = "Set the AFS version",
                 DefaultValueFactory = _ => 1,
             }
-                .AcceptOnlyFromAmong(new int[] { 1, 2 }.Select(x => x.ToString()).ToArray());
+                .AcceptOnlyFromAmong(["1", "2"]);
             Add(_versionOption);
 
             _timestampsOption = new("--timestamps")
@@ -41,17 +46,6 @@ namespace PuyoTools.App.Cli.Commands.Archives
         }
 
         protected override ArchiveCreateOptions CreateOptions(ParseResult parseResult)
-        {
-            AfsArchiveCreateOptions options = new()
-            {
-                BlockSize = parseResult.GetValue(_blockSizeOption),
-                Version = parseResult.GetValue(_versionOption),
-                Timestamps = parseResult.GetValue(_timestampsOption),
-            };
-
-            SetBaseOptions(parseResult, options);
-
-            return options;
-        }
+            => new AfsArchiveCreateOptions(parseResult);
     }
 }

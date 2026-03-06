@@ -1,5 +1,5 @@
 ﻿using PuyoTools.App.Formats.Archives;
-using PuyoTools.Core.Archives;
+using PuyoTools.Archives.Formats.Snt;
 using System;
 using System.Collections.Generic;
 using System.CommandLine;
@@ -11,7 +11,9 @@ namespace PuyoTools.App.Cli.Commands.Archives
 {
     class SntArchiveCreateCommand : ArchiveFormatCreateCommand
     {
-        private readonly Option<SntArchiveWriter.SntPlatform> _platformOption;
+        private readonly Option<SntPlatform> _platformOption;
+
+        public Option<SntPlatform> PlatformOption => _platformOption;
 
         public SntArchiveCreateCommand(SntFormat format)
             : base(format)
@@ -19,21 +21,12 @@ namespace PuyoTools.App.Cli.Commands.Archives
             _platformOption = new("--platform")
             {
                 Description = "Platform this archive will be used on",
-                DefaultValueFactory = _ => SntArchiveWriter.SntPlatform.Ps2,
+                DefaultValueFactory = _ => SntPlatform.PlayStation2,
             };
             Add(_platformOption);
         }
 
         protected override ArchiveCreateOptions CreateOptions(ParseResult parseResult)
-        {
-            SntArchiveCreateOptions options = new()
-            {
-                Platform = parseResult.GetValue(_platformOption),
-            };
-
-            SetBaseOptions(parseResult, options);
-
-            return options;
-        }
+            => new SntArchiveCreateOptions(parseResult);
     }
 }

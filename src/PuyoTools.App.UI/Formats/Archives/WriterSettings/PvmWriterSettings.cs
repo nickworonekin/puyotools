@@ -1,19 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Data;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using PuyoTools.GUI;
+using PuyoTools.App;
+using PuyoTools.App.Formats.Archives;
+using PuyoTools.Archives;
+using PuyoTools.Archives.Formats.Gvm;
+using PuyoTools.Archives.Formats.Pvm;
+using PuyoTools.Archives.Formats.Svm;
 using PuyoTools.Core;
 using PuyoTools.Core.Archives;
-using PuyoTools.App.Formats.Archives;
+using PuyoTools.GUI;
 
 namespace PuyoTools.Formats.Archives.WriterSettings
 {
-    public partial class PvmWriterSettings : ModuleSettingsControl, IArchiveFormatOptions
+    public partial class PvmWriterSettings : ModuleSettingsControl, IArchiveFormatOptions,
+        IArchiveWriterOptions<GvmWriter>,
+        IArchiveWriterOptions<PvmWriter>,
+        IArchiveWriterOptions<SvmWriter>
     {
         public PvmWriterSettings()
         {
@@ -60,5 +68,49 @@ namespace PuyoTools.Formats.Archives.WriterSettings
                 archive.HasDimensions = hasDimensionsCheckbox.Checked;
             }
         }
+
+        public void MapTo(GvmWriter obj)
+        {
+            obj.HasFilenames = hasFilenamesCheckbox.Checked;
+            obj.HasGlobalIndexes = hasGlobalIndexesCheckbox.Checked;
+            obj.HasFormats = hasFormatsCheckbox.Checked;
+            obj.HasDimensions = hasDimensionsCheckbox.Checked;
+        }
+
+        public void MapTo(PvmWriter obj)
+        {
+            obj.HasFilenames = hasFilenamesCheckbox.Checked;
+            obj.HasGlobalIndexes = hasGlobalIndexesCheckbox.Checked;
+            obj.HasFormats = hasFormatsCheckbox.Checked;
+            obj.HasDimensions = hasDimensionsCheckbox.Checked;
+        }
+
+        public void MapTo(SvmWriter obj)
+        {
+            obj.HasFilenames = hasFilenamesCheckbox.Checked;
+            obj.HasGlobalIndexes = hasGlobalIndexesCheckbox.Checked;
+            obj.HasFormats = hasFormatsCheckbox.Checked;
+            obj.HasDimensions = hasDimensionsCheckbox.Checked;
+        }
+
+        private void MapTo(ArchiveWriter obj)
+        {
+            if (obj is GvmWriter gvmWriterObj)
+            {
+                MapTo(gvmWriterObj);
+            }
+            else if (obj is PvmWriter pvmWriterObj)
+            {
+                MapTo(pvmWriterObj);
+            }
+            else if (obj is SvmWriter svmWriterObj)
+            {
+                MapTo(svmWriterObj);
+            }
+        }
+
+        void IArchiveWriterOptions.MapTo(ArchiveWriter obj) => MapTo(obj);
+
+        void IMappable<ArchiveWriter>.MapTo(ArchiveWriter obj) => MapTo(obj);
     }
 }

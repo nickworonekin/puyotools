@@ -15,6 +15,14 @@ namespace PuyoTools.App.Cli.Commands.Archives
         private readonly Option<bool> _formatsOption;
         private readonly Option<bool> _dimensionsOption;
 
+        public Option<bool> FilenamesOption => _filenamesOption;
+
+        public Option<bool> GlobalIndexesOption => _globalIndexesOption;
+
+        public Option<bool> FormatsOption => _formatsOption;
+
+        public Option<bool> DimensionsOption => _dimensionsOption;
+
         public GvmArchiveCreateCommand(GvmFormat format)
             : base(format)
         {
@@ -44,18 +52,6 @@ namespace PuyoTools.App.Cli.Commands.Archives
         }
 
         protected override ArchiveCreateOptions CreateOptions(ParseResult parseResult)
-        {
-            GvmArchiveCreateOptions options = new()
-            {
-                Filenames = parseResult.GetValue(_filenamesOption),
-                GlobalIndexes = parseResult.GetValue(_globalIndexesOption),
-                Formats = parseResult.GetValue(_formatsOption),
-                Dimensions = parseResult.GetValue(_dimensionsOption),
-            };
-
-            SetBaseOptions(parseResult, options);
-
-            return options;
-        }
+            => new GvmArchiveCreateOptions(parseResult);
     }
 }

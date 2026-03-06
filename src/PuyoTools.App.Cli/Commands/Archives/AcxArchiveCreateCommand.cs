@@ -9,6 +9,8 @@ namespace PuyoTools.App.Cli.Commands.Archives
     {
         private readonly Option<int> _blockSizeOption;
 
+        public Option<int> BlockSizeOption => _blockSizeOption;
+
         public AcxArchiveCreateCommand(AcxFormat format)
             : base(format)
         {
@@ -16,21 +18,11 @@ namespace PuyoTools.App.Cli.Commands.Archives
             {
                 Description = "Set the block size",
                 DefaultValueFactory = _ => 2048,
-            }
-                .AcceptOnlyFromAmong(new int[] { 4, 2048 }.Select(x => x.ToString()).ToArray());
+            }.AcceptOnlyFromAmong(["4", "2048"]);
             Add(_blockSizeOption);
         }
 
         protected override ArchiveCreateOptions CreateOptions(ParseResult parseResult)
-        {
-            AcxArchiveCreateOptions options = new()
-            {
-                BlockSize = parseResult.GetValue(_blockSizeOption),
-            };
-
-            SetBaseOptions(parseResult, options);
-
-            return options;
-        }
+            => new AcxArchiveCreateOptions(parseResult);
     }
 }

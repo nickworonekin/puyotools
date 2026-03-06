@@ -1,15 +1,26 @@
 ﻿using PuyoTools.App.Formats.Archives;
+using PuyoTools.Archives.Formats.Afs;
 using PuyoTools.Core.Archives;
 using System;
 using System.Collections.Generic;
+using System.CommandLine;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace PuyoTools.App.Cli.Commands.Archives
 {
-    class AfsArchiveCreateOptions : ArchiveCreateOptions, IArchiveFormatOptions
+    record AfsArchiveCreateOptions : ArchiveCreateOptions, IArchiveFormatOptions, IArchiveWriterOptions<AfsWriter>
     {
+        public AfsArchiveCreateOptions(ParseResult parseResult) : base(parseResult)
+        {
+            AfsArchiveCreateCommand command = (AfsArchiveCreateCommand)parseResult.CommandResult.Command;
+
+            BlockSize = parseResult.GetValue(command.BlockSizeOption);
+            Version = parseResult.GetValue(command.VersionOption);
+            Timestamps = parseResult.GetValue(command.TimestampsOption);
+        }
+
         public int BlockSize { get; set; }
 
         public int Version { get; set; }
@@ -25,6 +36,15 @@ namespace PuyoTools.App.Cli.Commands.Archives
                 ? AfsArchiveWriter.AfsVersion.Version2
                 : AfsArchiveWriter.AfsVersion.Version1;
             archive.HasTimestamps = Timestamps;
+        }
+
+        public void MapTo(AfsWriter obj)
+        {
+            obj.BlockSize = BlockSize;
+            obj.Version = Version == 2
+                ? AfsVersion.Version2
+                : AfsVersion.Version1;
+            obj.HasTimestamps = Timestamps;
         }
     }
 }

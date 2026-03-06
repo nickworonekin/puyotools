@@ -15,5 +15,9 @@ namespace PuyoTools.Archives.Formats.Snt
         public static ReadOnlySpan<byte> PspPrimaryMagicCode => "NUIF"u8;
 
         public static ReadOnlySpan<byte> PspSecondaryMagicCode => "NUTL"u8;
+
+        public static ReadOnlySpan<byte> Nof0MagicCode => "NOF0"u8;
+
+        public static ReadOnlySpan<byte> NendMagicCode => "NEND"u8;
     }
 }

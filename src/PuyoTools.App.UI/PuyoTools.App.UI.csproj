@@ -22,10 +22,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="System.ComponentModel.Composition" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Compile Update="Formats\Archives\WriterSettings\AcxWriterSettings.cs" />
     <Compile Update="Formats\Archives\WriterSettings\AfsWriterSettings.cs" />
     <Compile Update="Formats\Archives\WriterSettings\PvmWriterSettings.cs" />

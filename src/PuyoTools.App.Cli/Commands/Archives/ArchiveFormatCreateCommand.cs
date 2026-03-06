@@ -20,6 +20,14 @@ namespace PuyoTools.App.Cli.Commands.Archives
         private readonly Option<string> _outputOption;
         private readonly Option<string> _compressOption;
 
+        public Option<string[]> InputOption => _inputOption;
+
+        public Option<string[]> ExcludeOption => _excludeOption;
+
+        public Option<string> OutputOption => _outputOption;
+
+        public Option<string> CompressOption => _compressOption;
+
         public ArchiveFormatCreateCommand(IArchiveFormat format)
             : base(format.CommandName, $"Create {format.Name} archive")
         {
@@ -49,27 +57,14 @@ namespace PuyoTools.App.Cli.Commands.Archives
             _compressOption = new Option<string>("--compress")
             {
                 Description = "Compress the archive"
-            }
-                .AcceptOnlyFromAmong(CompressionFactory.EncoderFormats.Select(x => x.CommandName).ToArray());
+            }.AcceptOnlyFromAmong([.. CompressionFactory.EncoderFormats.Select(x => x.CommandName)]);
             Add(_compressOption);
 
             SetAction(parseResult => Execute(CreateOptions(parseResult), parseResult.InvocationConfiguration.Output));
         }
 
         protected virtual ArchiveCreateOptions CreateOptions(ParseResult parseResult)
-        {
-            ArchiveCreateOptions options = new();
-            SetBaseOptions(parseResult, options);
-            return options;
-        }
-
-        protected void SetBaseOptions(ParseResult parseResult, ArchiveCreateOptions options)
-        {
-            options.Input = parseResult.GetRequiredValue(_inputOption);
-            options.Exclude = parseResult.GetValue(_excludeOption);
-            options.Output = parseResult.GetRequiredValue(_outputOption);
-            options.Compress = parseResult.GetValue(_compressOption);
-        }
+            => new(parseResult);
 
         protected void Execute(ArchiveCreateOptions options, TextWriter writer)
         {
@@ -127,7 +122,7 @@ namespace PuyoTools.App.Cli.Commands.Archives
             });
 
             // Execute the tool
-            var tool = new ArchiveCreator(_format, toolOptions, options as IArchiveFormatOptions);
+            var tool = new ArchiveCreator(_format, toolOptions, options as IArchiveWriterOptions);
             tool.Execute(files, options.Output, progress);
         }
     }

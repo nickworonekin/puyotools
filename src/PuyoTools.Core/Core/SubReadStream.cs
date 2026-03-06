@@ -1,11 +1,13 @@
 ﻿/*
- * This implementation is derived from the .NET source for System.Formats.Tar.SubReadStream.
+ * This implementation is derived from the .NET source for System.Formats.Tar.SubReadStream and System.Formats.Tar.SeekableSubReadStream.
  * https://source.dot.net/#System.Formats.Tar/System/Formats/Tar/SubReadStream.cs
+ * https://source.dot.net/#System.Formats.Tar/System/Formats/Tar/SeekableSubReadStream.cs
  */
 
 using System;
-using System.Diagnostics;
+using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -16,12 +18,21 @@ namespace PuyoTools.Core
     // Does not support writing.
     public class SubReadStream : Stream
     {
-        protected bool _hasReachedEnd;
         protected readonly long _startInSuperStream;
         protected long _positionInSuperStream;
         protected readonly long _endInSuperStream;
         protected readonly Stream _superStream;
         protected bool _isDisposed;
+
+        public SubReadStream(Stream superStream)
+            : this(superStream, superStream.Position, superStream.Length - superStream.Position)
+        {
+        }
+
+        public SubReadStream(Stream superStream, long maxLength)
+            : this(superStream, superStream.Position, maxLength)
+        {
+        }
 
         public SubReadStream(Stream superStream, long startPosition, long maxLength)
         {
@@ -34,7 +45,6 @@ namespace PuyoTools.Core
             _endInSuperStream = startPosition + maxLength;
             _superStream = superStream;
             _isDisposed = false;
-            _hasReachedEnd = false;
         }
 
         public override long Length
@@ -56,45 +66,32 @@ namespace PuyoTools.Core
             set
             {
                 ThrowIfDisposed();
-                throw new InvalidOperationException("The stream does not support seeking.");
+                ThrowIfUnseekable();
+                ArgumentOutOfRangeException.ThrowIfNegative(value);
+                _positionInSuperStream = _startInSuperStream + value;
             }
         }
 
         public override bool CanRead => !_isDisposed;
 
-        public override bool CanSeek => false;
+        public override bool CanSeek => !_isDisposed && _superStream.CanSeek;
 
         public override bool CanWrite => false;
 
-        internal bool HasReachedEnd
-        {
-            get
-            {
-                if (!_hasReachedEnd && _positionInSuperStream > _endInSuperStream)
-                {
-                    _hasReachedEnd = true;
-                }
-                return _hasReachedEnd;
-            }
-            set
-            {
-                if (value) // Don't allow revert to false
-                {
-                    _hasReachedEnd = true;
-                }
-            }
-        }
+        private long Remaining => _endInSuperStream - _positionInSuperStream;
+
+        private int LimitByRemaining(int bufferSize) => (int)long.Clamp(Remaining, 0, bufferSize);
 
         protected void ThrowIfDisposed()
         {
             ObjectDisposedException.ThrowIf(_isDisposed, this);
         }
 
-        private void ThrowIfBeyondEndOfStream()
+        private void ThrowIfUnseekable()
         {
-            if (HasReachedEnd)
+            if (!CanSeek)
             {
-                throw new EndOfStreamException();
+                throw new NotSupportedException("The stream does not support seeking.");
             }
         }
 
@@ -107,23 +104,14 @@ namespace PuyoTools.Core
         public override int Read(Span<byte> destination)
         {
             ThrowIfDisposed();
-            ThrowIfBeyondEndOfStream();
+            VerifyPositionInSuperStream();
 
-            // parameter validation sent to _superStream.Read
-            int origCount = destination.Length;
-            int count = destination.Length;
+            destination = destination[..LimitByRemaining(destination.Length)];
 
-            if (_positionInSuperStream + count > _endInSuperStream)
-            {
-                count = (int)(_endInSuperStream - _positionInSuperStream);
-            }
-
-            Debug.Assert(count >= 0);
-            Debug.Assert(count <= origCount);
-
-            int ret = _superStream.Read(destination.Slice(0, count));
+            int ret = _superStream.Read(destination);
 
             _positionInSuperStream += ret;
+
             return ret;
         }
 
@@ -150,30 +138,62 @@ namespace PuyoTools.Core
                 return ValueTask.FromCanceled<int>(cancellationToken);
             }
             ThrowIfDisposed();
-            ThrowIfBeyondEndOfStream();
+            VerifyPositionInSuperStream();
             return ReadAsyncCore(buffer, cancellationToken);
         }
 
         protected async ValueTask<int> ReadAsyncCore(Memory<byte> buffer, CancellationToken cancellationToken)
         {
-            Debug.Assert(!_hasReachedEnd);
-
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (_positionInSuperStream > _endInSuperStream - buffer.Length)
-            {
-                buffer = buffer.Slice(0, (int)(_endInSuperStream - _positionInSuperStream));
-            }
+            buffer = buffer[..LimitByRemaining(buffer.Length)];
 
             int ret = await _superStream.ReadAsync(buffer, cancellationToken).ConfigureAwait(false);
 
             _positionInSuperStream += ret;
+
             return ret;
         }
 
-        public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException("The stream does not support seeking.");
+        public override long Seek(long offset, SeekOrigin origin)
+        {
+            ThrowIfDisposed();
+            ThrowIfUnseekable();
 
-        public override void SetLength(long value) => throw new NotSupportedException("The stream does not support seeking.");
+            long newPositionInSuperStream = origin switch
+            {
+                SeekOrigin.Begin => _startInSuperStream + offset,
+                SeekOrigin.Current => _positionInSuperStream + offset,
+                SeekOrigin.End => _endInSuperStream + offset,
+                _ => throw new ArgumentOutOfRangeException(nameof(origin)),
+            };
+
+            if (newPositionInSuperStream < _startInSuperStream)
+            {
+                throw new IOException("An attempt was made to move the position before the beginning of the stream.");
+            }
+
+            _positionInSuperStream = newPositionInSuperStream;
+
+            return _positionInSuperStream - _startInSuperStream;
+        }
+
+        private void VerifyPositionInSuperStream()
+        {
+            if (!CanSeek)
+            {
+                return;
+            }
+
+            if (_positionInSuperStream != _superStream.Position)
+            {
+                // Since we can seek, if the stream had its position pointer moved externally,
+                // we must bring it back to the last read location on this stream
+                _superStream.Seek(_positionInSuperStream, SeekOrigin.Begin);
+            }
+        }
+
+        public override void SetLength(long value) => throw new NotSupportedException("The stream does not support both writing and seeking.");
 
         public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException("The stream does not support writing.");
 

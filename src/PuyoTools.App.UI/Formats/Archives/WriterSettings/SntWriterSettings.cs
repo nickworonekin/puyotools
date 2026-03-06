@@ -10,10 +10,12 @@ using PuyoTools.GUI;
 using PuyoTools.Core;
 using PuyoTools.Core.Archives;
 using PuyoTools.App.Formats.Archives;
+using PuyoTools.Archives.Formats.Snt;
 
 namespace PuyoTools.Formats.Archives.WriterSettings
 {
-    public partial class SntWriterSettings : ModuleSettingsControl, IArchiveFormatOptions
+    public partial class SntWriterSettings : ModuleSettingsControl, IArchiveFormatOptions,
+        IArchiveWriterOptions<SntWriter>
     {
         public SntWriterSettings()
         {
@@ -36,6 +38,18 @@ namespace PuyoTools.Formats.Archives.WriterSettings
             else
             {
                 archive.Platform = SntArchiveWriter.SntPlatform.Ps2;
+            }
+        }
+
+        public void MapTo(SntWriter obj)
+        {
+            if (platformPspRadio.Checked)
+            {
+                obj.Platform = SntPlatform.PlayStationPortable;
+            }
+            else
+            {
+                obj.Platform = SntPlatform.PlayStation2;
             }
         }
     }

@@ -17,6 +17,8 @@ using PuyoTools.App.Tools;
 using PuyoTools.App.Formats.Archives;
 using System.Threading.Tasks;
 using PuyoTools.App.Formats.Compression;
+using PuyoTools.App;
+using PuyoTools.Archives;
 
 namespace PuyoTools.GUI
 {
@@ -419,7 +421,7 @@ namespace PuyoTools.GUI
 
                 // Get the format specific options
                 var formatOptions = writerSettingsControlsCache.TryGetValue(archiveFormat, out var writerSettingsControl)
-                        ? (IArchiveFormatOptions)writerSettingsControl
+                        ? (IArchiveWriterOptions)writerSettingsControl
                         : null;
 
                 // Create the progress dialog and handler

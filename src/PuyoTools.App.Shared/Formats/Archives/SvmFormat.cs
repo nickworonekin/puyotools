@@ -29,7 +29,7 @@ namespace PuyoTools.App.Formats.Archives
 
         public ArchiveReader CreateReader(Stream source) => new SvmReader(source);
 
-        public ArchiveWriter CreateWriter(Stream destination) => null;
+        public ArchiveWriter CreateWriter(Stream destination) => new SvmWriter(destination);
 
         public bool Identify(Stream source, string filename) => SvmReader.IsFormat(source);
     }

@@ -7,6 +7,6 @@ namespace PuyoTools.App.Tools
 {
     class ArchiveCreatorOptions
     {
-        public ICompressionFormat CompressionFormat { get; set; }
+        public ICompressionFormat? CompressionFormat { get; set; }
     }
 }

@@ -94,7 +94,7 @@ namespace PuyoTools.Archives.Formats.Snt
 
             long currentPosition = source.Position;
 
-            using (Stream stream = new StreamView(source, position, length))
+            using (Stream stream = new SubReadStream(source, position, length))
             {
                 if (GimTextureDecoder.Is(stream))
                 {

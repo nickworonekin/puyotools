@@ -9,7 +9,10 @@
     <Import_RootNamespace>PuyoTools.App</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Formats\Archives\IArchiveWriterOptions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Formats\Archives\IArchiveWriterOptions{T}.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formats\Archives\VddFormat.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IMappable.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SynchronousProgress.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formats\Archives\AcxFormat.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formats\Archives\AfsFormat.cs" />
@@ -46,7 +49,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Formats\Textures\PvrFormat.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formats\Textures\SvrFormat.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formats\Textures\TextureFactory.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)IMappable.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Tools\ArchiveCreator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Tools\ArchiveCreatorFileEntry.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Tools\ArchiveCreatorOptions.cs" />

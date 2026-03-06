@@ -43,7 +43,7 @@ namespace PuyoTools.Archives
         /// Opens the entry from the archive for reading.
         /// </summary>
         /// <returns>The stream that represents the contents of the entry.</returns>
-        public virtual Stream Open() => new StreamView(_stream, _position, _length);
+        public virtual Stream Open() => new SubReadStream(_stream, _position, _length);
 
         /// <summary>
         /// Extracts the entry to a file.

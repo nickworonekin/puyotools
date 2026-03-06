@@ -23,13 +23,13 @@ namespace PuyoTools.App.Formats.Archives
 
         public string Name => "SNT";
 
-        public string FileExtension => ".Snt";
+        public string FileExtension => ".snt";
 
         public ArchiveBase GetCodec() => new SntArchive();
 
         public ArchiveReader CreateReader(Stream source) => new SntReader(source);
 
-        public ArchiveWriter CreateWriter(Stream destination) => null;
+        public ArchiveWriter CreateWriter(Stream destination) => new SntWriter(destination);
 
         public bool Identify(Stream source, string filename) => SntReader.IsFormat(source);
     }

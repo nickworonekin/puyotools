@@ -1,5 +1,4 @@
 ﻿using PuyoTools.Core;
-using PuyoTools.Core.Archives;
 using PuyoTools.Core.Textures.Svr;
 using System;
 using System.Collections.Generic;
@@ -11,9 +10,9 @@ using System.Threading.Tasks;
 
 namespace PuyoTools.Archives.Formats.Svm
 {
-    public class PvmWriter : ArchiveWriter<SvmWriterEntry>
+    public class SvmWriter : ArchiveWriter<SvmWriterEntry>
     {
-        public PvmWriter(Stream destination) : base(destination)
+        public SvmWriter(Stream destination) : base(destination)
         {
         }
 

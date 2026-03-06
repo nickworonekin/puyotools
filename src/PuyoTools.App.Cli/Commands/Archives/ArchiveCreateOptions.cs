@@ -1,19 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.CommandLine;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace PuyoTools.App.Cli.Commands.Archives
 {
-    class ArchiveCreateOptions
+    record ArchiveCreateOptions
     {
-        public string[] Input { get; set; }
+        public ArchiveCreateOptions(ParseResult parseResult)
+        {
+            ArchiveFormatCreateCommand command = (ArchiveFormatCreateCommand)parseResult.CommandResult.Command;
 
-        public string[] Exclude { get; set; }
+            Input = parseResult.GetRequiredValue(command.InputOption);
+            Exclude = parseResult.GetValue(command.ExcludeOption);
+            Output = parseResult.GetRequiredValue(command.OutputOption);
+            Compress = parseResult.GetValue(command.CompressOption);
+        }
 
-        public string Output { get; set; }
+        public string[] Input { get; }
 
-        public string Compress { get; set; }
+        public string[]? Exclude { get; }
+
+        public string Output { get; }
+
+        public string? Compress { get; }
     }
 }
